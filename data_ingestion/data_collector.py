@@ -1,7 +1,6 @@
 import os
 import time
 import logging
-import sqlite3
 import pandas as pd
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
@@ -21,8 +20,8 @@ logging.basicConfig(
 
 logger = logging.getLogger('data_collector')
 
-# Database path
-DATABASE_PATH = os.getenv('DATABASE_PATH', '../database/liquidity_pools.db')
+# Database connection
+from database.db_operations import DBManager
 
 class DataCollector:
     """
@@ -99,9 +98,8 @@ class DataCollector:
             
             logger.info(f"Processing {len(pools_to_process)} pools")
             
-            # Connect to database
-            conn = sqlite3.connect(DATABASE_PATH)
-            cursor = conn.cursor()
+            # Initialize DB Manager
+            db = DBManager()
             
             # Process each pool
             processed_count = 0
@@ -129,53 +127,32 @@ class DataCollector:
                     # Extract and transform data
                     pool_name = pool.get('name') or f"{pool.get('token1Symbol', 'Unknown')}/{pool.get('token2Symbol', 'Unknown')}"
                     
-                    pool_data = {
-                        'pool_id': pool_id,
-                        'name': pool_name,
-                        'liquidity': pool_metrics.get('liquidity', 0),
-                        'volume_24h': pool_metrics.get('volume24h', 0),
-                        'apr': pool_metrics.get('apr', 0),
-                        'timestamp': datetime.now().isoformat()
-                    }
-                    
                     # Store basic pool data
-                    cursor.execute('''
-                        INSERT OR REPLACE INTO pool_data 
-                        (pool_id, name, liquidity, volume_24h, apr, timestamp)
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    ''', (
-                        pool_data['pool_id'],
-                        pool_data['name'],
-                        pool_data['liquidity'],
-                        pool_data['volume_24h'],
-                        pool_data['apr'],
-                        pool_data['timestamp']
-                    ))
+                    db.save_pool_data(
+                        pool_id=pool_id,
+                        name=pool_name,
+                        liquidity=pool_metrics.get('liquidity', 0),
+                        volume_24h=pool_metrics.get('volume24h', 0),
+                        apr=pool_metrics.get('apr', 0),
+                        timestamp=datetime.now()
+                    )
                     
                     # Store metrics with hourly granularity
-                    cursor.execute('''
-                        INSERT INTO pool_metrics
-                        (pool_id, liquidity, volume, apr, timestamp)
-                        VALUES (?, ?, ?, ?, ?)
-                    ''', (
-                        pool_id,
-                        pool_data['liquidity'],
-                        pool_data['volume_24h'],
-                        pool_data['apr'],
-                        pool_data['timestamp']
-                    ))
+                    db.save_pool_metrics(
+                        pool_id=pool_id,
+                        liquidity=pool_metrics.get('liquidity', 0),
+                        volume=pool_metrics.get('volume24h', 0),
+                        apr=pool_metrics.get('apr', 0),
+                        timestamp=datetime.now()
+                    )
                     
                     processed_count += 1
                     if processed_count % 10 == 0:
                         logger.info(f"Processed {processed_count}/{len(pools_to_process)} pools")
-                        conn.commit()  # Intermediate commit
                     
                 except Exception as e:
                     logger.error(f"Error processing pool {pool.get('id', 'unknown')}: {e}")
             
-            # Final commit
-            conn.commit()
-            conn.close()
             logger.info(f"Successfully processed {processed_count} pools")
             
         except Exception as e:
@@ -192,21 +169,14 @@ class DataCollector:
             if blockchain_stats:
                 logger.info("Successfully collected blockchain stats")
                 # Store blockchain stats in database
-                conn = sqlite3.connect(DATABASE_PATH)
-                cursor = conn.cursor()
-                cursor.execute('''
-                    INSERT INTO blockchain_stats
-                    (slot, block_height, avg_tps, sol_price, timestamp)
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (
-                    blockchain_stats.get('slot', 0),
-                    blockchain_stats.get('blockHeight', 0),
-                    blockchain_stats.get('tps', 0),  # Field name may be different in the API
-                    blockchain_stats.get('solPrice', 0),
-                    datetime.now().isoformat()
-                ))
-                conn.commit()
-                conn.close()
+                db = DBManager()
+                db.save_blockchain_stats(
+                    slot=blockchain_stats.get('slot', 0),
+                    block_height=blockchain_stats.get('blockHeight', 0),
+                    avg_tps=blockchain_stats.get('tps', 0),
+                    sol_price=blockchain_stats.get('solPrice', 0),
+                    timestamp=datetime.now()
+                )
             
             # Collect and store pool data
             self.collect_and_store_pool_data()
