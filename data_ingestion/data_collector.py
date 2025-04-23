@@ -1,12 +1,13 @@
 import os
 import time
-import json
 import logging
-import requests
 import sqlite3
 import pandas as pd
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
+
+# Import our new Raydium API client
+from .raydium_api_client import RaydiumAPIClient
 
 # Configure logging
 logging.basicConfig(
@@ -20,21 +21,18 @@ logging.basicConfig(
 
 logger = logging.getLogger('data_collector')
 
-# Node.js backend endpoints
-BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
+# Database path
 DATABASE_PATH = os.getenv('DATABASE_PATH', '../database/liquidity_pools.db')
 
 class DataCollector:
     """
-    Main data collection service for liquidity pool data from Raydium via Node.js backend
+    Main data collection service for liquidity pool data from Raydium API
     """
     
     def __init__(self):
         """Initialize the data collector"""
-        self.backend_url = BACKEND_URL
-        self.max_retries = 3
-        self.retry_delay = 5  # seconds
-        self.session = requests.Session()
+        # Initialize the Raydium API client
+        self.api_client = RaydiumAPIClient()
         
         # Initialize connection to the database
         try:
@@ -44,27 +42,11 @@ class DataCollector:
         except Exception as e:
             logger.error(f"Error connecting to database: {e}")
     
-    def fetch_with_retry(self, url, params=None):
-        """Fetch data with retry logic"""
-        for attempt in range(self.max_retries):
-            try:
-                response = self.session.get(url, params=params, timeout=30)
-                response.raise_for_status()
-                return response.json()
-            except requests.exceptions.RequestException as e:
-                logger.warning(f"Attempt {attempt+1}/{self.max_retries} failed: {e}")
-                if attempt < self.max_retries - 1:
-                    time.sleep(self.retry_delay)
-                else:
-                    logger.error(f"Failed to fetch data from {url} after {self.max_retries} attempts")
-                    raise
-    
     def get_all_pools(self):
         """Fetch all liquidity pools from Raydium"""
-        url = f"{self.backend_url}/api/pools"
         try:
             logger.info("Fetching all liquidity pools")
-            pools = self.fetch_with_retry(url)
+            pools = self.api_client.get_all_pools()
             logger.info(f"Successfully fetched {len(pools)} pools")
             return pools
         except Exception as e:
@@ -73,10 +55,9 @@ class DataCollector:
     
     def get_pool_details(self, pool_id):
         """Fetch detailed information about a specific pool"""
-        url = f"{self.backend_url}/api/pools/{pool_id}"
         try:
             logger.info(f"Fetching details for pool {pool_id}")
-            pool_data = self.fetch_with_retry(url)
+            pool_data = self.api_client.get_pool_by_id(pool_id)
             return pool_data
         except Exception as e:
             logger.error(f"Error fetching details for pool {pool_id}: {e}")
@@ -84,10 +65,9 @@ class DataCollector:
     
     def get_pool_metrics(self, pool_id):
         """Fetch metrics for a specific pool"""
-        url = f"{self.backend_url}/api/pools/{pool_id}/metrics"
         try:
             logger.info(f"Fetching metrics for pool {pool_id}")
-            metrics = self.fetch_with_retry(url)
+            metrics = self.api_client.get_pool_metrics(pool_id)
             return metrics
         except Exception as e:
             logger.error(f"Error fetching metrics for pool {pool_id}: {e}")
@@ -95,10 +75,9 @@ class DataCollector:
     
     def get_blockchain_stats(self):
         """Fetch Solana blockchain statistics"""
-        url = f"{self.backend_url}/api/blockchain/stats"
         try:
             logger.info("Fetching blockchain statistics")
-            stats = self.fetch_with_retry(url)
+            stats = self.api_client.get_blockchain_stats()
             return stats
         except Exception as e:
             logger.error(f"Error fetching blockchain stats: {e}")
@@ -128,24 +107,34 @@ class DataCollector:
             processed_count = 0
             for pool in pools_to_process:
                 try:
-                    pool_id = pool.get('ammId') or pool.get('id')
+                    pool_id = pool.get('id') or pool.get('ammId')
                     if not pool_id:
                         logger.warning(f"Skipping pool with no ID: {pool}")
                         continue
                     
-                    # Get detailed metrics
-                    metrics = self.get_pool_metrics(pool_id)
-                    if not metrics:
+                    # Get detailed pool information if needed
+                    # For efficiency, we can use the metrics from the pool if they exist
+                    pool_metrics = None
+                    if 'apr' in pool and 'liquidity' in pool and 'volume24h' in pool:
+                        # Use metrics from the pool object if available
+                        pool_metrics = pool
+                    else:
+                        # Otherwise fetch detailed metrics
+                        pool_metrics = self.get_pool_metrics(pool_id)
+                    
+                    if not pool_metrics:
                         logger.warning(f"No metrics available for pool {pool_id}")
                         continue
                     
                     # Extract and transform data
+                    pool_name = pool.get('name') or f"{pool.get('token1Symbol', 'Unknown')}/{pool.get('token2Symbol', 'Unknown')}"
+                    
                     pool_data = {
                         'pool_id': pool_id,
-                        'name': metrics.get('name', 'Unknown'),
-                        'liquidity': metrics.get('liquidity', 0),
-                        'volume_24h': metrics.get('volume24h', 0),
-                        'apr': metrics.get('apr', 0),
+                        'name': pool_name,
+                        'liquidity': pool_metrics.get('liquidity', 0),
+                        'volume_24h': pool_metrics.get('volume24h', 0),
+                        'apr': pool_metrics.get('apr', 0),
                         'timestamp': datetime.now().isoformat()
                     }
                     
@@ -170,10 +159,10 @@ class DataCollector:
                         VALUES (?, ?, ?, ?, ?)
                     ''', (
                         pool_id,
-                        metrics.get('liquidity', 0),
-                        metrics.get('volume24h', 0),
-                        metrics.get('apr', 0),
-                        datetime.now().isoformat()
+                        pool_data['liquidity'],
+                        pool_data['volume_24h'],
+                        pool_data['apr'],
+                        pool_data['timestamp']
                     ))
                     
                     processed_count += 1
@@ -182,7 +171,7 @@ class DataCollector:
                         conn.commit()  # Intermediate commit
                     
                 except Exception as e:
-                    logger.error(f"Error processing pool {pool.get('ammId', 'unknown')}: {e}")
+                    logger.error(f"Error processing pool {pool.get('id', 'unknown')}: {e}")
             
             # Final commit
             conn.commit()
@@ -212,9 +201,9 @@ class DataCollector:
                 ''', (
                     blockchain_stats.get('slot', 0),
                     blockchain_stats.get('blockHeight', 0),
-                    blockchain_stats.get('averageTps', 0),
+                    blockchain_stats.get('tps', 0),  # Field name may be different in the API
                     blockchain_stats.get('solPrice', 0),
-                    blockchain_stats.get('currentTimestamp', datetime.now().isoformat())
+                    datetime.now().isoformat()
                 ))
                 conn.commit()
                 conn.close()

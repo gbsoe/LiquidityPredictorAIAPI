@@ -1,0 +1,352 @@
+# Raydium API Service - Client Integration Guide
+
+This document provides code examples and best practices for integrating with the Raydium API Service using different programming languages.
+
+## Getting Started
+
+Before using the API, you'll need:
+1. An API key (obtained from the [dashboard](DASHBOARD_GUIDE.md))
+2. The API base URL
+
+## Authentication
+
+All API requests (except public endpoints) require an API key passed in the request headers:
+
+```
+x-api-key: your-api-key-here
+```
+
+## JavaScript/Node.js Integration
+
+### Basic Setup
+
+```javascript
+const axios = require('axios');
+
+// Configuration
+const API_KEY = 'your-api-key-here';
+const BASE_URL = 'https://[repl-name].[repl-owner].repl.co';
+
+// Create an axios instance with the API key header
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'x-api-key': API_KEY,
+    'Content-Type': 'application/json'
+  },
+  timeout: 10000 // 10 second timeout
+});
+```
+
+### Example: Get All Pools
+
+```javascript
+async function getAllPools() {
+  try {
+    const response = await api.get('/api/pools');
+    console.log(`Retrieved ${response.data.pools.bestPerformance.length} best performance pools`);
+    console.log(`Retrieved ${response.data.pools.topStable.length} top stable pools`);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      console.error('Authentication error - please check your API key');
+    } else {
+      console.error('Error fetching pools:', error.message);
+    }
+    return null;
+  }
+}
+```
+
+### Example: Filter Pools
+
+```javascript
+async function findHighAprSolPools(minApr = 20, limit = 5) {
+  try {
+    const response = await api.get('/api/filter', {
+      params: {
+        tokenSymbol: 'SOL',
+        minApr: minApr,
+        limit: limit
+      }
+    });
+
+    console.log(`Found ${response.data.count} SOL pools with APR > ${minApr}%`);
+    return response.data;
+  } catch (error) {
+    console.error('Error filtering pools:', error.message);
+    return null;
+  }
+}
+```
+
+### Example: Get Specific Pool
+
+```javascript
+async function getPoolById(poolId) {
+  try {
+    const response = await api.get(`/api/pool/${poolId}`);
+    return response.data.pool;
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 404) {
+        console.error(`Pool with ID ${poolId} not found`);
+      } else {
+        console.error(`Error (${error.response.status}):`, error.response.data);
+      }
+    } else {
+      console.error('Error fetching pool:', error.message);
+    }
+    return null;
+  }
+}
+```
+
+### Complete JavaScript Example
+
+For a complete working example, see the [client-example.js](client-example.js) file.
+
+## Python Integration
+
+### Basic Setup
+
+```python
+import requests
+
+# Configuration
+API_KEY = "your-api-key-here"
+BASE_URL = "https://[repl-name].[repl-owner].repl.co"
+
+# Create a session for better performance with multiple requests
+session = requests.Session()
+session.headers.update({
+    "x-api-key": API_KEY,
+    "Content-Type": "application/json"
+})
+```
+
+### Example: Get All Pools
+
+```python
+def get_all_pools():
+    try:
+        response = session.get(f"{BASE_URL}/api/pools", timeout=10)
+        response.raise_for_status()  # Raises an exception for 4XX/5XX responses
+        data = response.json()
+
+        best_performance = data["pools"]["bestPerformance"]
+        top_stable = data["pools"]["topStable"]
+
+        print(f"Retrieved {len(best_performance)} best performance pools")
+        print(f"Retrieved {len(top_stable)} top stable pools")
+
+        return data
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 401:
+            print("Authentication error - please check your API key")
+        else:
+            print(f"HTTP error: {e}")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Request error: {e}")
+        return None
+```
+
+### Example: Filter Pools
+
+```python
+def find_high_apr_sol_pools(min_apr=20, limit=5):
+    try:
+        params = {
+            "tokenSymbol": "SOL",
+            "minApr": min_apr,
+            "limit": limit
+        }
+
+        response = session.get(
+            f"{BASE_URL}/api/filter",
+            params=params,
+            timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        print(f"Found {data['count']} SOL pools with APR > {min_apr}%")
+        return data
+    except requests.exceptions.RequestException as e:
+        print(f"Error filtering pools: {e}")
+        return None
+```
+
+### Example: Get Specific Pool
+
+```python
+def get_pool_by_id(pool_id):
+    try:
+        response = session.get(f"{BASE_URL}/api/pool/{pool_id}", timeout=10)
+        response.raise_for_status()
+        return response.json()["pool"]
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            print(f"Pool with ID {pool_id} not found")
+        else:
+            print(f"HTTP error: {e}")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Request error: {e}")
+        return None
+```
+
+### Complete Python Example
+
+For a complete working example, see the [python_client_example.py](python_client_example.py) file.
+
+## Advanced Usage
+
+### Using Environment Variables
+
+In production environments, it's recommended to use environment variables for sensitive information like API keys.
+
+#### JavaScript/Node.js
+
+```javascript
+// Load environment variables
+require('dotenv').config();
+
+const API_KEY = process.env.RAYDIUM_API_KEY;
+const BASE_URL = process.env.RAYDIUM_API_URL || 'https://[repl-name].[repl-owner].repl.co';
+```
+
+#### Python
+
+```python
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+API_KEY = os.environ.get("RAYDIUM_API_KEY")
+BASE_URL = os.environ.get("RAYDIUM_API_URL", "https://[repl-name].[repl-owner].repl.co")
+```
+
+### Implementing Retry Logic
+
+For improved reliability, implement retry logic with exponential backoff.
+
+#### JavaScript/Node.js
+
+```javascript
+async function makeRequestWithRetry(url, options = {}, maxRetries = 3) {
+  let retries = 0;
+
+  while (retries < maxRetries) {
+    try {
+      const response = await api.request({
+        url,
+        ...options
+      });
+      return response.data;
+    } catch (error) {
+      if (
+        error.response && 
+        (error.response.status === 429 || error.response.status >= 500) && 
+        retries < maxRetries - 1
+      ) {
+        // Retry on rate limit (429) or server errors (5xx)
+        retries++;
+        console.log(`Retry attempt ${retries} for ${url}`);
+
+        // Exponential backoff
+        const delay = Math.pow(2, retries) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else {
+        // Don't retry for other errors
+        throw error;
+      }
+    }
+  }
+}
+
+// Example usage
+makeRequestWithRetry('/api/pools')
+  .then(data => console.log('Pools:', data))
+  .catch(error => console.error('Failed after retries:', error));
+```
+
+#### Python
+
+```python
+import time
+
+def make_request_with_retry(url_path, method='get', params=None, max_retries=3):
+    retries = 0
+
+    while retries < max_retries:
+        try:
+            if method.lower() == 'get':
+                response = session.get(
+                    f"{BASE_URL}{url_path}", 
+                    params=params,
+                    timeout=10
+                )
+            else:
+                raise ValueError(f"Unsupported HTTP method: {method}")
+
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            if (
+                hasattr(e, 'response') and 
+                e.response is not None and
+                (e.response.status_code == 429 or e.response.status_code >= 500) and
+                retries < max_retries - 1
+            ):
+                # Retry on rate limit (429) or server errors (5xx)
+                retries += 1
+                print(f"Retry attempt {retries} for {url_path}")
+
+                # Exponential backoff
+                delay = 2 ** retries
+                time.sleep(delay)
+            else:
+                # Don't retry for other errors
+                raise
+
+# Example usage
+try:
+    data = make_request_with_retry('/api/pools')
+    print('Pools:', data)
+except Exception as e:
+    print('Failed after retries:', e)
+```
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+1. **401 Unauthorized**
+   - Make sure your API key is valid and active
+   - Check that you're including the key in the correct header format
+   - Verify the API key via the dashboard
+
+2. **429 Too Many Requests**
+   - Implement retry logic with backoff
+   - Reduce the frequency of your requests
+   - Consider caching responses on your side
+
+3. **Connection Issues**
+   - Verify the API service is running
+   - Check your network connection
+   - Ensure you're using the correct URL
+   - Check if the Replit deployment is online
+
+4. **Timeout Issues**
+   - Increase the timeout value in your requests
+   - The API may be under heavy load, retry later
+   - Consider adding retry logic for timeout errors
+
+## Further Resources
+
+- [API Documentation](API_DOCUMENTATION.md) - Full API reference with all endpoints
+- [Dashboard Guide](DASHBOARD_GUIDE.md) - Managing API keys and monitoring usage
