@@ -7,7 +7,7 @@ from datetime import datetime
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import RAYDIUM_API_KEY, RAYDIUM_API_URL
+import config
 
 # Configure logging
 logging.basicConfig(
@@ -27,8 +27,8 @@ class RaydiumAPIClient:
             api_key: Raydium API key (defaults to config.RAYDIUM_API_KEY)
             base_url: API base URL (defaults to config.RAYDIUM_API_URL)
         """
-        self.api_key = api_key or RAYDIUM_API_KEY
-        self.base_url = base_url or RAYDIUM_API_URL
+        self.api_key = api_key or config.RAYDIUM_API_KEY
+        self.base_url = base_url or config.RAYDIUM_API_URL
         
         # Create a session for better performance with multiple requests
         self.session = requests.Session()
