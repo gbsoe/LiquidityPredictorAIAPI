@@ -5,7 +5,7 @@ import os
 import sys
 import time
 from datetime import datetime, timedelta
-import sqlite3
+import psycopg2
 import requests
 import plotly.express as px
 import plotly.graph_objects as go
@@ -15,6 +15,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils.visualization import create_metrics_chart, create_pool_comparison_chart
 from utils.data_processor import get_top_pools, get_blockchain_stats, get_prediction_metrics
 from database.db_operations import DBManager
+from data_ingestion.raydium_api_client import RaydiumAPIClient
 
 # Page configuration
 st.set_page_config(
@@ -230,40 +231,48 @@ except Exception as e:
 st.subheader("System Status")
 
 try:
-    # Check backend status
-    backend_status = "Online"
-    backend_error = None
+    # Initialize Raydium API client for status check
+    api_client = RaydiumAPIClient()
+    api_status = "Online"
+    api_error = None
     
     try:
-        response = requests.get("http://localhost:8000/api/health", timeout=5)
-        if response.status_code != 200:
-            backend_status = "Error"
-            backend_error = f"Status code: {response.status_code}"
-    except requests.exceptions.RequestException as e:
-        backend_status = "Offline"
-        backend_error = str(e)
+        # Simple test API call
+        test_result = api_client.get_blockchain_stats()
+        if test_result is None:
+            api_status = "Error"
+            api_error = "API returned no data"
+    except Exception as e:
+        api_status = "Offline"
+        api_error = str(e)
     
     # Get database metrics
     pool_count = 0
     latest_update = "Unknown"
     
     try:
-        conn = sqlite3.connect(db.db_path)
-        cursor = conn.cursor()
-        
-        # Count pools
-        cursor.execute("SELECT COUNT(*) FROM pool_data")
-        pool_count = cursor.fetchone()[0]
+        # Use database manager to check status
+        pool_count_query = "SELECT COUNT(*) FROM pool_data"
+        pool_count_result = db.execute_query(pool_count_query)
+        if pool_count_result and len(pool_count_result) > 0:
+            pool_count = pool_count_result[0][0]
         
         # Get latest update time
-        cursor.execute("SELECT MAX(timestamp) FROM pool_metrics")
-        latest_timestamp = cursor.fetchone()[0]
+        timestamp_query = "SELECT MAX(timestamp) FROM pool_metrics"
+        timestamp_result = db.execute_query(timestamp_query)
+        latest_timestamp = None
         
-        if latest_timestamp:
-            latest_datetime = datetime.fromisoformat(latest_timestamp.replace('Z', '+00:00'))
+        if timestamp_result and len(timestamp_result) > 0 and timestamp_result[0][0]:
+            latest_timestamp = timestamp_result[0][0]
+            # Format timestamp for display
+            if isinstance(latest_timestamp, str):
+                # Parse ISO format string
+                latest_datetime = datetime.fromisoformat(latest_timestamp.replace('Z', '+00:00'))
+            else:
+                # Already a datetime object
+                latest_datetime = latest_timestamp
+                
             latest_update = latest_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        
-        conn.close()
     except Exception as e:
         latest_update = f"Error: {str(e)}"
     
@@ -271,12 +280,12 @@ try:
     status_cols = st.columns(3)
     
     with status_cols[0]:
-        if backend_status == "Online":
-            st.success("Backend Services: Online")
-        elif backend_status == "Error":
-            st.warning(f"Backend Services: Error - {backend_error}")
+        if api_status == "Online":
+            st.success("Raydium API: Online")
+        elif api_status == "Error":
+            st.warning(f"Raydium API: Error - {api_error}")
         else:
-            st.error(f"Backend Services: Offline - {backend_error}")
+            st.error(f"Raydium API: Offline - {api_error}")
     
     with status_cols[1]:
         st.info(f"Monitored Pools: {pool_count}")
