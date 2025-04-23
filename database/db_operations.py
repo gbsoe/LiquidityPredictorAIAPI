@@ -1,9 +1,10 @@
 import os
-import sqlite3
+import psycopg2
 import pandas as pd
 import logging
 from datetime import datetime, timedelta
-from .schema import initialize_database, DATABASE_PATH
+from sqlalchemy import create_engine
+from .schema import initialize_database, get_db_connection, get_sqlalchemy_engine, DATABASE_URL
 
 # Configure logging
 logging.basicConfig(
@@ -15,27 +16,25 @@ logger = logging.getLogger('db_operations')
 
 def ensure_database_exists():
     """Ensure the database exists and has the correct schema."""
-    if not os.path.exists(DATABASE_PATH):
-        logger.info(f"Database not found at {DATABASE_PATH}. Creating new database.")
-        return initialize_database()
-    return True
+    if not DATABASE_URL:
+        logger.error("DATABASE_URL environment variable is not set")
+        return False
+    
+    logger.info("Initializing PostgreSQL database schema")
+    return initialize_database()
 
 class DBManager:
     """Database operations manager for liquidity pools data."""
     
     def __init__(self):
         """Initialize the database manager."""
-        self.db_path = DATABASE_PATH
         ensure_database_exists()
+        # Initialize SQLAlchemy engine for pandas operations
+        self.engine = get_sqlalchemy_engine()
     
     def get_connection(self):
         """Get a connection to the database."""
-        try:
-            conn = sqlite3.connect(self.db_path)
-            return conn
-        except Exception as e:
-            logger.error(f"Error connecting to database: {e}")
-            raise
+        return get_db_connection()
     
     def execute_query(self, query, params=None, fetch=True):
         """Execute a SQL query and optionally return results."""
@@ -84,13 +83,18 @@ class DBManager:
     def query_to_dataframe(self, query, params=None):
         """Execute a SQL query and return results as a pandas DataFrame."""
         try:
-            conn = self.get_connection()
-            return pd.read_sql_query(query, conn, params=params)
+            if self.engine:
+                # Use SQLAlchemy for pandas
+                return pd.read_sql_query(query, self.engine, params=params)
+            else:
+                # Fallback to direct connection
+                conn = self.get_connection()
+                return pd.read_sql_query(query, conn, params=params)
         except Exception as e:
             logger.error(f"Error executing query to dataframe: {e}")
             raise
         finally:
-            if conn:
+            if 'conn' in locals() and conn:
                 conn.close()
     
     # Pool data operations
@@ -102,18 +106,24 @@ class DBManager:
     
     def get_pool_by_id(self, pool_id):
         """Get pool data by ID."""
-        query = "SELECT * FROM pool_data WHERE pool_id = ?"
+        query = "SELECT * FROM pool_data WHERE pool_id = %s"
         return self.query_to_dataframe(query, params=(pool_id,))
     
     def save_pool_data(self, pool_id, name, liquidity, volume_24h, apr, timestamp=None):
         """Save or update pool data."""
         if timestamp is None:
-            timestamp = datetime.now().isoformat()
+            timestamp = datetime.now()
             
         query = """
-            INSERT OR REPLACE INTO pool_data 
+            INSERT INTO pool_data 
             (pool_id, name, liquidity, volume_24h, apr, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (pool_id) DO UPDATE SET
+                name = EXCLUDED.name,
+                liquidity = EXCLUDED.liquidity,
+                volume_24h = EXCLUDED.volume_24h,
+                apr = EXCLUDED.apr,
+                timestamp = EXCLUDED.timestamp
         """
         return self.execute_query(
             query, 
@@ -124,12 +134,12 @@ class DBManager:
     def save_pool_metrics(self, pool_id, liquidity, volume, apr, timestamp=None):
         """Save pool metrics data."""
         if timestamp is None:
-            timestamp = datetime.now().isoformat()
+            timestamp = datetime.now()
             
         query = """
             INSERT INTO pool_metrics
             (pool_id, liquidity, volume, apr, timestamp)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s)
         """
         return self.execute_query(
             query, 
@@ -141,10 +151,10 @@ class DBManager:
         """Get historical metrics for a pool."""
         query = """
             SELECT * FROM pool_metrics 
-            WHERE pool_id = ? AND timestamp >= ?
+            WHERE pool_id = %s AND timestamp >= %s
             ORDER BY timestamp
         """
-        cutoff_date = (datetime.now() - timedelta(days=days)).isoformat()
+        cutoff_date = datetime.now() - timedelta(days=days)
         return self.query_to_dataframe(query, params=(pool_id, cutoff_date))
     
     # Token price operations
@@ -152,12 +162,12 @@ class DBManager:
     def save_token_price(self, token_symbol, price_usd, timestamp=None):
         """Save current token price."""
         if timestamp is None:
-            timestamp = datetime.now().isoformat()
+            timestamp = datetime.now()
             
         query = """
             INSERT INTO token_prices
             (token_symbol, price_usd, timestamp)
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s)
         """
         return self.execute_query(
             query, 
@@ -169,10 +179,10 @@ class DBManager:
         """Get historical price data for a token."""
         query = """
             SELECT * FROM token_prices 
-            WHERE token_symbol = ? AND timestamp >= ?
+            WHERE token_symbol = %s AND timestamp >= %s
             ORDER BY timestamp
         """
-        cutoff_date = (datetime.now() - timedelta(days=days)).isoformat()
+        cutoff_date = datetime.now() - timedelta(days=days)
         return self.query_to_dataframe(query, params=(token_symbol, cutoff_date))
     
     def get_latest_token_prices(self):
@@ -192,12 +202,12 @@ class DBManager:
     def save_blockchain_stats(self, slot, block_height, avg_tps, sol_price, timestamp=None):
         """Save blockchain statistics."""
         if timestamp is None:
-            timestamp = datetime.now().isoformat()
+            timestamp = datetime.now()
             
         query = """
             INSERT INTO blockchain_stats
             (slot, block_height, avg_tps, sol_price, timestamp)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s)
         """
         return self.execute_query(
             query, 
@@ -209,10 +219,10 @@ class DBManager:
         """Get historical blockchain statistics."""
         query = """
             SELECT * FROM blockchain_stats 
-            WHERE timestamp >= ?
+            WHERE timestamp >= %s
             ORDER BY timestamp
         """
-        cutoff_date = (datetime.now() - timedelta(days=days)).isoformat()
+        cutoff_date = datetime.now() - timedelta(days=days)
         return self.query_to_dataframe(query, params=(cutoff_date,))
     
     # Model predictions operations
@@ -220,12 +230,12 @@ class DBManager:
     def save_prediction(self, pool_id, predicted_apr, performance_class, risk_score, model_version, timestamp=None):
         """Save model prediction results."""
         if timestamp is None:
-            timestamp = datetime.now().isoformat()
+            timestamp = datetime.now()
             
         query = """
             INSERT INTO model_predictions
             (pool_id, predicted_apr, performance_class, risk_score, prediction_timestamp, model_version)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """
         return self.execute_query(
             query, 
@@ -242,7 +252,7 @@ class DBManager:
                 FROM model_predictions
                 GROUP BY pool_id
             ) m ON p.pool_id = m.pool_id AND p.prediction_timestamp = m.max_timestamp
-            LIMIT ?
+            LIMIT %s
         """
         return self.query_to_dataframe(query, params=(limit,))
     
@@ -250,10 +260,10 @@ class DBManager:
         """Get historical predictions for a specific pool."""
         query = """
             SELECT * FROM model_predictions 
-            WHERE pool_id = ? AND prediction_timestamp >= ?
+            WHERE pool_id = %s AND prediction_timestamp >= %s
             ORDER BY prediction_timestamp
         """
-        cutoff_date = (datetime.now() - timedelta(days=days)).isoformat()
+        cutoff_date = datetime.now() - timedelta(days=days)
         return self.query_to_dataframe(query, params=(pool_id, cutoff_date))
     
     # Data aggregation queries
@@ -263,7 +273,7 @@ class DBManager:
         query = """
             SELECT * FROM pool_data
             ORDER BY liquidity DESC
-            LIMIT ?
+            LIMIT %s
         """
         return self.query_to_dataframe(query, params=(limit,))
     
@@ -272,7 +282,7 @@ class DBManager:
         query = """
             SELECT * FROM pool_data
             ORDER BY volume_24h DESC
-            LIMIT ?
+            LIMIT %s
         """
         return self.query_to_dataframe(query, params=(limit,))
     
@@ -281,7 +291,7 @@ class DBManager:
         query = """
             SELECT * FROM pool_data
             ORDER BY apr DESC
-            LIMIT ?
+            LIMIT %s
         """
         return self.query_to_dataframe(query, params=(limit,))
     
@@ -295,9 +305,9 @@ class DBManager:
                 AVG(apr) as avg_apr,
                 COUNT(DISTINCT pool_id) as pool_count
             FROM pool_metrics
-            WHERE timestamp >= ?
+            WHERE timestamp >= %s
             GROUP BY DATE(timestamp)
             ORDER BY date
         """
-        cutoff_date = (datetime.now() - timedelta(days=days)).isoformat()
+        cutoff_date = datetime.now() - timedelta(days=days)
         return self.query_to_dataframe(query, params=(cutoff_date,))
