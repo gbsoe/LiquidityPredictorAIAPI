@@ -20,6 +20,10 @@ author = "agent"
 task = "workflow.run"
 args = "Test API Script"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Pool ID Scraper"
+
 [[workflows.workflow]]
 name = "Test API Script"
 author = "agent"
@@ -33,6 +37,21 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "streamlit run test_api.py --server.port 5000"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Pool ID Scraper"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "streamlit run scrape_pool_ids.py --server.port 5000"
 waitForPort = 5000
 
 [[ports]]
