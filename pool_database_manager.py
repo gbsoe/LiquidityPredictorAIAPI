@@ -139,10 +139,17 @@ def connect_to_db():
     """Connect to PostgreSQL database"""
     try:
         db_url = os.getenv("DATABASE_URL")
+        if not db_url:
+            st.error("DATABASE_URL environment variable is not set")
+            st.code("Current environment vars: " + ", ".join([k for k in os.environ.keys() if not k.startswith('_')]))
+            return None
+            
+        st.info(f"Connecting to database with URL: {db_url.split('@')[0]}@...")
         conn = psycopg2.connect(db_url)
         return conn
     except Exception as e:
         st.error(f"Error connecting to database: {str(e)}")
+        st.error("Check that the PostgreSQL database is running and accessible")
         return None
 
 def init_db():
@@ -513,15 +520,47 @@ def main():
     You can add new pools, explore pool data, and simulate metrics for analysis.
     """)
     
+    # Check database connection status
+    db_status = st.empty()
+    st.subheader("Database Connection Status")
+    
+    # Display environment variables (without sensitive info)
+    st.write("Environment Variables:")
+    env_vars = {
+        k: v if not any(s in k.lower() for s in ["password", "key", "secret", "token"]) else "***" 
+        for k, v in os.environ.items() 
+        if k.startswith(("PG", "DATABASE")) and not k.startswith("_")
+    }
+    
+    if env_vars:
+        st.json(json.dumps(env_vars, indent=2))
+    else:
+        st.warning("No database-related environment variables found")
+    
+    # Test connection
+    conn = connect_to_db()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT current_database(), current_user, version()")
+            db, user, version = cur.fetchone()
+            st.success("✅ Database connection successful")
+            st.info(f"Database: {db}, User: {user}")
+            st.info(f"PostgreSQL version: {version}")
+            conn.close()
+        except Exception as e:
+            st.error(f"⚠️ Error querying database: {str(e)}")
+    else:
+        st.error("⚠️ Database connection failed")
+    
     # Database initialization
     st.subheader("Database Setup")
     
-    db_status = st.empty()
     if st.button("Initialize Database"):
         if init_db():
-            db_status.success("Database initialized successfully")
+            st.success("Database initialized successfully")
         else:
-            db_status.error("Database initialization failed")
+            st.error("Database initialization failed")
     
     # Options in tabs
     tab1, tab2, tab3, tab4 = st.tabs(["Manage Pools", "View Pools", "Generate Metrics", "API Testing"])
