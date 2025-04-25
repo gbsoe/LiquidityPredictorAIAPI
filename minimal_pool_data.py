@@ -16,19 +16,22 @@ except ImportError:
     HAS_EXTRACTOR = False
 
 # Attempt to import the advanced prediction engine
+HAS_BASIC_PREDICTION = False
+HAS_ADVANCED_PREDICTION = False
+
 try:
-    from advanced_prediction_engine import (
-        # Import basic components first
-        PredictionResult
-    )
+    # Import basic prediction components
+    from advanced_prediction_engine import PredictionResult
+    HAS_BASIC_PREDICTION = True
     
-    # Attempt to import advanced components (may fail if TensorFlow has issues)
+    # Attempt to import advanced components (may fail if TensorFlow/XGBoost has issues)
     try:
         from advanced_prediction_engine import (
             SelfEvolvingPredictionEngine, 
             predict_pool_performance,
             predict_multiple_pools
         )
+        HAS_ADVANCED_PREDICTION = True
         HAS_PREDICTION_ENGINE = True
     except (ImportError, AttributeError, TypeError) as e:
         st.warning(f"Advanced prediction engine not fully available: {str(e)}. Using simplified predictions.")
