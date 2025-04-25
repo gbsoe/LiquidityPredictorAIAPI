@@ -515,7 +515,7 @@ def main():
     mobile_view = st.session_state.mobile_layout
     
     # Create tabs for different views
-    tabs = st.tabs(["Overview", "Pool Explorer", "Insights & Predictions"])
+    tabs = st.tabs(["Overview", "Pool Explorer", "Insights & Predictions", "Pool IDs"])
     
     # Tab 1: Overview
     with tabs[0]:
@@ -745,9 +745,9 @@ def main():
         min_tvl = float(df['liquidity'].min())
         max_tvl = float(df['liquidity'].max())
         
-        # Round values to prevent floating point issues
-        min_tvl_rounded = round(min_tvl, -5)  # Round to nearest 100K
-        max_tvl_rounded = round(max_tvl, -5)  # Round to nearest 100K
+        # Round values to prevent floating point issues - handle as integers for slider
+        min_tvl_rounded = int(round(min_tvl, -5))  # Round to nearest 100K
+        max_tvl_rounded = int(round(max_tvl, -5))  # Round to nearest 100K
         
         # Handle edge case where min == max
         if min_tvl_rounded == max_tvl_rounded:
@@ -777,7 +777,7 @@ def main():
                 min_value=min_tvl_rounded,
                 max_value=max_tvl_rounded,
                 value=(min_tvl_rounded, max_tvl_rounded),
-                step=1000000.0,
+                step=1000000,
                 format="$%.1fM"
             )
         
@@ -786,8 +786,8 @@ def main():
         max_apr = float(df['apr'].max())
         
         # Round values for better slider behavior
-        min_apr_rounded = round(min_apr)
-        max_apr_rounded = round(max_apr) + 1  # Add 1 to ensure we include the maximum
+        min_apr_rounded = int(round(min_apr))
+        max_apr_rounded = int(round(max_apr) + 1)  # Add 1 to ensure we include the maximum
         
         if mobile_view:
             # For mobile: simplified APR options
@@ -812,7 +812,7 @@ def main():
                 min_value=min_apr_rounded,
                 max_value=max_apr_rounded,
                 value=(min_apr_rounded, max_apr_rounded),
-                step=1.0
+                step=1
             )
         
         # Prediction score filter - simplified for mobile
@@ -1365,16 +1365,32 @@ def main():
         # Display as a table - mobile optimized
         if mobile_view:
             # For mobile view, use a simplified table with fewer columns
-            if 'AI Score' in top_pred_df.columns:
-                # Advanced prediction table for mobile
-                mobile_pred_df = top_pred_df[['Name', 'Predicted APR', 'AI Score']].copy()
-            else:
-                # Basic prediction table for mobile
-                mobile_pred_df = top_pred_df[['Name', 'APR', 'Score']].copy()
+            try:
+                # Check which columns are actually available in the DataFrame
+                available_columns = top_pred_df.columns.tolist()
                 
-            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-            st.write(mobile_pred_df.to_html(escape=False, index=False), unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+                if 'AI Score' in available_columns:
+                    # Advanced prediction table for mobile
+                    mobile_cols = ['Name', 'Predicted APR', 'AI Score']
+                else:
+                    # Basic prediction table for mobile
+                    mobile_cols = ['Name', 'APR', 'Score']
+                    
+                # Filter to only include columns that exist
+                mobile_cols = [col for col in mobile_cols if col in available_columns]
+                
+                # Create the mobile view DataFrame
+                mobile_pred_df = top_pred_df[mobile_cols].copy()
+                
+                st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
+                st.write(mobile_pred_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+            except Exception as e:
+                st.error(f"Error displaying mobile table: {str(e)}")
+                # Fallback to the full table
+                st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
+                st.write(top_pred_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
         else:
             # For desktop view, show full table
             st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
