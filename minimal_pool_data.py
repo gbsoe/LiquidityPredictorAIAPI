@@ -78,6 +78,47 @@ def get_category_badge(category):
     </span>
     """
 
+def ensure_all_fields(pool_data):
+    """
+    Ensure all required fields are present in the pool data.
+    This is important when loading data from the cached file that might be missing fields.
+    """
+    required_fields = [
+        "id", "name", "dex", "category", "token1_symbol", "token2_symbol", 
+        "token1_address", "token2_address", "liquidity", "volume_24h", 
+        "apr", "fee", "version", "apr_change_24h", "apr_change_7d", 
+        "tvl_change_24h", "tvl_change_7d", "prediction_score"
+    ]
+    
+    # Extra fields that might be missing but can have default values
+    optional_fields = {
+        "apr_change_30d": 0.0,
+        "tvl_change_30d": 0.0
+    }
+    
+    validated_pools = []
+    
+    for pool in pool_data:
+        # Make a copy of the pool data to not modify the original
+        validated_pool = pool.copy()
+        
+        # Add any missing required fields with default values
+        for field in required_fields:
+            if field not in validated_pool:
+                if field in ["id", "name", "dex", "category", "token1_symbol", "token2_symbol", "token1_address", "token2_address", "version"]:
+                    validated_pool[field] = "Unknown"
+                else:
+                    validated_pool[field] = 0.0
+        
+        # Add any missing optional fields with their default values
+        for field, default_value in optional_fields.items():
+            if field not in validated_pool:
+                validated_pool[field] = default_value
+        
+        validated_pools.append(validated_pool)
+    
+    return validated_pools
+
 def load_data():
     """Load pool data from the cached file first, and only try live data if explicitly requested"""
     cache_file = "extracted_pools.json"
@@ -91,6 +132,8 @@ def load_data():
                     st.success("✓ Successfully loaded pool data from local cache")
                     pools = json.loads(file_content)
                     if pools and len(pools) > 0:
+                        # Ensure all required fields are present
+                        pools = ensure_all_fields(pools)
                         return pools
         except Exception as e:
             st.warning(f"Error loading cached data: {e}")
@@ -343,42 +386,109 @@ def main():
     # Display logo and title
     col_logo, col_title = st.columns([1, 3])
     
-    with col_logo:
-        st.image("static/filot_logo_new.png", width=150)
-    
-    with col_title:
-        st.title("FiLot - Solana Liquidity Pool Analysis")
-        st.subheader("Advanced analysis and predictions for Solana DeFi liquidity pools")
-        st.markdown("""
-        This tool analyzes thousands of Solana liquidity pools across all major DEXes, 
-        including Raydium, Orca, Jupiter, Meteora, Saber, and more. It provides comprehensive 
-        data, historical metrics, and machine learning-based predictions.
-        """)
-    
-    # Create tabs for different views
-    tab_explore, tab_predict, tab_risk, tab_nlp = st.tabs([
-        "Data Explorer", "Predictions", "Risk Assessment", "NLP Reports"
-    ])
-    
-    # Add debug information
-    st.info("Loading pool data now...")
-    
-    # Load data
-    pool_data = load_data()
-    
-    # Debug info
-    if pool_data:
-        if isinstance(pool_data, list):
-            st.success(f"✓ Successfully loaded {len(pool_data)} pools")
+    try:
+        with col_logo:
+            # Try to load the logo, but handle exceptions gracefully
+            try:
+                st.image("static/filot_logo_new.png", width=150)
+            except Exception:
+                st.write("FiLot")
+        
+        with col_title:
+            st.title("FiLot - Solana Liquidity Pool Analysis")
+            st.subheader("Advanced analysis and predictions for Solana DeFi liquidity pools")
+            st.markdown("""
+            This tool analyzes thousands of Solana liquidity pools across all major DEXes, 
+            including Raydium, Orca, Jupiter, Meteora, Saber, and more. It provides comprehensive 
+            data, historical metrics, and machine learning-based predictions.
+            """)
+        
+        # Create tabs for different views
+        tab_explore, tab_predict, tab_risk, tab_nlp = st.tabs([
+            "Data Explorer", "Predictions", "Risk Assessment", "NLP Reports"
+        ])
+        
+        # Add debug information
+        st.info("Loading pool data now...")
+        
+        # Load data
+        pool_data = load_data()
+        
+        # Debug info
+        if pool_data:
+            if isinstance(pool_data, list):
+                st.success(f"✓ Successfully loaded {len(pool_data)} pools")
+            else:
+                st.error(f"Unexpected data type: {type(pool_data)}")
+                # Generate fallback sample data
+                pool_data = generate_sample_data()
+                st.warning("Using generated sample data due to unexpected data type")
         else:
-            st.error(f"Unexpected data type: {type(pool_data)}")
-            return
-    else:
-        st.error("Failed to load any pool data")
-        return
-    
-    # Convert to DataFrame for easier manipulation
-    df = pd.DataFrame(pool_data)
+            st.error("Failed to load any pool data")
+            # Generate fallback sample data
+            pool_data = generate_sample_data()
+            st.warning("Using generated sample data due to data loading failure")
+            
+        # Ensure we have data, no matter what
+        if not pool_data:
+            pool_data = [{
+                "id": "sample1",
+                "name": "SOL/USDC",
+                "dex": "Raydium",
+                "category": "Major",
+                "token1_symbol": "SOL",
+                "token2_symbol": "USDC",
+                "token1_address": "So11111111111111111111111111111111111111112",
+                "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                "liquidity": 25000000,
+                "volume_24h": 1000000,
+                "apr": 10.5,
+                "fee": 0.0025,
+                "version": "v4",
+                "apr_change_24h": 0.5,
+                "apr_change_7d": 1.2,
+                "tvl_change_24h": 0.8,
+                "tvl_change_7d": 2.5,
+                "prediction_score": 85,
+                "apr_change_30d": 5.5,
+                "tvl_change_30d": 7.5
+            }]
+        
+        # Ensure all required fields are present 
+        pool_data = ensure_all_fields(pool_data)
+        
+        # Convert to DataFrame for easier manipulation
+        df = pd.DataFrame(pool_data)
+    except Exception as e:
+        # Handle any unexpected exceptions to prevent crashes
+        st.error(f"Error in main function: {str(e)}")
+        st.warning("Attempting to continue with minimal functionality...")
+        
+        # Create minimal data for the app to continue
+        pool_data = [{
+            "id": "sample1",
+            "name": "SOL/USDC",
+            "dex": "Raydium",
+            "category": "Major",
+            "token1_symbol": "SOL",
+            "token2_symbol": "USDC",
+            "token1_address": "So11111111111111111111111111111111111111112",
+            "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "liquidity": 25000000,
+            "volume_24h": 1000000,
+            "apr": 10.5,
+            "fee": 0.0025,
+            "version": "v4",
+            "apr_change_24h": 0.5,
+            "apr_change_7d": 1.2,
+            "tvl_change_24h": 0.8,
+            "tvl_change_7d": 2.5,
+            "prediction_score": 85,
+            "apr_change_30d": 5.5,
+            "tvl_change_30d": 7.5
+        }]
+        
+        df = pd.DataFrame(pool_data)
     
     # Data Explorer Tab
     with tab_explore:
@@ -713,14 +823,19 @@ def main():
         
         # Create simulated historical data for demonstration
         days = 30
-        base_liquidity = pool_data["liquidity"] / (1 + pool_data["tvl_change_30d"]/100)
-        base_apr = pool_data["apr"] / (1 + pool_data["apr_change_30d"]/100)
+        # Use safer methods to get values
+        tvl_change_30d = pool_data.get("tvl_change_30d", 0)
+        apr_change_30d = pool_data.get("apr_change_30d", 0)
+        
+        # Calculate base values
+        base_liquidity = pool_data["liquidity"] / (1 + (tvl_change_30d/100))
+        base_apr = pool_data["apr"] / (1 + (apr_change_30d/100))
         
         dates = [(datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(days, 0, -1)]
         
         # Generate random daily fluctuations within the overall trend
-        liquidity_trend = pool_data["tvl_change_30d"] / 30  # daily trend
-        apr_trend = pool_data["apr_change_30d"] / 30  # daily trend
+        liquidity_trend = tvl_change_30d / 30  # daily trend
+        apr_trend = apr_change_30d / 30  # daily trend
         
         # Create historical data with some randomness
         historical_data = []
