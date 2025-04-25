@@ -424,8 +424,52 @@ def main():
         # Store the custom RPC in session state
         st.session_state['custom_rpc'] = custom_rpc
         
+        # Add a manual data refresh button and display status
+        st.sidebar.header("Data Management")
+        
+        # Add a refresh button
+        if st.sidebar.button("🔄 Refresh Data Now"):
+            st.sidebar.info("Starting manual data refresh...")
+            
+            try:
+                # Check if we have a valid RPC endpoint
+                if has_valid_rpc and HAS_EXTRACTOR:
+                    # Import the extractor
+                    from onchain_extractor import OnChainExtractor
+                    
+                    # Initialize the extractor with the current RPC endpoint
+                    extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
+                    
+                    # Extract fresh pool data - use a smaller limit to avoid rate limits
+                    with st.sidebar.status("Fetching fresh data from blockchain..."):
+                        fresh_pools = extractor.extract_and_enrich_pools(max_per_dex=10)
+                        
+                        if fresh_pools and len(fresh_pools) > 0:
+                            # Save to file
+                            cache_file = "extracted_pools.json"
+                            with open(cache_file, "w") as f:
+                                json.dump(fresh_pools, f, indent=2)
+                            
+                            # Try to save to database if available
+                            if hasattr(db_handler, 'engine') and db_handler.engine is not None:
+                                try:
+                                    db_handler.store_pools(fresh_pools)
+                                except Exception as e:
+                                    st.sidebar.warning(f"Database error: {e}")
+                            
+                            # Update the timestamp displayed in the UI
+                            st.sidebar.success(f"✅ Successfully refreshed {len(fresh_pools)} pools!")
+                            
+                            # Force a page reload to show the new data
+                            st.rerun()
+                        else:
+                            st.sidebar.error("No pools were returned from the blockchain")
+                else:
+                    st.sidebar.warning("Cannot refresh data: No valid RPC endpoint or extractor not available")
+            except Exception as e:
+                st.sidebar.error(f"Error refreshing data: {e}")
+                
         # Display last update time if available
-        st.sidebar.header("Data Status")
         if os.path.exists("extracted_pools.json"):
             try:
                 mod_time = os.path.getmtime("extracted_pools.json")
