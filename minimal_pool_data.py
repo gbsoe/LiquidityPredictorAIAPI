@@ -290,67 +290,36 @@ def load_data():
     # Check if we have cached data
     cache_file = "extracted_pools.json"
     
-    # First, always try to load from cache file for faster startup
-    if os.path.exists(cache_file):
-        try:
-            # Debug information
-            st.info(f"Cache file exists at: {os.path.abspath(cache_file)}")
-            st.info(f"Cache file size: {os.path.getsize(cache_file)} bytes")
-            
-            with open(cache_file, "r") as f:
-                # Read file content for debugging
-                file_content = f.read()
-                st.info(f"Read {len(file_content)} bytes from cache file")
-                
-                # Try to parse JSON
-                if file_content.strip():
-                    pools = json.loads(file_content)
-                    
-                    # Verify the data is not empty
-                    if pools and len(pools) > 0:
-                        st.success(f"✓ Successfully loaded {len(pools)} pools from cache")
-                        st.info("To refresh data from the blockchain, use the settings in the sidebar")
-                        return pools
-                    else:
-                        st.warning("Cache file contains empty pool data")
-                else:
-                    st.warning("Cache file is empty")
-        except json.JSONDecodeError as e:
-            st.error(f"JSON decode error in cache file: {e}")
-            # Show part of the file content for debugging
-            with open(cache_file, "r") as f:
-                st.code(f.read(500) + "...")
-        except Exception as e:
-            st.error(f"Error loading cached data: {e}")
-            st.info("Will attempt to fetch fresh data from blockchain")
-    
-    # If we have the extractor, try to get live data
+    # For production readiness, always prioritize live data from blockchain
     if HAS_EXTRACTOR:
-        try:
-            # Allow users to provide their own RPC endpoint
-            with st.sidebar:
-                use_custom_rpc = st.checkbox("Use custom Solana RPC endpoint")
-                
-                if use_custom_rpc:
-                    custom_rpc = st.text_input(
-                        "Solana RPC Endpoint", 
-                        value=os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"),
-                        help="Public endpoints may have rate limits. Consider using a service like Helius, QuickNode, or Alchemy."
-                    )
-                    if st.button("Save Endpoint"):
-                        # Save to .env file for persistence
-                        try:
-                            with open(".env", "a+") as f:
-                                f.seek(0)
-                                if "SOLANA_RPC_ENDPOINT" not in f.read():
-                                    f.write(f"\nSOLANA_RPC_ENDPOINT={custom_rpc}\n")
-                                else:
-                                    st.success("RPC endpoint updated in environment")
-                        except Exception as e:
-                            st.warning(f"Could not save endpoint to .env: {e}")
-                else:
-                    custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", None)
+        # Allow users to provide their own RPC endpoint
+        with st.sidebar:
+            force_live_data = st.checkbox("Always use live data", value=True, 
+                help="When enabled, always fetches fresh data from the blockchain")
+            use_custom_rpc = st.checkbox("Use custom Solana RPC endpoint")
             
+            if use_custom_rpc:
+                custom_rpc = st.text_input(
+                    "Solana RPC Endpoint", 
+                    value=os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"),
+                    help="Public endpoints may have rate limits. Consider using a service like Helius, QuickNode, or Alchemy."
+                )
+                if st.button("Save Endpoint"):
+                    # Save to .env file for persistence
+                    try:
+                        with open(".env", "a+") as f:
+                            f.seek(0)
+                            if "SOLANA_RPC_ENDPOINT" not in f.read():
+                                f.write(f"\nSOLANA_RPC_ENDPOINT={custom_rpc}\n")
+                            else:
+                                st.success("RPC endpoint updated in environment")
+                    except Exception as e:
+                        st.warning(f"Could not save endpoint to .env: {e}")
+            else:
+                custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", None)
+        
+        # Try to fetch live data first if forcing live data
+        if force_live_data:
             with st.spinner("Extracting pool data from Solana blockchain..."):
                 try:
                     # Add extra logging
@@ -376,13 +345,63 @@ def load_data():
                         st.error("No pool data was returned from the blockchain")
                 except Exception as e:
                     st.error(f"Error extracting data from blockchain: {str(e)}")
-                    st.info("Trying to use cached data instead...")
+                    st.warning("Falling back to cached data due to error")
+            
+        # If not forcing live data or if live data failed, try using cache
+        if os.path.exists(cache_file) and not force_live_data:
+            try:
+                # Debug information
+                st.info(f"Cache file exists at: {os.path.abspath(cache_file)}")
+                st.info(f"Cache file size: {os.path.getsize(cache_file)} bytes")
                 
-                # If we reach here, we either had an error or empty data from blockchain
-                st.warning("No pools returned from the blockchain extractor")
+                with open(cache_file, "r") as f:
+                    # Read file content for debugging
+                    file_content = f.read()
+                    st.info(f"Read {len(file_content)} bytes from cache file")
+                    
+                    # Try to parse JSON
+                    if file_content.strip():
+                        pools = json.loads(file_content)
+                        
+                        # Verify the data is not empty
+                        if pools and len(pools) > 0:
+                            st.success(f"✓ Successfully loaded {len(pools)} pools from cache")
+                            st.info("For fresh data, check 'Always use live data' in the sidebar")
+                            return pools
+                        else:
+                            st.warning("Cache file contains empty pool data")
+                    else:
+                        st.warning("Cache file is empty")
+            except json.JSONDecodeError as e:
+                st.error(f"JSON decode error in cache file: {e}")
+                # Show part of the file content for debugging
+                with open(cache_file, "r") as f:
+                    st.code(f.read(500) + "...")
+            except Exception as e:
+                st.error(f"Error loading cached data: {e}")
+                st.info("Will try to generate sample data")
+    
+    # One more attempt to fetch from blockchain with a simpler approach
+    if HAS_EXTRACTOR:
+        try:
+            st.error("Failed to get data. Attempting one final fetch from blockchain...")
+            extractor = OnChainExtractor(rpc_endpoint="https://api.mainnet-beta.solana.com")
+            pools = extractor.extract_and_enrich_pools(max_per_dex=10)
+            
+            if pools and len(pools) > 0:
+                st.success(f"Successfully extracted {len(pools)} pools from blockchain")
+                # Save to cache
+                try:
+                    with open(cache_file, "w") as f:
+                        json.dump(pools, f, indent=2)
+                    st.info(f"Data saved to cache file: {cache_file}")
+                except Exception as e:
+                    st.warning(f"Error saving data to cache: {e}")
+                
+                return pools
         except Exception as e:
-            st.error(f"Error extracting pool data: {e}")
-            st.error("Hint: If you're seeing RPC errors, try using a custom RPC endpoint in the sidebar.")
+            st.error(f"Final attempt failed: {e}")
+            st.error("Falling back to generated sample data")
     
     # Generate reliable sample data
     st.info("Using generated sample data for demonstration")
