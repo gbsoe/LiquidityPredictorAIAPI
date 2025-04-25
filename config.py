@@ -43,3 +43,6 @@ ENABLE_MONITORING = os.getenv("ENABLE_MONITORING", "True").lower() == "true"
 # Dashboard settings
 REFRESH_INTERVAL_SECONDS = int(os.getenv("REFRESH_INTERVAL_SECONDS", "300"))
 TOP_POOLS_COUNT = int(os.getenv("TOP_POOLS_COUNT", "10"))
+
+# Solana blockchain settings
+SOLANA_RPC_ENDPOINT = os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com")
