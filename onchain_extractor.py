@@ -47,9 +47,9 @@ logger = logging.getLogger("onchain_extractor")
 
 # Constants
 DEFAULT_TIMEOUT = 30  # seconds
-MAX_RETRIES = 3
-RETRY_DELAY = 0.5  # seconds
-MAX_CONCURRENT_REQUESTS = 20
+MAX_RETRIES = 5  # Increased from 3 to 5
+RETRY_DELAY = 2.0  # Increased from 0.5 to 2.0 seconds
+MAX_CONCURRENT_REQUESTS = 5  # Reduced from 20 to 5 for Helius free tier
 DEFAULT_RPC_ENDPOINT = "https://api.mainnet-beta.solana.com"
 
 # Known tokens for easier identification
@@ -320,8 +320,10 @@ class OnChainExtractor:
                     logger.warning(f"RPC error: {error}")
                     
                     # Check for rate limiting errors
-                    if "rate limited" in str(error).lower():
-                        time.sleep(RETRY_DELAY * (2 ** attempt))
+                    if "rate limited" in str(error).lower() or "too many" in str(error).lower() or "429" in str(error):
+                        wait_time = RETRY_DELAY * (2 ** attempt)
+                        logger.warning(f"Rate limited, waiting {wait_time} seconds before retry")
+                        time.sleep(wait_time)
                         continue
                     
                     # Return the error for further processing
@@ -331,7 +333,12 @@ class OnChainExtractor:
                 
             except requests.RequestException as e:
                 logger.warning(f"RPC request failed (attempt {attempt+1}/{MAX_RETRIES}): {e}")
-                if attempt < MAX_RETRIES - 1:
+                # Also handle 429 Too Many Requests in the exception catch
+                if "429" in str(e) or "too many" in str(e).lower():
+                    wait_time = RETRY_DELAY * (4 ** attempt)  # Longer wait for rate limiting
+                    logger.warning(f"Rate limited in exception handler, waiting {wait_time} seconds")
+                    time.sleep(wait_time)
+                elif attempt < MAX_RETRIES - 1:
                     time.sleep(RETRY_DELAY * (2 ** attempt))  # Exponential backoff
                 else:
                     raise RuntimeError(f"RPC request failed after {MAX_RETRIES} attempts: {e}")
