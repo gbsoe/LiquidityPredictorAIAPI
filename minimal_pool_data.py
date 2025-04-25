@@ -741,35 +741,101 @@ def main():
         token_options = ['All'] + sorted(list(all_tokens))
         selected_token = st.sidebar.selectbox("Contains Token", token_options)
         
-        # TVL and APR range sliders
-        min_tvl = df['liquidity'].min()
-        max_tvl = df['liquidity'].max()
+        # TVL and APR range sliders - optimized for mobile
+        min_tvl = float(df['liquidity'].min())
+        max_tvl = float(df['liquidity'].max())
         
-        tvl_range = st.sidebar.slider(
-            "TVL Range ($)",
-            min_value=float(min_tvl),
-            max_value=float(max_tvl),
-            value=(float(min_tvl), float(max_tvl)),
-            format="%e"
-        )
+        # Round values to prevent floating point issues
+        min_tvl_rounded = round(min_tvl, -5)  # Round to nearest 100K
+        max_tvl_rounded = round(max_tvl, -5)  # Round to nearest 100K
         
-        min_apr = df['apr'].min()
-        max_apr = df['apr'].max()
+        # Handle edge case where min == max
+        if min_tvl_rounded == max_tvl_rounded:
+            min_tvl_rounded = max(0, min_tvl_rounded - 1000000)
+            max_tvl_rounded = max_tvl_rounded + 1000000
         
-        apr_range = st.sidebar.slider(
-            "APR Range (%)",
-            min_value=float(min_apr),
-            max_value=float(max_apr),
-            value=(float(min_apr), float(max_apr))
-        )
+        if mobile_view:
+            # For mobile: simplified sliders with presets
+            tvl_options = ["All", "< $1M", "$1M - $10M", "$10M - $50M", "> $50M"]
+            selected_tvl_option = st.sidebar.selectbox("TVL Range", tvl_options)
+            
+            # Convert selection to actual filter values
+            if selected_tvl_option == "< $1M":
+                tvl_range = (0, 1_000_000)
+            elif selected_tvl_option == "$1M - $10M":
+                tvl_range = (1_000_000, 10_000_000)
+            elif selected_tvl_option == "$10M - $50M":
+                tvl_range = (10_000_000, 50_000_000)
+            elif selected_tvl_option == "> $50M":
+                tvl_range = (50_000_000, float('inf'))
+            else:  # "All"
+                tvl_range = (min_tvl, max_tvl)
+        else:
+            # For desktop: full range slider
+            tvl_range = st.sidebar.slider(
+                "TVL Range ($)",
+                min_value=min_tvl_rounded,
+                max_value=max_tvl_rounded,
+                value=(min_tvl_rounded, max_tvl_rounded),
+                step=1000000.0,
+                format="$%.1fM"
+            )
         
-        # Prediction score filter
-        min_prediction = st.sidebar.slider(
-            "Min Prediction Score",
-            min_value=0,
-            max_value=100,
-            value=0
-        )
+        # APR slider with similar optimization
+        min_apr = float(df['apr'].min())
+        max_apr = float(df['apr'].max())
+        
+        # Round values for better slider behavior
+        min_apr_rounded = round(min_apr)
+        max_apr_rounded = round(max_apr) + 1  # Add 1 to ensure we include the maximum
+        
+        if mobile_view:
+            # For mobile: simplified APR options
+            apr_options = ["All", "< 5%", "5% - 15%", "15% - 30%", "> 30%"]
+            selected_apr_option = st.sidebar.selectbox("APR Range", apr_options)
+            
+            # Convert selection to actual filter values
+            if selected_apr_option == "< 5%":
+                apr_range = (0, 5)
+            elif selected_apr_option == "5% - 15%":
+                apr_range = (5, 15)
+            elif selected_apr_option == "15% - 30%":
+                apr_range = (15, 30)
+            elif selected_apr_option == "> 30%":
+                apr_range = (30, float('inf'))
+            else:  # "All"
+                apr_range = (min_apr, max_apr)
+        else:
+            # For desktop: full range slider
+            apr_range = st.sidebar.slider(
+                "APR Range (%)",
+                min_value=min_apr_rounded,
+                max_value=max_apr_rounded,
+                value=(min_apr_rounded, max_apr_rounded),
+                step=1.0
+            )
+        
+        # Prediction score filter - simplified for mobile
+        if mobile_view:
+            # For mobile, use preset options
+            prediction_options = ["All Pools", "High Potential (70+)", "Very High Potential (85+)"]
+            selected_prediction = st.sidebar.selectbox("Prediction Score", prediction_options)
+            
+            if selected_prediction == "High Potential (70+)":
+                min_prediction = 70
+            elif selected_prediction == "Very High Potential (85+)":
+                min_prediction = 85
+            else:
+                min_prediction = 0
+        else:
+            # For desktop: full slider
+            min_prediction = st.sidebar.slider(
+                "Min Prediction Score",
+                min_value=0,
+                max_value=100,
+                value=0,
+                step=5
+            )
         
         # Apply filters
         filtered_df = df.copy()
@@ -850,10 +916,18 @@ def main():
         # Convert to DataFrame
         display_df = pd.DataFrame(display_data)
         
-        # Display as a table
-        st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-        st.write(display_df.drop(columns=['id']).to_html(escape=False, index=False), unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        # Display as a table with mobile optimizations
+        if mobile_view:
+            # For mobile view, use a simplified table with fewer columns
+            simplified_df = display_df[['Name', 'TVL', 'APR', 'Score']].copy()
+            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
+            st.write(simplified_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            # For desktop view, show full table
+            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
+            st.write(display_df.drop(columns=['id']).to_html(escape=False, index=False), unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
         
         # Pool detail view
         if len(filtered_df) > 0:
@@ -870,21 +944,20 @@ def main():
             selected_idx = pool_options[selected_name]
             selected_pool = filtered_df.iloc[selected_idx]
             
-            # Display detailed information
-            col1, col2, col3 = st.columns([1, 1, 1])
-            
-            with col1:
+            # Display detailed information based on device type
+            if mobile_view:
+                # Mobile view: stacked sections
+                # Basic Info section
                 st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
                 st.markdown("### Basic Info")
-                st.write(f"**ID:** {selected_pool['id']}")
                 st.write(f"**Name:** {selected_pool['name']}")
                 st.write(f"**DEX:** {selected_pool['dex']}")
                 st.write(f"**Category:** {selected_pool['category']}")
                 st.write(f"**Token 1:** {selected_pool['token1_symbol']}")
                 st.write(f"**Token 2:** {selected_pool['token2_symbol']}")
                 st.markdown("</div>", unsafe_allow_html=True)
-            
-            with col2:
+                
+                # Performance section
                 st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
                 st.markdown("### Performance")
                 st.write(f"**TVL:** {format_currency(selected_pool['liquidity'])}")
@@ -896,8 +969,8 @@ def main():
                     apr_change = selected_pool['apr_change_7d']
                     st.write(f"**7d APR Change:** {get_trend_icon(apr_change)} {format_percentage(abs(apr_change))}")
                 st.markdown("</div>", unsafe_allow_html=True)
-            
-            with col3:
+                
+                # Prediction section
                 st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
                 st.markdown("### Prediction")
                 score = selected_pool['prediction_score']
@@ -911,7 +984,7 @@ def main():
                 else:
                     st.warning("Limited growth potential")
                 
-                # Key factors
+                # Key factors - simplified for mobile
                 st.write("**Key Factors:**")
                 
                 apr_change = selected_pool.get('apr_change_7d', 0)
@@ -938,6 +1011,75 @@ def main():
                 for factor in factors:
                     st.write(factor)
                 st.markdown("</div>", unsafe_allow_html=True)
+            else:
+                # Desktop view: 3-column layout
+                col1, col2, col3 = st.columns([1, 1, 1])
+                
+                with col1:
+                    st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
+                    st.markdown("### Basic Info")
+                    st.write(f"**ID:** {selected_pool['id']}")
+                    st.write(f"**Name:** {selected_pool['name']}")
+                    st.write(f"**DEX:** {selected_pool['dex']}")
+                    st.write(f"**Category:** {selected_pool['category']}")
+                    st.write(f"**Token 1:** {selected_pool['token1_symbol']}")
+                    st.write(f"**Token 2:** {selected_pool['token2_symbol']}")
+                    st.markdown("</div>", unsafe_allow_html=True)
+                
+                with col2:
+                    st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
+                    st.markdown("### Performance")
+                    st.write(f"**TVL:** {format_currency(selected_pool['liquidity'])}")
+                    st.write(f"**24h Volume:** {format_currency(selected_pool['volume_24h'])}")
+                    st.write(f"**Fee Rate:** {format_percentage(selected_pool['fee'] * 100)}")
+                    st.write(f"**APR:** {format_percentage(selected_pool['apr'])}")
+                    
+                    if 'apr_change_7d' in selected_pool:
+                        apr_change = selected_pool['apr_change_7d']
+                        st.write(f"**7d APR Change:** {get_trend_icon(apr_change)} {format_percentage(abs(apr_change))}")
+                    st.markdown("</div>", unsafe_allow_html=True)
+                
+                with col3:
+                    st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
+                    st.markdown("### Prediction")
+                    score = selected_pool['prediction_score']
+                    st.write(f"**Prediction Score:** {score:.0f}/100")
+                    
+                    # Prediction indicator
+                    if score >= 85:
+                        st.success("High growth potential")
+                    elif score >= 70:
+                        st.info("Moderate growth potential")
+                    else:
+                        st.warning("Limited growth potential")
+                    
+                    # Key factors
+                    st.write("**Key Factors:**")
+                    
+                    apr_change = selected_pool.get('apr_change_7d', 0)
+                    tvl_change = selected_pool.get('tvl_change_7d', 0)
+                    
+                    factors = []
+                    
+                    if apr_change > 2:
+                        factors.append("• Strong APR growth")
+                    elif apr_change < -2:
+                        factors.append("• APR decline")
+                        
+                    if tvl_change > 5:
+                        factors.append("• Increasing liquidity")
+                    elif tvl_change < -5:
+                        factors.append("• Decreasing liquidity")
+                        
+                    if selected_pool['category'] == 'Meme':
+                        factors.append("• Meme coin volatility")
+                    
+                    if selected_pool['volume_24h'] / selected_pool['liquidity'] > 0.2:
+                        factors.append("• High trading volume")
+                    
+                    for factor in factors:
+                        st.write(factor)
+                    st.markdown("</div>", unsafe_allow_html=True)
             
             # Historical data visualization
             st.subheader("Historical Performance")
@@ -983,33 +1125,60 @@ def main():
                 apr_data.append(day_apr)
                 tvl_data.append(day_tvl)
             
-            # Create figure with two y-axes
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
-            
-            # Add APR line
-            fig.add_trace(
-                go.Scatter(x=dates, y=apr_data, name="APR (%)", line=dict(color="#2196F3", width=2)),
-                secondary_y=False
-            )
-            
-            # Add TVL line
-            fig.add_trace(
-                go.Scatter(x=dates, y=tvl_data, name="TVL ($)", line=dict(color="#4CAF50", width=2)),
-                secondary_y=True
-            )
-            
-            # Update layout
-            fig.update_layout(
-                title="30-Day Historical Performance",
-                xaxis_title="Date",
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-            )
-            
-            # Update y-axes
-            fig.update_yaxes(title_text="APR (%)", secondary_y=False)
-            fig.update_yaxes(title_text="TVL ($)", secondary_y=True, tickformat="$,.0f")
-            
-            st.plotly_chart(fig, use_container_width=True)
+            # Create figure with two y-axes - optimize for mobile if needed
+            if mobile_view:
+                # For mobile, create separate simpler charts
+                
+                # APR Chart
+                fig_apr = px.line(
+                    x=dates, 
+                    y=apr_data,
+                    labels={"x": "Date", "y": "APR (%)"},
+                    title="30-Day APR History"
+                )
+                fig_apr.update_traces(line=dict(color="#2196F3", width=3))
+                fig_apr.update_layout(margin=dict(l=10, r=10, t=40, b=40))
+                st.plotly_chart(fig_apr, use_container_width=True)
+                
+                # TVL Chart
+                fig_tvl = px.line(
+                    x=dates, 
+                    y=tvl_data,
+                    labels={"x": "Date", "y": "TVL"},
+                    title="30-Day TVL History"
+                )
+                fig_tvl.update_traces(line=dict(color="#4CAF50", width=3))
+                fig_tvl.update_layout(margin=dict(l=10, r=10, t=40, b=40))
+                fig_tvl.update_yaxes(tickformat="$,.0f")
+                st.plotly_chart(fig_tvl, use_container_width=True)
+            else:
+                # Desktop view with dual-axis chart
+                fig = make_subplots(specs=[[{"secondary_y": True}]])
+                
+                # Add APR line
+                fig.add_trace(
+                    go.Scatter(x=dates, y=apr_data, name="APR (%)", line=dict(color="#2196F3", width=2)),
+                    secondary_y=False
+                )
+                
+                # Add TVL line
+                fig.add_trace(
+                    go.Scatter(x=dates, y=tvl_data, name="TVL ($)", line=dict(color="#4CAF50", width=2)),
+                    secondary_y=True
+                )
+                
+                # Update layout
+                fig.update_layout(
+                    title="30-Day Historical Performance",
+                    xaxis_title="Date",
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                )
+                
+                # Update y-axes
+                fig.update_yaxes(title_text="APR (%)", secondary_y=False)
+                fig.update_yaxes(title_text="TVL ($)", secondary_y=True, tickformat="$,.0f")
+                
+                st.plotly_chart(fig, use_container_width=True)
     
     # Tab 3: Insights & Predictions
     with tabs[2]:
@@ -1193,10 +1362,24 @@ def main():
         # Convert to DataFrame
         top_pred_df = pd.DataFrame(top_pred_data)
         
-        # Display as a table
-        st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-        st.write(top_pred_df.to_html(escape=False, index=False), unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        # Display as a table - mobile optimized
+        if mobile_view:
+            # For mobile view, use a simplified table with fewer columns
+            if 'AI Score' in top_pred_df.columns:
+                # Advanced prediction table for mobile
+                mobile_pred_df = top_pred_df[['Name', 'Predicted APR', 'AI Score']].copy()
+            else:
+                # Basic prediction table for mobile
+                mobile_pred_df = top_pred_df[['Name', 'APR', 'Score']].copy()
+                
+            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
+            st.write(mobile_pred_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            # For desktop view, show full table
+            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
+            st.write(top_pred_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
         
         # Category performance comparison
         st.subheader("Category Performance Analysis")
