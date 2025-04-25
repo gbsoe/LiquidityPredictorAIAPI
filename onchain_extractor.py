@@ -270,15 +270,24 @@ class OnChainExtractor:
         # Get endpoint from parameter or environment
         endpoint = rpc_endpoint or os.getenv("SOLANA_RPC_ENDPOINT", DEFAULT_RPC_ENDPOINT)
         
+        # Handle Helius API key format (just the key without domain)
+        # Helius keys are typically UUID format: 8-4-4-4-12 hex digits
+        if len(endpoint) == 36 and endpoint.count('-') == 4:
+            # This looks like a Helius API key (UUID format)
+            logger.info(f"Detected Helius API key format, converting to proper URL")
+            endpoint = f"https://rpc.helius.xyz/?api-key={endpoint}"
+        
         # Ensure the endpoint has a protocol prefix and is a valid URL
-        if endpoint and not endpoint.startswith(('http://', 'https://')):
+        elif endpoint and not endpoint.startswith(('http://', 'https://')):
+            # For non-Helius endpoints that might be just a domain
             endpoint = f"https://{endpoint}"
-            
-        # Validation and sanity check for endpoint
-        # Prevent common URL mistakes like using the API key as domain
-        if "api-key" in endpoint and "?" not in endpoint:
-            logger.warning(f"Invalid RPC endpoint detected (API key format issue). Using fallback endpoint.")
-            endpoint = DEFAULT_RPC_ENDPOINT
+        
+        # Handle old format Helius endpoints (directly using the API key as subdomain)
+        if endpoint.count('.') >= 2 and len(endpoint.split('.')[0].split('//')[1]) > 30:
+            # This is likely the old format with API key as subdomain
+            api_key = endpoint.split('.')[0].split('//')[1]
+            logger.warning(f"Converting from old Helius format to new format")
+            endpoint = f"https://rpc.helius.xyz/?api-key={api_key}"
             
         logger.info(f"Using RPC endpoint: {endpoint[:20]}...{endpoint[-20:] if len(endpoint) > 40 else endpoint}")
         
