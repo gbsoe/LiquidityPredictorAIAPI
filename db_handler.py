@@ -1,10 +1,12 @@
 """
 Database handler for SolPool Insight application.
-Manages interactions with the PostgreSQL database.
+Manages interactions with the database (PostgreSQL or SQLite fallback).
 """
 
 import os
 import json
+import sys
+import sqlite3
 import pandas as pd
 import sqlalchemy as sa
 from sqlalchemy import create_engine, Column, Integer, String, Float, MetaData, Table
@@ -14,19 +16,40 @@ from sqlalchemy.orm import sessionmaker
 # Get the database URL from environment variables
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
+# SQLite fallback path
+SQLITE_DB_PATH = 'liquidity_pools.db'
+
 # Initialize SQLAlchemy base class regardless of database connection
 Base = declarative_base()
 
 # Initialize SQLAlchemy engine and metadata
-if DATABASE_URL:
-    engine = create_engine(DATABASE_URL)
-    metadata = MetaData()
-    Session = sessionmaker(bind=engine)
-else:
-    print("Warning: DATABASE_URL not found in environment variables")
-    engine = None
-    metadata = None
-    Session = None
+engine = None
+metadata = None
+Session = None
+
+try:
+    if DATABASE_URL:
+        # Attempt to connect to PostgreSQL
+        print(f"Attempting to connect to PostgreSQL database...")
+        engine = create_engine(DATABASE_URL)
+        # Test the connection
+        with engine.connect() as conn:
+            conn.execute(sa.text("SELECT 1"))
+        print("Successfully connected to PostgreSQL database")
+    else:
+        raise ValueError("DATABASE_URL not found in environment variables")
+except Exception as e:
+    print(f"PostgreSQL connection error: {e}")
+    print(f"Falling back to SQLite database at {SQLITE_DB_PATH}")
+    
+    # Use SQLite as fallback
+    sqlite_url = f"sqlite:///{SQLITE_DB_PATH}"
+    engine = create_engine(sqlite_url)
+    print(f"Using SQLite database: {sqlite_url}")
+
+# Create metadata and session regardless of which database we're using
+metadata = MetaData()
+Session = sessionmaker(bind=engine)
 
 # Define the LiquidityPool model
 class LiquidityPool(Base):
@@ -87,10 +110,17 @@ class LiquidityPool(Base):
 def init_db():
     """Initialize database schema if it doesn't exist"""
     if engine:
-        Base.metadata.create_all(engine)
-        print("Database schema created successfully.")
+        try:
+            Base.metadata.create_all(engine)
+            print("Database schema created successfully.")
+            return True
+        except Exception as e:
+            print(f"Error creating database schema: {e}")
+            print("Will attempt to use existing schema if available")
+            return False
     else:
         print("Cannot initialize database: engine not available.")
+        return False
 
 # Function to store data in database
 def store_pools(pool_data, replace=True):
@@ -109,7 +139,13 @@ def store_pools(pool_data, replace=True):
         return 0
     
     # Initialize database schema if needed
-    init_db()
+    schema_ready = init_db()
+    
+    if not schema_ready:
+        # Since we couldn't create the schema, write to JSON backup
+        backup_to_json(pool_data)
+        print("Unable to store in database, data backed up to JSON instead")
+        return 0
     
     # Create a session
     session = Session()
@@ -117,19 +153,39 @@ def store_pools(pool_data, replace=True):
     count = 0
     try:
         for pool in pool_data:
-            # Check if this pool already exists
-            existing = session.query(LiquidityPool).filter_by(id=pool["id"]).first()
-            
-            if existing and replace:
-                # Update existing entry
-                for key, value in pool.items():
-                    setattr(existing, key, value)
-                count += 1
-            elif not existing:
-                # Create new entry
-                new_pool = LiquidityPool(**pool)
-                session.add(new_pool)
-                count += 1
+            try:
+                # Ensure all required fields are present
+                required_fields = [
+                    "id", "name", "dex", "category", "token1_symbol", "token2_symbol",
+                    "token1_address", "token2_address", "liquidity", "volume_24h", 
+                    "apr", "fee", "version", "apr_change_24h", "apr_change_7d",
+                    "tvl_change_24h", "tvl_change_7d", "prediction_score"
+                ]
+                
+                # Check for missing fields
+                missing_fields = [field for field in required_fields if field not in pool]
+                if missing_fields:
+                    print(f"Skipping pool {pool.get('id', 'unknown')}: Missing fields: {missing_fields}")
+                    continue
+                
+                # Check if this pool already exists
+                existing = session.query(LiquidityPool).filter_by(id=pool["id"]).first()
+                
+                if existing and replace:
+                    # Update existing entry
+                    for key, value in pool.items():
+                        if hasattr(existing, key):
+                            setattr(existing, key, value)
+                    count += 1
+                elif not existing:
+                    # Create new entry
+                    new_pool = LiquidityPool(**pool)
+                    session.add(new_pool)
+                    count += 1
+            except Exception as e:
+                print(f"Error processing pool {pool.get('id', 'unknown')}: {e}")
+                # Continue with the next pool
+                continue
                 
         # Commit changes
         session.commit()
@@ -138,6 +194,8 @@ def store_pools(pool_data, replace=True):
     except Exception as e:
         session.rollback()
         print(f"Error storing pools in database: {e}")
+        # Still backup to JSON even if database fails
+        backup_to_json(pool_data)
         return 0
     finally:
         session.close()
@@ -155,7 +213,8 @@ def get_pools(limit=None):
     """
     if not engine:
         print("Database connection not available")
-        return []
+        # Try to fallback to JSON file
+        return load_from_json()
     
     # Create a session
     session = Session()
@@ -168,10 +227,23 @@ def get_pools(limit=None):
             
         pools = [pool.to_dict() for pool in query.all()]
         print(f"Retrieved {len(pools)} pools from database")
+        
+        # If we got no pools from database, try JSON file as backup
+        if not pools:
+            print("No pools found in database, trying JSON file...")
+            pools = load_from_json()
+            if pools:
+                # We found pools in JSON, try to save them back to database
+                try:
+                    store_pools(pools)
+                except Exception as e:
+                    print(f"Failed to save JSON data to database: {e}")
+        
         return pools
     except Exception as e:
         print(f"Error retrieving pools from database: {e}")
-        return []
+        # Fallback to JSON file
+        return load_from_json()
     finally:
         session.close()
 
@@ -268,7 +340,10 @@ def query_pools(dex=None, category=None, min_liquidity=None, max_liquidity=None,
     """
     if not engine:
         print("Database connection not available")
-        return []
+        # Try to filter from JSON as fallback
+        all_pools = load_from_json()
+        return filter_pools_in_memory(all_pools, dex, category, min_liquidity, max_liquidity, 
+                                     min_apr, max_apr, search_term, sort_by, limit)
     
     # Create a session
     session = Session()
@@ -320,9 +395,86 @@ def query_pools(dex=None, category=None, min_liquidity=None, max_liquidity=None,
             query = query.limit(limit)
             
         pools = [pool.to_dict() for pool in query.all()]
+        
+        # If we got no results from the database, try the JSON file with the same filters
+        if not pools:
+            print("No pools found in database with given filters, trying JSON file...")
+            all_pools = load_from_json()
+            return filter_pools_in_memory(all_pools, dex, category, min_liquidity, max_liquidity, 
+                                         min_apr, max_apr, search_term, sort_by, limit)
+        
         return pools
     except Exception as e:
         print(f"Error querying pools from database: {e}")
-        return []
+        # Try to filter from JSON as fallback
+        all_pools = load_from_json()
+        return filter_pools_in_memory(all_pools, dex, category, min_liquidity, max_liquidity, 
+                                     min_apr, max_apr, search_term, sort_by, limit)
     finally:
         session.close()
+
+# Function to filter pools in memory (used as fallback when database is unavailable)
+def filter_pools_in_memory(pools, dex=None, category=None, min_liquidity=None, max_liquidity=None, 
+                          min_apr=None, max_apr=None, search_term=None, sort_by=None, limit=None):
+    """
+    Filter pools in memory (Python-based filtering instead of SQL)
+    
+    Args:
+        pools: List of pool dictionaries
+        dex: Filter by DEX
+        category: Filter by category
+        min_liquidity: Minimum liquidity
+        max_liquidity: Maximum liquidity
+        min_apr: Minimum APR
+        max_apr: Maximum APR
+        search_term: Search in name or token symbols
+        sort_by: Column to sort by
+        limit: Maximum number of results
+        
+    Returns:
+        Filtered list of dictionaries
+    """
+    filtered_pools = pools.copy()
+    
+    # Apply filters
+    if dex:
+        filtered_pools = [p for p in filtered_pools if p.get('dex') == dex]
+    
+    if category:
+        filtered_pools = [p for p in filtered_pools if p.get('category') == category]
+    
+    if min_liquidity is not None:
+        filtered_pools = [p for p in filtered_pools if p.get('liquidity', 0) >= min_liquidity]
+    
+    if max_liquidity is not None:
+        filtered_pools = [p for p in filtered_pools if p.get('liquidity', float('inf')) <= max_liquidity]
+    
+    if min_apr is not None:
+        filtered_pools = [p for p in filtered_pools if p.get('apr', 0) >= min_apr]
+    
+    if max_apr is not None:
+        filtered_pools = [p for p in filtered_pools if p.get('apr', float('inf')) <= max_apr]
+    
+    if search_term:
+        search_term = search_term.lower()
+        filtered_pools = [p for p in filtered_pools if 
+                         search_term in p.get('name', '').lower() or
+                         search_term in p.get('token1_symbol', '').lower() or
+                         search_term in p.get('token2_symbol', '').lower()]
+    
+    # Apply sorting
+    if sort_by:
+        reverse = sort_by.startswith('-')
+        sort_column = sort_by.lstrip('-')
+        
+        if sort_column in pools[0] if pools else []:
+            filtered_pools = sorted(filtered_pools, 
+                                   key=lambda p: p.get(sort_column, 0) if isinstance(p.get(sort_column, 0), (int, float)) 
+                                   else str(p.get(sort_column, '')),
+                                   reverse=reverse)
+    
+    # Apply limit
+    if limit:
+        filtered_pools = filtered_pools[:limit]
+    
+    return filtered_pools
