@@ -387,6 +387,7 @@ def load_data():
             st.error("Failed to get data. Attempting one final fetch from blockchain...")
             # Use one of these alternative endpoints for Solana mainnet
             rpc_endpoints = [
+                "https://mainnet.helius-rpc.com/?api-key=acd3e611-d3cd-4405-9721-2becfe0aeea6",  # Helius endpoint (primary)
                 "https://api.mainnet-beta.solana.com",
                 "https://solana-api.projectserum.com", 
                 "https://free.rpcpool.com",
