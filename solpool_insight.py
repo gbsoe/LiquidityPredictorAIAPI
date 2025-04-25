@@ -144,24 +144,24 @@ def ensure_all_fields(pool_data):
 def load_data():
     """Load pool data from database, cached file, or generate as needed"""
     # First try to load from database
-    if db_handler.engine:
-        pools = db_handler.get_pools()
-        if pools and len(pools) > 0:
-            st.success(f"✓ Successfully loaded {len(pools)} pools from database")
-            return pools
+    if hasattr(db_handler, 'engine') and db_handler.engine is not None:
+        try:
+            pools = db_handler.get_pools()
+            if pools and len(pools) > 0:
+                st.success(f"✓ Successfully loaded {len(pools)} pools from database")
+                return pools
+        except Exception as db_error:
+            st.warning(f"Could not load from database: {db_error}")
     
     # If no database data, try cached file
     cache_file = "extracted_pools.json"
     if os.path.exists(cache_file):
         try:
-            pools = db_handler.load_from_json(cache_file)
+            with open(cache_file, "r") as f:
+                pools = json.load(f)
+            
             if pools and len(pools) > 0:
                 st.success(f"✓ Successfully loaded {len(pools)} pools from local cache")
-                
-                # Store in database if available
-                if db_handler.engine:
-                    db_handler.store_pools(pools)
-                    st.info("✓ Pool data copied to database")
                 
                 # Ensure all required fields are present
                 pools = ensure_all_fields(pools)
@@ -178,66 +178,9 @@ def load_data():
     # Get the pool_count value from session state (set in main())
     pool_count = st.session_state.get('pool_count', 200)
     
-    # Verify RPC endpoint
-    rpc_endpoint = os.getenv("SOLANA_RPC_ENDPOINT")
-    has_valid_rpc = rpc_endpoint and len(rpc_endpoint) > 5
-    
-    # Only try to fetch live data if explicitly requested
-    if force_live_data and HAS_EXTRACTOR:
-        with st.spinner("Attempting to extract pool data from Solana blockchain..."):
-            try:
-                # Use the custom or environment RPC endpoint
-                st.info(f"Connecting to RPC endpoint: {custom_rpc}")
-                
-                # Initialize extractor with better error handling and batch processing
-                # Use tranched fetching with up to 50 pools per DEX but fetch them in batches
-                extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
-                
-                # Display a message about tranched fetching
-                st.info("Starting tranched fetching of pool data. This may take a few minutes as we retrieve data in batches to avoid rate limits.")
-                
-                # Fetch more pools per DEX to get comprehensive market coverage
-                pools = extractor.extract_and_enrich_pools(max_per_dex=200)
-                
-                # Verify the data is not empty
-                if pools and len(pools) > 0:
-                    st.success(f"Successfully extracted {len(pools)} pools from blockchain")
-                    # Save to cache and database
-                    try:
-                        # Save to cache file
-                        db_handler.backup_to_json(pools, cache_file)
-                        st.info(f"Data saved to cache file: {cache_file}")
-                        
-                        # Save to database if available
-                        if db_handler.engine:
-                            db_handler.store_pools(pools)
-                            st.info("✓ Pool data stored in database")
-                    except Exception as e:
-                        st.warning(f"Error saving data: {e}")
-                    
-                    return pools
-                else:
-                    st.error("No pool data was returned from the blockchain")
-            except Exception as e:
-                st.error(f"Error extracting data from blockchain: {str(e)}")
-    
-    # If we got here, we need to use sample data
+    # Generate sample data if no real data is available
     st.warning(f"Unable to load pool data - using generated sample data with {pool_count} pools")
-    sample_data = generate_sample_data(pool_count)
-    
-    # Save sample data to cache and database
-    try:
-        # Save to cache file
-        db_handler.backup_to_json(sample_data, cache_file)
-        
-        # Save to database if available
-        if db_handler.engine:
-            db_handler.store_pools(sample_data)
-            st.info("✓ Sample data stored in database")
-    except Exception as e:
-        st.warning(f"Error saving sample data: {e}")
-    
-    return sample_data
+    return generate_sample_data(pool_count)
 
 def generate_sample_data(count=200):
     """Generate sample pool data with the specified number of pools"""
@@ -481,63 +424,15 @@ def main():
         # Store the custom RPC in session state
         st.session_state['custom_rpc'] = custom_rpc
         
-        # Background updater controls
-        if HAS_BACKGROUND_UPDATER:
-            st.sidebar.header("Background Updater")
-            
-            if st.session_state.get('updater_started') != True:
-                if st.sidebar.button("Start Background Updater"):
-                    # Only start if we have a valid RPC endpoint
-                    if rpc_endpoint:
-                        try:
-                            # Use a try-except block to handle potential errors
-                            try:
-                                # Import inside the try block to handle potential import errors
-                                import background_updater
-                                if background_updater.start_background_updater():
-                                    st.session_state['updater_started'] = True
-                                    st.success("✓ Background data updater started")
-                                else:
-                                    st.warning("Background updater could not be started (already running)")
-                            except ImportError as ie:
-                                st.error(f"Could not import background updater module: {ie}")
-                        except Exception as e:
-                            st.error(f"Could not start background updater: {e}")
-                    else:
-                        st.warning("Cannot start background updater: No valid RPC endpoint configured")
-            else:
-                st.sidebar.success("✓ Background data refresh is active")
-                
-                # Get the cache file modification time
-                try:
-                    if os.path.exists("extracted_pools.json"):
-                        mod_time = os.path.getmtime("extracted_pools.json")
-                        mod_time_str = datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M:%S")
-                        st.sidebar.info(f"Last data update: {mod_time_str}")
-                except Exception:
-                    st.sidebar.info("No data update timestamp available")
-                    
-                # Add a refresh button
-                if st.sidebar.button("Refresh Data Now"):
-                    try:
-                        # Safely check if extracted_pools.json exists and has data
-                        if os.path.exists("extracted_pools.json"):
-                            with open("extracted_pools.json", "r") as f:
-                                pool_content = f.read()
-                                if pool_content.strip():
-                                    data = json.loads(pool_content)
-                                    st.session_state['last_data_length'] = len(data)
-                                else:
-                                    st.session_state['last_data_length'] = 0
-                        else:
-                            st.warning("No cached data file available to refresh")
-                            st.session_state['last_data_length'] = 0
-                    except Exception as e:
-                        st.warning(f"Error checking cache file: {e}")
-                        st.session_state['last_data_length'] = 0
-                    
-                    # Force a page refresh
-                    st.rerun()
+        # Display last update time if available
+        st.sidebar.header("Data Status")
+        if os.path.exists("extracted_pools.json"):
+            try:
+                mod_time = os.path.getmtime("extracted_pools.json")
+                mod_time_str = datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M:%S")
+                st.sidebar.info(f"Last data update: {mod_time_str}")
+            except Exception:
+                st.sidebar.info("Last update time unavailable")
     
     # Display logo and title in the main area
     col_logo, col_title = st.columns([1, 3])
@@ -560,7 +455,7 @@ def main():
             """)
         
         # Database status
-        if db_handler.engine:
+        if hasattr(db_handler, 'engine') and db_handler.engine is not None:
             st.success("✓ Connected to PostgreSQL database")
         else:
             st.warning("⚠ Database connection not available - using file-based storage")
@@ -573,838 +468,994 @@ def main():
         # Load data
         pool_data = load_data()
         
-        # Debug info
-        if pool_data:
-            if isinstance(pool_data, list):
-                st.success(f"✓ Successfully loaded {len(pool_data)} pools")
-            else:
-                st.error(f"Unexpected data type: {type(pool_data)}")
-                # Generate fallback sample data
-                pool_data = generate_sample_data(200)
-                st.warning("Using generated sample data due to unexpected data type")
-        else:
-            st.error("Failed to load any pool data")
-            # Generate fallback sample data
-            pool_data = generate_sample_data(200)
-            st.warning("Using generated sample data due to data loading failure")
+        if not pool_data or len(pool_data) == 0:
+            st.error("No pool data available. Please check your data sources.")
+            return
             
-        # Ensure we have data, no matter what
-        if not pool_data:
-            pool_data = [{
-                "id": "sample1",
-                "name": "SOL/USDC",
-                "dex": "Raydium",
-                "category": "Major",
-                "token1_symbol": "SOL",
-                "token2_symbol": "USDC",
-                "token1_address": "So11111111111111111111111111111111111111112",
-                "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-                "liquidity": 25000000,
-                "volume_24h": 1000000,
-                "apr": 10.5,
-                "fee": 0.0025,
-                "version": "v4",
-                "apr_change_24h": 0.5,
-                "apr_change_7d": 1.2,
-                "tvl_change_24h": 0.8,
-                "tvl_change_7d": 2.5,
-                "prediction_score": 85,
-                "apr_change_30d": 5.5,
-                "tvl_change_30d": 7.5
-            }]
-        
-        # Ensure all required fields are present 
-        pool_data = ensure_all_fields(pool_data)
-        
         # Convert to DataFrame for easier manipulation
         df = pd.DataFrame(pool_data)
-    except Exception as e:
-        # Handle any unexpected exceptions to prevent crashes
-        st.error(f"Error in main function: {str(e)}")
-        st.warning("Attempting to continue with minimal functionality...")
-        
-        # Create minimal data for the app to continue
-        pool_data = [{
-            "id": "sample1",
-            "name": "SOL/USDC",
-            "dex": "Raydium",
-            "category": "Major",
-            "token1_symbol": "SOL",
-            "token2_symbol": "USDC",
-            "token1_address": "So11111111111111111111111111111111111111112",
-            "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-            "liquidity": 25000000,
-            "volume_24h": 1000000,
-            "apr": 10.5,
-            "fee": 0.0025,
-            "version": "v4",
-            "apr_change_24h": 0.5,
-            "apr_change_7d": 1.2,
-            "tvl_change_24h": 0.8,
-            "tvl_change_7d": 2.5,
-            "prediction_score": 85,
-            "apr_change_30d": 5.5,
-            "tvl_change_30d": 7.5
-        }]
-        
-        df = pd.DataFrame(pool_data)
     
-    # Data Explorer Tab
-    with tab_explore:
-        st.header("Liquidity Pool Explorer")
-        
-        # Search and filter section
-        col_search, col_filter1, col_filter2, col_filter3 = st.columns([2, 1, 1, 1])
-        
-        with col_search:
-            search_term = st.text_input("Search by token symbol or pool name")
-        
-        with col_filter1:
-            dex_filter = st.selectbox("Filter by DEX", options=["All"] + sorted(df["dex"].unique().tolist()))
-        
-        with col_filter2:
-            category_filter = st.selectbox("Filter by Category", options=["All"] + sorted(df["category"].unique().tolist()))
-        
-        with col_filter3:
-            sort_by = st.selectbox(
-                "Sort by", 
-                options=["Prediction Score", "APR", "Liquidity", "Volume", "APR Change 24h", "TVL Change 24h"]
-            )
-        
-        # Apply filters
-        filtered_df = df.copy()
-        
-        if search_term:
-            filtered_df = filtered_df[
-                filtered_df["token1_symbol"].str.contains(search_term, case=False) | 
-                filtered_df["token2_symbol"].str.contains(search_term, case=False) |
-                filtered_df["name"].str.contains(search_term, case=False)
-            ]
-        
-        if dex_filter != "All":
-            filtered_df = filtered_df[filtered_df["dex"] == dex_filter]
-        
-        if category_filter != "All":
-            filtered_df = filtered_df[filtered_df["category"] == category_filter]
-        
-        # Apply sorting
-        sort_column_map = {
-            "Prediction Score": "prediction_score",
-            "APR": "apr",
-            "Liquidity": "liquidity",
-            "Volume": "volume_24h",
-            "APR Change 24h": "apr_change_24h",
-            "TVL Change 24h": "tvl_change_24h"
-        }
-        
-        sort_column = sort_column_map.get(sort_by, "prediction_score")
-        filtered_df = filtered_df.sort_values(sort_column, ascending=False)
-        
-        # Show summary statistics
-        st.subheader("Summary Statistics")
-        metrics_col1, metrics_col2, metrics_col3, metrics_col4 = st.columns(4)
-        
-        with metrics_col1:
-            st.metric(
-                "Total Pools", 
-                f"{len(filtered_df):,}",
-                f"{len(filtered_df) - len(df):,}" if len(filtered_df) != len(df) else None
-            )
-        
-        with metrics_col2:
-            total_tvl = filtered_df["liquidity"].sum()
-            st.metric(
-                "Total Liquidity", 
-                format_currency(total_tvl)
-            )
-        
-        with metrics_col3:
-            avg_apr = filtered_df["apr"].mean()
-            st.metric(
-                "Average APR", 
-                format_percentage(avg_apr)
-            )
-        
-        with metrics_col4:
-            avg_prediction = filtered_df["prediction_score"].mean()
-            st.metric(
-                "Avg Prediction Score", 
-                f"{avg_prediction:.1f}/100"
-            )
-        
-        # Pool data table
-        st.subheader("Pool Data")
-        
-        # Show only the most relevant columns
-        display_columns = [
-            "name", "dex", "category", "liquidity", "volume_24h", 
-            "apr", "apr_change_24h", "apr_change_7d", "prediction_score", "id"
-        ]
-        
-        # Create a proper Streamlit table instead of HTML
-        # This avoids formatting issues with HTML badges
-        
-        # First create a clean representation of the data
-        table_data = []
-        
-        # Allow showing more pools by default - previously the display was limited
-        # Default to showing all pools up to 50, then allow pagination
-        max_display = min(len(filtered_df), 50)
-        
-        # Add pagination control
-        start_idx = st.slider("Page", min_value=1, max_value=max(1, len(filtered_df) // max_display + 1), value=1) - 1
-        start_idx = start_idx * max_display
-        end_idx = min(start_idx + max_display, len(filtered_df))
-        
-        st.write(f"Showing pools {start_idx+1}-{end_idx} of {len(filtered_df)}")
-        
-        for _, row in filtered_df.iloc[start_idx:end_idx].iterrows():
-            # Format all values correctly
-            category_text = row["category"]  # Just use plain text instead of HTML badge
-            pool_name = row["name"]
-            dex_name = row["dex"]
-            liquidity_val = format_currency(row["liquidity"])
-            volume_val = format_currency(row["volume_24h"])
-            apr_val = format_percentage(row["apr"])
-            apr_change_24h_val = f"{get_trend_icon(row['apr_change_24h'])} {format_percentage(row['apr_change_24h'])}"
-            apr_change_7d_val = f"{get_trend_icon(row['apr_change_7d'])} {format_percentage(row['apr_change_7d'])}"
-            pred_score = row["prediction_score"]
-            pred_icon = "🟢" if pred_score > 75 else "🟡" if pred_score > 50 else "🔴"
-            pred_text = f"{pred_icon} {pred_score:.1f}/100"
-            pool_id = row["id"]
+        # Data Explorer Tab
+        with tab_explore:
+            st.header("Liquidity Pool Explorer")
             
-            # Add to table data
-            table_data.append({
-                "Pool Name": pool_name,
-                "DEX": dex_name,
-                "Category": category_text,
-                "TVL": liquidity_val,
-                "24h Volume": volume_val,
-                "APR": apr_val,
-                "24h Δ": apr_change_24h_val,
-                "7d Δ": apr_change_7d_val,
-                "Pred Score": pred_text,
-                "Pool ID": pool_id
-            })
-        
-        # Convert to a new DataFrame with formatted values
-        formatted_df = pd.DataFrame(table_data)
-        
-        # Use Streamlit's native table which handles formatting better
-        st.dataframe(
-            formatted_df,
-            use_container_width=True,
-            column_config={
-                "Pool ID": st.column_config.TextColumn(
-                    "Pool ID",
-                    width="medium",
-                    help="Unique identifier for the pool"
-                ),
-                "TVL": st.column_config.TextColumn(
-                    "TVL",
-                    width="small"
-                ),
-                "24h Volume": st.column_config.TextColumn(
-                    "24h Volume",
-                    width="small"
-                ),
-                "Pool Name": st.column_config.TextColumn(
-                    "Pool Name", 
-                    width="medium"
-                ),
-                "Pred Score": st.column_config.TextColumn(
-                    "Pred Score",
-                    width="small"
+            # Search and filter section
+            col_search, col_filter1, col_filter2, col_filter3 = st.columns([2, 1, 1, 1])
+            
+            with col_search:
+                search_term = st.text_input("Search by token symbol or pool name")
+            
+            with col_filter1:
+                dex_filter = st.selectbox("Filter by DEX", options=["All"] + sorted(df["dex"].unique().tolist()))
+            
+            with col_filter2:
+                category_filter = st.selectbox("Filter by Category", options=["All"] + sorted(df["category"].unique().tolist()))
+            
+            with col_filter3:
+                sort_by = st.selectbox(
+                    "Sort by", 
+                    options=["Prediction Score", "APR", "Liquidity", "Volume", "APR Change 24h", "TVL Change 24h"]
                 )
-            }
-        )
-    
-    # Advanced Filtering Tab
-    with tab_advanced:
-        st.header("Advanced Filtering System")
-        st.markdown("""
-        Apply sophisticated filters to find pools matching specific criteria. This system supports
-        complex multi-dimensional filtering across metrics and derived values.
-        """)
-        
-        if HAS_ADVANCED_FILTERING:
-            # Create an AdvancedFilteringSystem instance if not already in session state
-            if 'advanced_filter_system' not in st.session_state:
-                st.session_state.advanced_filter_system = AdvancedFilteringSystem(df)
-            
-            # Layout for the advanced filtering UI
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.subheader("Filter Configuration")
-                
-                # TVL (Liquidity) Filter
-                with st.expander("Liquidity (TVL) Filter", expanded=True):
-                    min_tvl = st.number_input("Minimum TVL (USD)", value=0.0, step=100000.0, format="%.2f")
-                    max_tvl = st.number_input("Maximum TVL (USD)", value=1000000000.0, step=1000000.0, format="%.2f")
-                    
-                    if st.button("Apply TVL Filter"):
-                        tvl_filter = AdvancedFilteringSystem.liquidity_filter(min_value=min_tvl, max_value=max_tvl)
-                        st.session_state.advanced_filter_system.add_filter(tvl_filter)
-                        st.success("✓ TVL filter applied")
-                
-                # APR Filter
-                with st.expander("APR Filter", expanded=True):
-                    min_apr = st.number_input("Minimum APR (%)", value=0.0, step=1.0, format="%.2f")
-                    max_apr = st.number_input("Maximum APR (%)", value=100.0, step=5.0, format="%.2f")
-                    
-                    if st.button("Apply APR Filter"):
-                        apr_filter = AdvancedFilteringSystem.apr_filter(min_value=min_apr, max_value=max_apr)
-                        st.session_state.advanced_filter_system.add_filter(apr_filter)
-                        st.success("✓ APR filter applied")
-                
-                # Volume Filter
-                with st.expander("Volume Filter"):
-                    min_volume = st.number_input("Minimum 24h Volume (USD)", value=0.0, step=10000.0, format="%.2f")
-                    max_volume = st.number_input("Maximum 24h Volume (USD)", value=100000000.0, step=100000.0, format="%.2f")
-                    
-                    if st.button("Apply Volume Filter"):
-                        volume_filter = AdvancedFilteringSystem.volume_filter(min_value=min_volume, max_value=max_volume)
-                        st.session_state.advanced_filter_system.add_filter(volume_filter)
-                        st.success("✓ Volume filter applied")
-                
-                # DEX Filter
-                with st.expander("DEX Filter"):
-                    selected_dexes = st.multiselect(
-                        "Select DEXes", 
-                        options=sorted(df["dex"].unique().tolist()),
-                        default=[]
-                    )
-                    
-                    if st.button("Apply DEX Filter") and selected_dexes:
-                        dex_filter = AdvancedFilteringSystem.dex_filter(selected_dexes)
-                        st.session_state.advanced_filter_system.add_filter(dex_filter)
-                        st.success(f"✓ DEX filter applied for {', '.join(selected_dexes)}")
-                
-                # Category Filter
-                with st.expander("Category Filter"):
-                    selected_categories = st.multiselect(
-                        "Select Categories", 
-                        options=sorted(df["category"].unique().tolist()),
-                        default=[]
-                    )
-                    
-                    if st.button("Apply Category Filter") and selected_categories:
-                        category_filter = AdvancedFilteringSystem.category_filter(selected_categories)
-                        st.session_state.advanced_filter_system.add_filter(category_filter)
-                        st.success(f"✓ Category filter applied for {', '.join(selected_categories)}")
-                
-                # Token Filter
-                with st.expander("Token Filter"):
-                    tokens = set()
-                    for _, row in df.iterrows():
-                        tokens.add(row["token1_symbol"])
-                        tokens.add(row["token2_symbol"])
-                    
-                    selected_tokens = st.multiselect(
-                        "Select Tokens", 
-                        options=sorted(list(tokens)),
-                        default=[]
-                    )
-                    
-                    if st.button("Apply Token Filter") and selected_tokens:
-                        token_filter = AdvancedFilteringSystem.token_filter(selected_tokens)
-                        st.session_state.advanced_filter_system.add_filter(token_filter)
-                        st.success(f"✓ Token filter applied for {', '.join(selected_tokens)}")
-            
-            with col2:
-                st.subheader("Filter Results")
-                
-                # Button to clear all filters
-                if st.button("Clear All Filters"):
-                    st.session_state.advanced_filter_system.reset_filters()
-                    st.success("✓ All filters cleared")
-                
-                # Apply all filters and show results
-                filtered_df = st.session_state.advanced_filter_system.apply_filters()
-                
-                # Show impact analysis
-                impact_analysis = st.session_state.advanced_filter_system.get_filter_impact_analysis()
-                if not impact_analysis.empty:
-                    st.write("Filter Impact Analysis:")
-                    st.dataframe(impact_analysis)
-                
-                # Show filtered data summary
-                st.metric("Pools Matching Filters", len(filtered_df))
-                
-                # Show top 10 results
-                st.write("Top Results (by Prediction Score):")
-                top_results = filtered_df.sort_values("prediction_score", ascending=False).head(10)
-                
-                # Display results in a table
-                for i, (_, row) in enumerate(top_results.iterrows()):
-                    with st.container():
-                        st.markdown(f"**{row['name']}** ({row['dex']})")
-                        cols = st.columns(4)
-                        
-                        with cols[0]:
-                            st.markdown(f"**TVL:** {format_currency(row['liquidity'])}")
-                        
-                        with cols[1]:
-                            st.markdown(f"**APR:** {format_percentage(row['apr'])}")
-                        
-                        with cols[2]:
-                            st.markdown(f"**24h Volume:** {format_currency(row['volume_24h'])}")
-                        
-                        with cols[3]:
-                            score_color = "green" if row['prediction_score'] > 75 else "orange" if row['prediction_score'] > 50 else "red"
-                            st.markdown(f"**Score:** <span style='color:{score_color};'>{row['prediction_score']:.1f}/100</span>", unsafe_allow_html=True)
-                    
-                    st.markdown("---")
-                
-                # Advanced analytics visualization
-                if not filtered_df.empty and len(filtered_df) > 1:
-                    st.subheader("Filtered Pools Analysis")
-                    
-                    # Create a scatter plot of APR vs TVL
-                    fig = px.scatter(
-                        filtered_df,
-                        x="liquidity",
-                        y="apr",
-                        color="category",
-                        size="volume_24h",
-                        hover_name="name",
-                        log_x=True,
-                        size_max=30,
-                        title="APR vs TVL by Pool Category"
-                    )
-                    
-                    # Update the layout
-                    fig.update_layout(
-                        xaxis_title="TVL (log scale)",
-                        yaxis_title="APR (%)",
-                        legend_title="Category",
-                        height=500
-                    )
-                    
-                    st.plotly_chart(fig, use_container_width=True)
-                    
-                    # Option to cluster the filtered pools
-                    if st.button("Cluster Similar Pools"):
-                        if len(filtered_df) >= 5:  # Need at least 5 pools for meaningful clustering
-                            clusters = st.session_state.advanced_filter_system.get_pool_clusters(
-                                n_clusters=min(5, len(filtered_df) // 2),
-                                metrics=["liquidity", "apr", "volume_24h", "prediction_score"]
-                            )
-                            
-                            if not clusters.empty:
-                                st.success("✓ Pools clustered successfully")
-                                
-                                # Show clusters
-                                st.write("Pool Clusters:")
-                                for cluster_id in sorted(clusters["cluster"].unique()):
-                                    cluster_pools = clusters[clusters["cluster"] == cluster_id]
-                                    
-                                    # Describe this cluster
-                                    avg_tvl = cluster_pools["liquidity"].mean()
-                                    avg_apr = cluster_pools["apr"].mean()
-                                    avg_pred = cluster_pools["prediction_score"].mean()
-                                    
-                                    st.markdown(f"**Cluster {cluster_id+1}** - {len(cluster_pools)} pools")
-                                    st.markdown(f"Avg TVL: {format_currency(avg_tvl)} | Avg APR: {format_percentage(avg_apr)} | Avg Score: {avg_pred:.1f}/100")
-                                    
-                                    # Show a few examples from this cluster
-                                    example_pools = cluster_pools.sort_values("prediction_score", ascending=False).head(3)
-                                    for _, pool in example_pools.iterrows():
-                                        st.markdown(f"- {pool['name']} ({pool['dex']})")
-                                    
-                                    st.markdown("---")
-                        else:
-                            st.warning("Need at least 5 pools for clustering")
-        else:
-            st.warning("""
-            Advanced filtering module not found. Please make sure that `advanced_filtering.py` 
-            is available in the same directory as this script.
-            """)
-            
-            # Show a simplified advanced filtering UI
-            st.subheader("Basic Advanced Filtering")
-            
-            # TVL range filter
-            col1, col2 = st.columns(2)
-            with col1:
-                min_tvl = st.number_input("Minimum TVL (USD)", value=0.0, step=100000.0, format="%.2f")
-            with col2:
-                max_tvl = st.number_input("Maximum TVL (USD)", value=1000000000.0, step=1000000.0, format="%.2f")
-            
-            # APR range filter
-            col1, col2 = st.columns(2)
-            with col1:
-                min_apr = st.number_input("Minimum APR (%)", value=0.0, step=1.0, format="%.2f")
-            with col2:
-                max_apr = st.number_input("Maximum APR (%)", value=100.0, step=5.0, format="%.2f")
-            
-            # DEX and category filters
-            col1, col2 = st.columns(2)
-            with col1:
-                dex_options = ["All"] + sorted(df["dex"].unique().tolist())
-                selected_dex = st.selectbox("Select DEX", options=dex_options)
-            with col2:
-                category_options = ["All"] + sorted(df["category"].unique().tolist())
-                selected_category = st.selectbox("Select Category", options=category_options)
-            
-            # Token filter
-            tokens = set()
-            for _, row in df.iterrows():
-                tokens.add(row["token1_symbol"])
-                tokens.add(row["token2_symbol"])
-            
-            selected_token = st.selectbox("Filter by Token", options=["All"] + sorted(list(tokens)))
             
             # Apply filters
             filtered_df = df.copy()
             
-            if min_tvl > 0:
-                filtered_df = filtered_df[filtered_df["liquidity"] >= min_tvl]
-            
-            if max_tvl < 1000000000:
-                filtered_df = filtered_df[filtered_df["liquidity"] <= max_tvl]
-            
-            if min_apr > 0:
-                filtered_df = filtered_df[filtered_df["apr"] >= min_apr]
-            
-            if max_apr < 100:
-                filtered_df = filtered_df[filtered_df["apr"] <= max_apr]
-            
-            if selected_dex != "All":
-                filtered_df = filtered_df[filtered_df["dex"] == selected_dex]
-            
-            if selected_category != "All":
-                filtered_df = filtered_df[filtered_df["category"] == selected_category]
-            
-            if selected_token != "All":
+            if search_term:
                 filtered_df = filtered_df[
-                    (filtered_df["token1_symbol"] == selected_token) | 
-                    (filtered_df["token2_symbol"] == selected_token)
+                    filtered_df["token1_symbol"].str.contains(search_term, case=False) | 
+                    filtered_df["token2_symbol"].str.contains(search_term, case=False) |
+                    filtered_df["name"].str.contains(search_term, case=False)
                 ]
             
-            # Show results
-            st.metric("Pools Matching Filters", len(filtered_df))
+            if dex_filter != "All":
+                filtered_df = filtered_df[filtered_df["dex"] == dex_filter]
             
-            # Display results
-            if not filtered_df.empty:
-                st.dataframe(
-                    filtered_df[["name", "dex", "category", "liquidity", "volume_24h", "apr", "prediction_score"]],
-                    use_container_width=True
+            if category_filter != "All":
+                filtered_df = filtered_df[filtered_df["category"] == category_filter]
+            
+            # Apply sorting
+            sort_column_map = {
+                "Prediction Score": "prediction_score",
+                "APR": "apr",
+                "Liquidity": "liquidity",
+                "Volume": "volume_24h",
+                "APR Change 24h": "apr_change_24h",
+                "TVL Change 24h": "tvl_change_24h"
+            }
+            
+            sort_column = sort_column_map.get(sort_by, "prediction_score")
+            filtered_df = filtered_df.sort_values(sort_column, ascending=False)
+            
+            # Show summary statistics
+            st.subheader("Summary Statistics")
+            metrics_col1, metrics_col2, metrics_col3, metrics_col4 = st.columns(4)
+            
+            with metrics_col1:
+                st.metric(
+                    "Total Pools", 
+                    f"{len(filtered_df):,}",
+                    f"{len(filtered_df) - len(df):,}" if len(filtered_df) != len(df) else None
                 )
+            
+            with metrics_col2:
+                total_tvl = filtered_df["liquidity"].sum()
+                st.metric(
+                    "Total Liquidity", 
+                    format_currency(total_tvl)
+                )
+            
+            with metrics_col3:
+                avg_apr = filtered_df["apr"].mean()
+                st.metric(
+                    "Average APR", 
+                    format_percentage(avg_apr)
+                )
+            
+            with metrics_col4:
+                avg_prediction = filtered_df["prediction_score"].mean()
+                st.metric(
+                    "Avg Prediction Score", 
+                    f"{avg_prediction:.1f}/100"
+                )
+            
+            # Pool data table
+            st.subheader("Pool Data")
+            
+            # Show only the most relevant columns
+            display_columns = [
+                "name", "dex", "category", "liquidity", "volume_24h", 
+                "apr", "apr_change_24h", "apr_change_7d", "prediction_score", "id"
+            ]
+            
+            # Create a proper Streamlit table instead of HTML
+            # This avoids formatting issues with HTML badges
+            
+            # First create a clean representation of the data
+            table_data = []
+            
+            # Allow showing more pools by default - previously the display was limited
+            # Default to showing all pools up to 50, then allow pagination
+            max_display = min(len(filtered_df), 50)
+            
+            # Add pagination control
+            start_idx = st.slider("Page", min_value=1, max_value=max(1, len(filtered_df) // max_display + 1), value=1) - 1
+            start_idx = start_idx * max_display
+            end_idx = min(start_idx + max_display, len(filtered_df))
+            
+            st.write(f"Showing pools {start_idx+1}-{end_idx} of {len(filtered_df)}")
+            
+            for _, row in filtered_df.iloc[start_idx:end_idx].iterrows():
+                # Format all values correctly
+                category_text = row["category"]  # Just use plain text instead of HTML badge
+                pool_name = row["name"]
+                dex_name = row["dex"]
+                liquidity_val = format_currency(row["liquidity"])
+                volume_val = format_currency(row["volume_24h"])
+                apr_val = format_percentage(row["apr"])
+                apr_change_24h_val = f"{get_trend_icon(row['apr_change_24h'])} {format_percentage(row['apr_change_24h'])}"
+                apr_change_7d_val = f"{get_trend_icon(row['apr_change_7d'])} {format_percentage(row['apr_change_7d'])}"
+                pred_score = row["prediction_score"]
+                pred_icon = "🟢" if pred_score > 75 else "🟡" if pred_score > 50 else "🔴"
+                pred_text = f"{pred_icon} {pred_score:.1f}"
+                
+                # Add to table data
+                table_data.append({
+                    "Name": pool_name,
+                    "DEX": dex_name,
+                    "Category": category_text,
+                    "Liquidity": liquidity_val,
+                    "Volume (24h)": volume_val,
+                    "APR": apr_val,
+                    "APR Δ (24h)": apr_change_24h_val,
+                    "APR Δ (7d)": apr_change_7d_val,
+                    "Prediction": pred_text,
+                    "ID": row["id"]
+                })
+            
+            # Show as dataframe
+            table_df = pd.DataFrame(table_data)
+            st.dataframe(table_df, use_container_width=True)
     
-    # Predictions Tab
-    with tab_predict:
-        st.header("Pool Performance Predictions")
-        st.markdown("""
-        Our machine learning algorithms analyze historical pool performance and various on-chain metrics
-        to predict which pools are likely to perform well in the future.
-        """)
-        
-        # Top predicted pools
-        st.subheader("Top Predicted Pools")
-        
-        # Get top 20 pools by prediction score (increased from 10)
-        top_predicted = df.sort_values("prediction_score", ascending=False).head(20)
-        
-        # Display in a clean table
-        for i, (_, row) in enumerate(top_predicted.iterrows()):
-            with st.container():
-                col1, col2, col3, col4, col5 = st.columns([2, 1, 1.5, 1, 1.5])
+        # Advanced Filtering Tab
+        with tab_advanced:
+            st.header("Advanced Pool Filtering")
+            st.write("Apply more sophisticated filters to find the perfect liquidity pools")
+            
+            # Start with a copy of the unfiltered pool dataframe
+            # We reset for each tab to ensure independent filtering
+            advanced_df = df.copy()
+            
+            # Check if we have advanced filtering available
+            if HAS_ADVANCED_FILTERING:
+                # Create an instance of the advanced filtering system
+                filter_system = AdvancedFilteringSystem(advanced_df)
                 
-                with col1:
-                    st.markdown(f"**{row['name']}**")
-                    st.markdown(f"*{row['dex']}* • {get_category_badge(row['category'])}", unsafe_allow_html=True)
+                # Left column for filters, right column for results
+                filter_col, results_col = st.columns([1, 2])
                 
-                with col2:
-                    st.markdown("**TVL**")
-                    st.markdown(format_currency(row['liquidity']))
+                with filter_col:
+                    st.subheader("Filter Controls")
+                    
+                    # Liquidity Filter
+                    with st.expander("Liquidity Filter", expanded=True):
+                        min_liquidity = st.slider(
+                            "Minimum Liquidity ($)", 
+                            min_value=0.0, 
+                            max_value=float(advanced_df["liquidity"].max()),
+                            value=0.0,
+                            format="$%.2f"
+                        )
+                        
+                        max_liquidity = st.slider(
+                            "Maximum Liquidity ($)", 
+                            min_value=0.0, 
+                            max_value=float(advanced_df["liquidity"].max()),
+                            value=float(advanced_df["liquidity"].max()),
+                            format="$%.2f"
+                        )
+                        
+                        if st.button("Apply Liquidity Filter"):
+                            filter_system.add_filter(
+                                AdvancedFilteringSystem.liquidity_filter(
+                                    min_value=min_liquidity, 
+                                    max_value=max_liquidity
+                                )
+                            )
+                    
+                    # APR Filter
+                    with st.expander("APR Filter", expanded=True):
+                        min_apr = st.slider(
+                            "Minimum APR (%)", 
+                            min_value=0.0, 
+                            max_value=100.0,
+                            value=0.0,
+                            format="%.2f%%"
+                        )
+                        
+                        max_apr = st.slider(
+                            "Maximum APR (%)", 
+                            min_value=0.0, 
+                            max_value=100.0,
+                            value=50.0,
+                            format="%.2f%%"
+                        )
+                        
+                        if st.button("Apply APR Filter"):
+                            filter_system.add_filter(
+                                AdvancedFilteringSystem.apr_filter(
+                                    min_value=min_apr, 
+                                    max_value=max_apr
+                                )
+                            )
+                    
+                    # DEX Filter
+                    with st.expander("DEX Filter"):
+                        selected_dexes = st.multiselect(
+                            "Select DEXes",
+                            options=advanced_df["dex"].unique().tolist(),
+                            default=[]
+                        )
+                        
+                        if st.button("Apply DEX Filter") and selected_dexes:
+                            filter_system.add_filter(
+                                AdvancedFilteringSystem.dex_filter(selected_dexes)
+                            )
+                    
+                    # Token Filter
+                    with st.expander("Token Filter"):
+                        # Get unique tokens
+                        all_tokens = set()
+                        for _, row in advanced_df.iterrows():
+                            all_tokens.add(row["token1_symbol"])
+                            all_tokens.add(row["token2_symbol"])
+                        
+                        selected_tokens = st.multiselect(
+                            "Select Tokens",
+                            options=sorted(list(all_tokens)),
+                            default=[]
+                        )
+                        
+                        if st.button("Apply Token Filter") and selected_tokens:
+                            filter_system.add_filter(
+                                AdvancedFilteringSystem.token_filter(selected_tokens)
+                            )
+                    
+                    # Trend Filter
+                    with st.expander("Trend Filter"):
+                        trend_field = st.selectbox(
+                            "Select Metric",
+                            options=["apr", "liquidity"],
+                            format_func=lambda x: "APR" if x == "apr" else "Liquidity"
+                        )
+                        
+                        trend_period = st.selectbox(
+                            "Time Period",
+                            options=[1, 7, 30],
+                            format_func=lambda x: f"{x} day{'s' if x > 1 else ''}"
+                        )
+                        
+                        trend_type = st.selectbox(
+                            "Trend Direction",
+                            options=["increasing", "decreasing", "stable"]
+                        )
+                        
+                        trend_threshold = st.slider(
+                            "Threshold (%)", 
+                            min_value=0.0, 
+                            max_value=20.0,
+                            value=1.0,
+                            format="%.1f%%"
+                        )
+                        
+                        if st.button("Apply Trend Filter"):
+                            filter_system.add_filter(
+                                AdvancedFilteringSystem.trend_filter(
+                                    field=trend_field,
+                                    days=trend_period,
+                                    trend_type=trend_type,
+                                    threshold=trend_threshold
+                                )
+                            )
+                    
+                    # Reset button
+                    if st.button("Reset All Filters"):
+                        filter_system.reset_filters()
                 
-                with col3:
-                    st.markdown("**APR**")
-                    st.markdown(f"{format_percentage(row['apr'])} {get_trend_icon(row['apr_change_24h'])}")
-                
-                with col4:
-                    st.markdown("**Score**")
-                    score_color = "green" if row['prediction_score'] > 75 else "orange" if row['prediction_score'] > 50 else "red"
-                    st.markdown(f"<span style='color:{score_color};font-weight:bold;'>{row['prediction_score']:.1f}/100</span>", unsafe_allow_html=True)
-                
-                with col5:
-                    st.markdown("**Pool ID**")
-                    st.code(row['id'], language=None)
-            
-            st.markdown("---")
-        
-        # Chart of prediction scores by category
-        st.subheader("Prediction Scores by Category")
-        
-        # Group by category and calculate average prediction score
-        category_scores = df.groupby("category")["prediction_score"].mean().reset_index()
-        category_scores = category_scores.sort_values("prediction_score", ascending=False)
-        
-        # Create bar chart
-        fig = px.bar(
-            category_scores,
-            x="category",
-            y="prediction_score",
-            title="Average Prediction Score by Category",
-            labels={"prediction_score": "Avg Prediction Score", "category": "Category"},
-            color="prediction_score",
-            color_continuous_scale="RdYlGn"
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # Risk Assessment Tab
-    with tab_risk:
-        st.header("Risk Assessment")
-        st.markdown("""
-        This tab provides a risk assessment for various liquidity pools based on
-        volatility, impermanent loss risk, smart contract risk, and other factors.
-        """)
-        
-        # Risk metrics
-        risk_col1, risk_col2 = st.columns(2)
-        
-        with risk_col1:
-            st.subheader("Highest Volatility Pools")
-            
-            # Get pools with highest APR changes (proxy for volatility) - increased to 10
-            volatile_pools = df.iloc[df['apr_change_24h'].abs().argsort()[::-1]].head(10)
-            
-            for _, row in volatile_pools.iterrows():
-                st.markdown(f"**{row['name']}** ({row['dex']})")
-                st.markdown(f"APR Change 24h: {format_percentage(row['apr_change_24h'])} {get_trend_icon(row['apr_change_24h'])}")
-                st.markdown("---")
-        
-        with risk_col2:
-            st.subheader("Lowest Liquidity Pools")
-            
-            # Get pools with lowest liquidity - increased to 10
-            low_liquidity = df.sort_values("liquidity").head(10)
-            
-            for _, row in low_liquidity.iterrows():
-                st.markdown(f"**{row['name']}** ({row['dex']})")
-                st.markdown(f"TVL: {format_currency(row['liquidity'])}")
-                st.markdown("---")
-        
-        # Risk scatter plot
-        st.subheader("Risk vs. Reward Analysis")
-        
-        # Create a scatter plot of APR vs Volatility
-        fig = px.scatter(
-            df,
-            x="apr_change_24h",
-            y="apr",
-            color="category",
-            size="liquidity",
-            hover_name="name",
-            log_x=False,
-            size_max=30,
-            title="APR vs Volatility by Pool Category"
-        )
-        
-        # Update the layout
-        fig.update_layout(
-            xaxis_title="24h APR Change (%)",
-            yaxis_title="Current APR (%)",
-            legend_title="Category",
-            height=600
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # NLP Reports Tab
-    with tab_nlp:
-        st.header("NLP-Generated Pool Reports")
-        st.markdown("""
-        Our AI analyzes each pool's metrics and performance to generate human-readable reports.
-        These reports help you understand the pool's performance and potential investment value.
-        """)
-        
-        # Pool selection
-        selected_pool = st.selectbox(
-            "Select a pool for detailed report",
-            options=df["name"].tolist(),
-            index=0
-        )
-        
-        pool_data = df[df["name"] == selected_pool].iloc[0]
-        
-        # Display pool data
-        col1, col2 = st.columns([1, 2])
-        
-        with col1:
-            st.subheader("Pool Metrics")
-            st.metric("TVL", format_currency(pool_data["liquidity"]))
-            st.metric("APR", format_percentage(pool_data["apr"]))
-            st.metric("24h Volume", format_currency(pool_data["volume_24h"]))
-            st.metric("Fee", f"{pool_data['fee']*100:.3f}%")
-            st.metric("Prediction Score", f"{pool_data['prediction_score']:.1f}/100")
-        
-        with col2:
-            st.subheader("AI Analysis Report")
-            
-            # Generate a formatted pool report based on the data
-            dex_name = pool_data["dex"]
-            pool_name = pool_data["name"]
-            liquidity = pool_data["liquidity"]
-            apr = pool_data["apr"]
-            volume = pool_data["volume_24h"]
-            apr_trend_24h = pool_data["apr_change_24h"]
-            liquidity_trend_7d = pool_data["tvl_change_7d"]
-            prediction_score = pool_data["prediction_score"]
-            
-            # Determine sentiment based on metrics
-            sentiment = "very positive" if prediction_score > 80 else "positive" if prediction_score > 60 else "neutral" if prediction_score > 40 else "negative" if prediction_score > 20 else "very negative"
-            
-            apr_sentiment = "excellent" if apr > 30 else "very good" if apr > 20 else "good" if apr > 10 else "moderate" if apr > 5 else "low"
-            
-            liquidity_size = "very high" if liquidity > 20_000_000 else "high" if liquidity > 5_000_000 else "moderate" if liquidity > 1_000_000 else "low" if liquidity > 100_000 else "very low"
-            
-            volume_quality = "excellent" if volume/liquidity > 0.2 else "good" if volume/liquidity > 0.1 else "moderate" if volume/liquidity > 0.05 else "low" if volume/liquidity > 0.01 else "very low"
-            
-            # Trend analysis
-            apr_trend_text = "increasing rapidly" if apr_trend_24h > 5 else "increasing" if apr_trend_24h > 1 else "stable" if abs(apr_trend_24h) <= 1 else "decreasing" if apr_trend_24h > -5 else "decreasing rapidly"
-            
-            liquidity_trend_text = "growing strongly" if liquidity_trend_7d > 10 else "growing" if liquidity_trend_7d > 2 else "stable" if abs(liquidity_trend_7d) <= 2 else "declining" if liquidity_trend_7d > -10 else "declining rapidly"
-            
-            # Investment recommendation
-            if prediction_score > 75:
-                recommendation = "strong opportunity for investment"
-            elif prediction_score > 60:
-                recommendation = "potential opportunity worth considering"
-            elif prediction_score > 40:
-                recommendation = "moderate opportunity with reasonable risk/reward"
-            elif prediction_score > 25:
-                recommendation = "high-risk opportunity, proceed with caution"
+                with results_col:
+                    st.subheader("Filtered Results")
+                    
+                    # Apply all filters
+                    filtered_results = filter_system.apply_filters()
+                    
+                    # Display results count
+                    st.metric(
+                        "Matching Pools", 
+                        f"{len(filtered_results):,}",
+                        f"{len(filtered_results) - len(advanced_df):,}"
+                    )
+                    
+                    # Show the filter impact analysis
+                    impact_df = filter_system.get_filter_impact_analysis()
+                    if not impact_df.empty:
+                        st.subheader("Filter Impact Analysis")
+                        st.dataframe(impact_df)
+                    
+                    # Display results
+                    if not filtered_results.empty:
+                        # Prepare data for display
+                        display_df = filtered_results.copy()
+                        
+                        # Format columns for display
+                        display_df["liquidity"] = display_df["liquidity"].apply(format_currency)
+                        display_df["volume_24h"] = display_df["volume_24h"].apply(format_currency)
+                        display_df["apr"] = display_df["apr"].apply(format_percentage)
+                        
+                        # Show table
+                        st.dataframe(display_df[["name", "dex", "category", "token1_symbol", 
+                                                "token2_symbol", "liquidity", "volume_24h", "apr"]])
+                        
+                        # Visualization
+                        st.subheader("Visualization")
+                        
+                        # Plot options
+                        plot_type = st.selectbox(
+                            "Plot Type",
+                            options=["Scatter", "Bar", "Bubble"],
+                            index=0
+                        )
+                        
+                        if plot_type == "Scatter":
+                            x_axis = st.selectbox("X-Axis", ["liquidity", "volume_24h", "apr", "apr_change_24h"], 
+                                                format_func=lambda x: {
+                                                    "liquidity": "Liquidity", 
+                                                    "volume_24h": "Volume (24h)", 
+                                                    "apr": "APR", 
+                                                    "apr_change_24h": "APR Change (24h)"
+                                                }.get(x, x))
+                            
+                            y_axis = st.selectbox("Y-Axis", ["apr", "liquidity", "volume_24h", "prediction_score"], 
+                                                format_func=lambda x: {
+                                                    "apr": "APR", 
+                                                    "liquidity": "Liquidity", 
+                                                    "volume_24h": "Volume (24h)", 
+                                                    "prediction_score": "Prediction Score"
+                                                }.get(x, x))
+                            
+                            color_by = st.selectbox("Color By", ["dex", "category"], 
+                                                format_func=lambda x: "DEX" if x == "dex" else "Category")
+                            
+                            # Create the scatter plot
+                            fig = px.scatter(
+                                filtered_results,
+                                x=x_axis,
+                                y=y_axis,
+                                color=color_by,
+                                hover_name="name",
+                                size="prediction_score" if y_axis != "prediction_score" else None,
+                                title=f"{y_axis.replace('_', ' ').title()} vs {x_axis.replace('_', ' ').title()}",
+                                labels={
+                                    "liquidity": "Liquidity ($)",
+                                    "volume_24h": "Volume 24h ($)",
+                                    "apr": "APR (%)",
+                                    "apr_change_24h": "APR Change 24h (%)",
+                                    "prediction_score": "Prediction Score"
+                                }
+                            )
+                            st.plotly_chart(fig, use_container_width=True)
+                            
+                        elif plot_type == "Bar":
+                            # Group by options
+                            group_by = st.selectbox("Group By", ["dex", "category"], 
+                                                format_func=lambda x: "DEX" if x == "dex" else "Category")
+                            
+                            metric = st.selectbox("Metric", ["count", "liquidity", "volume_24h", "apr"], 
+                                                format_func=lambda x: {
+                                                    "count": "Count", 
+                                                    "liquidity": "Total Liquidity", 
+                                                    "volume_24h": "Total Volume", 
+                                                    "apr": "Average APR"
+                                                }.get(x, x))
+                            
+                            if metric == "count":
+                                # Count of pools by group
+                                group_counts = filtered_results[group_by].value_counts().reset_index()
+                                group_counts.columns = [group_by, 'count']
+                                
+                                fig = px.bar(
+                                    group_counts,
+                                    x=group_by,
+                                    y='count',
+                                    color=group_by,
+                                    title=f"Pool Count by {group_by.title()}",
+                                    labels={group_by: group_by.title(), 'count': 'Number of Pools'}
+                                )
+                                
+                            elif metric == "apr":
+                                # Average APR by group
+                                group_stats = filtered_results.groupby(group_by)['apr'].mean().reset_index()
+                                
+                                fig = px.bar(
+                                    group_stats,
+                                    x=group_by,
+                                    y='apr',
+                                    color=group_by,
+                                    title=f"Average APR by {group_by.title()}",
+                                    labels={group_by: group_by.title(), 'apr': 'Average APR (%)'}
+                                )
+                                
+                            else:
+                                # Sum of liquidity or volume by group
+                                group_stats = filtered_results.groupby(group_by)[metric].sum().reset_index()
+                                
+                                fig = px.bar(
+                                    group_stats,
+                                    x=group_by,
+                                    y=metric,
+                                    color=group_by,
+                                    title=f"Total {metric.replace('_', ' ').title()} by {group_by.title()}",
+                                    labels={
+                                        group_by: group_by.title(), 
+                                        metric: f"Total {metric.replace('_', ' ').title()} ($)"
+                                    }
+                                )
+                            
+                            st.plotly_chart(fig, use_container_width=True)
+                            
+                        elif plot_type == "Bubble":
+                            fig = px.scatter(
+                                filtered_results,
+                                x="liquidity",
+                                y="apr",
+                                size="volume_24h",
+                                color="dex",
+                                hover_name="name",
+                                text="name",
+                                title="Liquidity Pool Bubble Chart",
+                                labels={
+                                    "liquidity": "Liquidity ($)",
+                                    "apr": "APR (%)",
+                                    "volume_24h": "Volume 24h ($)"
+                                }
+                            )
+                            st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.info("No pools match the current filters")
             else:
-                recommendation = "not recommended for investment at this time"
+                st.warning("Advanced filtering is not available - module could not be loaded")
+    
+        # Predictions Tab
+        with tab_predict:
+            st.header("Liquidity Pool Predictions")
+            st.write("Machine learning-based predictions for future pool performance")
             
-            # Generate the report
-            report = f"""
-            ## {pool_name} Pool Analysis
+            # Use a copy of the DataFrame to not interfere with other tabs
+            prediction_df = df.copy()
             
-            The {pool_name} pool on {dex_name} currently shows {sentiment} indicators with a prediction score of {prediction_score:.1f}/100.
+            # Show top predicted pools
+            st.subheader("Top Predicted Pools")
             
-            ### Liquidity and Volume
-            The pool has {liquidity_size} liquidity at ${liquidity:,.2f}, which has been {liquidity_trend_text} over the past 7 days ({liquidity_trend_7d:.2f}%).
-            Trading volume is {volume_quality} at ${volume:,.2f} over the past 24 hours, representing a volume/TVL ratio of {volume/liquidity:.2%}.
+            # Get the top 10 pools by prediction score
+            top_pools = prediction_df.sort_values("prediction_score", ascending=False).head(10)
             
-            ### Yield Analysis
-            The current APR is {apr_sentiment} at {apr:.2f}% and has been {apr_trend_text} over the past 24 hours ({apr_trend_24h:.2f}%).
+            # Create a bar chart of the top pools
+            fig = px.bar(
+                top_pools,
+                x="name",
+                y="prediction_score",
+                color="dex",
+                hover_data=["liquidity", "apr", "volume_24h"],
+                title="Top 10 Pools by Prediction Score",
+                labels={
+                    "name": "Pool Name",
+                    "prediction_score": "Prediction Score",
+                    "dex": "DEX"
+                }
+            )
+            st.plotly_chart(fig, use_container_width=True)
             
-            ### Investment Outlook
-            Based on comprehensive analysis of on-chain metrics, market conditions, and historical performance, this pool presents a {recommendation}.
+            # Prediction factors
+            st.subheader("Prediction Factors")
+            st.write("""
+            Our prediction model takes into account various factors:
             
-            ### Pool ID Reference
-            ```
-            {pool_data['id']}
-            ```
-            """
+            1. **Historical APR Trends**: How the APR has changed over time
+            2. **Liquidity Stability**: Stability of the pool's total liquidity
+            3. **Volume Trends**: Changes in trading volume
+            4. **Token Category**: Different categories have different potential
+            5. **Market Correlation**: Correlation with broader market trends
+            """)
             
-            st.markdown(report)
-        
-        # Display historical performance chart
-        st.subheader("Simulated Historical Performance")
-        
-        # Create simulated historical data for demonstration
-        days = 30
-        # Use safer methods to get values
-        tvl_change_30d = pool_data.get("tvl_change_30d", 0)
-        apr_change_30d = pool_data.get("apr_change_30d", 0)
-        
-        # Calculate base values
-        base_liquidity = pool_data["liquidity"] / (1 + (tvl_change_30d/100))
-        base_apr = pool_data["apr"] / (1 + (apr_change_30d/100))
-        
-        dates = [(datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(days, 0, -1)]
-        
-        # Generate random daily fluctuations within the overall trend
-        liquidity_trend = tvl_change_30d / 30  # daily trend
-        apr_trend = apr_change_30d / 30  # daily trend
-        
-        # Create historical data with some randomness
-        historical_data = []
-        
-        for i in range(days):
-            daily_liquidity_change = liquidity_trend + random.uniform(-0.5, 0.5)
-            daily_apr_change = apr_trend + random.uniform(-0.2, 0.2)
+            # APR projection
+            st.subheader("APR Projections")
             
-            factor_liquidity = 1 + (daily_liquidity_change / 100)
-            factor_apr = 1 + (daily_apr_change / 100)
+            # Select a pool for detailed projection
+            pool_options = prediction_df["name"].tolist()
+            selected_pool = st.selectbox("Select Pool for Projection", pool_options)
             
-            if i == 0:
-                liquidity = base_liquidity
-                apr = base_apr
-            else:
-                liquidity = historical_data[i-1]["liquidity"] * factor_liquidity
-                apr = historical_data[i-1]["apr"] * factor_apr
+            # Get the selected pool data
+            pool_data = prediction_df[prediction_df["name"] == selected_pool].iloc[0]
             
-            historical_data.append({
-                "date": dates[i],
-                "liquidity": liquidity,
-                "apr": apr
+            # Generate some simple projections (in a real app, this would use the ML model)
+            current_apr = pool_data["apr"]
+            apr_change_7d = pool_data["apr_change_7d"]
+            
+            # Simple projection for demo purposes
+            projection_days = 30
+            daily_change = apr_change_7d / 7  # Convert weekly to daily
+            
+            # Generate projection data
+            days = list(range(projection_days + 1))
+            projected_apr = [current_apr + daily_change * i for i in days]
+            
+            # Add some randomness to make it look more realistic
+            for i in range(1, len(projected_apr)):
+                projected_apr[i] += random.uniform(-0.2, 0.2)
+            
+            # Create a projection dataframe
+            projection_df = pd.DataFrame({
+                "Day": days,
+                "APR": projected_apr
             })
+            
+            # Create APR projection chart
+            fig = px.line(
+                projection_df,
+                x="Day",
+                y="APR",
+                title=f"30-Day APR Projection for {selected_pool}",
+                labels={"Day": "Days from Now", "APR": "Projected APR (%)"}
+            )
+            
+            # Add current APR marker
+            fig.add_trace(
+                go.Scatter(
+                    x=[0],
+                    y=[current_apr],
+                    mode="markers",
+                    marker=dict(size=10, color="red"),
+                    name="Current APR"
+                )
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Prediction confidence
+            confidence = pool_data["prediction_score"] / 100
+            st.metric("Prediction Confidence", f"{confidence:.2%}")
+            
+            # Disclaimer
+            st.warning("""
+            **Disclaimer**: These predictions are for informational purposes only. 
+            Actual pool performance may vary significantly. Past performance is not 
+            indicative of future results. Always do your own research before investing.
+            """)
+    
+        # Risk Assessment Tab
+        with tab_risk:
+            st.header("Liquidity Pool Risk Assessment")
+            st.write("Analyze the risk factors for liquidity pools")
+            
+            # Use a copy of the DataFrame to not interfere with other tabs
+            risk_df = df.copy()
+            
+            # Calculate risk scores (in a real app, this would be more sophisticated)
+            # Here we'll use a simple formula based on APR, liquidity, and volatility
+            
+            # Higher APR usually indicates higher risk
+            apr_risk = risk_df["apr"] / 100  # Scale to 0-1 range assuming APR < 100%
+            
+            # Lower liquidity usually means higher risk
+            max_liquidity = risk_df["liquidity"].max()
+            liquidity_risk = 1 - (risk_df["liquidity"] / max_liquidity)
+            
+            # Higher volatility (using APR changes as a proxy) means higher risk
+            volatility_risk = abs(risk_df["apr_change_24h"]) / 10  # Scale to 0-1 assuming changes < 10%
+            
+            # Combine into an overall risk score (0-100)
+            risk_df["risk_score"] = ((apr_risk * 0.4) + (liquidity_risk * 0.4) + (volatility_risk * 0.2)) * 100
+            
+            # Categorize risk
+            risk_df["risk_category"] = pd.cut(
+                risk_df["risk_score"],
+                bins=[0, 25, 50, 75, 100],
+                labels=["Low", "Medium", "High", "Very High"]
+            )
+            
+            # Show risk distribution
+            st.subheader("Risk Distribution")
+            
+            # Create a histogram of risk scores
+            fig = px.histogram(
+                risk_df,
+                x="risk_score",
+                color="risk_category",
+                title="Distribution of Risk Scores",
+                labels={
+                    "risk_score": "Risk Score (0-100)",
+                    "count": "Number of Pools",
+                    "risk_category": "Risk Category"
+                },
+                category_orders={"risk_category": ["Low", "Medium", "High", "Very High"]},
+                color_discrete_map={
+                    "Low": "green",
+                    "Medium": "yellow",
+                    "High": "orange",
+                    "Very High": "red"
+                }
+            )
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Risk by DEX and category
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Average risk by DEX
+                dex_risk = risk_df.groupby("dex")["risk_score"].mean().reset_index()
+                dex_risk = dex_risk.sort_values("risk_score", ascending=False)
+                
+                fig = px.bar(
+                    dex_risk,
+                    x="dex",
+                    y="risk_score",
+                    title="Average Risk by DEX",
+                    labels={
+                        "dex": "DEX",
+                        "risk_score": "Avg. Risk Score"
+                    }
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            
+            with col2:
+                # Average risk by category
+                category_risk = risk_df.groupby("category")["risk_score"].mean().reset_index()
+                category_risk = category_risk.sort_values("risk_score", ascending=False)
+                
+                fig = px.bar(
+                    category_risk,
+                    x="category",
+                    y="risk_score",
+                    title="Average Risk by Category",
+                    labels={
+                        "category": "Category",
+                        "risk_score": "Avg. Risk Score"
+                    }
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            
+            # Risk vs. Reward
+            st.subheader("Risk vs. Reward Analysis")
+            
+            fig = px.scatter(
+                risk_df,
+                x="risk_score",
+                y="apr",
+                color="dex",
+                size="liquidity",
+                hover_name="name",
+                title="Risk vs. Reward",
+                labels={
+                    "risk_score": "Risk Score",
+                    "apr": "APR (%)",
+                    "dex": "DEX",
+                    "liquidity": "Liquidity"
+                }
+            )
+            
+            # Add a trend line
+            fig.add_trace(
+                go.Scatter(
+                    x=[0, 100],
+                    y=[0, risk_df["apr"].max()],
+                    mode="lines",
+                    line=dict(dash="dash", color="gray"),
+                    name="Risk-Reward Line"
+                )
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Individual pool risk assessment
+            st.subheader("Individual Pool Risk Assessment")
+            
+            # Select a pool
+            pool_options = risk_df["name"].tolist()
+            selected_pool = st.selectbox("Select Pool", pool_options, key="risk_pool_select")
+            
+            # Get the selected pool data
+            pool_risk_data = risk_df[risk_df["name"] == selected_pool].iloc[0]
+            
+            # Display pool risk metrics
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                risk_score = pool_risk_data["risk_score"]
+                risk_color = "red" if risk_score > 75 else "orange" if risk_score > 50 else "yellow" if risk_score > 25 else "green"
+                st.markdown(f"<h1 style='text-align: center; color: {risk_color};'>{risk_score:.1f}</h1>", unsafe_allow_html=True)
+                st.markdown("<p style='text-align: center;'>Risk Score</p>", unsafe_allow_html=True)
+            
+            with col2:
+                st.metric("APR", format_percentage(pool_risk_data["apr"]))
+            
+            with col3:
+                st.metric("Liquidity", format_currency(pool_risk_data["liquidity"]))
+            
+            # Risk factors
+            st.subheader("Risk Factors")
+            
+            # Create radar chart of risk factors
+            risk_factors = {
+                "APR Risk": apr_risk[risk_df["name"] == selected_pool].iloc[0] * 100,
+                "Liquidity Risk": liquidity_risk[risk_df["name"] == selected_pool].iloc[0] * 100,
+                "Volatility Risk": volatility_risk[risk_df["name"] == selected_pool].iloc[0] * 100,
+                "Token Risk": random.uniform(20, 80),  # In a real app, this would be calculated
+                "Protocol Risk": random.uniform(20, 80)  # In a real app, this would be calculated
+            }
+            
+            # Create radar chart data
+            categories = list(risk_factors.keys())
+            values = list(risk_factors.values())
+            values.append(values[0])  # Close the loop
+            categories.append(categories[0])  # Close the loop
+            
+            fig = go.Figure()
+            
+            fig.add_trace(go.Scatterpolar(
+                r=values,
+                theta=categories,
+                fill='toself',
+                name='Risk Factors'
+            ))
+            
+            fig.update_layout(
+                polar=dict(
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, 100]
+                    )
+                ),
+                showlegend=False,
+                title="Risk Factor Breakdown"
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Recommendations
+            st.subheader("Risk Mitigation Recommendations")
+            
+            if risk_score > 75:
+                st.error("""
+                **High Risk Pool**: This pool shows signs of high risk. Consider:
+                - Limiting exposure to a small percentage of your portfolio
+                - Setting tight stop-loss orders
+                - Monitoring more frequently
+                - Considering lower-risk alternatives
+                """)
+            elif risk_score > 50:
+                st.warning("""
+                **Medium-High Risk Pool**: This pool has moderate risk levels. Consider:
+                - Diversifying across multiple pools
+                - Regular monitoring of performance
+                - Having an exit strategy in place
+                """)
+            elif risk_score > 25:
+                st.info("""
+                **Medium-Low Risk Pool**: This pool has relatively stable metrics. Consider:
+                - Standard diversification practices
+                - Regular but less frequent monitoring
+                - Middle-term investment horizon
+                """)
+            else:
+                st.success("""
+                **Low Risk Pool**: This pool shows lower risk indicators. Consider:
+                - Suitable for larger allocation percentages
+                - Good candidate for longer-term holdings
+                - Still maintain standard monitoring practices
+                """)
+    
+        # NLP Reports Tab
+        with tab_nlp:
+            st.header("Natural Language Analytics Reports")
+            st.write("AI-generated insights about liquidity pool trends and opportunities")
+            
+            # Select pool for detailed analysis
+            st.subheader("Pool-Specific Analysis")
+            
+            selected_pool = st.selectbox("Select Pool for Analysis", df["name"].tolist())
+            
+            # Get the selected pool data
+            pool_analysis_data = df[df["name"] == selected_pool].iloc[0]
+            
+            # Create the natural language report
+            # In a real application, this would use a more sophisticated NLP model
+            def generate_pool_report(pool_data):
+                name = pool_data["name"]
+                dex = pool_data["dex"]
+                category = pool_data["category"]
+                apr = pool_data["apr"]
+                liquidity = pool_data["liquidity"]
+                volume = pool_data["volume_24h"]
+                apr_change_24h = pool_data["apr_change_24h"]
+                apr_change_7d = pool_data["apr_change_7d"]
+                prediction_score = pool_data["prediction_score"]
+                
+                # Trending status
+                if apr_change_7d > 2:
+                    trend = "strongly trending upward"
+                elif apr_change_7d > 0.5:
+                    trend = "trending upward"
+                elif apr_change_7d < -2:
+                    trend = "strongly trending downward"
+                elif apr_change_7d < -0.5:
+                    trend = "trending downward"
+                else:
+                    trend = "stable"
+                
+                # Volume to liquidity ratio
+                vl_ratio = volume / liquidity
+                if vl_ratio > 0.2:
+                    volume_assessment = "excellent trading volume relative to its liquidity"
+                elif vl_ratio > 0.1:
+                    volume_assessment = "good trading volume relative to its liquidity"
+                elif vl_ratio > 0.05:
+                    volume_assessment = "moderate trading volume relative to its liquidity"
+                else:
+                    volume_assessment = "low trading volume relative to its liquidity"
+                
+                # Generate outlook based on prediction score
+                if prediction_score > 80:
+                    outlook = "very positive outlook"
+                elif prediction_score > 60:
+                    outlook = "positive outlook"
+                elif prediction_score > 40:
+                    outlook = "neutral outlook"
+                else:
+                    outlook = "cautious outlook"
+                
+                # Generate the report
+                report = f"""
+                ## {name} Pool Analysis
+                
+                The {name} pool on {dex} is a {category.lower()} category pool with an APR of {apr:.2f}%. 
+                This pool currently has ${liquidity:,.2f} in total liquidity and 24-hour trading volume of ${volume:,.2f}.
+                
+                ### Performance Trends
+                
+                This pool is currently {trend} with a 7-day APR change of {apr_change_7d:.2f}% and a 24-hour change of {apr_change_24h:.2f}%. 
+                It shows {volume_assessment}.
+                
+                ### Market Position
+                
+                As a {category.lower()} pool on {dex}, this pool represents a {outlook} in our prediction model, with a score of {prediction_score:.1f}/100.
+                
+                ### Recommendations
+                
+                """
+                
+                # Add recommendations based on metrics
+                if prediction_score > 70 and apr > 10 and apr_change_7d > 0:
+                    report += """
+                    This pool shows strong potential for high returns with positive momentum. Consider:
+                    - Adding this pool to your high-potential portfolio segment
+                    - Monitoring the APR trends weekly
+                    - Setting profit-taking targets
+                    """
+                elif prediction_score > 50 and apr > 5:
+                    report += """
+                    This pool shows moderate potential with reasonable returns. Consider:
+                    - Balanced position as part of a diversified strategy
+                    - Regular monitoring of key performance indicators
+                    - Setting both entry and exit strategy
+                    """
+                else:
+                    report += """
+                    This pool shows lower potential or elevated risk factors. Consider:
+                    - Limited exposure if any
+                    - Looking for alternatives with better risk/reward profiles
+                    - Waiting for stronger positive indicators before entry
+                    """
+                
+                return report
+            
+            # Display the report
+            report = generate_pool_report(pool_analysis_data)
+            st.markdown(report)
+            
+            # Market-wide analysis
+            st.subheader("Market-Wide Trends Analysis")
+            
+            # Generate a higher-level summary of market trends
+            def generate_market_report(df):
+                # Get high-level metrics
+                total_liquidity = df["liquidity"].sum()
+                avg_apr = df["apr"].mean()
+                avg_apr_change = df["apr_change_7d"].mean()
+                
+                # DEX with highest average APR
+                dex_apr = df.groupby("dex")["apr"].mean().reset_index()
+                top_dex = dex_apr.sort_values("apr", ascending=False).iloc[0]
+                
+                # Category with highest average APR
+                cat_apr = df.groupby("category")["apr"].mean().reset_index()
+                top_category = cat_apr.sort_values("apr", ascending=False).iloc[0]
+                
+                # Market trend assessment
+                if avg_apr_change > 1:
+                    market_trend = "strong upward trend"
+                elif avg_apr_change > 0.2:
+                    market_trend = "moderate upward trend"
+                elif avg_apr_change < -1:
+                    market_trend = "strong downward trend"
+                elif avg_apr_change < -0.2:
+                    market_trend = "moderate downward trend"
+                else:
+                    market_trend = "generally stable"
+                
+                # Generate the report
+                report = f"""
+                ## Market-Wide Liquidity Pool Analysis
+                
+                The Solana liquidity pool market currently has a total liquidity of ${total_liquidity:,.2f} 
+                across all tracked pools, with an average APR of {avg_apr:.2f}%.
+                
+                ### Current Market Trends
+                
+                The market is showing a {market_trend} with an average 7-day APR change of {avg_apr_change:.2f}%.
+                {top_dex['dex']} currently offers the highest average APR at {top_dex['apr']:.2f}%, while
+                {top_category['category']} pools are leading categories with an average APR of {top_category['apr']:.2f}%.
+                
+                ### Opportunities by Category
+                
+                """
+                
+                # Add category-specific insights
+                categories = df["category"].unique()
+                for category in categories:
+                    cat_data = df[df["category"] == category]
+                    cat_avg_apr = cat_data["apr"].mean()
+                    cat_avg_change = cat_data["apr_change_7d"].mean()
+                    cat_top_pool = cat_data.sort_values("prediction_score", ascending=False).iloc[0]
+                    
+                    report += f"""
+                    **{category}** pools are averaging {cat_avg_apr:.2f}% APR with a {cat_avg_change:.2f}% weekly change.
+                    *{cat_top_pool['name']}* on {cat_top_pool['dex']} is the top-rated pool in this category with a 
+                    prediction score of {cat_top_pool['prediction_score']:.1f}/100.
+                    
+                    """
+                
+                return report
+            
+            # Display the market report
+            market_report = generate_market_report(df)
+            st.markdown(market_report)
         
-        # Add current day
-        historical_data.append({
-            "date": datetime.now().strftime('%Y-%m-%d'),
-            "liquidity": pool_data["liquidity"],
-            "apr": pool_data["apr"]
-        })
-        
-        # Convert to DataFrame
-        historical_df = pd.DataFrame(historical_data)
-        
-        # Create a subplot with two y-axes
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-        
-        # Add TVL line
-        fig.add_trace(
-            go.Scatter(
-                x=historical_df["date"],
-                y=historical_df["liquidity"],
-                name="TVL",
-                line=dict(color="#1E88E5", width=3)
-            ),
-            secondary_y=False,
-        )
-        
-        # Add APR line
-        fig.add_trace(
-            go.Scatter(
-                x=historical_df["date"],
-                y=historical_df["apr"],
-                name="APR",
-                line=dict(color="#43A047", width=3, dash="dash")
-            ),
-            secondary_y=True,
-        )
-        
-        # Set titles
-        fig.update_layout(
-            title=f"Historical Performance: {pool_data['name']}",
-            hovermode="x unified",
-            height=500
-        )
-        
-        # Set y-axes titles
-        fig.update_yaxes(title_text="TVL ($)", secondary_y=False)
-        fig.update_yaxes(title_text="APR (%)", secondary_y=True)
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # REMINDER disclaimer
-        st.info("""
-        **Note**: Historical data shown here is simulated based on current metrics 
-        and trends for demonstration purposes. The AI-generated report is based on 
-        algorithmic analysis and should not be considered financial advice.
-        """)
-
-# Initialize the database when the module is first loaded
-if db_handler.engine:
-    db_handler.init_db()
+        # Add documentation and help information at the bottom
+        with st.expander("Documentation & Help"):
+            st.markdown("""
+            ## SolPool Insight Documentation
+            
+            This application provides comprehensive analytics for Solana liquidity pools across major DEXes.
+            
+            ### Key Features
+            
+            - **Data Explorer**: Browse and search through all available liquidity pools
+            - **Advanced Filtering**: Apply complex filters to find the best pools for your strategy
+            - **Predictions**: View machine learning-based predictions for future pool performance
+            - **Risk Assessment**: Analyze risk factors for different pools
+            - **NLP Reports**: Read AI-generated insights about market trends
+            
+            ### Data Sources
+            
+            Pool data is sourced directly from the Solana blockchain using RPC endpoints.
+            Historical data is used for trend analysis and predictions.
+            
+            ### Disclaimer
+            
+            This tool is for informational purposes only. It does not constitute investment advice.
+            Always do your own research before making investment decisions.
+            """)
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+        st.info("The application encountered an error. Please try refreshing the page or contact support.")
 
 if __name__ == "__main__":
     main()
