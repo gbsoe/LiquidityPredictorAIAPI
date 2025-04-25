@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import threading
+import time
 
 # Attempt to import the onchain extractor
 try:
@@ -14,6 +16,13 @@ try:
     HAS_EXTRACTOR = True
 except ImportError:
     HAS_EXTRACTOR = False
+
+# Try to import the background updater
+try:
+    import background_updater
+    HAS_BACKGROUND_UPDATER = True
+except ImportError:
+    HAS_BACKGROUND_UPDATER = False
 
 # Attempt to import the advanced prediction engine
 HAS_BASIC_PREDICTION = False
@@ -141,6 +150,42 @@ def load_data():
     # Sidebar controls for data loading
     with st.sidebar:
         st.subheader("Data Source")
+        
+        # Show background updater status
+        if HAS_BACKGROUND_UPDATER and st.session_state.get('updater_started') == True:
+            st.success("✓ Background data refresh is active")
+            
+            # Get the cache file modification time
+            try:
+                if os.path.exists("extracted_pools.json"):
+                    mod_time = os.path.getmtime("extracted_pools.json")
+                    mod_time_str = datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M:%S")
+                    st.info(f"Last data update: {mod_time_str}")
+            except Exception:
+                pass
+                
+            # Add a refresh button
+            if st.button("Refresh Data Now"):
+                # Get the current data
+                try:
+                    with open("extracted_pools.json", "r") as f:
+                        st.session_state['last_data_length'] = len(json.load(f))
+                except Exception:
+                    st.session_state['last_data_length'] = 0
+                    
+                # Force a page refresh
+                st.experimental_rerun()
+            
+            # Show stats if we have them
+            if 'last_data_length' in st.session_state:
+                try:
+                    with open("extracted_pools.json", "r") as f:
+                        current_length = len(json.load(f))
+                        if current_length > st.session_state['last_data_length']:
+                            st.success(f"➕ Added {current_length - st.session_state['last_data_length']} new pools")
+                        st.session_state['last_data_length'] = current_length
+                except Exception:
+                    pass
         
         force_live_data = st.checkbox("Try live blockchain data", value=False, 
                               help="When checked, attempts to fetch fresh data from blockchain")
@@ -408,6 +453,19 @@ def main():
             including Raydium, Orca, Jupiter, Meteora, Saber, and more. It provides comprehensive 
             data, historical metrics, and machine learning-based predictions.
             """)
+        
+        # Start the background updater if available
+        if HAS_BACKGROUND_UPDATER and st.session_state.get('updater_started') != True:
+            st.session_state['updater_started'] = True
+            
+            # Only start if we have a valid RPC endpoint
+            rpc_endpoint = os.getenv("SOLANA_RPC_ENDPOINT")
+            if rpc_endpoint:
+                try:
+                    background_updater.start_background_updater()
+                    st.success("✓ Background data updater started - pools will be progressively refreshed")
+                except Exception as e:
+                    st.warning(f"Could not start background updater: {e}")
         
         # Create tabs for different views
         tab_explore, tab_predict, tab_risk, tab_nlp = st.tabs([
