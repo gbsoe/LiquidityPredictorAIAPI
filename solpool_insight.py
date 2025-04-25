@@ -169,20 +169,29 @@ def load_data():
         except Exception as e:
             st.warning(f"Error loading cached data: {e}")
     
-    # Sidebar controls for data loading
+    # Move data source controls to the sidebar
     with st.sidebar:
-        st.subheader("Data Source")
+        # Create a dedicated section for data source controls
+        st.sidebar.markdown("## Data Source Settings")
         
         # Default to force live data if SOLANA_RPC_ENDPOINT is set
         rpc_endpoint = os.getenv("SOLANA_RPC_ENDPOINT")
         has_valid_rpc = rpc_endpoint and len(rpc_endpoint) > 5
         
+        # Always show the RPC status
         if has_valid_rpc:
             st.success("✓ Solana RPC Endpoint configured")
         else:
             st.warning("⚠️ No valid RPC endpoint configured")
         
-        # Show background updater status
+        # Always show the checkbox for live data (critical feature)
+        force_live_data = st.sidebar.checkbox(
+            "Use live blockchain data", 
+            value=has_valid_rpc,
+            help="When checked, attempts to fetch fresh data from blockchain"
+        )
+        
+        # Show background updater status if active
         if HAS_BACKGROUND_UPDATER and st.session_state.get('updater_started') == True:
             st.success("✓ Background data refresh is active")
             
@@ -217,10 +226,6 @@ def load_data():
                         st.session_state['last_data_length'] = current_length
                 except Exception:
                     pass
-        
-        # Default to live data if RPC is available
-        force_live_data = st.checkbox("Use live blockchain data", value=has_valid_rpc, 
-                              help="When checked, attempts to fetch fresh data from blockchain")
         
         # Show this only if we might need sample data
         if not has_valid_rpc or not force_live_data:
