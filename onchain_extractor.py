@@ -781,26 +781,58 @@ class OnChainExtractor:
             filters = None
             
             # Get program accounts
-            accounts = self.get_program_accounts(program_id, filters)
-            logger.info(f"Found {len(accounts)} accounts for {dex_name} program: {program_id}")
-            
-            # Limit the number of accounts to process
-            accounts = accounts[:max_accounts]
-            
-            # Process accounts based on DEX type
-            for account in accounts:
-                pool = None
+            try:
+                accounts = self.get_program_accounts(program_id, filters)
+                logger.info(f"Found {len(accounts)} accounts for {dex_name} program: {program_id}")
                 
-                if dex_name == "Raydium":
-                    pool = self.parse_raydium_pool_account(account)
-                elif dex_name == "Orca":
-                    pool = self.parse_orca_whirlpool_account(account)
-                elif dex_name == "Saber":
-                    pool = self.parse_saber_pool_account(account)
-                # Add parsers for other DEXes
+                # Limit the number of accounts to process
+                accounts = accounts[:max_accounts]
                 
-                if pool:
-                    pools.append(pool)
+                # Process accounts based on DEX type
+                for account in accounts:
+                    pool = None
+                    
+                    try:
+                        # Try to use the specific parser method for this DEX
+                        parser_method_name = f"parse_{dex_name.lower()}_pool_account"
+                        
+                        # Handle special cases for different naming conventions
+                        if dex_name == "Orca":
+                            parser_method_name = "parse_orca_whirlpool_account"
+                        
+                        # Check if we have a specific parser for this DEX
+                        if hasattr(self, parser_method_name):
+                            parser_method = getattr(self, parser_method_name)
+                            pool = parser_method(account)
+                        else:
+                            # Fallback to generic DEX parser
+                            pool = self.parse_generic_pool_account(account, dex_name)
+                            
+                        if pool:
+                            pools.append(pool)
+                    except Exception as e:
+                        logger.warning(f"Error parsing {dex_name} account: {str(e)}")
+                        continue
+                        
+            except Exception as e:
+                logger.error(f"Error getting accounts for {dex_name} program {program_id}: {str(e)}")
+                continue
+        
+        # If we couldn't extract any pools using parsers, try the generic DEX extraction
+        if len(pools) == 0:
+            logger.info(f"Attempting generic extraction for {dex_name}")
+            try:
+                # Try explicit extraction method if available
+                extraction_method_name = f"extract_{dex_name.lower()}_pools"
+                if hasattr(self, extraction_method_name):
+                    for program_id in program_ids:
+                        extraction_method = getattr(self, extraction_method_name)
+                        generic_pools = extraction_method(program_id, max_accounts)
+                        if generic_pools:
+                            pools.extend(generic_pools)
+                            logger.info(f"Added {len(generic_pools)} generic pools from {dex_name}")
+            except Exception as e:
+                logger.error(f"Error during generic extraction for {dex_name}: {str(e)}")
         
         logger.info(f"Extracted {len(pools)} pools from {dex_name}")
         return pools

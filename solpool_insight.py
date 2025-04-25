@@ -173,6 +173,15 @@ def load_data():
     with st.sidebar:
         st.subheader("Data Source")
         
+        # Default to force live data if SOLANA_RPC_ENDPOINT is set
+        rpc_endpoint = os.getenv("SOLANA_RPC_ENDPOINT")
+        has_valid_rpc = rpc_endpoint and len(rpc_endpoint) > 5
+        
+        if has_valid_rpc:
+            st.success("✓ Solana RPC Endpoint configured")
+        else:
+            st.warning("⚠️ No valid RPC endpoint configured")
+        
         # Show background updater status
         if HAS_BACKGROUND_UPDATER and st.session_state.get('updater_started') == True:
             st.success("✓ Background data refresh is active")
@@ -209,12 +218,18 @@ def load_data():
                 except Exception:
                     pass
         
-        force_live_data = st.checkbox("Try live blockchain data", value=False, 
+        # Default to live data if RPC is available
+        force_live_data = st.checkbox("Use live blockchain data", value=has_valid_rpc, 
                               help="When checked, attempts to fetch fresh data from blockchain")
         
-        # Increase pool count slider
-        pool_count = st.slider("Sample pool count", min_value=50, max_value=500, value=200, step=50,
-                              help="Number of sample pools to generate if real data isn't available")
+        # Show this only if we might need sample data
+        if not has_valid_rpc or not force_live_data:
+            # Increase pool count slider
+            pool_count = st.slider("Sample pool count", min_value=50, max_value=500, value=200, step=50,
+                                help="Number of sample pools to generate if real data isn't available")
+        else:
+            # Use a reasonable default
+            pool_count = 200
         
         # Add advanced options
         with st.expander("Advanced RPC Options"):
