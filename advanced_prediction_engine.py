@@ -54,19 +54,9 @@ except ImportError:
 # Define a global HAS_TENSORFLOW variable
 HAS_TENSORFLOW = False
 
-# Try to import TensorFlow but handle it gracefully if it fails
-try:
-    import tensorflow as tf
-    from tensorflow.keras.models import Sequential, load_model, Model
-    from tensorflow.keras.layers import Dense, LSTM, Dropout, Input
-    from tensorflow.keras.optimizers import Adam
-    from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-    from tensorflow.keras.utils import plot_model
-    HAS_TENSORFLOW = True
-except (ImportError, AttributeError, TypeError) as e:
-    # Log the error but continue - we'll handle the absence of TensorFlow
-    # in the appropriate places
-    print(f"TensorFlow import error: {e}. Advanced neural network features will be disabled.")
+# Temporarily disable TensorFlow due to compatibility issues
+HAS_TENSORFLOW = False
+print("TensorFlow is disabled for compatibility reasons. Using alternative models.")
 
 # Define a global HAS_XGBOOST variable
 HAS_XGBOOST = False
