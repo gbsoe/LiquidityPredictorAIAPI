@@ -259,3 +259,57 @@ def create_impermanent_loss_chart():
     )
     
     return fig
+
+def create_prediction_chart(df, metric='predicted_apr'):
+    """Create a line chart for prediction history"""
+    fig = px.line(
+        df,
+        x='prediction_timestamp',
+        y=metric,
+        title=f"{'Predicted APR' if metric == 'predicted_apr' else 'Risk Score'} Over Time",
+        labels={
+            'prediction_timestamp': 'Date',
+            'predicted_apr': 'Predicted APR (%)',
+            'risk_score': 'Risk Score'
+        }
+    )
+    
+    # Add marker points
+    fig.update_traces(mode='lines+markers')
+    
+    # Format layout
+    fig.update_layout(
+        xaxis_title='Date',
+        yaxis_title='Predicted APR (%)' if metric == 'predicted_apr' else 'Risk Score',
+        height=400
+    )
+    
+    return fig
+
+def create_performance_distribution_chart(df):
+    """Create a pie chart showing performance class distribution"""
+    # Count pools in each performance class
+    perf_counts = df['performance_class'].value_counts().reset_index()
+    perf_counts.columns = ['Performance Class', 'Count']
+    
+    # Map class numbers to labels
+    class_map = {1: 'High', 2: 'Medium', 3: 'Low'}
+    perf_counts['Class'] = perf_counts['Performance Class'].map(class_map)
+    
+    # Define colors
+    color_map = {'High': '#4CAF50', 'Medium': '#FFC107', 'Low': '#F44336'}
+    
+    # Create pie chart
+    fig = px.pie(
+        perf_counts,
+        values='Count',
+        names='Class',
+        title="Distribution of Performance Classes",
+        color='Class',
+        color_discrete_map=color_map
+    )
+    
+    # Format layout
+    fig.update_layout(height=400)
+    
+    return fig
