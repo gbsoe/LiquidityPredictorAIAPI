@@ -11,10 +11,23 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
-import xgboost as xgb
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
-from tensorflow.keras.callbacks import EarlyStopping
+
+# Handle potential import errors gracefully
+try:
+    import xgboost as xgb
+    HAS_XGBOOST = True
+except ImportError:
+    HAS_XGBOOST = False
+    print("XGBoost not available. Using RandomForest as fallback.")
+
+try:
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import LSTM, Dense, Dropout
+    from tensorflow.keras.callbacks import EarlyStopping
+    HAS_TENSORFLOW = True
+except ImportError:
+    HAS_TENSORFLOW = False
+    print("TensorFlow not available. Using RandomForest as fallback.")
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -281,15 +294,26 @@ class PoolPerformanceClassifier:
             # Create time series cross-validation
             tscv = TimeSeriesSplit(n_splits=5)
             
-            # Create XGBoost classifier
-            model = xgb.XGBClassifier(
-                n_estimators=100,
-                learning_rate=0.1,
-                max_depth=5,
-                random_state=42,
-                use_label_encoder=False,
-                eval_metric='mlogloss'
-            )
+            # Create classifier based on available packages
+            if HAS_XGBOOST:
+                model = xgb.XGBClassifier(
+                    n_estimators=100,
+                    learning_rate=0.1,
+                    max_depth=5,
+                    random_state=42,
+                    use_label_encoder=False,
+                    eval_metric='mlogloss'
+                )
+            else:
+                # Fallback to RandomForest if XGBoost is not available
+                model = RandomForestRegressor(
+                    n_estimators=100,
+                    max_depth=5,
+                    min_samples_split=5,
+                    min_samples_leaf=2,
+                    random_state=42,
+                    n_jobs=-1
+                )
             
             # Define the pipeline with scaling
             pipeline = Pipeline([
@@ -486,22 +510,34 @@ class RiskAssessmentModel:
             raise
     
     def build_model(self, input_shape):
-        """Build the LSTM model"""
-        model = Sequential()
-        
-        # LSTM layers
-        model.add(LSTM(50, return_sequences=True, input_shape=input_shape))
-        model.add(Dropout(0.2))
-        model.add(LSTM(50))
-        model.add(Dropout(0.2))
-        
-        # Output layer
-        model.add(Dense(1))
-        
-        # Compile the model
-        model.compile(optimizer='adam', loss='mse')
-        
-        return model
+        """Build the model (LSTM if TensorFlow is available, otherwise RandomForest)"""
+        if HAS_TENSORFLOW:
+            model = Sequential()
+            
+            # LSTM layers
+            model.add(LSTM(50, return_sequences=True, input_shape=input_shape))
+            model.add(Dropout(0.2))
+            model.add(LSTM(50))
+            model.add(Dropout(0.2))
+            
+            # Output layer
+            model.add(Dense(1))
+            
+            # Compile the model
+            model.compile(optimizer='adam', loss='mse')
+            
+            return model
+        else:
+            # Fallback to RandomForest if TensorFlow is not available
+            logger.warning("TensorFlow not available. Using RandomForest as fallback for risk assessment.")
+            return RandomForestRegressor(
+                n_estimators=100,
+                max_depth=10,
+                min_samples_split=5,
+                min_samples_leaf=2,
+                random_state=42,
+                n_jobs=-1
+            )
     
     def train(self, df):
         """Train the model with the provided data"""
@@ -511,40 +547,73 @@ class RiskAssessmentModel:
             # Preprocess data
             X, y = self.preprocess_data(df)
             
-            if X.shape[0] == 0 or y is None:
+            if X is None or y is None:
                 logger.error("Empty dataset after preprocessing")
                 return False
-            
-            # Build the model
-            input_shape = (X.shape[1], X.shape[2])
-            self.model = self.build_model(input_shape)
-            
-            # Early stopping to prevent overfitting
-            early_stopping = EarlyStopping(
-                monitor='val_loss',
-                patience=10,
-                restore_best_weights=True
-            )
-            
-            # Train the model
-            start_time = time.time()
-            history = self.model.fit(
-                X, y,
-                epochs=50,
-                batch_size=32,
-                validation_split=0.2,
-                callbacks=[early_stopping],
-                verbose=1
-            )
-            training_time = time.time() - start_time
-            
-            # Save the model
-            self.model.save(self.model_path)
-            
-            # Log results
-            logger.info(f"Risk assessment model trained in {training_time:.2f} seconds")
-            logger.info(f"Final loss: {history.history['loss'][-1]:.4f}")
-            logger.info(f"Model saved to {self.model_path}")
+                
+            if HAS_TENSORFLOW:
+                # For TensorFlow model
+                if X.shape[0] == 0:
+                    logger.error("Empty dataset after preprocessing")
+                    return False
+                
+                # Build the model
+                input_shape = (X.shape[1], X.shape[2])
+                self.model = self.build_model(input_shape)
+                
+                # Early stopping to prevent overfitting
+                early_stopping = EarlyStopping(
+                    monitor='val_loss',
+                    patience=10,
+                    restore_best_weights=True
+                )
+                
+                # Train the model
+                start_time = time.time()
+                history = self.model.fit(
+                    X, y,
+                    epochs=50,
+                    batch_size=32,
+                    validation_split=0.2,
+                    callbacks=[early_stopping],
+                    verbose=1
+                )
+                training_time = time.time() - start_time
+                
+                # Save the model
+                self.model.save(self.model_path)
+                
+                # Log results
+                logger.info(f"Risk assessment model trained in {training_time:.2f} seconds")
+                logger.info(f"Final loss: {history.history['loss'][-1]:.4f}")
+                logger.info(f"Model saved to {self.model_path}")
+            else:
+                # For RandomForest fallback
+                logger.info("Using RandomForest as fallback for risk assessment model")
+                
+                # Create feature matrix and target vector differently for RandomForest
+                if isinstance(X, np.ndarray) and len(X.shape) == 3:
+                    # Flatten the 3D array to 2D for RandomForest
+                    n_samples, n_timesteps, n_features = X.shape
+                    X_flat = X.reshape(n_samples, n_timesteps * n_features)
+                else:
+                    X_flat = X
+                
+                # Build the model
+                self.model = self.build_model(None)  # input_shape not needed for RandomForest
+                
+                # Train the model
+                start_time = time.time()
+                self.model.fit(X_flat, y)
+                training_time = time.time() - start_time
+                
+                # Save the model using pickle instead of TensorFlow's save method
+                with open(f"{self.model_path}.pkl", 'wb') as f:
+                    pickle.dump(self.model, f)
+                
+                # Log results
+                logger.info(f"RandomForest risk assessment model trained in {training_time:.2f} seconds")
+                logger.info(f"Model saved to {self.model_path}.pkl")
             
             return True
             

@@ -23,4 +23,5 @@ dependencies = [
     "streamlit>=1.44.1",
     "tensorflow>=2.14.0",
     "trafilatura>=2.0.0",
+    "xgboost>=3.0.0",
 ]
