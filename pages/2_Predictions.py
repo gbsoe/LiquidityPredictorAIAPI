@@ -13,7 +13,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.visualization import create_prediction_chart, create_performance_distribution_chart
 from utils.data_processor import get_pool_list, get_pool_metrics, get_pool_predictions, get_top_predictions
 from database.db_operations import DBManager
-from eda.ml_models import APRPredictionModel, PoolPerformanceClassifier, RiskAssessmentModel
+# Modified to use direct DB access instead of ML models that require TensorFlow
+# from eda.ml_models import APRPredictionModel, PoolPerformanceClassifier, RiskAssessmentModel
 
 # Page configuration
 st.set_page_config(
@@ -37,15 +38,24 @@ st.markdown("View ML-powered predictions for APR, performance classification, an
 st.image("https://images.unsplash.com/photo-1516534775068-ba3e7458af70", 
          caption="Machine Learning Concept")
 
-# Initialize ML models
+# Initialize ML models - replaced with mock models due to TensorFlow compatibility issues
 @st.cache_resource
 def load_ml_models():
-    apr_model = APRPredictionModel()
-    perf_model = PoolPerformanceClassifier()
-    risk_model = RiskAssessmentModel()
+    # Using dictionary objects instead of actual models
+    class SimpleModel:
+        def __init__(self, model_type):
+            self.model_type = model_type
+            
+        def predict(self, data):
+            return pd.DataFrame({'prediction': [0.0] * len(data)})
+            
+    apr_model = SimpleModel("APR")
+    perf_model = SimpleModel("Performance")
+    risk_model = SimpleModel("Risk")
     return apr_model, perf_model, risk_model
 
-apr_model, perf_model, risk_model = load_ml_models()
+# Comment out the model loading to avoid TensorFlow issues
+# apr_model, perf_model, risk_model = load_ml_models()
 
 # Sidebar for pool selection
 st.sidebar.header("Pool Selection")
