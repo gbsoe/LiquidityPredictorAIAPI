@@ -322,11 +322,12 @@ def load_data():
         if force_live_data:
             with st.spinner("Extracting pool data from Solana blockchain..."):
                 try:
-                    # Add extra logging
-                    st.info(f"Connecting to RPC endpoint: {custom_rpc[:10]}...{custom_rpc[-10:] if custom_rpc else ''}")
+                    # Get RPC endpoint from environment with default to Ankr
+                    rpc_endpoint = os.getenv("SOLANA_RPC_ENDPOINT", "https://rpc.ankr.com/solana")
+                    st.info(f"Connecting to RPC endpoint: {rpc_endpoint}")
                     
                     # Initialize extractor with better error handling - limit pools to 3 per DEX to avoid rate limits
-                    extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
+                    extractor = OnChainExtractor(rpc_endpoint=rpc_endpoint)
                     pools = extractor.extract_and_enrich_pools(max_per_dex=3)
                     
                     # Verify the data is not empty
