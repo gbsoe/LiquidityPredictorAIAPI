@@ -169,108 +169,18 @@ def load_data():
         except Exception as e:
             st.warning(f"Error loading cached data: {e}")
     
-    # Move data source controls to the sidebar
-    with st.sidebar:
-        # Create a dedicated section for data source controls
-        st.sidebar.markdown("## Data Source Settings")
-        
-        # Default to force live data if SOLANA_RPC_ENDPOINT is set
-        rpc_endpoint = os.getenv("SOLANA_RPC_ENDPOINT")
-        has_valid_rpc = rpc_endpoint and len(rpc_endpoint) > 5
-        
-        # Always show the RPC status
-        if has_valid_rpc:
-            st.success("✓ Solana RPC Endpoint configured")
-        else:
-            st.warning("⚠️ No valid RPC endpoint configured")
-        
-        # Always show the checkbox for live data (critical feature)
-        force_live_data = st.sidebar.checkbox(
-            "Use live blockchain data", 
-            value=has_valid_rpc,
-            help="When checked, attempts to fetch fresh data from blockchain"
-        )
-        
-        # Show background updater status if active
-        if HAS_BACKGROUND_UPDATER and st.session_state.get('updater_started') == True:
-            st.success("✓ Background data refresh is active")
-            
-            # Get the cache file modification time
-            try:
-                if os.path.exists("extracted_pools.json"):
-                    mod_time = os.path.getmtime("extracted_pools.json")
-                    mod_time_str = datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M:%S")
-                    st.info(f"Last data update: {mod_time_str}")
-            except Exception:
-                pass
-                
-            # Add a refresh button
-            if st.button("Refresh Data Now"):
-                # Get the current data
-                try:
-                    with open("extracted_pools.json", "r") as f:
-                        st.session_state['last_data_length'] = len(json.load(f))
-                except Exception:
-                    st.session_state['last_data_length'] = 0
-                    
-                # Force a page refresh
-                st.rerun()
-            
-            # Show stats if we have them
-            if 'last_data_length' in st.session_state:
-                try:
-                    with open("extracted_pools.json", "r") as f:
-                        current_length = len(json.load(f))
-                        if current_length > st.session_state['last_data_length']:
-                            st.success(f"➕ Added {current_length - st.session_state['last_data_length']} new pools")
-                        st.session_state['last_data_length'] = current_length
-                except Exception:
-                    pass
-        
-        # Show this only if we might need sample data
-        if not has_valid_rpc or not force_live_data:
-            # Increase pool count slider
-            pool_count = st.slider("Sample pool count", min_value=50, max_value=500, value=200, step=50,
-                                help="Number of sample pools to generate if real data isn't available")
-        else:
-            # Use a reasonable default
-            pool_count = 200
-        
-        # Add advanced options
-        with st.expander("Advanced RPC Options"):
-            use_custom_rpc = st.checkbox("Use custom RPC endpoint", value=False)
-            
-            if use_custom_rpc:
-                custom_rpc = st.text_input(
-                    "Solana RPC Endpoint", 
-                    value=os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"),
-                    help="For Helius, use format: https://rpc.helius.xyz/?api-key=YOUR_API_KEY"
-                )
-                if st.button("Save Endpoint"):
-                    # Save to .env file for persistence
-                    try:
-                        with open(".env", "r+") as f:
-                            content = f.read()
-                            f.seek(0)
-                            if "SOLANA_RPC_ENDPOINT=" in content:
-                                # Replace the existing endpoint
-                                new_content = []
-                                for line in content.split("\n"):
-                                    if line.startswith("SOLANA_RPC_ENDPOINT="):
-                                        new_content.append(f"SOLANA_RPC_ENDPOINT={custom_rpc}")
-                                    else:
-                                        new_content.append(line)
-                                f.write("\n".join(new_content))
-                                f.truncate()
-                            else:
-                                # Add new endpoint
-                                f.seek(0, 2)  # Go to end of file
-                                f.write(f"\nSOLANA_RPC_ENDPOINT={custom_rpc}\n")
-                            st.success("RPC endpoint updated in environment")
-                    except Exception as e:
-                        st.warning(f"Could not save endpoint to .env: {e}")
-            else:
-                custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com")
+    # Get the force_live_data value from session state (set in main())
+    force_live_data = st.session_state.get('force_live_data', False)
+    
+    # Get the custom_rpc value from session state (set in main())
+    custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"))
+    
+    # Get the pool_count value from session state (set in main())
+    pool_count = st.session_state.get('pool_count', 200)
+    
+    # Verify RPC endpoint
+    rpc_endpoint = os.getenv("SOLANA_RPC_ENDPOINT")
+    has_valid_rpc = rpc_endpoint and len(rpc_endpoint) > 5
     
     # Only try to fetch live data if explicitly requested
     if force_live_data and HAS_EXTRACTOR:
@@ -492,7 +402,124 @@ def generate_sample_data(count=200):
     return pools
 
 def main():
-    # Display logo and title
+    # Configure the sidebar first to ensure it's always visible
+    with st.sidebar:
+        st.sidebar.title("SolPool Insight")
+        
+        # Add Data Source Section - Critical Feature
+        st.sidebar.header("Data Source Settings")
+        
+        # Default to force live data if SOLANA_RPC_ENDPOINT is set
+        rpc_endpoint = os.getenv("SOLANA_RPC_ENDPOINT")
+        has_valid_rpc = rpc_endpoint and len(rpc_endpoint) > 5
+        
+        # Always show the RPC status
+        if has_valid_rpc:
+            st.sidebar.success("✓ Solana RPC Endpoint configured")
+        else:
+            st.sidebar.warning("⚠️ No valid RPC endpoint configured")
+        
+        # Always show the checkbox for live data (critical feature)
+        force_live_data = st.sidebar.checkbox(
+            "Use live blockchain data", 
+            value=has_valid_rpc,
+            help="When checked, attempts to fetch fresh data from blockchain"
+        )
+        
+        # Store in session state so it's accessible in load_data
+        st.session_state['force_live_data'] = force_live_data
+        
+        # Show sample pool controls only if needed
+        if not has_valid_rpc or not force_live_data:
+            pool_count = st.sidebar.slider(
+                "Sample pool count", 
+                min_value=50, 
+                max_value=500, 
+                value=200, 
+                step=50,
+                help="Number of sample pools to generate if real data isn't available"
+            )
+            st.session_state['pool_count'] = pool_count
+        
+        # Add advanced options
+        with st.sidebar.expander("Advanced RPC Options"):
+            use_custom_rpc = st.checkbox("Use custom RPC endpoint", value=False)
+            
+            if use_custom_rpc:
+                custom_rpc = st.text_input(
+                    "Solana RPC Endpoint", 
+                    value=os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"),
+                    help="For Helius, use format: https://rpc.helius.xyz/?api-key=YOUR_API_KEY"
+                )
+                if st.button("Save Endpoint"):
+                    # Save to .env file for persistence
+                    try:
+                        with open(".env", "r+") as f:
+                            content = f.read()
+                            f.seek(0)
+                            if "SOLANA_RPC_ENDPOINT=" in content:
+                                # Replace the existing endpoint
+                                new_content = []
+                                for line in content.split("\n"):
+                                    if line.startswith("SOLANA_RPC_ENDPOINT="):
+                                        new_content.append(f"SOLANA_RPC_ENDPOINT={custom_rpc}")
+                                    else:
+                                        new_content.append(line)
+                                f.write("\n".join(new_content))
+                                f.truncate()
+                            else:
+                                # Add new endpoint
+                                f.seek(0, 2)  # Go to end of file
+                                f.write(f"\nSOLANA_RPC_ENDPOINT={custom_rpc}\n")
+                            st.success("RPC endpoint updated in environment")
+                    except Exception as e:
+                        st.warning(f"Could not save endpoint to .env: {e}")
+            else:
+                custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com")
+                
+        # Store the custom RPC in session state
+        st.session_state['custom_rpc'] = custom_rpc
+        
+        # Background updater controls
+        if HAS_BACKGROUND_UPDATER:
+            st.sidebar.header("Background Updater")
+            
+            if st.session_state.get('updater_started') != True:
+                if st.sidebar.button("Start Background Updater"):
+                    st.session_state['updater_started'] = True
+                    
+                    # Only start if we have a valid RPC endpoint
+                    if rpc_endpoint:
+                        try:
+                            background_updater.start_background_updater()
+                            st.success("✓ Background data updater started")
+                        except Exception as e:
+                            st.warning(f"Could not start background updater: {e}")
+            else:
+                st.sidebar.success("✓ Background data refresh is active")
+                
+                # Get the cache file modification time
+                try:
+                    if os.path.exists("extracted_pools.json"):
+                        mod_time = os.path.getmtime("extracted_pools.json")
+                        mod_time_str = datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M:%S")
+                        st.sidebar.info(f"Last data update: {mod_time_str}")
+                except Exception:
+                    pass
+                    
+                # Add a refresh button
+                if st.sidebar.button("Refresh Data Now"):
+                    # Get the current data
+                    try:
+                        with open("extracted_pools.json", "r") as f:
+                            st.session_state['last_data_length'] = len(json.load(f))
+                    except Exception:
+                        st.session_state['last_data_length'] = 0
+                        
+                    # Force a page refresh
+                    st.rerun()
+    
+    # Display logo and title in the main area
     col_logo, col_title = st.columns([1, 3])
     
     try:
@@ -518,26 +545,10 @@ def main():
         else:
             st.warning("⚠ Database connection not available - using file-based storage")
         
-        # Start the background updater if available
-        if HAS_BACKGROUND_UPDATER and st.session_state.get('updater_started') != True:
-            st.session_state['updater_started'] = True
-            
-            # Only start if we have a valid RPC endpoint
-            rpc_endpoint = os.getenv("SOLANA_RPC_ENDPOINT")
-            if rpc_endpoint:
-                try:
-                    background_updater.start_background_updater()
-                    st.success("✓ Background data updater started - pools will be progressively refreshed")
-                except Exception as e:
-                    st.warning(f"Could not start background updater: {e}")
-        
         # Create tabs for different views
         tab_explore, tab_advanced, tab_predict, tab_risk, tab_nlp = st.tabs([
             "Data Explorer", "Advanced Filtering", "Predictions", "Risk Assessment", "NLP Reports"
         ])
-        
-        # Add debug information
-        st.info("Loading pool data now...")
         
         # Load data
         pool_data = load_data()
