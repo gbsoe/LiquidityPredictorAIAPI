@@ -166,7 +166,11 @@ with tab1:
                     # Get top predictions if requested
                     top_predictions = []
                     if include_predictions:
-                        top_predictions = db.get_top_predictions(category="apr", limit=10)
+                        prediction_df = db.get_top_predictions(category="apr", limit=10)
+                        if not isinstance(prediction_df, list) and hasattr(prediction_df, 'to_dict'):
+                            top_predictions = prediction_df.to_dict('records')
+                        else:
+                            top_predictions = prediction_df
                         
                     # Convert pools_data to list of dictionaries
                     pools_dict_list = pools_data.to_dict('records') if not pools_data.empty else []
