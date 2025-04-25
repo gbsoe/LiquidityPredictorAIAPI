@@ -188,9 +188,15 @@ def load_data():
                 # Use the custom or environment RPC endpoint
                 st.info(f"Connecting to RPC endpoint: {custom_rpc}")
                 
-                # Initialize extractor with better error handling - limit pools to 2 per DEX to avoid rate limits
+                # Initialize extractor with better error handling and batch processing
+                # Use tranched fetching with up to 10 pools per DEX but fetch them in batches
                 extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
-                pools = extractor.extract_and_enrich_pools(max_per_dex=2)
+                
+                # Display a message about tranched fetching
+                st.info("Starting tranched fetching of pool data. This may take a few minutes as we retrieve data in batches to avoid rate limits.")
+                
+                # Start with a higher number of pools per DEX (10)
+                pools = extractor.extract_and_enrich_pools(max_per_dex=10)
                 
                 # Verify the data is not empty
                 if pools and len(pools) > 0:
@@ -582,48 +588,71 @@ def main():
             "apr", "apr_change_24h", "apr_change_7d", "prediction_score", "id"
         ]
         
-        # Extract display data
-        display_df = filtered_df[display_columns].copy()
+        # Create a proper Streamlit table instead of HTML
+        # This avoids formatting issues with HTML badges
         
-        # Format the display data
-        display_df["liquidity"] = display_df["liquidity"].apply(format_currency)
-        display_df["volume_24h"] = display_df["volume_24h"].apply(format_currency)
-        display_df["apr"] = display_df["apr"].apply(format_percentage)
-        display_df["apr_change_24h"] = display_df["apr_change_24h"].apply(
-            lambda x: f"{get_trend_icon(x)} {format_percentage(x)}"
-        )
-        display_df["apr_change_7d"] = display_df["apr_change_7d"].apply(
-            lambda x: f"{get_trend_icon(x)} {format_percentage(x)}"
-        )
+        # First create a clean representation of the data
+        table_data = []
         
-        # Format prediction score with a visual indicator
-        display_df["prediction_score"] = display_df["prediction_score"].apply(
-            lambda x: f"{'🟢' if x > 75 else '🟡' if x > 50 else '🔴'} {x:.1f}/100"
-        )
+        for _, row in filtered_df.iterrows():
+            # Format all values correctly
+            category_text = row["category"]  # Just use plain text instead of HTML badge
+            pool_name = row["name"]
+            dex_name = row["dex"]
+            liquidity_val = format_currency(row["liquidity"])
+            volume_val = format_currency(row["volume_24h"])
+            apr_val = format_percentage(row["apr"])
+            apr_change_24h_val = f"{get_trend_icon(row['apr_change_24h'])} {format_percentage(row['apr_change_24h'])}"
+            apr_change_7d_val = f"{get_trend_icon(row['apr_change_7d'])} {format_percentage(row['apr_change_7d'])}"
+            pred_score = row["prediction_score"]
+            pred_icon = "🟢" if pred_score > 75 else "🟡" if pred_score > 50 else "🔴"
+            pred_text = f"{pred_icon} {pred_score:.1f}/100"
+            pool_id = row["id"]
+            
+            # Add to table data
+            table_data.append({
+                "Pool Name": pool_name,
+                "DEX": dex_name,
+                "Category": category_text,
+                "TVL": liquidity_val,
+                "24h Volume": volume_val,
+                "APR": apr_val,
+                "24h Δ": apr_change_24h_val,
+                "7d Δ": apr_change_7d_val,
+                "Pred Score": pred_text,
+                "Pool ID": pool_id
+            })
         
-        # Format the category column with HTML badges
-        display_df["category"] = filtered_df["category"].apply(get_category_badge)
+        # Convert to a new DataFrame with formatted values
+        formatted_df = pd.DataFrame(table_data)
         
-        # Rename columns for display
-        column_labels = {
-            "name": "Pool Name",
-            "dex": "DEX",
-            "category": "Category",
-            "liquidity": "TVL",
-            "volume_24h": "24h Volume",
-            "apr": "APR",
-            "apr_change_24h": "24h Δ",
-            "apr_change_7d": "7d Δ",
-            "prediction_score": "Pred Score",
-            "id": "Pool ID"
-        }
-        
-        display_df = display_df.rename(columns=column_labels)
-        
-        # Display the table with HTML formatting
-        st.write(
-            display_df.to_html(escape=False, index=False),
-            unsafe_allow_html=True
+        # Use Streamlit's native table which handles formatting better
+        st.dataframe(
+            formatted_df,
+            use_container_width=True,
+            column_config={
+                "Pool ID": st.column_config.TextColumn(
+                    "Pool ID",
+                    width="medium",
+                    help="Unique identifier for the pool"
+                ),
+                "TVL": st.column_config.TextColumn(
+                    "TVL",
+                    width="small"
+                ),
+                "24h Volume": st.column_config.TextColumn(
+                    "24h Volume",
+                    width="small"
+                ),
+                "Pool Name": st.column_config.TextColumn(
+                    "Pool Name", 
+                    width="medium"
+                ),
+                "Pred Score": st.column_config.TextColumn(
+                    "Pred Score",
+                    width="small"
+                )
+            }
         )
     
     # Predictions Tab
