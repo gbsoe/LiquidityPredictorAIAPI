@@ -293,13 +293,33 @@ def load_data():
     # First, always try to load from cache file for faster startup
     if os.path.exists(cache_file):
         try:
+            # Debug information
+            st.info(f"Cache file exists at: {os.path.abspath(cache_file)}")
+            st.info(f"Cache file size: {os.path.getsize(cache_file)} bytes")
+            
             with open(cache_file, "r") as f:
-                pools = json.load(f)
-                # Verify the data is not empty
-                if pools and len(pools) > 0:
-                    st.success(f"✓ Successfully loaded {len(pools)} pools from cache")
-                    st.info("To refresh data from the blockchain, use the settings in the sidebar")
-                    return pools
+                # Read file content for debugging
+                file_content = f.read()
+                st.info(f"Read {len(file_content)} bytes from cache file")
+                
+                # Try to parse JSON
+                if file_content.strip():
+                    pools = json.loads(file_content)
+                    
+                    # Verify the data is not empty
+                    if pools and len(pools) > 0:
+                        st.success(f"✓ Successfully loaded {len(pools)} pools from cache")
+                        st.info("To refresh data from the blockchain, use the settings in the sidebar")
+                        return pools
+                    else:
+                        st.warning("Cache file contains empty pool data")
+                else:
+                    st.warning("Cache file is empty")
+        except json.JSONDecodeError as e:
+            st.error(f"JSON decode error in cache file: {e}")
+            # Show part of the file content for debugging
+            with open(cache_file, "r") as f:
+                st.code(f.read(500) + "...")
         except Exception as e:
             st.error(f"Error loading cached data: {e}")
             st.info("Will attempt to fetch fresh data from blockchain")
@@ -547,18 +567,32 @@ def main():
     comprehensive data, historical metrics, and machine learning-based predictions.
     """)
     
+    # Add debug information
+    st.info("Loading pool data now...")
+    
     # Load data
     pool_data = load_data()
     
+    # Debug info
+    if pool_data:
+        st.success(f"Successfully obtained pool data with {len(pool_data)} pools")
+    else:
+        st.error("No pool data was returned from load_data()")
+        
     # Convert to DataFrame for easier manipulation
     df = pd.DataFrame(pool_data)
+    st.info(f"Created DataFrame with shape: {df.shape}")
+    if len(df) > 0:
+        st.info(f"DataFrame columns: {', '.join(df.columns.tolist())}")
     
     # Check if we have valid data with required columns
     if len(df) == 0 or 'liquidity' not in df.columns:
         st.error("Failed to load valid pool data. Using sample data instead.")
         # Generate sample data
         pool_data = generate_sample_data()
+        st.success(f"Generated sample data with {len(pool_data)} pools")
         df = pd.DataFrame(pool_data)
+        st.info(f"New DataFrame shape: {df.shape}")
     
     # Use a simpler approach for mobile-friendly layout
     # We'll use browser width as a proxy for mobile
