@@ -53,6 +53,8 @@ class LiquidityPool(Base):
     prediction_score = Column(Float, nullable=False)
     apr_change_30d = Column(Float, nullable=False, default=0.0)
     tvl_change_30d = Column(Float, nullable=False, default=0.0)
+    created_at = Column(String, nullable=True)
+    updated_at = Column(String, nullable=True)
     
     def to_dict(self):
         """Convert model to dictionary"""
@@ -76,7 +78,9 @@ class LiquidityPool(Base):
             "tvl_change_7d": self.tvl_change_7d,
             "prediction_score": self.prediction_score,
             "apr_change_30d": self.apr_change_30d,
-            "tvl_change_30d": self.tvl_change_30d
+            "tvl_change_30d": self.tvl_change_30d,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at
         }
 
 # Function to initialize database schema

@@ -260,14 +260,14 @@ def load_data():
                 st.info(f"Connecting to RPC endpoint: {custom_rpc}")
                 
                 # Initialize extractor with better error handling and batch processing
-                # Use tranched fetching with up to 10 pools per DEX but fetch them in batches
+                # Use tranched fetching with up to 50 pools per DEX but fetch them in batches
                 extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
                 
                 # Display a message about tranched fetching
                 st.info("Starting tranched fetching of pool data. This may take a few minutes as we retrieve data in batches to avoid rate limits.")
                 
-                # Start with a higher number of pools per DEX (20 instead of 10)
-                pools = extractor.extract_and_enrich_pools(max_per_dex=20)
+                # Increase the number of pools per DEX to 50 to get more real-time data
+                pools = extractor.extract_and_enrich_pools(max_per_dex=50)
                 
                 # Verify the data is not empty
                 if pools and len(pools) > 0:
