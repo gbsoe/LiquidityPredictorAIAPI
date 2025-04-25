@@ -68,12 +68,18 @@ except (ImportError, AttributeError, TypeError) as e:
     # in the appropriate places
     print(f"TensorFlow import error: {e}. Advanced neural network features will be disabled.")
 
+# Define a global HAS_XGBOOST variable
+HAS_XGBOOST = False
+
+# Try to import XGBoost but handle it gracefully if it fails
 try:
     import xgboost as xgb
     from xgboost import XGBRegressor, XGBClassifier
     HAS_XGBOOST = True
-except ImportError:
-    HAS_XGBOOST = False
+except (ImportError, AttributeError, TypeError) as e:
+    # Log the error but continue - we'll handle the absence of XGBoost
+    # in the appropriate places
+    print(f"XGBoost import error: {e}. Advanced boosting models will be disabled.")
 
 try:
     from sklearn.preprocessing import StandardScaler, MinMaxScaler
@@ -467,43 +473,53 @@ class APRPredictionModel:
         self.version = 1
         self.feature_engineer = FeatureEngineer()
         
-    def _create_xgboost_model(self) -> xgb.XGBRegressor:
+    def _create_xgboost_model(self):
         """Create an XGBoost model for APR prediction"""
         if not HAS_XGBOOST:
-            raise ImportError("XGBoost is required but not installed")
+            logger.warning("XGBoost is not available - using fallback model")
+            return None
             
-        # Model hyperparameters - in a real implementation these would be tuned
-        params = {
-            "objective": "reg:squarederror",
-            "n_estimators": 200,
-            "max_depth": 6,
-            "learning_rate": 0.05,
-            "subsample": 0.8,
-            "colsample_bytree": 0.8,
-            "reg_alpha": 0.1,
-            "reg_lambda": 1.0,
-            "random_state": 42
-        }
-        
-        return XGBRegressor(**params)
+        try:
+            # Model hyperparameters - in a real implementation these would be tuned
+            params = {
+                "objective": "reg:squarederror",
+                "n_estimators": 200,
+                "max_depth": 6,
+                "learning_rate": 0.05,
+                "subsample": 0.8,
+                "colsample_bytree": 0.8,
+                "reg_alpha": 0.1,
+                "reg_lambda": 1.0,
+                "random_state": 42
+            }
+            
+            return XGBRegressor(**params) if HAS_XGBOOST else None
+        except Exception as e:
+            logger.error(f"Error creating XGBoost model: {e}")
+            return None
     
-    def _create_lstm_model(self, input_shape: int) -> tf.keras.Model:
+    def _create_lstm_model(self, input_shape: int):
         """Create an LSTM model for time series prediction"""
         if not HAS_TENSORFLOW:
-            raise ImportError("TensorFlow is required but not installed")
+            logger.warning("TensorFlow is not available - LSTM model creation skipped")
+            return None
             
-        model = Sequential([
-            LSTM(64, input_shape=(input_shape, 1), return_sequences=True),
-            Dropout(0.2),
-            LSTM(32),
-            Dropout(0.2),
-            Dense(16, activation='relu'),
-            Dense(1)  # Output layer for regression
-        ])
-        
-        model.compile(optimizer=Adam(learning_rate=0.001), loss='mse')
-        
-        return model
+        try:
+            model = Sequential([
+                LSTM(64, input_shape=(input_shape, 1), return_sequences=True),
+                Dropout(0.2),
+                LSTM(32),
+                Dropout(0.2),
+                Dense(16, activation='relu'),
+                Dense(1)  # Output layer for regression
+            ])
+            
+            model.compile(optimizer=Adam(learning_rate=0.001), loss='mse')
+            
+            return model
+        except Exception as e:
+            logger.error(f"Error creating LSTM model: {e}")
+            return None
     
     def prepare_training_data(self, historical_data: List[Dict[str, Any]]) -> Tuple[pd.DataFrame, pd.Series]:
         """
