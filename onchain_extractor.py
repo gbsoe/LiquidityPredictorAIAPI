@@ -754,6 +754,57 @@ class OnChainExtractor:
         except Exception as e:
             logger.error(f"Error parsing Saber pool account: {e}")
             return None
+            
+    def parse_generic_pool_account(self, account_data: Dict[str, Any], dex_name: str) -> Optional[PoolData]:
+        """
+        Generic parser for pool accounts when specific parsers aren't available
+        
+        Args:
+            account_data: Account data from getProgramAccounts
+            dex_name: Name of the DEX
+            
+        Returns:
+            PoolData object or None if parsing fails
+        """
+        try:
+            # Extract account address (pubkey)
+            pool_id = account_data.get("pubkey")
+            if not pool_id:
+                logger.warning(f"Missing pubkey in account data for {dex_name}")
+                return None
+                
+            # Generate placeholder token info
+            # In a real implementation, you would parse the binary data to extract token addresses
+            # and use the token metadata API to get symbols and names
+            token1_address = str(uuid.uuid4())  # This would be extracted from account data
+            token2_address = str(uuid.uuid4())  # This would be extracted from account data
+            
+            token1 = TokenInfo(address=token1_address)
+            token2 = TokenInfo(address=token2_address)
+            
+            # Create pool data with a unique name based on the DEX and ID
+            short_id = pool_id[-6:] if pool_id else "unknown"
+            name = f"{dex_name} Pool {short_id}"
+            
+            pool = PoolData(
+                id=pool_id,
+                dex=dex_name,
+                name=name,
+                token1=token1,
+                token2=token2,
+                version="v1",  # Default version
+                # Conservative metrics
+                liquidity=0.0,
+                volume_24h=0.0,
+                apr=0.0,
+                fee_rate=0.001  # Default fee
+            )
+            
+            return pool
+            
+        except Exception as e:
+            logger.error(f"Error in generic parsing for {dex_name} account: {e}")
+            return None
     
     def extract_pools_from_dex(self, dex_name: str, max_accounts: int = 100) -> List[PoolData]:
         """
