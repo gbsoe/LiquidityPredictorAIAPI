@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 
 # Add project directories to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.visualization import create_metrics_chart, create_liquidity_volume_chart, create_token_price_chart
+from utils.visualization import create_metrics_chart, create_liquidity_volume_chart, create_token_price_chart, create_pool_comparison_chart
 from utils.data_processor import get_pool_list, get_pool_metrics, get_pool_details, get_token_prices
 from database.db_operations import DBManager
 
