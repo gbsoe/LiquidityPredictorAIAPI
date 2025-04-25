@@ -387,10 +387,10 @@ def load_data():
             st.error("Failed to get data. Attempting one final fetch from blockchain...")
             # Use one of these alternative endpoints for Solana mainnet
             rpc_endpoints = [
-                "https://solana-mainnet.rpc.extrnode.com",
-                "https://solana-api.projectserum.com",
-                "https://solana-mainnet.g.alchemy.com/v2/demo",
-                "https://api.mainnet-beta.solana.com"
+                "https://api.mainnet-beta.solana.com",
+                "https://solana-api.projectserum.com", 
+                "https://free.rpcpool.com",
+                "https://solana.blockdaemon.com"
             ]
             
             # Try each endpoint until one works
