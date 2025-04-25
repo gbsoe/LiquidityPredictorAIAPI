@@ -384,6 +384,13 @@ def main():
     # Convert to DataFrame for easier manipulation
     df = pd.DataFrame(pool_data)
     
+    # Check if we have valid data with required columns
+    if len(df) == 0 or 'liquidity' not in df.columns:
+        st.error("Failed to load valid pool data. Using sample data instead.")
+        # Generate sample data
+        pool_data = generate_sample_data()
+        df = pd.DataFrame(pool_data)
+    
     # Create tabs for different views
     tabs = st.tabs(["Overview", "Pool Explorer", "Insights & Predictions"])
     
