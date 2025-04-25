@@ -31,6 +31,25 @@ import joblib
 import random
 from copy import deepcopy
 
+# Import advanced self-evolving modules
+try:
+    from bayesian_optimization import BayesianOptimizer, HyperparameterOptimizer
+    HAS_BAYESIAN_OPT = True
+except ImportError:
+    HAS_BAYESIAN_OPT = False
+
+try:
+    from multi_agent_system import MultiAgentSystem
+    HAS_MULTI_AGENT = True
+except ImportError:
+    HAS_MULTI_AGENT = False
+
+try:
+    from neural_architecture_search import ArchitectureSearch, NeuralArchitecture
+    HAS_NEURAL_SEARCH = True
+except ImportError:
+    HAS_NEURAL_SEARCH = False
+
 # Advanced ML libraries (would need to be installed)
 try:
     import tensorflow as tf
@@ -1631,6 +1650,14 @@ class ReinforcementLearningOptimizer:
 class SelfEvolvingPredictionEngine:
     """
     Main prediction engine that combines multiple models and evolves over time
+    
+    This advanced self-evolving system integrates:
+    1. Ensemble learning with multiple model types
+    2. Reinforcement learning for weight optimization
+    3. Bayesian optimization for hyperparameter tuning 
+    4. Multi-agent system for collaborative intelligence
+    5. Neural architecture search for optimal network design
+    6. Market trend analysis for contextual predictions
     """
     
     def __init__(self, prediction_horizon: int = 7):
@@ -1651,6 +1678,59 @@ class SelfEvolvingPredictionEngine:
         self.prediction_history = []
         self.validation_results = []
         self.version = 1
+        
+        # Advanced self-evolving components (initialized on demand)
+        self._bayes_optimizer = None
+        self._multi_agent_system = None
+        self._neural_architecture_search = None
+        
+        # Evolvability tracking metrics
+        self.evolution_metrics = {
+            "hyperparameter_optimizations": 0,
+            "architecture_searches": 0,
+            "multi_agent_cycles": 0,
+            "total_evolution_steps": 0,
+            "improvement_rates": [],
+            "model_complexity_history": [],
+            "feature_importance_history": []
+        }
+    
+    @property
+    def bayes_optimizer(self):
+        """Lazy initialization of Bayesian optimizer"""
+        if not self._bayes_optimizer and HAS_BAYESIAN_OPT:
+            try:
+                self._bayes_optimizer = HyperparameterOptimizer("xgboost")
+                logger.info("Initialized Bayesian optimizer for hyperparameter tuning")
+            except Exception as e:
+                logger.error(f"Error initializing Bayesian optimizer: {e}")
+        return self._bayes_optimizer
+    
+    @property
+    def multi_agent_system(self):
+        """Lazy initialization of multi-agent system"""
+        if not self._multi_agent_system and HAS_MULTI_AGENT:
+            try:
+                self._multi_agent_system = MultiAgentSystem()
+                self._multi_agent_system.create_default_agents()
+                logger.info("Initialized multi-agent system with default agents")
+            except Exception as e:
+                logger.error(f"Error initializing multi-agent system: {e}")
+        return self._multi_agent_system
+    
+    @property
+    def neural_architecture_search(self):
+        """Lazy initialization of neural architecture search"""
+        if not self._neural_architecture_search and HAS_NEURAL_SEARCH:
+            try:
+                # Default to a simple time series input shape
+                # This would be adjusted based on actual input data
+                input_shape = (10, 1)  # 10 time steps, 1 feature
+                self._neural_architecture_search = ArchitectureSearch(input_shape)
+                logger.info("Initialized neural architecture search")
+            except Exception as e:
+                logger.error(f"Error initializing neural architecture search: {e}")
+        return self._neural_architecture_search
         
     def train(self, training_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
@@ -1871,38 +1951,434 @@ class SelfEvolvingPredictionEngine:
     
     def evolve(self, historical_data: List[Dict[str, Any]], validation_split: float = 0.2) -> Dict[str, Any]:
         """
-        Evolve the prediction engine by training and validating models
+        Evolve the prediction engine by training and validating models.
+        This advanced method integrates multiple evolutionary approaches:
+        
+        1. Bayesian hyperparameter optimization
+        2. Neural architecture search
+        3. Multi-agent collaborative learning
+        4. Reinforcement learning optimization
+        5. Feature selection evolution
         
         Args:
             historical_data: Historical pool data
             validation_split: Portion of data to use for validation
             
         Returns:
-            Evolution results
+            Evolution results with comprehensive metrics
         """
+        evolution_start = datetime.now()
+        self.evolution_metrics["total_evolution_steps"] += 1
+        
         # Split data into training and validation
         split_idx = int(len(historical_data) * (1 - validation_split))
         training_data = historical_data[:split_idx]
         validation_data = historical_data[split_idx:]
         
-        # Train models
+        # Basic model training and validation (baseline approach)
         training_results = self.train(training_data)
-        
-        # Validate models
         validation_results = self.validate(validation_data)
         
-        # Update model weights based on validation results
-        # (already done in validate method)
+        # Track initial performance metrics for improvement measurement
+        initial_metrics = self._extract_performance_metrics(validation_results)
         
-        # Save optimizer state
-        self.rl_optimizer.save_state(os.path.join(MODEL_DIR, f"rl_optimizer_v{self.version}.json"))
+        # ===== Advanced Evolution Steps =====
+        evolution_steps_results = {}
         
-        return {
-            "training_results": training_results,
-            "validation_results": validation_results,
-            "model_weights": self.rl_optimizer.model_weights,
+        # Step 1: Bayesian hyperparameter optimization (if available)
+        if self.bayes_optimizer:
+            try:
+                evolution_steps_results["bayesian_optimization"] = self._evolve_with_bayesian_optimization(
+                    training_data, validation_data
+                )
+                self.evolution_metrics["hyperparameter_optimizations"] += 1
+            except Exception as e:
+                logger.error(f"Error in Bayesian optimization step: {e}")
+                evolution_steps_results["bayesian_optimization"] = {"error": str(e)}
+        
+        # Step 2: Neural architecture search (if available and appropriate)
+        if self.neural_architecture_search and len(training_data) >= 500:  # Only with sufficient data
+            try:
+                evolution_steps_results["neural_architecture_search"] = self._evolve_with_neural_architecture_search(
+                    training_data, validation_data
+                )
+                self.evolution_metrics["architecture_searches"] += 1
+            except Exception as e:
+                logger.error(f"Error in neural architecture search step: {e}")
+                evolution_steps_results["neural_architecture_search"] = {"error": str(e)}
+        
+        # Step 3: Multi-agent collective intelligence (if available)
+        if self.multi_agent_system:
+            try:
+                evolution_steps_results["multi_agent_learning"] = self._evolve_with_multi_agent_system(
+                    training_data, validation_data
+                )
+                self.evolution_metrics["multi_agent_cycles"] += 1
+            except Exception as e:
+                logger.error(f"Error in multi-agent evolution step: {e}")
+                evolution_steps_results["multi_agent_learning"] = {"error": str(e)}
+        
+        # Calculate performance improvement
+        final_validation = self.validate(validation_data)
+        final_metrics = self._extract_performance_metrics(final_validation)
+        
+        improvement = self._calculate_improvement(initial_metrics, final_metrics)
+        self.evolution_metrics["improvement_rates"].append(improvement)
+        
+        # Track model complexity
+        complexity = {
+            "feature_count": len(self.apr_model.feature_names) if hasattr(self.apr_model, 'feature_names') else 0,
+            "parameter_count": self._estimate_model_parameters(),
             "version": self.version
         }
+        self.evolution_metrics["model_complexity_history"].append(complexity)
+        
+        # Save state of all components
+        self._save_evolution_state()
+        
+        # Format results
+        evolution_results = {
+            "training_results": training_results,
+            "initial_validation": validation_results,
+            "final_validation": final_validation,
+            "evolution_steps": evolution_steps_results,
+            "improvement": improvement,
+            "model_weights": self.rl_optimizer.model_weights,
+            "version": self.version,
+            "duration_seconds": (datetime.now() - evolution_start).total_seconds()
+        }
+        
+        logger.info(f"Evolution cycle complete. Improvement: {improvement:.2f}%, Version: {self.version}")
+        return evolution_results
+    
+    def _evolve_with_bayesian_optimization(self, 
+                                         training_data: List[Dict[str, Any]], 
+                                         validation_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Evolve models using Bayesian hyperparameter optimization
+        
+        Args:
+            training_data: Training data
+            validation_data: Validation data
+            
+        Returns:
+            Optimization results
+        """
+        logger.info("Starting Bayesian hyperparameter optimization")
+        
+        # Define evaluation function for hyperparameter optimization
+        def evaluate_hyperparams(params: Dict[str, Any]) -> float:
+            # Create a temporary model with these hyperparameters
+            temp_model = APRPredictionModel(self.prediction_horizon)
+            
+            # Apply hyperparameters
+            if HAS_XGBOOST and temp_model._create_xgboost_model:
+                xgb_params = {
+                    "learning_rate": params.get("learning_rate", 0.1),
+                    "max_depth": params.get("max_depth", 6),
+                    "subsample": params.get("subsample", 0.8),
+                    "colsample_bytree": params.get("colsample_bytree", 0.8),
+                    "reg_alpha": params.get("reg_alpha", 0.1),
+                    "reg_lambda": params.get("reg_lambda", 1.0)
+                }
+                temp_model.model = temp_model._create_xgboost_model()
+                temp_model.model.set_params(**xgb_params)
+            
+            # Train on training data
+            X_train, y_train = temp_model.prepare_training_data(training_data)
+            
+            # We can't do a full train since it's slow, so let's simulate
+            if temp_model.model is not None:
+                try:
+                    temp_model.model.fit(X_train, y_train)
+                    
+                    # Evaluate on validation data
+                    X_val, y_val = temp_model.prepare_training_data(validation_data)
+                    y_pred = temp_model.model.predict(X_val)
+                    
+                    # Calculate error (negated for maximization)
+                    mae = mean_absolute_error(y_val, y_pred)
+                    return -mae  # Negative because we want to maximize score (minimize error)
+                except Exception as e:
+                    logger.error(f"Error evaluating hyperparameters: {e}")
+                    return -float('inf')  # Worst possible score
+            else:
+                return -float('inf')
+        
+        # Define hyperparameter space based on model type
+        if self.bayes_optimizer and HAS_BAYESIAN_OPT:
+            # Run optimization
+            results = self.bayes_optimizer.optimize(
+                evaluation_function=evaluate_hyperparams,
+                n_iterations=20,
+                maximize=True
+            )
+            
+            # Apply best parameters to actual model
+            if 'best_params' in results and results['best_params']:
+                best_params = results['best_params']
+                
+                # Update model parameters if possible
+                if HAS_XGBOOST and hasattr(self.apr_model, 'model') and self.apr_model.model:
+                    xgb_params = {k: v for k, v in best_params.items() 
+                                  if k in ['learning_rate', 'max_depth', 'subsample', 
+                                          'colsample_bytree', 'reg_alpha', 'reg_lambda']}
+                    self.apr_model.model.set_params(**xgb_params)
+                    logger.info(f"Applied best hyperparameters to APR model: {xgb_params}")
+            
+            return results
+        else:
+            return {"error": "Bayesian optimizer not available"}
+    
+    def _evolve_with_neural_architecture_search(self, 
+                                              training_data: List[Dict[str, Any]], 
+                                              validation_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Evolve models using neural architecture search
+        
+        Args:
+            training_data: Training data
+            validation_data: Validation data
+            
+        Returns:
+            Architecture search results
+        """
+        logger.info("Starting neural architecture search")
+        
+        if not HAS_NEURAL_SEARCH or not self.neural_architecture_search:
+            return {"error": "Neural architecture search not available"}
+        
+        if not HAS_TENSORFLOW:
+            return {"error": "TensorFlow not available for neural architecture search"}
+        
+        try:
+            # Prepare data for neural architecture search
+            # We need to convert pool data to numpy arrays for neural networks
+            feature_engineer = FeatureEngineer()
+            X_train_df = feature_engineer.create_features(training_data)
+            
+            # Scale features
+            X_train_df = feature_engineer.scale_features(X_train_df)
+            
+            # Extract target variable (APR change)
+            target_col = f'apr_change_{self.prediction_horizon}d'
+            if target_col in X_train_df.columns:
+                y_train = X_train_df[target_col].values
+                X_train_df = X_train_df.drop(columns=[target_col])
+            else:
+                # Fallback to apr_change_7d if specific horizon not available
+                y_train = X_train_df['apr_change_7d'].values if 'apr_change_7d' in X_train_df.columns else np.zeros(len(X_train_df))
+                if 'apr_change_7d' in X_train_df.columns:
+                    X_train_df = X_train_df.drop(columns=['apr_change_7d'])
+            
+            # Convert to numpy arrays
+            X_train = X_train_df.values
+            
+            # Do the same for validation data
+            X_val_df = feature_engineer.create_features(validation_data)
+            X_val_df = feature_engineer.scale_features(X_val_df)
+            
+            if target_col in X_val_df.columns:
+                y_val = X_val_df[target_col].values
+                X_val_df = X_val_df.drop(columns=[target_col])
+            else:
+                y_val = X_val_df['apr_change_7d'].values if 'apr_change_7d' in X_val_df.columns else np.zeros(len(X_val_df))
+                if 'apr_change_7d' in X_val_df.columns:
+                    X_val_df = X_val_df.drop(columns=['apr_change_7d'])
+            
+            X_val = X_val_df.values
+            
+            # Update neural architecture search input shape
+            self._neural_architecture_search = ArchitectureSearch(
+                input_shape=(X_train.shape[1],),  # Feature dimension
+                output_shape=1  # Regression target
+            )
+            
+            # Run a simplified search (for demonstration)
+            best_arch = self.neural_architecture_search.run_search(
+                train_data=(X_train, y_train),
+                val_data=(X_val, y_val),
+                generations=2,  # Limit for demonstration
+                population_size=5,
+                epochs=5
+            )
+            
+            if best_arch:
+                # We could create and save the best model here
+                # For demonstration, we'll just return the architecture details
+                return {
+                    "best_architecture_id": best_arch.architecture_id,
+                    "layers": len(best_arch.layers),
+                    "fitness": best_arch.calculate_fitness(),
+                    "estimated_parameters": best_arch.estimate_complexity()
+                }
+            else:
+                return {"error": "No architecture found"}
+                
+        except Exception as e:
+            logger.error(f"Error in neural architecture search: {e}")
+            return {"error": str(e)}
+    
+    def _evolve_with_multi_agent_system(self, 
+                                       training_data: List[Dict[str, Any]], 
+                                       validation_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Evolve prediction capabilities using multi-agent system
+        
+        Args:
+            training_data: Training data
+            validation_data: Validation data
+            
+        Returns:
+            Multi-agent evolution results
+        """
+        logger.info("Starting multi-agent collective intelligence evolution")
+        
+        if not HAS_MULTI_AGENT or not self.multi_agent_system:
+            return {"error": "Multi-agent system not available"}
+        
+        try:
+            # Process some training examples through the multi-agent system
+            results = []
+            
+            # Take a subset of data for efficiency
+            sample_size = min(100, len(training_data))
+            training_sample = random.sample(training_data, sample_size)
+            
+            for pool_data in training_sample:
+                # Get target variable based on prediction horizon
+                target_col = f'apr_change_{self.prediction_horizon}d'
+                target_variable = "apr_change"  # Default
+                
+                # Use multi-agent prediction
+                prediction = self.multi_agent_system.predict(pool_data, target_variable)
+                
+                # If we have the true outcome, update the system
+                true_value = pool_data.get(target_col, pool_data.get('apr_change_7d'))
+                if true_value is not None:
+                    self.multi_agent_system.update_with_outcome(prediction['task_id'], true_value)
+                
+                results.append({
+                    "pool_id": pool_data.get('id', 'unknown'),
+                    "prediction": prediction['value'],
+                    "confidence": prediction['confidence']
+                })
+            
+            # Trigger an evolutionary step in the multi-agent system
+            self.multi_agent_system._evolutionary_step()
+            
+            # Get system metrics
+            system_state = {
+                "agent_count": len(self.multi_agent_system.agents),
+                "tasks_completed": self.multi_agent_system.system_metrics['tasks_completed'],
+                "knowledge_items": self.multi_agent_system.system_metrics['knowledge_items'],
+                "evolution_cycles": self.multi_agent_system.system_metrics['evolution_cycles'],
+                "avg_prediction_error": self.multi_agent_system.system_metrics['avg_prediction_error']
+            }
+            
+            return {
+                "sample_predictions": results[:5],  # Show just a few
+                "system_state": system_state
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in multi-agent evolution: {e}")
+            return {"error": str(e)}
+    
+    def _extract_performance_metrics(self, validation_results: Dict[str, Any]) -> Dict[str, float]:
+        """Extract key performance metrics from validation results"""
+        metrics = {}
+        
+        # Extract metrics from various models
+        if 'models' in validation_results:
+            for model_name, model_metrics in validation_results['models'].items():
+                if 'error' not in model_metrics:
+                    for metric_name, value in model_metrics.items():
+                        if isinstance(value, (int, float)):
+                            metrics[f"{model_name}_{metric_name}"] = value
+        
+        return metrics
+    
+    def _calculate_improvement(self, initial_metrics: Dict[str, float], 
+                              final_metrics: Dict[str, float]) -> float:
+        """Calculate overall improvement percentage"""
+        if not initial_metrics or not final_metrics:
+            return 0.0
+            
+        # Find common metrics
+        common_metrics = set(initial_metrics.keys()) & set(final_metrics.keys())
+        if not common_metrics:
+            return 0.0
+            
+        # Calculate improvement for each metric
+        improvements = []
+        for metric in common_metrics:
+            if 'mae' in metric or 'mse' in metric or 'error' in metric:
+                # For error metrics, lower is better
+                if initial_metrics[metric] > 0:  # Avoid division by zero
+                    improvement = (initial_metrics[metric] - final_metrics[metric]) / initial_metrics[metric] * 100
+                    improvements.append(improvement)
+            elif 'accuracy' in metric or 'score' in metric:
+                # For accuracy metrics, higher is better
+                if initial_metrics[metric] > 0:  # Avoid division by zero
+                    improvement = (final_metrics[metric] - initial_metrics[metric]) / initial_metrics[metric] * 100
+                    improvements.append(improvement)
+        
+        # Average improvement
+        if improvements:
+            return sum(improvements) / len(improvements)
+        return 0.0
+    
+    def _estimate_model_parameters(self) -> int:
+        """Estimate total number of parameters in all models"""
+        total_params = 0
+        
+        # XGBoost model parameters
+        if hasattr(self.apr_model, 'model') and self.apr_model.model is not None:
+            if hasattr(self.apr_model.model, 'get_booster'):
+                # Get number of trees and their depth
+                booster = self.apr_model.model.get_booster()
+                trees = booster.get_dump()
+                for tree in trees:
+                    # Rough estimate: count nodes in the tree dump
+                    total_params += tree.count('\n') + 1
+            else:
+                # Rough estimate based on hyperparameters
+                if hasattr(self.apr_model.model, 'n_estimators'):
+                    n_trees = getattr(self.apr_model.model, 'n_estimators', 100)
+                    max_depth = getattr(self.apr_model.model, 'max_depth', 6)
+                    # Roughly 2^depth - 1 nodes per tree
+                    tree_params = 2 ** max_depth - 1
+                    total_params += n_trees * tree_params
+        
+        # LSTM model parameters (if any)
+        if hasattr(self.apr_model, 'lstm_model') and self.apr_model.lstm_model is not None:
+            # Keras models have a useful method for this
+            total_params += self.apr_model.lstm_model.count_params()
+        
+        return total_params
+    
+    def _save_evolution_state(self) -> None:
+        """Save state of all evolutionary components"""
+        # Save RL optimizer
+        self.rl_optimizer.save_state(os.path.join(MODEL_DIR, f"rl_optimizer_v{self.version}.json"))
+        
+        # Save multi-agent system (if available)
+        if self.multi_agent_system:
+            try:
+                self.multi_agent_system.save_state(os.path.join(MODEL_DIR, f"multi_agent_v{self.version}.pkl"))
+            except Exception as e:
+                logger.error(f"Error saving multi-agent system state: {e}")
+        
+        # Save evolution metrics
+        try:
+            metrics_path = os.path.join(HISTORY_DIR, "evolution_metrics.json")
+            with open(metrics_path, 'w') as f:
+                # Convert any non-serializable values
+                metrics_copy = deepcopy(self.evolution_metrics)
+                json.dump(metrics_copy, f, indent=2)
+        except Exception as e:
+            logger.error(f"Error saving evolution metrics: {e}")
     
     def auto_evolve(self, historical_data: List[Dict[str, Any]], min_improvement: float = 0.05) -> Dict[str, Any]:
         """
