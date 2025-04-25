@@ -15,6 +15,17 @@ try:
 except ImportError:
     HAS_EXTRACTOR = False
 
+# Attempt to import the advanced prediction engine
+try:
+    from advanced_prediction_engine import (
+        SelfEvolvingPredictionEngine, 
+        predict_pool_performance,
+        predict_multiple_pools
+    )
+    HAS_PREDICTION_ENGINE = True
+except ImportError:
+    HAS_PREDICTION_ENGINE = False
+
 # Set page configuration
 st.set_page_config(
     page_title="Solana Liquidity Pool Analysis",
@@ -824,6 +835,45 @@ def main():
         
         st.plotly_chart(fig, use_container_width=True)
         
+        # Advanced prediction engine explanation
+        st.subheader("Self-Evolving Prediction Technology")
+        
+        st.markdown("""
+        Our platform uses a sophisticated self-evolving prediction system that continually 
+        improves its accuracy over time. The system combines multiple machine learning approaches:
+        
+        1. **Ensemble Learning** - Multiple models work together to generate predictions
+        2. **Reinforcement Learning** - The system learns from the accuracy of past predictions
+        3. **LSTM Neural Networks** - Recognize complex patterns in time series data
+        4. **Adaptive Hyperparameter Optimization** - Self-tunes for optimal performance
+        
+        With each prediction cycle, the system evaluates its own performance and adjusts its
+        internal weights, feature selection, and model parameters to improve future predictions.
+        """)
+        
+        # If we have the prediction engine, show a button to run it
+        if HAS_PREDICTION_ENGINE:
+            st.write("#### Generate Advanced Predictions")
+            
+            # Create a demo using the advanced prediction engine
+            use_advanced_engine = st.checkbox("Use advanced prediction engine for pool analysis", value=True)
+            
+            if use_advanced_engine:
+                with st.expander("Advanced Prediction Settings", expanded=False):
+                    prediction_horizon = st.slider(
+                        "Prediction Horizon (Days)", 
+                        min_value=1, 
+                        max_value=30, 
+                        value=7
+                    )
+                    
+                    confidence_threshold = st.slider(
+                        "Minimum Confidence Threshold (%)", 
+                        min_value=0, 
+                        max_value=100, 
+                        value=60
+                    )
+        
         # Top predicted pools
         st.subheader("Top Growth Potential Pools")
         
@@ -831,29 +881,119 @@ def main():
         min_liquidity = 1_000_000  # $1M
         top_predictions = df[df['liquidity'] >= min_liquidity].nlargest(10, 'prediction_score')
         
-        # Create display data
-        top_pred_data = []
-        
-        for _, pool in top_predictions.iterrows():
-            # Format data
-            apr_change_7d = pool.get('apr_change_7d')
-            apr_change_icon = get_trend_icon(apr_change_7d)
+        # If we have advanced prediction engine and user wants to use it
+        if HAS_PREDICTION_ENGINE and 'use_advanced_engine' in locals() and use_advanced_engine:
+            with st.spinner("Generating advanced predictions using self-evolving AI..."):
+                try:
+                    # Process the top pools with the advanced engine
+                    top_pools_data = top_predictions.to_dict('records')
+                    
+                    # Initialize the prediction engine
+                    engine = SelfEvolvingPredictionEngine(prediction_horizon=prediction_horizon)
+                    
+                    # Generate predictions
+                    advanced_predictions = []
+                    for pool in top_pools_data:
+                        prediction_result = engine.predict(pool)
+                        
+                        # Extract prediction data
+                        pred_dict = prediction_result.to_dict()
+                        
+                        # Calculate overall score
+                        score = pred_dict.get('prediction_score', 0)
+                        
+                        # Only include if it meets confidence threshold
+                        if score >= confidence_threshold:
+                            # Add prediction details
+                            pool['advanced_prediction'] = pred_dict
+                            advanced_predictions.append(pool)
+                    
+                    # Sort by prediction score
+                    advanced_predictions.sort(key=lambda x: x.get('advanced_prediction', {}).get('prediction_score', 0), reverse=True)
+                    
+                    # Create display data
+                    top_pred_data = []
+                    
+                    for pool in advanced_predictions[:10]:  # Take up to 10
+                        # Format data
+                        apr_change_7d = pool.get('apr_change_7d')
+                        apr_change_icon = get_trend_icon(apr_change_7d)
+                        
+                        tvl_change_7d = pool.get('tvl_change_7d')
+                        tvl_change_icon = get_trend_icon(tvl_change_7d)
+                        
+                        category_html = get_category_badge(pool.get('category'))
+                        
+                        # Get advanced prediction data
+                        adv_pred = pool.get('advanced_prediction', {})
+                        pred_values = adv_pred.get('prediction_values', {})
+                        
+                        # Get predicted changes
+                        pred_apr_change = pred_values.get('apr_change', 0)
+                        pred_tvl_change = pred_values.get('tvl_change_percent', 0)
+                        
+                        top_pred_data.append({
+                            "Name": pool['name'],
+                            "DEX": pool['dex'],
+                            "Category": category_html,
+                            "Current APR": format_percentage(pool['apr']),
+                            "Predicted APR": format_percentage(pred_values.get('future_apr', pool['apr'])),
+                            "APR Trend": f"{get_trend_icon(pred_apr_change)} {format_percentage(abs(pred_apr_change)) if pred_apr_change is not None else 'N/A'}",
+                            "TVL": format_currency(pool['liquidity']),
+                            "TVL Trend": f"{get_trend_icon(pred_tvl_change)} {format_percentage(abs(pred_tvl_change)) if pred_tvl_change is not None else 'N/A'}",
+                            "AI Score": f"{adv_pred.get('prediction_score', 0):.0f}/100"
+                        })
+                
+                except Exception as e:
+                    st.error(f"Error using advanced prediction engine: {str(e)}")
+                    # Fall back to basic predictions
+                    # Create display data from basic predictions
+                    top_pred_data = []
+                    
+                    for _, pool in top_predictions.iterrows():
+                        # Format data
+                        apr_change_7d = pool.get('apr_change_7d')
+                        apr_change_icon = get_trend_icon(apr_change_7d)
+                        
+                        tvl_change_7d = pool.get('tvl_change_7d')
+                        tvl_change_icon = get_trend_icon(tvl_change_7d)
+                        
+                        category_html = get_category_badge(pool.get('category'))
+                        
+                        top_pred_data.append({
+                            "Name": pool['name'],
+                            "DEX": pool['dex'],
+                            "Category": category_html,
+                            "TVL": format_currency(pool['liquidity']),
+                            "TVL Change": f"{tvl_change_icon} {format_percentage(abs(tvl_change_7d)) if tvl_change_7d is not None else 'N/A'}",
+                            "APR": format_percentage(pool['apr']),
+                            "APR Change": f"{apr_change_icon} {format_percentage(abs(apr_change_7d)) if apr_change_7d is not None else 'N/A'}",
+                            "Score": f"{pool['prediction_score']:.0f}/100"
+                        })
+        else:
+            # Create display data from basic predictions
+            top_pred_data = []
             
-            tvl_change_7d = pool.get('tvl_change_7d')
-            tvl_change_icon = get_trend_icon(tvl_change_7d)
-            
-            category_html = get_category_badge(pool.get('category'))
-            
-            top_pred_data.append({
-                "Name": pool['name'],
-                "DEX": pool['dex'],
-                "Category": category_html,
-                "TVL": format_currency(pool['liquidity']),
-                "TVL Change": f"{tvl_change_icon} {format_percentage(abs(tvl_change_7d)) if tvl_change_7d is not None else 'N/A'}",
-                "APR": format_percentage(pool['apr']),
-                "APR Change": f"{apr_change_icon} {format_percentage(abs(apr_change_7d)) if apr_change_7d is not None else 'N/A'}",
-                "Score": f"{pool['prediction_score']:.0f}/100"
-            })
+            for _, pool in top_predictions.iterrows():
+                # Format data
+                apr_change_7d = pool.get('apr_change_7d')
+                apr_change_icon = get_trend_icon(apr_change_7d)
+                
+                tvl_change_7d = pool.get('tvl_change_7d')
+                tvl_change_icon = get_trend_icon(tvl_change_7d)
+                
+                category_html = get_category_badge(pool.get('category'))
+                
+                top_pred_data.append({
+                    "Name": pool['name'],
+                    "DEX": pool['dex'],
+                    "Category": category_html,
+                    "TVL": format_currency(pool['liquidity']),
+                    "TVL Change": f"{tvl_change_icon} {format_percentage(abs(tvl_change_7d)) if tvl_change_7d is not None else 'N/A'}",
+                    "APR": format_percentage(pool['apr']),
+                    "APR Change": f"{apr_change_icon} {format_percentage(abs(apr_change_7d)) if apr_change_7d is not None else 'N/A'}",
+                    "Score": f"{pool['prediction_score']:.0f}/100"
+                })
         
         # Convert to DataFrame
         top_pred_df = pd.DataFrame(top_pred_data)
