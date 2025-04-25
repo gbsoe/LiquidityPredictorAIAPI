@@ -1,8 +1,8 @@
-# SolPool Insight API Documentation
+# FiLot API Documentation
 
 ## Overview
 
-SolPool Insight provides a powerful RESTful API for accessing comprehensive data on Solana-based liquidity pools across multiple DEXes. Our API includes real-time metrics, historical data, advanced predictions, and sophisticated filtering capabilities.
+FiLot provides a powerful RESTful API for accessing comprehensive data on Solana-based liquidity pools across multiple DEXes. Our API includes real-time metrics, historical data, advanced AI-powered predictions, and sophisticated filtering capabilities.
 
 With our API, you can:
 - Access data on thousands of liquidity pools across all major Solana DEXes
@@ -16,7 +16,7 @@ With our API, you can:
 ## Base URL
 
 ```
-https://api.solpool-insight.com/v1
+https://api.filot.io/v1
 ```
 
 ## Authentication
@@ -27,7 +27,7 @@ All API requests require an API key passed in the `X-API-Key` header:
 X-API-Key: your_api_key
 ```
 
-To obtain an API key, please [register for an account](https://solpool-insight.com/register) or contact us at api@solpool-insight.com.
+To obtain an API key, please [register for an account](https://filot.io/register) or contact us at api@filot.io.
 
 ## Rate Limiting
 
@@ -79,7 +79,7 @@ GET /pools
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solanapoolanalytics.com/v1/pools?dex=Raydium&min_tvl=1000000&min_apr=10" \
+curl -X GET "https://api.filot.io/v1/pools?dex=Raydium&min_tvl=1000000&min_apr=10" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -135,7 +135,7 @@ GET /pools/{pool_id}
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solanapoolanalytics.com/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2" \
+curl -X GET "https://api.filot.io/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -199,7 +199,7 @@ GET /pools/{pool_id}/history
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solanapoolanalytics.com/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/history?days=60&interval=day" \
+curl -X GET "https://api.filot.io/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/history?days=60&interval=day" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -249,7 +249,7 @@ GET /dexes/{dex_name}
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solanapoolanalytics.com/v1/dexes/Raydium" \
+curl -X GET "https://api.filot.io/v1/dexes/Raydium" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -305,7 +305,7 @@ GET /categories/{category_name}
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solanapoolanalytics.com/v1/categories/Meme" \
+curl -X GET "https://api.filot.io/v1/categories/Meme" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -364,7 +364,7 @@ Same as `/pools` endpoint.
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solanapoolanalytics.com/v1/tokens/BONK/pools?min_liquidity=1000000" \
+curl -X GET "https://api.filot.io/v1/tokens/BONK/pools?min_liquidity=1000000" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -409,7 +409,7 @@ GET /tokens/{token_symbol}
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solanapoolanalytics.com/v1/tokens/BONK" \
+curl -X GET "https://api.filot.io/v1/tokens/BONK" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -463,7 +463,7 @@ GET /tokens/{token_symbol}/price-history
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solanapoolanalytics.com/v1/tokens/BONK/price-history?days=60&interval=day" \
+curl -X GET "https://api.filot.io/v1/tokens/BONK/price-history?days=60&interval=day" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -515,7 +515,7 @@ GET /predictions
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solanapoolanalytics.com/v1/predictions?min_score=80&category=Meme" \
+curl -X GET "https://api.filot.io/v1/predictions?min_score=80&category=Meme" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -551,6 +551,80 @@ curl -X GET "https://api.solanapoolanalytics.com/v1/predictions?min_score=80&cat
     },
     // More predictions...
   ]
+}
+```
+
+### Get NLP Reports
+
+Generate AI-powered analysis reports for pools and market trends.
+
+```
+POST /reports/generate
+```
+
+#### Request Body
+
+```json
+{
+  "report_type": "market",
+  "parameters": {
+    "detail_level": "standard",
+    "include_predictions": true,
+    "timeframe": "7d"
+  }
+}
+```
+
+Valid report_type values:
+- `market`: Overall market analysis and trends
+- `pool`: Analysis of a specific pool (requires pool_id in parameters)
+- `custom`: Custom analysis (requires query in parameters)
+
+#### Example Request (Market Report)
+
+```bash
+curl -X POST "https://api.filot.io/v1/reports/generate" \
+  -H "X-API-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "report_type": "market",
+    "parameters": {
+      "detail_level": "detailed",
+      "include_predictions": true,
+      "timeframe": "7d"
+    }
+  }'
+```
+
+#### Example Request (Pool Report)
+
+```bash
+curl -X POST "https://api.filot.io/v1/reports/generate" \
+  -H "X-API-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "report_type": "pool",
+    "parameters": {
+      "pool_id": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+      "detail_level": "detailed",
+      "include_historical": true
+    }
+  }'
+```
+
+#### Example Response
+
+```json
+{
+  "status": "success",
+  "report": {
+    "id": "report_4321abcd",
+    "generated_at": "2025-04-25T14:30:25Z",
+    "report_type": "market",
+    "content": "# Solana DeFi Market Report\n\n## Market Overview\n\nThe Solana DeFi ecosystem has shown significant growth over the past week with total liquidity increasing by 8.3% to reach $3.2B across all DEXes. Trading volume has surged by 12.7%, indicating heightened market activity.\n\n## Key Metrics\n\n- **Total Liquidity**: $3.2B (+8.3% WoW)\n- **24h Trading Volume**: $487M (+12.7% WoW)\n- **Average APR**: 14.8% (+0.9% WoW)\n\n## Trending Categories\n\n### Meme Coins\nMeme coins continue to demonstrate remarkable growth, with a 23% increase in total liquidity...",
+    "summary": "Market growth of 8.3% in TVL and 12.7% in volume, with meme coins leading at 23% growth. Average APR increased to 14.8%. Top prediction: SOL/USDC pool expected to increase by 15%.",
+    "data_timestamp": "2025-04-25T12:00:00Z"
+  }
 }
 ```
 
@@ -601,7 +675,7 @@ GET /mobile/pools/summary
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solpool-insight.com/v1/mobile/pools/summary?category=Meme&limit=10" \
+curl -X GET "https://api.filot.io/v1/mobile/pools/summary?category=Meme&limit=10" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -643,7 +717,7 @@ GET /mobile/pools/{pool_id}
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solpool-insight.com/v1/mobile/pools/M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K" \
+curl -X GET "https://api.filot.io/v1/mobile/pools/M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -694,7 +768,7 @@ GET /mobile/predictions/top
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solpool-insight.com/v1/mobile/predictions/top?limit=5" \
+curl -X GET "https://api.filot.io/v1/mobile/predictions/top?limit=5" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -744,7 +818,7 @@ GET /mobile/pools/{pool_id}/chart
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solpool-insight.com/v1/mobile/pools/M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K/chart?days=30&metric=apr" \
+curl -X GET "https://api.filot.io/v1/mobile/pools/M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K/chart?days=30&metric=apr" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -769,7 +843,7 @@ curl -X GET "https://api.solpool-insight.com/v1/mobile/pools/M2mx93ekt1fmXSVkTrU
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solanapoolanalytics.com/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/similar?limit=10" \
+curl -X GET "https://api.filot.io/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/similar?limit=10" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -810,7 +884,7 @@ GET /market-overview
 #### Example Request
 
 ```bash
-curl -X GET "https://api.solanapoolanalytics.com/v1/market-overview" \
+curl -X GET "https://api.filot.io/v1/market-overview" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -983,6 +1057,6 @@ Contact us to set up webhook notifications.
 
 ## Support
 
-For API support, please contact api@solanapoolanalytics.com.
+For API support, please contact api@filot.io.
 
 Documentation last updated: April 25, 2025
