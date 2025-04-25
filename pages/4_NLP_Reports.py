@@ -98,6 +98,11 @@ def get_nlp_generator():
 
 nlp_generator = get_nlp_generator()
 
+# Add FiLot logo to sidebar
+st.sidebar.image("static/filot_logo.svg", width=100)
+st.sidebar.markdown("### FiLot Analytics")
+st.sidebar.markdown("---")
+
 # API key management
 if not nlp_generator.has_api_key():
     st.sidebar.markdown("### OpenAI API Key Required")

@@ -41,7 +41,7 @@ except ImportError:
 
 # Set page configuration
 st.set_page_config(
-    page_title="Solana Liquidity Pool Analysis",
+    page_title="FiLot - Solana Liquidity Pool Analysis",
     page_icon="💧",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -558,7 +558,15 @@ def generate_sample_data():
     return pools
 
 def main():
-    st.title("Solana Liquidity Pool Analysis")
+    # Display logo and title
+    col_logo, col_title = st.columns([1, 4])
+    
+    with col_logo:
+        st.image("static/filot_logo.svg", width=120)
+    
+    with col_title:
+        st.title("FiLot - Solana Liquidity Pool Analysis")
+        st.markdown("Advanced analysis and predictions for Solana DeFi liquidity pools")
     
     # Introduction
     st.markdown("""
