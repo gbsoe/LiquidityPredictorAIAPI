@@ -1,8 +1,8 @@
-# Raydium API Service Requirements
+# SolPool Insight API Requirements
 
 ## API Overview
 
-The Solana Liquidity Pool Analysis System requires access to a Raydium API service that provides data about liquidity pools on the Solana blockchain. This document outlines the required endpoints, expected data formats, and authentication requirements for the API service.
+SolPool Insight requires a comprehensive API system that provides extensive data about liquidity pools across multiple Solana DEXes, including Raydium, Orca, Jupiter, and others. The API must support thousands of pools, including meme tokens and emerging projects, with both standard and mobile-optimized endpoints. This document outlines the required endpoints, expected data formats, authentication requirements, and mobile-specific considerations for the API service.
 
 ## Authentication
 

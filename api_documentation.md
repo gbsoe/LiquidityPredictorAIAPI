@@ -1,13 +1,22 @@
-# Solana Liquidity Pool Analysis API Documentation
+# SolPool Insight API Documentation
 
 ## Overview
 
-The Solana Liquidity Pool Analysis API provides programmatic access to comprehensive data on Solana-based liquidity pools across multiple DEXes, including historical metrics, predictions, and advanced filtering capabilities.
+SolPool Insight provides a powerful RESTful API for accessing comprehensive data on Solana-based liquidity pools across multiple DEXes. Our API includes real-time metrics, historical data, advanced predictions, and sophisticated filtering capabilities.
+
+With our API, you can:
+- Access data on thousands of liquidity pools across all major Solana DEXes
+- Retrieve historical performance metrics with custom timeframes
+- Get advanced ML-based predictions on future pool performance
+- Filter and sort pools based on various metrics
+- Compare and analyze pools across different categories
+- Access specialized meme coin analytics
+- Use mobile-optimized endpoints for lightweight data retrieval
 
 ## Base URL
 
 ```
-https://api.solanapoolanalytics.com/v1
+https://api.solpool-insight.com/v1
 ```
 
 ## Authentication
@@ -18,14 +27,22 @@ All API requests require an API key passed in the `X-API-Key` header:
 X-API-Key: your_api_key
 ```
 
-To obtain an API key, please contact us at api@solanapoolanalytics.com.
+To obtain an API key, please [register for an account](https://solpool-insight.com/register) or contact us at api@solpool-insight.com.
 
 ## Rate Limiting
 
-Requests are limited to:
-- Free tier: 100 requests per hour
-- Standard tier: 1,000 requests per hour
-- Enterprise tier: 10,000 requests per hour
+API request limits by tier:
+- **Free tier**: 100 requests per hour
+- **Standard tier**: 1,000 requests per hour
+- **Enterprise tier**: 10,000 requests per hour
+- **Mobile tier**: 500 requests per hour (optimized for mobile apps)
+
+Rate limiting headers are included in all responses:
+```
+X-Rate-Limit-Limit: 1000
+X-Rate-Limit-Remaining: 985
+X-Rate-Limit-Reset: 1619231400
+```
 
 ## Endpoints
 
@@ -558,6 +575,196 @@ GET /pools/{pool_id}/similar
 | limit        | integer | Maximum number of similar pools to return | 5     | 10      |
 | metrics      | string  | Comma-separated metrics to use for similarity | tvl,apr,volume | volatility,apr |
 | min_similarity | number | Minimum similarity score (0-100)      | 50      | 70      |
+
+## Mobile-Optimized Endpoints
+
+The following endpoints are specifically optimized for mobile applications, providing lightweight responses with essential data to minimize bandwidth usage and improve loading times on mobile devices.
+
+### Get Mobile Pool Summary
+
+Retrieve a lightweight summary of pools, optimized for mobile devices.
+
+```
+GET /mobile/pools/summary
+```
+
+#### Query Parameters
+
+| Parameter    | Type   | Description                                  | Default | Example    |
+|--------------|--------|----------------------------------------------|---------|------------|
+| category     | string | Filter by pool category                      | null    | Meme       |
+| dex          | string | Filter by DEX name                           | null    | Raydium    |
+| min_tvl      | number | Minimum TVL threshold                        | 0       | 1000000    |
+| limit        | integer| Maximum number of results                    | 20      | 50         |
+| sort_by      | string | Field to sort by                             | liquidity| apr       |
+
+#### Example Request
+
+```bash
+curl -X GET "https://api.solpool-insight.com/v1/mobile/pools/summary?category=Meme&limit=10" \
+  -H "X-API-Key: your_api_key"
+```
+
+#### Example Response
+
+```json
+{
+  "status": "success",
+  "count": 10,
+  "data": [
+    {
+      "id": "M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K",
+      "name": "BONK/USDC",
+      "dex": "Meteora",
+      "category": "Meme",
+      "apr": 25.67,
+      "prediction_score": 92,
+      "trend": "increasing"
+    },
+    // More pool summaries...
+  ]
+}
+```
+
+### Get Mobile Pool Details
+
+Retrieve mobile-optimized details for a specific pool.
+
+```
+GET /mobile/pools/{pool_id}
+```
+
+#### Path Parameters
+
+| Parameter | Type   | Description                   | Example                                      |
+|-----------|--------|-------------------------------|----------------------------------------------|
+| pool_id   | string | The unique identifier of the pool | M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K |
+
+#### Example Request
+
+```bash
+curl -X GET "https://api.solpool-insight.com/v1/mobile/pools/M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K" \
+  -H "X-API-Key: your_api_key"
+```
+
+#### Example Response
+
+```json
+{
+  "status": "success",
+  "data": {
+    "id": "M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K",
+    "name": "BONK/USDC",
+    "dex": "Meteora",
+    "category": "Meme",
+    "token1_symbol": "BONK",
+    "token2_symbol": "USDC",
+    "liquidity": 5432167.89,
+    "volume_24h": 1987654.32,
+    "apr": 25.67,
+    "apr_change_24h": 1.32,
+    "apr_change_7d": 3.54,
+    "tvl_change_24h": 2.1,
+    "tvl_change_7d": 5.8,
+    "prediction_score": 92,
+    "prediction_summary": "Likely to increase APR by 2-4% in the next 7 days",
+    "key_factors": [
+      "Strong positive APR trend",
+      "Increasing volume"
+    ]
+  }
+}
+```
+
+### Get Mobile Top Predictions
+
+Retrieve top predictions in a mobile-optimized format.
+
+```
+GET /mobile/predictions/top
+```
+
+#### Query Parameters
+
+| Parameter    | Type   | Description                                   | Default | Example    |
+|--------------|--------|-----------------------------------------------|---------|------------|
+| category     | string | Filter by pool category                       | null    | Meme       |
+| limit        | integer| Maximum number of results                     | 10      | 20         |
+
+#### Example Request
+
+```bash
+curl -X GET "https://api.solpool-insight.com/v1/mobile/predictions/top?limit=5" \
+  -H "X-API-Key: your_api_key"
+```
+
+#### Example Response
+
+```json
+{
+  "status": "success",
+  "count": 5,
+  "data": [
+    {
+      "pool_id": "B0nkD2EW5B0nK1nG51mECoiNSolANaPooL5Us3",
+      "name": "BONK/SOL",
+      "dex": "Raydium",
+      "category": "Meme",
+      "prediction_score": 96,
+      "predicted_change": "+32.4%",
+      "confidence": "High",
+      "summary": "Strong APR increase expected"
+    },
+    // More predictions...
+  ]
+}
+```
+
+### Get Mobile Historical Chart Data
+
+Retrieve optimized chart data for mobile visualization.
+
+```
+GET /mobile/pools/{pool_id}/chart
+```
+
+#### Path Parameters
+
+| Parameter | Type   | Description                   | Example                                      |
+|-----------|--------|-------------------------------|----------------------------------------------|
+| pool_id   | string | The unique identifier of the pool | M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K |
+
+#### Query Parameters
+
+| Parameter | Type    | Description                               | Default | Example |
+|-----------|---------|-------------------------------------------|---------|---------|
+| days      | integer | Number of days of history to retrieve     | 30      | 60      |
+| metric    | string  | Metric to chart ('apr', 'tvl', 'volume') | apr     | tvl     |
+
+#### Example Request
+
+```bash
+curl -X GET "https://api.solpool-insight.com/v1/mobile/pools/M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K/chart?days=30&metric=apr" \
+  -H "X-API-Key: your_api_key"
+```
+
+#### Example Response
+
+```json
+{
+  "status": "success",
+  "pool_id": "M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K",
+  "metric": "apr",
+  "unit": "%",
+  "data": {
+    "labels": ["Apr 1", "Apr 8", "Apr 15", "Apr 22", "Apr 29"],
+    "values": [23.4, 24.2, 24.8, 25.1, 25.7],
+    "min": 23.4,
+    "max": 25.7,
+    "avg": 24.64
+  }
+}
+```
 
 #### Example Request
 
