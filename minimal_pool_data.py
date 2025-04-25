@@ -325,9 +325,9 @@ def load_data():
                     # Add extra logging
                     st.info(f"Connecting to RPC endpoint: {custom_rpc[:10]}...{custom_rpc[-10:] if custom_rpc else ''}")
                     
-                    # Initialize extractor with better error handling
+                    # Initialize extractor with better error handling - limit pools to 3 per DEX to avoid rate limits
                     extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
-                    pools = extractor.extract_and_enrich_pools(max_per_dex=10)
+                    pools = extractor.extract_and_enrich_pools(max_per_dex=3)
                     
                     # Verify the data is not empty
                     if pools and len(pools) > 0:
@@ -385,13 +385,12 @@ def load_data():
     if HAS_EXTRACTOR:
         try:
             st.error("Failed to get data. Attempting one final fetch from blockchain...")
-            # Use one of these alternative endpoints for Solana mainnet
+            # Use reliable public endpoints for Solana mainnet
             rpc_endpoints = [
-                "https://mainnet.helius-rpc.com/?api-key=acd3e611-d3cd-4405-9721-2becfe0aeea6",  # Helius endpoint (primary)
-                "https://api.mainnet-beta.solana.com",
+                "https://api.mainnet-beta.solana.com",  # Official Solana endpoint
                 "https://solana-api.projectserum.com", 
-                "https://free.rpcpool.com",
-                "https://solana.blockdaemon.com"
+                "https://rpc.ankr.com/solana",  # Ankr public endpoint
+                "https://solana.public-rpc.com"  # Another public endpoint
             ]
             
             # Try each endpoint until one works
@@ -399,7 +398,7 @@ def load_data():
                 try:
                     st.info(f"Trying RPC endpoint: {endpoint}")
                     extractor = OnChainExtractor(rpc_endpoint=endpoint)
-                    pools = extractor.extract_and_enrich_pools(max_per_dex=10)
+                    pools = extractor.extract_and_enrich_pools(max_per_dex=3)
                     if pools and len(pools) > 0:
                         st.success(f"Successfully connected to {endpoint}")
                         break

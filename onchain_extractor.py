@@ -492,19 +492,26 @@ class OnChainExtractor:
             # Get account info
             account_info = self.get_account_info(token_address, encoding="jsonParsed")
             
-            if account_info and "value" in account_info:
-                data = account_info["value"]
+            if account_info and isinstance(account_info, dict) and "value" in account_info:
+                data = account_info.get("value", {})
+                if not data or not isinstance(data, dict):
+                    logger.warning(f"Invalid account info value for token {token_address}")
+                    data = {}
                 
                 # Extract data based on token program
                 if data.get("owner") == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA":
                     # SPL token
-                    token_data = data.get("data", {}).get("parsed", {}).get("info", {})
+                    data_obj = data.get("data", {})
+                    if not isinstance(data_obj, dict):
+                        data_obj = {}
                     
-                    # Try to get symbol and name from extensions or other sources
-                    # This is simplified - in a real implementation you would need to:
-                    # 1. Get the metadata PDA for the token
-                    # 2. Fetch the metadata account
-                    # 3. Parse the Metaplex metadata format
+                    parsed = data_obj.get("parsed", {})
+                    if not isinstance(parsed, dict):
+                        parsed = {}
+                    
+                    token_data = parsed.get("info", {})
+                    if not isinstance(token_data, dict):
+                        token_data = {}
                     
                     # For now, use a simplified approach with decimal information
                     decimals = token_data.get("decimals", 0)
@@ -801,11 +808,29 @@ class OnChainExtractor:
         """
         all_pools = []
         
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        # Process major DEXes first, one at a time to avoid rate limiting
+        # This is more reliable than concurrent processing with free tier RPC endpoints
+        major_dexes = ["Raydium", "Orca", "Jupiter", "Saber"]
+        other_dexes = [dex for dex in DEX_PROGRAMS.keys() if dex not in major_dexes]
+        
+        # Process major DEXes sequentially
+        for dex in major_dexes:
+            try:
+                logger.info(f"Processing major DEX: {dex}")
+                pools = self.extract_pools_from_dex(dex, max_per_dex)
+                all_pools.extend(pools)
+                logger.info(f"Added {len(pools)} pools from {dex}")
+                # Add delay between major DEXes to avoid rate limiting
+                time.sleep(2.0)
+            except Exception as e:
+                logger.error(f"Error extracting pools from {dex}: {e}")
+        
+        # Process other DEXes with limited concurrency
+        with ThreadPoolExecutor(max_workers=2) as executor:
             # Submit extraction tasks for each DEX
             futures = {
                 executor.submit(self.extract_pools_from_dex, dex, max_per_dex): dex
-                for dex in DEX_PROGRAMS.keys()
+                for dex in other_dexes
             }
             
             # Process results as they complete
