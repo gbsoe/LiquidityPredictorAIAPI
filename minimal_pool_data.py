@@ -559,10 +559,10 @@ def generate_sample_data():
 
 def main():
     # Display logo and title
-    col_logo, col_title = st.columns([1, 4])
+    col_logo, col_title = st.columns([1, 3])
     
     with col_logo:
-        st.image("static/filot_logo.svg", width=120)
+        st.image("static/filot_logo_new.png", width=150)
     
     with col_title:
         st.title("FiLot - Solana Liquidity Pool Analysis")

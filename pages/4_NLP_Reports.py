@@ -99,7 +99,7 @@ def get_nlp_generator():
 nlp_generator = get_nlp_generator()
 
 # Add FiLot logo to sidebar
-st.sidebar.image("static/filot_logo.svg", width=100)
+st.sidebar.image("static/filot_logo_new.png", width=130)
 st.sidebar.markdown("### FiLot Analytics")
 st.sidebar.markdown("---")
 
