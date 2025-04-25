@@ -329,20 +329,33 @@ def load_data():
                     custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", None)
             
             with st.spinner("Extracting pool data from Solana blockchain..."):
-                extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
-                pools = extractor.extract_and_enrich_pools(max_per_dex=10)
-                
-                # Verify the data is not empty
-                if pools and len(pools) > 0:
-                    # Save to cache
-                    try:
-                        with open(cache_file, "w") as f:
-                            json.dump(pools, f, indent=2)
-                    except Exception as e:
-                        st.warning(f"Error saving data to cache: {e}")
+                try:
+                    # Add extra logging
+                    st.info(f"Connecting to RPC endpoint: {custom_rpc[:10]}...{custom_rpc[-10:] if custom_rpc else ''}")
                     
-                    return pools
-                else:
+                    # Initialize extractor with better error handling
+                    extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
+                    pools = extractor.extract_and_enrich_pools(max_per_dex=10)
+                    
+                    # Verify the data is not empty
+                    if pools and len(pools) > 0:
+                        st.success(f"Successfully extracted {len(pools)} pools from blockchain")
+                        # Save to cache
+                        try:
+                            with open(cache_file, "w") as f:
+                                json.dump(pools, f, indent=2)
+                            st.info(f"Data saved to cache file: {cache_file}")
+                        except Exception as e:
+                            st.warning(f"Error saving data to cache: {e}")
+                        
+                        return pools
+                    else:
+                        st.error("No pool data was returned from the blockchain")
+                except Exception as e:
+                    st.error(f"Error extracting data from blockchain: {str(e)}")
+                    st.info("Trying to use cached data instead...")
+                
+                # If we reach here, we either had an error or empty data from blockchain
                     st.warning("No pools returned from the blockchain extractor")
         except Exception as e:
             st.error(f"Error extracting pool data: {e}")

@@ -267,7 +267,11 @@ class OnChainExtractor:
         Args:
             rpc_endpoint: Solana RPC endpoint (defaults to public endpoint)
         """
-        self.rpc_endpoint = rpc_endpoint or os.getenv("SOLANA_RPC_ENDPOINT", DEFAULT_RPC_ENDPOINT)
+        endpoint = rpc_endpoint or os.getenv("SOLANA_RPC_ENDPOINT", DEFAULT_RPC_ENDPOINT)
+        # Ensure the endpoint has a protocol prefix
+        if endpoint and not endpoint.startswith(('http://', 'https://')):
+            endpoint = f"https://{endpoint}"
+        self.rpc_endpoint = endpoint
         self.session = self._create_session()
         self.cache = {}  # Simple memory cache
         self.token_metadata_cache = {}  # Cache for token metadata
