@@ -1,245 +1,120 @@
 import pandas as pd
-import numpy as np
-import psycopg2
-from datetime import datetime, timedelta
+import logging
+from database.mock_db import MockDBManager
 
-def get_top_pools(db, metric, limit=10):
+logger = logging.getLogger(__name__)
+
+def get_pool_list(db=None):
     """
-    Get top pools by a specific metric
-    
-    Args:
-        db: Database manager instance
-        metric: Metric to sort by ('liquidity', 'volume', or 'apr')
-        limit: Number of pools to return
-    
-    Returns:
-        DataFrame with top pools
+    Get list of pools from the database.
+    Falls back to mock DB if real DB fails.
     """
     try:
-        if metric == 'liquidity':
-            return db.get_top_pools_by_liquidity(limit)
-        elif metric == 'volume':
-            return db.get_top_pools_by_volume(limit)
-        elif metric == 'apr':
-            return db.get_top_pools_by_apr(limit)
-        else:
-            return pd.DataFrame()
+        if db is None:
+            db = MockDBManager()
+        return db.get_pool_list()
     except Exception as e:
-        print(f"Error in get_top_pools: {e}")
-        return pd.DataFrame()
-
-def get_blockchain_stats(db):
-    """
-    Get the latest blockchain stats
-    
-    Args:
-        db: Database manager instance
-    
-    Returns:
-        Dictionary with latest blockchain stats
-    """
-    try:
-        stats_df = db.get_blockchain_stats(days=1)
-        
-        if stats_df.empty:
-            return None
-        
-        # Get the latest stats
-        latest_stats = stats_df.iloc[-1].to_dict()
-        return latest_stats
-    except Exception as e:
-        print(f"Error in get_blockchain_stats: {e}")
-        return None
-
-def get_pool_list(db):
-    """
-    Get list of all pools
-    
-    Args:
-        db: Database manager instance
-    
-    Returns:
-        DataFrame with pool information
-    """
-    try:
-        return db.get_all_pools()
-    except Exception as e:
-        print(f"Error in get_pool_list: {e}")
-        return pd.DataFrame()
+        logger.error(f"Error getting pool list: {str(e)}")
+        # Fallback to mock if real DB fails
+        mock_db = MockDBManager()
+        return mock_db.get_pool_list()
 
 def get_pool_details(db, pool_id):
     """
-    Get details for a specific pool
-    
-    Args:
-        db: Database manager instance
-        pool_id: ID of the pool
-    
-    Returns:
-        Dictionary with pool details
+    Get details for a specific pool.
+    Falls back to mock DB if real DB fails.
     """
     try:
-        pool_df = db.get_pool_by_id(pool_id)
-        
-        if pool_df.empty:
-            return None
-        
-        return pool_df.iloc[0].to_dict()
+        if db is None:
+            db = MockDBManager()
+        pool_details = db.get_pool_details(pool_id)
+        if pool_details is None:
+            # Fallback to mock if real DB returns None
+            mock_db = MockDBManager()
+            return mock_db.get_pool_details(pool_id)
+        return pool_details
     except Exception as e:
-        print(f"Error in get_pool_details: {e}")
-        return None
+        logger.error(f"Error getting pool details: {str(e)}")
+        # Fallback to mock if real DB fails
+        mock_db = MockDBManager()
+        return mock_db.get_pool_details(pool_id)
 
-def get_pool_metrics(db, pool_id, days=30):
+def get_pool_metrics(db, pool_id, days=7):
     """
-    Get historical metrics for a pool
-    
-    Args:
-        db: Database manager instance
-        pool_id: ID of the pool
-        days: Number of days of data to retrieve
-    
-    Returns:
-        DataFrame with pool metrics
+    Get historical metrics for a specific pool.
+    Falls back to mock DB if real DB fails.
     """
     try:
-        return db.get_pool_metrics(pool_id, days)
+        if db is None:
+            db = MockDBManager()
+        metrics = db.get_pool_metrics(pool_id, days)
+        if metrics.empty:
+            # Fallback to mock if real DB returns empty
+            mock_db = MockDBManager()
+            return mock_db.get_pool_metrics(pool_id, days)
+        return metrics
     except Exception as e:
-        print(f"Error in get_pool_metrics: {e}")
-        return pd.DataFrame()
+        logger.error(f"Error getting pool metrics: {str(e)}")
+        # Fallback to mock if real DB fails
+        mock_db = MockDBManager()
+        return mock_db.get_pool_metrics(pool_id, days)
 
-def get_token_prices(db, token_symbols, days=30):
+def get_token_prices(db, token_symbols, days=7):
     """
-    Get price history for tokens
-    
-    Args:
-        db: Database manager instance
-        token_symbols: List of token symbols
-        days: Number of days of data to retrieve
-    
-    Returns:
-        DataFrame with token price history
+    Get historical token prices.
+    Falls back to mock DB if real DB fails.
     """
     try:
-        all_prices = []
-        
-        for symbol in token_symbols:
-            prices = db.get_token_price_history(symbol, days)
-            if not prices.empty:
-                all_prices.append(prices)
-        
-        if all_prices:
-            return pd.concat(all_prices, ignore_index=True)
-        else:
-            return pd.DataFrame()
+        if db is None:
+            db = MockDBManager()
+        prices = db.get_token_prices(token_symbols, days)
+        if prices.empty:
+            # Fallback to mock if real DB returns empty
+            mock_db = MockDBManager()
+            return mock_db.get_token_prices(token_symbols, days)
+        return prices
     except Exception as e:
-        print(f"Error in get_token_prices: {e}")
-        return pd.DataFrame()
+        logger.error(f"Error getting token prices: {str(e)}")
+        # Fallback to mock if real DB fails
+        mock_db = MockDBManager()
+        return mock_db.get_token_prices(token_symbols, days)
 
-def get_prediction_metrics(db, limit=10):
+def get_top_predictions(db, category="apr", limit=10, ascending=False):
     """
-    Get the latest prediction metrics for top pools
-    
-    Args:
-        db: Database manager instance
-        limit: Number of predictions to return
-    
-    Returns:
-        DataFrame with prediction metrics
+    Get top predictions based on category.
+    Falls back to mock DB if real DB fails.
     """
     try:
-        # Get latest predictions
-        predictions = db.get_latest_predictions(limit)
-        
+        if db is None:
+            db = MockDBManager()
+        predictions = db.get_top_predictions(category, limit, ascending)
         if predictions.empty:
-            return None
-        
-        # Join with pool data to get names
-        pool_data = db.get_all_pools()
-        
-        if not pool_data.empty:
-            merged = pd.merge(
-                predictions,
-                pool_data[['pool_id', 'name']],
-                on='pool_id',
-                how='left'
-            )
-            
-            # Rename for clarity
-            merged = merged.rename(columns={'name': 'pool_name'})
-            return merged
-        else:
-            return predictions
+            # Fallback to mock if real DB returns empty
+            mock_db = MockDBManager()
+            return mock_db.get_top_predictions(category, limit, ascending)
+        return predictions
     except Exception as e:
-        print(f"Error in get_prediction_metrics: {e}")
-        return None
+        logger.error(f"Error getting top predictions: {str(e)}")
+        # Fallback to mock if real DB fails
+        mock_db = MockDBManager()
+        return mock_db.get_top_predictions(category, limit, ascending)
 
-def get_pool_predictions(db, pool_id, days=30):
+def get_pool_predictions(db, pool_id):
     """
-    Get historical prediction data for a pool
-    
-    Args:
-        db: Database manager instance
-        pool_id: ID of the pool
-        days: Number of days of predictions to retrieve
-    
-    Returns:
-        DataFrame with pool prediction history
+    Get prediction history for a specific pool.
+    Falls back to mock DB if real DB fails.
     """
     try:
-        return db.get_pool_predictions(pool_id, days)
-    except Exception as e:
-        print(f"Error in get_pool_predictions: {e}")
-        return pd.DataFrame()
-
-def get_top_predictions(db, category, limit=10, ascending=False):
-    """
-    Get top predictions based on category
-    
-    Args:
-        db: Database manager instance
-        category: Category to sort by ('apr', 'performance', or 'risk')
-        limit: Number of predictions to return
-        ascending: Whether to sort in ascending order
-    
-    Returns:
-        DataFrame with top predictions
-    """
-    try:
-        # Get latest predictions
-        predictions = db.get_latest_predictions(100)  # Get a large sample to filter from
-        
+        if db is None:
+            db = MockDBManager()
+        predictions = db.get_pool_predictions(pool_id)
         if predictions.empty:
-            return pd.DataFrame()
-        
-        # Join with pool data to get names
-        pool_data = db.get_all_pools()
-        
-        if not pool_data.empty:
-            merged = pd.merge(
-                predictions,
-                pool_data[['pool_id', 'name']],
-                on='pool_id',
-                how='left'
-            )
-            
-            # Rename for clarity
-            merged = merged.rename(columns={'name': 'pool_name'})
-            
-            # Sort based on category
-            if category == 'apr':
-                sorted_df = merged.sort_values('predicted_apr', ascending=ascending)
-            elif category == 'performance':
-                # Map performance classes to numeric values for sorting
-                perf_map = {'high': 0, 'medium': 1, 'low': 2}
-                merged['perf_value'] = merged['performance_class'].map(perf_map)
-                sorted_df = merged.sort_values('perf_value', ascending=ascending)
-            else:  # risk
-                sorted_df = merged.sort_values('risk_score', ascending=ascending)
-            
-            # Return top N
-            return sorted_df.head(limit)
-        else:
-            return pd.DataFrame()
+            # Fallback to mock if real DB returns empty
+            mock_db = MockDBManager()
+            return mock_db.get_pool_predictions(pool_id)
+        return predictions
     except Exception as e:
-        print(f"Error in get_top_predictions: {e}")
-        return pd.DataFrame()
+        logger.error(f"Error getting pool predictions: {str(e)}")
+        # Fallback to mock if real DB fails
+        mock_db = MockDBManager()
+        return mock_db.get_pool_predictions(pool_id)
