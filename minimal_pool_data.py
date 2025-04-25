@@ -517,6 +517,115 @@ def main():
     # Create tabs for different views
     tabs = st.tabs(["Overview", "Pool Explorer", "Insights & Predictions", "Pool IDs"])
     
+    # Tab 4: Pool IDs - Adding this first to ensure it's implemented
+    with tabs[3]:
+        st.header("Pool IDs")
+        st.write("Access and copy pool IDs for transactions and API integration")
+        
+        # Search box for quick ID lookup
+        st.subheader("Search for Pool ID")
+        search_term = st.text_input("Enter pool name or token symbol", "")
+        
+        # Filter pools based on search term
+        if search_term:
+            search_lower = search_term.lower()
+            search_results = df[
+                df['name'].str.lower().str.contains(search_lower) | 
+                df['token1_symbol'].str.lower().str.contains(search_lower) | 
+                df['token2_symbol'].str.lower().str.contains(search_lower)
+            ]
+        else:
+            search_results = df
+            
+        # DEX filter for Pool IDs tab
+        dex_options_ids = ['All'] + sorted(df['dex'].unique().tolist())
+        selected_dex_ids = st.selectbox("Filter by DEX", dex_options_ids, key="dex_filter_ids")
+        
+        if selected_dex_ids != 'All':
+            search_results = search_results[search_results['dex'] == selected_dex_ids]
+            
+        # Sort options
+        sort_options_ids = [
+            "Name (A-Z)", 
+            "TVL (High to Low)",
+            "APR (High to Low)",
+            "Prediction Score (High to Low)"
+        ]
+        sort_by_ids = st.selectbox("Sort by", sort_options_ids, key="sort_pools_ids")
+        
+        # Apply sorting
+        if sort_by_ids == "Name (A-Z)":
+            search_results = search_results.sort_values('name')
+        elif sort_by_ids == "TVL (High to Low)":
+            search_results = search_results.sort_values('liquidity', ascending=False)
+        elif sort_by_ids == "APR (High to Low)":
+            search_results = search_results.sort_values('apr', ascending=False)
+        elif sort_by_ids == "Prediction Score (High to Low)":
+            search_results = search_results.sort_values('prediction_score', ascending=False)
+            
+        # Display pool IDs in a table format
+        if len(search_results) > 0:
+            # Create a dataframe specifically for displaying pool IDs
+            pool_id_data = []
+            
+            for _, pool in search_results.iterrows():
+                pool_id_data.append({
+                    "Pool Name": pool['name'],
+                    "Tokens": f"{pool['token1_symbol']}/{pool['token2_symbol']}",
+                    "DEX": pool['dex'],
+                    "Pool ID": pool['id']
+                })
+                
+            pool_id_df = pd.DataFrame(pool_id_data)
+            
+            # Display pool IDs with a copy button feature
+            st.subheader(f"Found {len(pool_id_data)} pools")
+            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
+            st.write(pool_id_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Detailed view for individual pool ID
+            st.subheader("Get Individual Pool ID")
+            
+            # Create a selectbox for choosing a specific pool
+            pool_options = {}
+            for i, row in search_results.reset_index().iterrows():
+                display_name = f"{row['name']} ({row['dex']})"
+                pool_options[display_name] = i
+                
+            if pool_options:
+                selected_pool_name = st.selectbox(
+                    "Select a pool to view its ID", 
+                    list(pool_options.keys()),
+                    key="pool_id_selector"
+                )
+                
+                selected_idx = pool_options[selected_pool_name]
+                selected_pool = search_results.iloc[selected_idx]
+                
+                # Display the pool ID prominently
+                st.markdown("### Pool ID")
+                st.code(selected_pool['id'], language=None)
+                st.info("This Pool ID is required for transactions and API integration")
+                
+                # Additional pool details
+                st.markdown("### Pool Details")
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.write(f"**Name:** {selected_pool['name']}")
+                    st.write(f"**DEX:** {selected_pool['dex']}")
+                    st.write(f"**Category:** {selected_pool['category']}")
+                
+                with col2:
+                    st.write(f"**Token 1:** {selected_pool['token1_symbol']}")
+                    st.write(f"**Token 2:** {selected_pool['token2_symbol']}")
+                    st.write(f"**TVL:** {format_currency(selected_pool['liquidity'])}")
+            else:
+                st.warning("No pools found matching your search criteria")
+        else:
+            st.warning("No pools found matching your search criteria")
+    
     # Tab 1: Overview
     with tabs[0]:
         st.header("Market Overview")
