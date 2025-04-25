@@ -179,11 +179,25 @@ class DBManager:
         # For now, just return mock data
         return self.mock_db.get_top_predictions(category, limit, ascending)
     
-    def get_pool_predictions(self, pool_id):
-        """Get prediction history for a specific pool"""
-        if self.use_mock:
-            return self.mock_db.get_pool_predictions(pool_id)
+    def get_pool_predictions(self, pool_id, days=30):
+        """
+        Get prediction history for a specific pool
         
-        # Real implementation would query the database
-        # For now, just return mock data
-        return self.mock_db.get_pool_predictions(pool_id)
+        Args:
+            pool_id: ID of the pool to get predictions for
+            days: Number of days of prediction history to return
+        """
+        if self.use_mock:
+            return self.mock_db.get_pool_predictions(pool_id, days)
+        
+        # Real implementation would query the database with time filtering
+        # For example: SELECT * FROM predictions WHERE pool_id = ? AND timestamp > (NOW() - INTERVAL ? DAY)
+        # For now, just get all mock data and filter by date
+        all_predictions = self.mock_db.get_pool_predictions(pool_id)
+        
+        if days and not all_predictions.empty and 'timestamp' in all_predictions.columns:
+            # Filter by days if we have timestamp data
+            cutoff_date = pd.Timestamp.now() - pd.Timedelta(days=days)
+            return all_predictions[all_predictions['timestamp'] >= cutoff_date]
+        
+        return all_predictions

@@ -99,22 +99,41 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
         mock_db = MockDBManager()
         return mock_db.get_top_predictions(category, limit, ascending)
 
-def get_pool_predictions(db, pool_id):
+def get_pool_predictions(db, pool_id, days=30):
     """
     Get prediction history for a specific pool.
     Falls back to mock DB if real DB fails.
+    
+    Args:
+        db: Database manager instance
+        pool_id: The ID of the pool to get predictions for
+        days: Number of days of prediction history to return (default: 30)
     """
     try:
         if db is None:
             db = MockDBManager()
-        predictions = db.get_pool_predictions(pool_id)
+        
+        # Try to call with days parameter if it's supported
+        try:
+            predictions = db.get_pool_predictions(pool_id, days)
+        except TypeError:
+            # If the days parameter isn't supported, fall back to basic version
+            predictions = db.get_pool_predictions(pool_id)
+            
         if predictions.empty:
             # Fallback to mock if real DB returns empty
             mock_db = MockDBManager()
-            return mock_db.get_pool_predictions(pool_id)
+            try:
+                return mock_db.get_pool_predictions(pool_id, days)
+            except TypeError:
+                return mock_db.get_pool_predictions(pool_id)
+                
         return predictions
     except Exception as e:
         logger.error(f"Error getting pool predictions: {str(e)}")
         # Fallback to mock if real DB fails
         mock_db = MockDBManager()
-        return mock_db.get_pool_predictions(pool_id)
+        try:
+            return mock_db.get_pool_predictions(pool_id, days)
+        except TypeError:
+            return mock_db.get_pool_predictions(pool_id)

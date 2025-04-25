@@ -212,15 +212,22 @@ class MockDBManager:
         
         return predictions_df
     
-    def get_pool_predictions(self, pool_id):
-        """Return prediction history for a specific pool"""
+    def get_pool_predictions(self, pool_id, days=30):
+        """
+        Return prediction history for a specific pool
+        
+        Args:
+            pool_id: The ID of the pool to get predictions for
+            days: Number of days of prediction history to return
+        """
         for pool in self.pools:
             if pool.get('id') == pool_id:
-                # Generate 10 days of prediction history
+                # Generate prediction history for the requested number of days
                 end_date = datetime.now()
-                start_date = end_date - timedelta(days=10)
+                start_date = end_date - timedelta(days=days)
                 
-                dates = [start_date + timedelta(days=i) for i in range(11)]
+                # Generate one data point per day
+                dates = [start_date + timedelta(days=i) for i in range(days + 1)]
                 
                 # Base values from the pool
                 base_apr = pool.get('apr', 10)

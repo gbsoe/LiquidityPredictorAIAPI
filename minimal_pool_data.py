@@ -385,8 +385,26 @@ def load_data():
     if HAS_EXTRACTOR:
         try:
             st.error("Failed to get data. Attempting one final fetch from blockchain...")
-            extractor = OnChainExtractor(rpc_endpoint="https://api.mainnet-beta.solana.com")
-            pools = extractor.extract_and_enrich_pools(max_per_dex=10)
+            # Use one of these alternative endpoints for Solana mainnet
+            rpc_endpoints = [
+                "https://solana-mainnet.rpc.extrnode.com",
+                "https://solana-api.projectserum.com",
+                "https://solana-mainnet.g.alchemy.com/v2/demo",
+                "https://api.mainnet-beta.solana.com"
+            ]
+            
+            # Try each endpoint until one works
+            for endpoint in rpc_endpoints:
+                try:
+                    st.info(f"Trying RPC endpoint: {endpoint}")
+                    extractor = OnChainExtractor(rpc_endpoint=endpoint)
+                    pools = extractor.extract_and_enrich_pools(max_per_dex=10)
+                    if pools and len(pools) > 0:
+                        st.success(f"Successfully connected to {endpoint}")
+                        break
+                except Exception as e:
+                    st.warning(f"Failed to use {endpoint}: {e}")
+                    continue
             
             if pools and len(pools) > 0:
                 st.success(f"Successfully extracted {len(pools)} pools from blockchain")
