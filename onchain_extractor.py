@@ -267,10 +267,21 @@ class OnChainExtractor:
         Args:
             rpc_endpoint: Solana RPC endpoint (defaults to public endpoint)
         """
+        # Get endpoint from parameter or environment
         endpoint = rpc_endpoint or os.getenv("SOLANA_RPC_ENDPOINT", DEFAULT_RPC_ENDPOINT)
-        # Ensure the endpoint has a protocol prefix
+        
+        # Ensure the endpoint has a protocol prefix and is a valid URL
         if endpoint and not endpoint.startswith(('http://', 'https://')):
             endpoint = f"https://{endpoint}"
+            
+        # Validation and sanity check for endpoint
+        # Prevent common URL mistakes like using the API key as domain
+        if "api-key" in endpoint and "?" not in endpoint:
+            logger.warning(f"Invalid RPC endpoint detected (API key format issue). Using fallback endpoint.")
+            endpoint = DEFAULT_RPC_ENDPOINT
+            
+        logger.info(f"Using RPC endpoint: {endpoint[:20]}...{endpoint[-20:] if len(endpoint) > 40 else endpoint}")
+        
         self.rpc_endpoint = endpoint
         self.session = self._create_session()
         self.cache = {}  # Simple memory cache
