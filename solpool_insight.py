@@ -487,15 +487,24 @@ def main():
             
             if st.session_state.get('updater_started') != True:
                 if st.sidebar.button("Start Background Updater"):
-                    st.session_state['updater_started'] = True
-                    
                     # Only start if we have a valid RPC endpoint
                     if rpc_endpoint:
                         try:
-                            background_updater.start_background_updater()
-                            st.success("✓ Background data updater started")
+                            # Use a try-except block to handle potential errors
+                            try:
+                                # Import inside the try block to handle potential import errors
+                                import background_updater
+                                if background_updater.start_background_updater():
+                                    st.session_state['updater_started'] = True
+                                    st.success("✓ Background data updater started")
+                                else:
+                                    st.warning("Background updater could not be started (already running)")
+                            except ImportError as ie:
+                                st.error(f"Could not import background updater module: {ie}")
                         except Exception as e:
-                            st.warning(f"Could not start background updater: {e}")
+                            st.error(f"Could not start background updater: {e}")
+                    else:
+                        st.warning("Cannot start background updater: No valid RPC endpoint configured")
             else:
                 st.sidebar.success("✓ Background data refresh is active")
                 
@@ -506,17 +515,27 @@ def main():
                         mod_time_str = datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M:%S")
                         st.sidebar.info(f"Last data update: {mod_time_str}")
                 except Exception:
-                    pass
+                    st.sidebar.info("No data update timestamp available")
                     
                 # Add a refresh button
                 if st.sidebar.button("Refresh Data Now"):
-                    # Get the current data
                     try:
-                        with open("extracted_pools.json", "r") as f:
-                            st.session_state['last_data_length'] = len(json.load(f))
-                    except Exception:
+                        # Safely check if extracted_pools.json exists and has data
+                        if os.path.exists("extracted_pools.json"):
+                            with open("extracted_pools.json", "r") as f:
+                                pool_content = f.read()
+                                if pool_content.strip():
+                                    data = json.loads(pool_content)
+                                    st.session_state['last_data_length'] = len(data)
+                                else:
+                                    st.session_state['last_data_length'] = 0
+                        else:
+                            st.warning("No cached data file available to refresh")
+                            st.session_state['last_data_length'] = 0
+                    except Exception as e:
+                        st.warning(f"Error checking cache file: {e}")
                         st.session_state['last_data_length'] = 0
-                        
+                    
                     # Force a page refresh
                     st.rerun()
     

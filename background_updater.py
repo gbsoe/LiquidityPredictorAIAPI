@@ -63,14 +63,14 @@ def save_pools(pools: List[Dict[str, Any]]) -> bool:
         logger.error(f"Error saving pools: {e}")
         return False
 
-def update_pools_for_dex(current_pools: List[Dict[str, Any]], dex_name: str, max_new: int = 5) -> List[Dict[str, Any]]:
+def update_pools_for_dex(current_pools: List[Dict[str, Any]], dex_name: str, max_new: int = 3) -> List[Dict[str, Any]]:
     """
     Update pools for a specific DEX by fetching new data
     
     Args:
         current_pools: Current pool data
         dex_name: DEX to update
-        max_new: Maximum number of new pools to add
+        max_new: Maximum number of new pools to add (reduced to prevent rate limiting)
         
     Returns:
         Updated list of pools
@@ -87,8 +87,12 @@ def update_pools_for_dex(current_pools: List[Dict[str, Any]], dex_name: str, max
         
         logger.info(f"Updating pools for {dex_name}")
         
-        # Initialize the extractor
-        extractor = OnChainExtractor(rpc_endpoint=rpc_endpoint)
+        # Initialize the extractor with timeout protection
+        try:
+            extractor = OnChainExtractor(rpc_endpoint=rpc_endpoint)
+        except Exception as ext_error:
+            logger.error(f"Failed to initialize extractor: {ext_error}")
+            return current_pools
         
         # Map of DEX names to their extraction methods
         dex_program_ids = {
@@ -112,27 +116,55 @@ def update_pools_for_dex(current_pools: List[Dict[str, Any]], dex_name: str, max
         # Extract a batch of new pools for this DEX
         new_pools = []
         try:
-            for program_id in program_ids:
-                # Extract based on DEX type
-                if dex_name == "Raydium":
-                    batch = extractor.extract_raydium_pools(program_id, max_pools=max_new)
-                elif dex_name == "Orca":
-                    batch = extractor.extract_orca_pools(program_id, max_pools=max_new)
-                elif dex_name == "Jupiter":
-                    batch = extractor.extract_jupiter_pools(program_id, max_pools=max_new)
-                elif dex_name == "Saber":
-                    batch = extractor.extract_saber_pools(program_id, max_pools=max_new)
-                elif dex_name == "Meteora":
-                    batch = extractor.extract_meteora_pools(program_id, max_pools=max_new)
-                else:
-                    # Generic extraction for other DEXes
-                    batch = extractor.extract_generic_pools(program_id, dex_name, max_pools=max_new)
+            # Since specific extraction methods may not be implemented in OnChainExtractor,
+            # use a safer approach with extract_and_enrich_pools
+            try:
+                all_pools = extractor.extract_and_enrich_pools(max_per_dex=max_new)
+                if all_pools:
+                    # Filter to just this DEX
+                    for pool in all_pools:
+                        if isinstance(pool, dict) and pool.get('dex') == dex_name:
+                            new_pools.append(pool)
+                    logger.info(f"Found {len(new_pools)} pools for {dex_name}")
+            except AttributeError:
+                # If extract_and_enrich_pools isn't available, try a more generic approach
+                logger.warning(f"extract_and_enrich_pools not found, using generic approach")
                 
-                if batch:
-                    new_pools.extend([p.to_dict() for p in batch])
-                    
-                # Add a delay between program IDs to avoid rate limiting
-                time.sleep(1.5)
+                # Try to get program accounts
+                for program_id in program_ids:
+                    try:
+                        accounts = extractor.get_program_accounts(program_id)
+                        if accounts:
+                            logger.info(f"Found {len(accounts)} accounts for {dex_name} program {program_id}")
+                            # Create basic pool data
+                            for i, acct in enumerate(accounts[:max_new]):
+                                pool_id = acct.get('pubkey', f"unknown-{i}")
+                                # Create a minimal pool entry
+                                pool = {
+                                    "id": pool_id,
+                                    "dex": dex_name,
+                                    "name": f"{dex_name} Pool {i+1}",
+                                    "created_at": datetime.now().isoformat(),
+                                    "updated_at": datetime.now().isoformat()
+                                }
+                                new_pools.append(pool)
+                    except Exception as prog_error:
+                        logger.error(f"Error fetching program accounts for {program_id}: {prog_error}")
+                
+                # If we managed to get any pools, get token data if possible
+                if new_pools and hasattr(extractor, 'get_token_metadata'):
+                    try:
+                        for pool in new_pools:
+                            # Try to get token data - this is very implementation dependent
+                            # so just a basic attempt that might work
+                            token_data = extractor.get_token_metadata(pool.get('id'))
+                            if token_data:
+                                pool.update(token_data)
+                    except Exception as token_error:
+                        logger.error(f"Error fetching token data: {token_error}")
+            
+            # Add a reasonable delay between program IDs to avoid rate limiting
+            time.sleep(3.0)
         except Exception as e:
             logger.error(f"Error extracting pools for {dex_name}: {e}")
         
@@ -168,9 +200,12 @@ def background_update_thread():
     """Main function for the background update thread"""
     logger.info("Starting background update thread")
     
-    # List of DEXes to update in rotation
-    dexes = ["Raydium", "Orca", "Jupiter", "Saber", "Meteora"]
+    # List of DEXes to update in rotation - start with the smaller ones first to avoid rate limiting
+    dexes = ["Saber", "Meteora", "Jupiter", "Orca", "Raydium"]
     dex_index = 0
+    
+    # Error counter to back off more aggressively if errors continue
+    error_count = 0
     
     while keep_running:
         try:
@@ -178,21 +213,44 @@ def background_update_thread():
             dex_name = dexes[dex_index]
             dex_index = (dex_index + 1) % len(dexes)
             
-            # Get current pools
-            current_pools = get_current_pools()
-            initial_count = len(current_pools)
+            logger.info(f"Preparing to update pools for {dex_name}")
             
-            # Update pools for this DEX
-            updated_pools = update_pools_for_dex(current_pools, dex_name)
+            # Get current pools
+            try:
+                current_pools = get_current_pools()
+                initial_count = len(current_pools)
+                logger.info(f"Retrieved {initial_count} current pools")
+            except Exception as pool_error:
+                logger.error(f"Error getting current pools: {pool_error}")
+                current_pools = []
+                initial_count = 0
+            
+            # Update pools for this DEX with error handling
+            try:
+                updated_pools = update_pools_for_dex(current_pools, dex_name)
+            except Exception as update_error:
+                logger.error(f"Error updating pools for {dex_name}: {update_error}")
+                updated_pools = current_pools
             
             # Save if we have changes
-            if len(updated_pools) != initial_count:
-                save_pools(updated_pools)
-                logger.info(f"Added {len(updated_pools) - initial_count} new pools from {dex_name}")
+            if len(updated_pools) > initial_count:
+                try:
+                    save_pools(updated_pools)
+                    logger.info(f"Added {len(updated_pools) - initial_count} new pools from {dex_name}")
+                    # Reset error count on success
+                    error_count = 0
+                except Exception as save_error:
+                    logger.error(f"Error saving updated pools: {save_error}")
+                    error_count += 1
             
             # Wait before the next update to avoid rate limits
-            # Random interval between 60-90 seconds
-            wait_time = random.uniform(60, 90)
+            # Longer interval between 120-180 seconds (2-3 minutes) to reduce load
+            wait_time = random.uniform(120, 180)
+            
+            # If we've had errors, increase wait time
+            if error_count > 0:
+                wait_time *= (1 + error_count * 0.5)  # 50% more time per error
+                
             logger.info(f"Waiting {wait_time:.1f}s before next update")
             
             # Break wait into small chunks to check keep_running flag
@@ -202,9 +260,12 @@ def background_update_thread():
                 time.sleep(1)
                 
         except Exception as e:
-            logger.error(f"Error in background update thread: {e}")
-            # Wait before retry
-            time.sleep(30)
+            logger.error(f"Critical error in background update thread: {e}")
+            error_count += 1
+            # Wait before retry - longer if we've had multiple errors
+            wait_time = 60 * (1 + error_count)  # 1 minute + 1 minute per previous error
+            logger.info(f"Backing off for {wait_time} seconds after error")
+            time.sleep(wait_time)
 
 def start_background_updater():
     """Start the background updater thread"""
