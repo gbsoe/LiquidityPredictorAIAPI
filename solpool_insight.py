@@ -196,8 +196,8 @@ def load_data():
                 # Display a message about tranched fetching
                 st.info("Starting tranched fetching of pool data. This may take a few minutes as we retrieve data in batches to avoid rate limits.")
                 
-                # Increase the number of pools per DEX to 50 to get more real-time data
-                pools = extractor.extract_and_enrich_pools(max_per_dex=50)
+                # Fetch more pools per DEX to get comprehensive market coverage
+                pools = extractor.extract_and_enrich_pools(max_per_dex=200)
                 
                 # Verify the data is not empty
                 if pools and len(pools) > 0:
@@ -420,9 +420,10 @@ def main():
             st.sidebar.warning("⚠️ No valid RPC endpoint configured")
         
         # Always show the checkbox for live data (critical feature)
+        # Default to True if has_valid_rpc to encourage live data use
         force_live_data = st.sidebar.checkbox(
             "Use live blockchain data", 
-            value=has_valid_rpc,
+            value=True if has_valid_rpc else False,
             help="When checked, attempts to fetch fresh data from blockchain"
         )
         
