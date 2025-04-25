@@ -655,33 +655,61 @@ class RiskAssessmentModel:
     
     def predict(self, df):
         """Make predictions using the trained model"""
-        from tensorflow.keras.models import load_model
-        
         if self.model is None:
-            # Try to load the model
+            # Try to load the model based on available packages
             try:
-                self.model = load_model(self.model_path)
-            except:
-                logger.error("Model not trained yet and could not load from file")
+                if HAS_TENSORFLOW:
+                    from tensorflow.keras.models import load_model
+                    self.model = load_model(self.model_path)
+                else:
+                    # Try to load RandomForest model from pickle
+                    try:
+                        with open(f"{self.model_path}.pkl", 'rb') as f:
+                            self.model = pickle.load(f)
+                    except:
+                        logger.error("RandomForest model not found")
+                        return None
+            except Exception as e:
+                logger.error(f"Model not trained yet and could not load from file: {e}")
                 return None
         
         try:
-            # We need a sequence of data for the LSTM
-            # First make sure we have enough data points
-            if len(df) < self.lookback:
-                logger.error(f"Not enough data points for prediction. Need at least {self.lookback} records.")
-                return None
-            
-            # Preprocess data (sequences will be created)
-            X, _ = self.preprocess_data(df)
-            
-            # Make predictions
-            predictions = self.model.predict(X)
-            
-            # Create a result dataframe
-            # The predictions have fewer rows than the input due to sequence creation
-            result_df = df.iloc[self.lookback:].copy()
-            result_df['predicted_risk_score'] = predictions
+            # Preprocess data differently based on the model type
+            if HAS_TENSORFLOW:
+                # We need a sequence of data for the LSTM
+                # First make sure we have enough data points
+                if len(df) < self.lookback:
+                    logger.error(f"Not enough data points for prediction. Need at least {self.lookback} records.")
+                    return None
+                
+                # Preprocess data (sequences will be created)
+                X, _ = self.preprocess_data(df)
+                
+                # Make predictions
+                predictions = self.model.predict(X)
+                
+                # Create a result dataframe
+                # The predictions have fewer rows than the input due to sequence creation
+                result_df = df.iloc[self.lookback:].copy()
+                result_df['predicted_risk_score'] = predictions
+            else:
+                # For RandomForest, we need to flatten the input data
+                # Preprocess data
+                X, _ = self.preprocess_data(df)
+                
+                # Flatten if it's a 3D array
+                if isinstance(X, np.ndarray) and len(X.shape) == 3:
+                    n_samples, n_timesteps, n_features = X.shape
+                    X_flat = X.reshape(n_samples, n_timesteps * n_features)
+                else:
+                    X_flat = X
+                
+                # Make predictions
+                predictions = self.model.predict(X_flat)
+                
+                # Create a result dataframe (no sequence offset for RandomForest)
+                result_df = df.copy()
+                result_df['predicted_risk_score'] = predictions
             
             return result_df
             

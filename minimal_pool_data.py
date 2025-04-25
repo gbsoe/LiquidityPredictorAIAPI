@@ -304,8 +304,32 @@ def load_data():
     # If we have the extractor, try to get live data
     if HAS_EXTRACTOR:
         try:
+            # Allow users to provide their own RPC endpoint
+            with st.sidebar:
+                use_custom_rpc = st.checkbox("Use custom Solana RPC endpoint")
+                
+                if use_custom_rpc:
+                    custom_rpc = st.text_input(
+                        "Solana RPC Endpoint", 
+                        value=os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"),
+                        help="Public endpoints may have rate limits. Consider using a service like Helius, QuickNode, or Alchemy."
+                    )
+                    if st.button("Save Endpoint"):
+                        # Save to .env file for persistence
+                        try:
+                            with open(".env", "a+") as f:
+                                f.seek(0)
+                                if "SOLANA_RPC_ENDPOINT" not in f.read():
+                                    f.write(f"\nSOLANA_RPC_ENDPOINT={custom_rpc}\n")
+                                else:
+                                    st.success("RPC endpoint updated in environment")
+                        except Exception as e:
+                            st.warning(f"Could not save endpoint to .env: {e}")
+                else:
+                    custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", None)
+            
             with st.spinner("Extracting pool data from Solana blockchain..."):
-                extractor = OnChainExtractor()
+                extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
                 pools = extractor.extract_and_enrich_pools(max_per_dex=10)
                 
                 # Verify the data is not empty
@@ -322,6 +346,7 @@ def load_data():
                     st.warning("No pools returned from the blockchain extractor")
         except Exception as e:
             st.error(f"Error extracting pool data: {e}")
+            st.error("Hint: If you're seeing RPC errors, try using a custom RPC endpoint in the sidebar.")
     
     # Generate reliable sample data
     st.info("Using generated sample data for demonstration")
