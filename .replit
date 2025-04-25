@@ -18,14 +18,10 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Test API Script"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Simple Pool Data Viewer"
+args = "Minimal Pool Data Viewer"
 
 [[workflows.workflow]]
-name = "Test API Script"
+name = "Minimal Pool Data Viewer"
 author = "agent"
 
 [workflows.workflow.metadata]
@@ -36,22 +32,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "streamlit run test_api.py --server.port 5000"
-waitForPort = 5000
-
-[[workflows.workflow]]
-name = "Simple Pool Data Viewer"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "streamlit run simple_pool_data.py --server.port 5000"
+args = "streamlit run minimal_pool_data.py --server.port 5000"
 waitForPort = 5000
 
 [[ports]]
