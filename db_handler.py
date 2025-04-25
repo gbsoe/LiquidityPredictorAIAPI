@@ -14,17 +14,18 @@ from sqlalchemy.orm import sessionmaker
 # Get the database URL from environment variables
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
+# Initialize SQLAlchemy base class regardless of database connection
+Base = declarative_base()
+
 # Initialize SQLAlchemy engine and metadata
 if DATABASE_URL:
     engine = create_engine(DATABASE_URL)
     metadata = MetaData()
-    Base = declarative_base()
     Session = sessionmaker(bind=engine)
 else:
     print("Warning: DATABASE_URL not found in environment variables")
     engine = None
     metadata = None
-    Base = None
     Session = None
 
 # Define the LiquidityPool model
