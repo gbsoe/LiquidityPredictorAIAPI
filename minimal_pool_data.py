@@ -19,248 +19,18 @@ except ImportError:
 HAS_BASIC_PREDICTION = False
 HAS_ADVANCED_PREDICTION = False
 
-try:
-    # Import basic prediction components
-    from advanced_prediction_engine import PredictionResult
-    HAS_BASIC_PREDICTION = True
-    
-    # Attempt to import advanced components (may fail if TensorFlow/XGBoost has issues)
-    try:
-        from advanced_prediction_engine import (
-            SelfEvolvingPredictionEngine, 
-            predict_pool_performance,
-            predict_multiple_pools
-        )
-        HAS_ADVANCED_PREDICTION = True
-        HAS_PREDICTION_ENGINE = True
-    except (ImportError, AttributeError, TypeError) as e:
-        st.warning(f"Advanced prediction engine not fully available: {str(e)}. Using simplified predictions.")
-        HAS_PREDICTION_ENGINE = False
-except ImportError:
-    HAS_PREDICTION_ENGINE = False
-
 # Set page configuration
 st.set_page_config(
     page_title="FiLot - Solana Liquidity Pool Analysis",
-    page_icon="💧",
+    page_icon="🌊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for enhanced mobile responsiveness
-st.markdown("""
-<style>
-    /* Mobile-friendly styling - comprehensive improvements */
-    @media (max-width: 768px) {
-        /* Improve radio buttons and selectors */
-        div.row-widget.stRadio > div {
-            flex-direction: column;
-        }
-        
-        div.row-widget.stRadio > div button {
-            width: 100%;
-            margin: 3px 0;
-            padding: 12px 8px;
-            font-size: 16px;
-        }
-        
-        /* Better spacing for mobile */
-        div.block-container {
-            padding: 1rem 0.5rem;
-        }
-        
-        /* Make selectbox elements touch-friendly */
-        div.stSelectbox [data-baseweb="select"] {
-            min-height: 44px;
-        }
-        
-        /* Improve all buttons for touch */
-        button, [role="button"] {
-            min-height: 44px;
-            min-width: 44px;
-        }
-        
-        /* Better tables on mobile */
-        .dataframe-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* Adjust metric containers for mobile */
-        .metric-container {
-            padding: 8px 4px;
-            margin-bottom: 10px;
-        }
-        
-        .metric-value {
-            font-size: 18px;
-        }
-        
-        .metric-label {
-            font-size: 12px;
-        }
-        
-        /* Force full width on all charts */
-        [data-testid="stArrowVegaLiteChart"] {
-            width: 100% !important;
-        }
-        
-        /* Improve sidebar on mobile */
-        section[data-testid="stSidebar"] {
-            width: 85% !important;
-            max-width: 300px !important;
-        }
-        
-        /* Optimize sliders for touch */
-        div.stSlider [data-testid="stThumbValue"] {
-            min-height: 40px;
-        }
-    }
-    
-    /* Metric styling - enhanced */
-    .metric-container {
-        background-color: #f9f9fa;
-        border-radius: 10px;
-        padding: 12px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        text-align: center;
-        transition: all 0.2s ease;
-    }
-    
-    .metric-container:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    
-    .metric-value {
-        font-size: 26px;
-        font-weight: bold;
-        color: #1E88E5;
-    }
-    
-    .metric-label {
-        font-size: 14px;
-        color: #555;
-        margin-top: 5px;
-    }
-    
-    /* Table styling - improved */
-    .dataframe-container {
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin: 15px 0;
-    }
-    
-    .dataframe-container th {
-        background-color: #f0f2f6;
-        color: #333;
-        padding: 12px 10px;
-        font-weight: 600;
-        border-bottom: 2px solid #e0e0e0;
-    }
-    
-    .dataframe-container td {
-        text-align: left;
-        padding: 10px;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .dataframe-container tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-    
-    .dataframe-container tr:hover {
-        background-color: #f0f7ff;
-    }
-    
-    /* Highlight styling */
-    .highlight-container {
-        border-left: 4px solid #1E88E5;
-        padding: 12px 15px;
-        margin: 15px 0;
-        background-color: #f8f9fa;
-        border-radius: 0 4px 4px 0;
-    }
-    
-    /* Category badges - enhanced */
-    .badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 15px;
-        font-size: 12px;
-        font-weight: bold;
-        color: white;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .badge-meme {
-        background-color: #FF5722;
-    }
-    
-    .badge-major {
-        background-color: #4CAF50;
-    }
-    
-    .badge-defi {
-        background-color: #2196F3;
-    }
-    
-    .badge-gaming {
-        background-color: #9C27B0;
-    }
-    
-    .badge-stablecoin {
-        background-color: #607D8B;
-    }
-    
-    .badge-other {
-        background-color: #9E9E9E;
-    }
-    
-    /* Better dark mode compatibility */
-    @media (prefers-color-scheme: dark) {
-        .metric-container {
-            background-color: #262730;
-        }
-        
-        .metric-value {
-            color: #4e8cde;
-        }
-        
-        .metric-label {
-            color: #c2c2c2;
-        }
-        
-        .dataframe-container th {
-            background-color: #262730;
-            color: #f0f2f6;
-            border-bottom: 2px solid #3b3b3b;
-        }
-        
-        .dataframe-container tr:nth-child(even) {
-            background-color: #2e303a;
-        }
-        
-        .dataframe-container tr:hover {
-            background-color: #3d4049;
-        }
-        
-        .highlight-container {
-            background-color: #262730;
-        }
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# Helper functions
+# Formatting helper functions
 def format_currency(value):
     """Format a value as currency"""
-    if value is None:
-        return "N/A"
-    elif value >= 1_000_000_000:
-        return f"${value/1_000_000_000:.2f}B"
-    elif value >= 1_000_000:
+    if value >= 1_000_000:
         return f"${value/1_000_000:.2f}M"
     elif value >= 1_000:
         return f"${value/1_000:.2f}K"
@@ -269,161 +39,135 @@ def format_currency(value):
 
 def format_percentage(value):
     """Format a value as percentage"""
-    if value is None:
-        return "N/A"
     return f"{value:.2f}%"
 
 def get_trend_icon(value):
     """Return an arrow icon based on trend direction"""
-    if value is None:
-        return "➖"
-    return "📈" if value >= 0 else "📉"
+    if value > 1.0:
+        return "📈"  # Strong up
+    elif value > 0.2:
+        return "↗️"  # Up
+    elif value < -1.0:
+        return "📉"  # Strong down
+    elif value < -0.2:
+        return "↘️"  # Down
+    else:
+        return "➡️"  # Stable
 
 def get_category_badge(category):
     """Return HTML for a category badge"""
-    category = category.lower() if category else "other"
-    badge_class = f"badge badge-{category}"
-    return f'<span class="{badge_class}">{category.capitalize()}</span>'
+    colors = {
+        "Major": "#1E88E5",  # Blue
+        "DeFi": "#43A047",   # Green
+        "Meme": "#FFC107",   # Yellow
+        "Gaming": "#D81B60", # Pink
+        "Stablecoin": "#6D4C41",  # Brown
+        "Other": "#757575"   # Grey
+    }
+    
+    color = colors.get(category, "#757575")
+    return f"""
+    <span style="
+        background-color: {color}; 
+        color: white; 
+        padding: 2px 8px; 
+        border-radius: 10px; 
+        font-size: 0.8em;
+        font-weight: bold;">
+        {category}
+    </span>
+    """
 
 def load_data():
-    """Load pool data from the extractor or generate reliable sample data"""
-    # Check if we have cached data
+    """Load pool data from the cached file first, and only try live data if explicitly requested"""
     cache_file = "extracted_pools.json"
     
-    # For production readiness, always prioritize live data from blockchain
-    if HAS_EXTRACTOR:
-        # Allow users to provide their own RPC endpoint
-        with st.sidebar:
-            force_live_data = st.checkbox("Always use live data", value=True, 
-                help="When enabled, always fetches fresh data from the blockchain")
-            use_custom_rpc = st.checkbox("Use custom Solana RPC endpoint")
+    # First check if we have the cached file - use this by default for stability
+    if os.path.exists(cache_file):
+        try:
+            with open(cache_file, "r") as f:
+                file_content = f.read()
+                if file_content.strip():
+                    st.success("✓ Successfully loaded pool data from local cache")
+                    pools = json.loads(file_content)
+                    if pools and len(pools) > 0:
+                        return pools
+        except Exception as e:
+            st.warning(f"Error loading cached data: {e}")
+    
+    # Sidebar controls for data loading
+    with st.sidebar:
+        st.subheader("Data Source")
+        
+        force_live_data = st.checkbox("Try live blockchain data", value=False, 
+                              help="When checked, attempts to fetch fresh data from blockchain")
+        
+        # Add advanced options
+        with st.expander("Advanced RPC Options"):
+            use_custom_rpc = st.checkbox("Use custom RPC endpoint", value=False)
             
             if use_custom_rpc:
                 custom_rpc = st.text_input(
                     "Solana RPC Endpoint", 
                     value=os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"),
-                    help="Public endpoints may have rate limits. Consider using a service like Helius, QuickNode, or Alchemy."
+                    help="For Helius, use format: https://rpc.helius.xyz/?api-key=YOUR_API_KEY"
                 )
                 if st.button("Save Endpoint"):
                     # Save to .env file for persistence
                     try:
-                        with open(".env", "a+") as f:
+                        with open(".env", "r+") as f:
+                            content = f.read()
                             f.seek(0)
-                            if "SOLANA_RPC_ENDPOINT" not in f.read():
-                                f.write(f"\nSOLANA_RPC_ENDPOINT={custom_rpc}\n")
+                            if "SOLANA_RPC_ENDPOINT=" in content:
+                                # Replace the existing endpoint
+                                new_content = []
+                                for line in content.split("\n"):
+                                    if line.startswith("SOLANA_RPC_ENDPOINT="):
+                                        new_content.append(f"SOLANA_RPC_ENDPOINT={custom_rpc}")
+                                    else:
+                                        new_content.append(line)
+                                f.write("\n".join(new_content))
+                                f.truncate()
                             else:
-                                st.success("RPC endpoint updated in environment")
+                                # Add new endpoint
+                                f.seek(0, 2)  # Go to end of file
+                                f.write(f"\nSOLANA_RPC_ENDPOINT={custom_rpc}\n")
+                            st.success("RPC endpoint updated in environment")
                     except Exception as e:
                         st.warning(f"Could not save endpoint to .env: {e}")
             else:
-                custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", None)
-        
-        # Try to fetch live data first if forcing live data
-        if force_live_data:
-            with st.spinner("Extracting pool data from Solana blockchain..."):
-                try:
-                    # Get RPC endpoint from environment with default to Ankr
-                    rpc_endpoint = os.getenv("SOLANA_RPC_ENDPOINT", "https://rpc.ankr.com/solana")
-                    st.info(f"Connecting to RPC endpoint: {rpc_endpoint}")
-                    
-                    # Initialize extractor with better error handling - limit pools to 3 per DEX to avoid rate limits
-                    extractor = OnChainExtractor(rpc_endpoint=rpc_endpoint)
-                    pools = extractor.extract_and_enrich_pools(max_per_dex=3)
-                    
-                    # Verify the data is not empty
-                    if pools and len(pools) > 0:
-                        st.success(f"Successfully extracted {len(pools)} pools from blockchain")
-                        # Save to cache
-                        try:
-                            with open(cache_file, "w") as f:
-                                json.dump(pools, f, indent=2)
-                            st.info(f"Data saved to cache file: {cache_file}")
-                        except Exception as e:
-                            st.warning(f"Error saving data to cache: {e}")
-                        
-                        return pools
-                    else:
-                        st.error("No pool data was returned from the blockchain")
-                except Exception as e:
-                    st.error(f"Error extracting data from blockchain: {str(e)}")
-                    st.warning("Falling back to cached data due to error")
-            
-        # If not forcing live data or if live data failed, try using cache
-        if os.path.exists(cache_file) and not force_live_data:
+                custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com")
+    
+    # Only try to fetch live data if explicitly requested
+    if force_live_data and HAS_EXTRACTOR:
+        with st.spinner("Attempting to extract pool data from Solana blockchain..."):
             try:
-                # Debug information
-                st.info(f"Cache file exists at: {os.path.abspath(cache_file)}")
-                st.info(f"Cache file size: {os.path.getsize(cache_file)} bytes")
+                # Use the custom or environment RPC endpoint
+                st.info(f"Connecting to RPC endpoint: {custom_rpc}")
                 
-                with open(cache_file, "r") as f:
-                    # Read file content for debugging
-                    file_content = f.read()
-                    st.info(f"Read {len(file_content)} bytes from cache file")
+                # Initialize extractor with better error handling - limit pools to 2 per DEX to avoid rate limits
+                extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
+                pools = extractor.extract_and_enrich_pools(max_per_dex=2)
+                
+                # Verify the data is not empty
+                if pools and len(pools) > 0:
+                    st.success(f"Successfully extracted {len(pools)} pools from blockchain")
+                    # Save to cache
+                    try:
+                        with open(cache_file, "w") as f:
+                            json.dump(pools, f, indent=2)
+                        st.info(f"Data saved to cache file: {cache_file}")
+                    except Exception as e:
+                        st.warning(f"Error saving data to cache: {e}")
                     
-                    # Try to parse JSON
-                    if file_content.strip():
-                        pools = json.loads(file_content)
-                        
-                        # Verify the data is not empty
-                        if pools and len(pools) > 0:
-                            st.success(f"✓ Successfully loaded {len(pools)} pools from cache")
-                            st.info("For fresh data, check 'Always use live data' in the sidebar")
-                            return pools
-                        else:
-                            st.warning("Cache file contains empty pool data")
-                    else:
-                        st.warning("Cache file is empty")
-            except json.JSONDecodeError as e:
-                st.error(f"JSON decode error in cache file: {e}")
-                # Show part of the file content for debugging
-                with open(cache_file, "r") as f:
-                    st.code(f.read(500) + "...")
+                    return pools
+                else:
+                    st.error("No pool data was returned from the blockchain")
             except Exception as e:
-                st.error(f"Error loading cached data: {e}")
-                st.info("Will try to generate sample data")
+                st.error(f"Error extracting data from blockchain: {str(e)}")
     
-    # One more attempt to fetch from blockchain with a simpler approach
-    if HAS_EXTRACTOR:
-        try:
-            st.error("Failed to get data. Attempting one final fetch from blockchain...")
-            # Use reliable public endpoints for Solana mainnet
-            rpc_endpoints = [
-                "https://api.mainnet-beta.solana.com",  # Official Solana endpoint
-                "https://solana-api.projectserum.com", 
-                "https://rpc.ankr.com/solana",  # Ankr public endpoint
-                "https://solana.public-rpc.com"  # Another public endpoint
-            ]
-            
-            # Try each endpoint until one works
-            for endpoint in rpc_endpoints:
-                try:
-                    st.info(f"Trying RPC endpoint: {endpoint}")
-                    extractor = OnChainExtractor(rpc_endpoint=endpoint)
-                    pools = extractor.extract_and_enrich_pools(max_per_dex=3)
-                    if pools and len(pools) > 0:
-                        st.success(f"Successfully connected to {endpoint}")
-                        break
-                except Exception as e:
-                    st.warning(f"Failed to use {endpoint}: {e}")
-                    continue
-            
-            if pools and len(pools) > 0:
-                st.success(f"Successfully extracted {len(pools)} pools from blockchain")
-                # Save to cache
-                try:
-                    with open(cache_file, "w") as f:
-                        json.dump(pools, f, indent=2)
-                    st.info(f"Data saved to cache file: {cache_file}")
-                except Exception as e:
-                    st.warning(f"Error saving data to cache: {e}")
-                
-                return pools
-        except Exception as e:
-            st.error(f"Final attempt failed: {e}")
-            st.error("Falling back to generated sample data")
-    
-    # Generate reliable sample data
-    st.info("Using generated sample data for demonstration")
+    # If we got here, we need to use sample data
+    st.warning("Unable to load pool data - using generated sample data")
     sample_data = generate_sample_data()
     
     # Save sample data to cache so it's consistent between runs
@@ -604,14 +348,17 @@ def main():
     
     with col_title:
         st.title("FiLot - Solana Liquidity Pool Analysis")
-        st.markdown("Advanced analysis and predictions for Solana DeFi liquidity pools")
+        st.subheader("Advanced analysis and predictions for Solana DeFi liquidity pools")
+        st.markdown("""
+        This tool analyzes thousands of Solana liquidity pools across all major DEXes, 
+        including Raydium, Orca, Jupiter, Meteora, Saber, and more. It provides comprehensive 
+        data, historical metrics, and machine learning-based predictions.
+        """)
     
-    # Introduction
-    st.markdown("""
-    This tool analyzes thousands of Solana liquidity pools across all major DEXes, 
-    including Raydium, Orca, Jupiter, Meteora, Saber, and more. It provides 
-    comprehensive data, historical metrics, and machine learning-based predictions.
-    """)
+    # Create tabs for different views
+    tab_explore, tab_predict, tab_risk, tab_nlp = st.tabs([
+        "Data Explorer", "Predictions", "Risk Assessment", "NLP Reports"
+    ])
     
     # Add debug information
     st.info("Loading pool data now...")
@@ -621,1191 +368,436 @@ def main():
     
     # Debug info
     if pool_data:
-        st.success(f"Successfully obtained pool data with {len(pool_data)} pools")
+        if isinstance(pool_data, list):
+            st.success(f"✓ Successfully loaded {len(pool_data)} pools")
+        else:
+            st.error(f"Unexpected data type: {type(pool_data)}")
+            return
     else:
-        st.error("No pool data was returned from load_data()")
-        
+        st.error("Failed to load any pool data")
+        return
+    
     # Convert to DataFrame for easier manipulation
     df = pd.DataFrame(pool_data)
-    st.info(f"Created DataFrame with shape: {df.shape}")
-    if len(df) > 0:
-        st.info(f"DataFrame columns: {', '.join(df.columns.tolist())}")
     
-    # Check if we have valid data with required columns
-    if len(df) == 0 or 'liquidity' not in df.columns:
-        st.error("Failed to load valid pool data. Using sample data instead.")
-        # Generate sample data
-        pool_data = generate_sample_data()
-        st.success(f"Generated sample data with {len(pool_data)} pools")
-        df = pd.DataFrame(pool_data)
-        st.info(f"New DataFrame shape: {df.shape}")
-    
-    # Use a simpler approach for mobile-friendly layout
-    # We'll use browser width as a proxy for mobile
-    # Create a session state to store the layout preference
-    if 'mobile_layout' not in st.session_state:
-        st.session_state.mobile_layout = False
+    # Data Explorer Tab
+    with tab_explore:
+        st.header("Liquidity Pool Explorer")
         
-    # Add a toggle for mobile layout in the sidebar
-    with st.sidebar:
-        st.session_state.mobile_layout = st.checkbox("Mobile-friendly layout", value=st.session_state.mobile_layout)
-    
-    mobile_view = st.session_state.mobile_layout
-    
-    # Create tabs for different views
-    tabs = st.tabs(["Overview", "Pool Explorer", "Insights & Predictions", "Pool IDs"])
-    
-    # Tab 4: Pool IDs - Adding this first to ensure it's implemented
-    with tabs[3]:
-        st.header("Pool IDs")
-        st.write("Access and copy pool IDs for transactions and API integration")
+        # Search and filter section
+        col_search, col_filter1, col_filter2, col_filter3 = st.columns([2, 1, 1, 1])
         
-        # Search box for quick ID lookup
-        st.subheader("Search for Pool ID")
-        search_term = st.text_input("Enter pool name or token symbol", "")
+        with col_search:
+            search_term = st.text_input("Search by token symbol or pool name")
         
-        # Filter pools based on search term
-        if search_term:
-            search_lower = search_term.lower()
-            search_results = df[
-                df['name'].str.lower().str.contains(search_lower) | 
-                df['token1_symbol'].str.lower().str.contains(search_lower) | 
-                df['token2_symbol'].str.lower().str.contains(search_lower)
-            ]
-        else:
-            search_results = df
-            
-        # DEX filter for Pool IDs tab
-        dex_options_ids = ['All'] + sorted(df['dex'].unique().tolist())
-        selected_dex_ids = st.selectbox("Filter by DEX", dex_options_ids, key="dex_filter_ids")
+        with col_filter1:
+            dex_filter = st.selectbox("Filter by DEX", options=["All"] + sorted(df["dex"].unique().tolist()))
         
-        if selected_dex_ids != 'All':
-            search_results = search_results[search_results['dex'] == selected_dex_ids]
-            
-        # Sort options
-        sort_options_ids = [
-            "Name (A-Z)", 
-            "TVL (High to Low)",
-            "APR (High to Low)",
-            "Prediction Score (High to Low)"
-        ]
-        sort_by_ids = st.selectbox("Sort by", sort_options_ids, key="sort_pools_ids")
+        with col_filter2:
+            category_filter = st.selectbox("Filter by Category", options=["All"] + sorted(df["category"].unique().tolist()))
         
-        # Apply sorting
-        if sort_by_ids == "Name (A-Z)":
-            search_results = search_results.sort_values('name')
-        elif sort_by_ids == "TVL (High to Low)":
-            search_results = search_results.sort_values('liquidity', ascending=False)
-        elif sort_by_ids == "APR (High to Low)":
-            search_results = search_results.sort_values('apr', ascending=False)
-        elif sort_by_ids == "Prediction Score (High to Low)":
-            search_results = search_results.sort_values('prediction_score', ascending=False)
-            
-        # Display pool IDs in a table format
-        if len(search_results) > 0:
-            # Create a dataframe specifically for displaying pool IDs
-            pool_id_data = []
-            
-            for _, pool in search_results.iterrows():
-                pool_id_data.append({
-                    "Pool Name": pool['name'],
-                    "Tokens": f"{pool['token1_symbol']}/{pool['token2_symbol']}",
-                    "DEX": pool['dex'],
-                    "Pool ID": pool['id']
-                })
-                
-            pool_id_df = pd.DataFrame(pool_id_data)
-            
-            # Display pool IDs with a copy button feature
-            st.subheader(f"Found {len(pool_id_data)} pools")
-            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-            st.write(pool_id_df.to_html(escape=False, index=False), unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            # Detailed view for individual pool ID
-            st.subheader("Get Individual Pool ID")
-            
-            # Create a selectbox for choosing a specific pool
-            pool_options = {}
-            for i, row in search_results.reset_index().iterrows():
-                display_name = f"{row['name']} ({row['dex']})"
-                pool_options[display_name] = i
-                
-            if pool_options:
-                selected_pool_name = st.selectbox(
-                    "Select a pool to view its ID", 
-                    list(pool_options.keys()),
-                    key="pool_id_selector"
-                )
-                
-                selected_idx = pool_options[selected_pool_name]
-                selected_pool = search_results.iloc[selected_idx]
-                
-                # Display the pool ID prominently
-                st.markdown("### Pool ID")
-                st.code(selected_pool['id'], language=None)
-                st.info("This Pool ID is required for transactions and API integration")
-                
-                # Additional pool details
-                st.markdown("### Pool Details")
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.write(f"**Name:** {selected_pool['name']}")
-                    st.write(f"**DEX:** {selected_pool['dex']}")
-                    st.write(f"**Category:** {selected_pool['category']}")
-                
-                with col2:
-                    st.write(f"**Token 1:** {selected_pool['token1_symbol']}")
-                    st.write(f"**Token 2:** {selected_pool['token2_symbol']}")
-                    st.write(f"**TVL:** {format_currency(selected_pool['liquidity'])}")
-            else:
-                st.warning("No pools found matching your search criteria")
-        else:
-            st.warning("No pools found matching your search criteria")
-    
-    # Tab 1: Overview
-    with tabs[0]:
-        st.header("Market Overview")
-        
-        # Summary metrics - adjust layout for mobile vs desktop
-        if mobile_view:
-            # Use 2-column layout on mobile for better readability
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.markdown(
-                    f"""<div class="metric-container">
-                    <div class="metric-value">{len(df)}</div>
-                    <div class="metric-label">Total Pools</div>
-                    </div>""", 
-                    unsafe_allow_html=True
-                )
-            
-            with col2:
-                total_tvl = df['liquidity'].sum()
-                st.markdown(
-                    f"""<div class="metric-container">
-                    <div class="metric-value">{format_currency(total_tvl)}</div>
-                    <div class="metric-label">Total TVL</div>
-                    </div>""", 
-                    unsafe_allow_html=True
-                )
-            
-            col3, col4 = st.columns(2)
-            with col3:
-                total_volume = df['volume_24h'].sum()
-                st.markdown(
-                    f"""<div class="metric-container">
-                    <div class="metric-value">{format_currency(total_volume)}</div>
-                    <div class="metric-label">24h Volume</div>
-                    </div>""", 
-                    unsafe_allow_html=True
-                )
-            
-            with col4:
-                avg_apr = df['apr'].mean()
-                st.markdown(
-                    f"""<div class="metric-container">
-                    <div class="metric-value">{format_percentage(avg_apr)}</div>
-                    <div class="metric-label">Average APR</div>
-                    </div>""", 
-                    unsafe_allow_html=True
-                )
-            
-            # Single column for last metric
-            high_potential = len(df[df['prediction_score'] >= 80])
-            st.markdown(
-                f"""<div class="metric-container">
-                <div class="metric-value">{high_potential}</div>
-                <div class="metric-label">High Potential</div>
-                </div>""", 
-                unsafe_allow_html=True
-            )
-        else:
-            # Desktop view - use 5 columns
-            col1, col2, col3, col4, col5 = st.columns(5)
-            
-            with col1:
-                st.markdown(
-                    f"""<div class="metric-container">
-                    <div class="metric-value">{len(df)}</div>
-                    <div class="metric-label">Total Pools</div>
-                    </div>""", 
-                    unsafe_allow_html=True
-                )
-            
-            with col2:
-                total_tvl = df['liquidity'].sum()
-                st.markdown(
-                    f"""<div class="metric-container">
-                    <div class="metric-value">{format_currency(total_tvl)}</div>
-                    <div class="metric-label">Total TVL</div>
-                    </div>""", 
-                    unsafe_allow_html=True
-                )
-            
-            with col3:
-                total_volume = df['volume_24h'].sum()
-                st.markdown(
-                    f"""<div class="metric-container">
-                    <div class="metric-value">{format_currency(total_volume)}</div>
-                    <div class="metric-label">24h Volume</div>
-                    </div>""", 
-                    unsafe_allow_html=True
-                )
-            
-            with col4:
-                avg_apr = df['apr'].mean()
-                st.markdown(
-                    f"""<div class="metric-container">
-                    <div class="metric-value">{format_percentage(avg_apr)}</div>
-                    <div class="metric-label">Average APR</div>
-                    </div>""", 
-                    unsafe_allow_html=True
-                )
-            
-            with col5:
-                high_potential = len(df[df['prediction_score'] >= 80])
-                st.markdown(
-                    f"""<div class="metric-container">
-                    <div class="metric-value">{high_potential}</div>
-                    <div class="metric-label">High Potential</div>
-                    </div>""", 
-                    unsafe_allow_html=True
-                )
-        
-        # DEX breakdown
-        st.subheader("DEX Breakdown")
-        
-        dex_counts = df['dex'].value_counts().reset_index()
-        dex_counts.columns = ['DEX', 'Pool Count']
-        
-        fig = px.pie(
-            dex_counts, 
-            values='Pool Count', 
-            names='DEX', 
-            title="Pool Distribution by DEX",
-            hole=0.4,
-            color_discrete_sequence=px.colors.qualitative.Set3
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Category breakdown
-        st.subheader("Pool Categories")
-        
-        category_counts = df['category'].value_counts().reset_index()
-        category_counts.columns = ['Category', 'Pool Count']
-        
-        fig = px.bar(
-            category_counts, 
-            x='Category', 
-            y='Pool Count',
-            title="Pools by Category",
-            color='Category',
-            color_discrete_sequence=px.colors.qualitative.Bold
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Top pools by different metrics
-        st.subheader("Top Pools")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.write("**Top Pools by TVL**")
-            top_tvl = df.nlargest(5, 'liquidity')
-            top_tvl_table = pd.DataFrame({
-                'Pool': top_tvl['name'],
-                'DEX': top_tvl['dex'],
-                'TVL': top_tvl['liquidity'].apply(format_currency),
-                'APR': top_tvl['apr'].apply(format_percentage)
-            })
-            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-            st.table(top_tvl_table)
-            st.markdown('</div>', unsafe_allow_html=True)
-        
-        with col2:
-            st.write("**Top Pools by APR**")
-            # Filter for reasonable liquidity to avoid tiny pools with extreme APRs
-            min_liquidity = 1_000_000  # $1M
-            high_apr = df[df['liquidity'] >= min_liquidity].nlargest(5, 'apr')
-            high_apr_table = pd.DataFrame({
-                'Pool': high_apr['name'],
-                'DEX': high_apr['dex'],
-                'APR': high_apr['apr'].apply(format_percentage),
-                'TVL': high_apr['liquidity'].apply(format_currency)
-            })
-            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-            st.table(high_apr_table)
-            st.markdown('</div>', unsafe_allow_html=True)
-        
-        # APR by Category comparison
-        st.subheader("APR by Category")
-        
-        category_metrics = df.groupby('category').agg({
-            'apr': 'mean',
-            'liquidity': 'mean',
-            'volume_24h': 'sum'
-        }).reset_index()
-        
-        fig = px.bar(
-            category_metrics,
-            x='category',
-            y='apr',
-            color='category',
-            title="Average APR by Category",
-            labels={'category': 'Category', 'apr': 'Average APR (%)'},
-            text_auto='.2f'
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-    
-    # Tab 2: Pool Explorer
-    with tabs[1]:
-        st.header("Pool Explorer")
-        st.write("Explore all pools with advanced filtering options")
-        
-        # Sidebar filters
-        st.sidebar.header("Pool Filters")
-        
-        # DEX filter
-        dex_options = ['All'] + sorted(df['dex'].unique().tolist())
-        selected_dex = st.sidebar.selectbox("DEX", dex_options)
-        
-        # Category filter
-        category_options = ['All'] + sorted(df['category'].unique().tolist())
-        selected_category = st.sidebar.selectbox("Category", category_options)
-        
-        # Token filter
-        all_tokens = set()
-        for token in df['token1_symbol'].unique():
-            all_tokens.add(token)
-        for token in df['token2_symbol'].unique():
-            all_tokens.add(token)
-        token_options = ['All'] + sorted(list(all_tokens))
-        selected_token = st.sidebar.selectbox("Contains Token", token_options)
-        
-        # TVL and APR range sliders - optimized for mobile
-        min_tvl = float(df['liquidity'].min())
-        max_tvl = float(df['liquidity'].max())
-        
-        # Round values to prevent floating point issues - handle as integers for slider
-        min_tvl_rounded = int(round(min_tvl, -5))  # Round to nearest 100K
-        max_tvl_rounded = int(round(max_tvl, -5))  # Round to nearest 100K
-        
-        # Handle edge case where min == max
-        if min_tvl_rounded == max_tvl_rounded:
-            min_tvl_rounded = max(0, min_tvl_rounded - 1000000)
-            max_tvl_rounded = max_tvl_rounded + 1000000
-        
-        if mobile_view:
-            # For mobile: simplified sliders with presets
-            tvl_options = ["All", "< $1M", "$1M - $10M", "$10M - $50M", "> $50M"]
-            selected_tvl_option = st.sidebar.selectbox("TVL Range", tvl_options)
-            
-            # Convert selection to actual filter values
-            if selected_tvl_option == "< $1M":
-                tvl_range = (0, 1_000_000)
-            elif selected_tvl_option == "$1M - $10M":
-                tvl_range = (1_000_000, 10_000_000)
-            elif selected_tvl_option == "$10M - $50M":
-                tvl_range = (10_000_000, 50_000_000)
-            elif selected_tvl_option == "> $50M":
-                tvl_range = (50_000_000, float('inf'))
-            else:  # "All"
-                tvl_range = (min_tvl, max_tvl)
-        else:
-            # For desktop: full range slider
-            tvl_range = st.sidebar.slider(
-                "TVL Range ($)",
-                min_value=min_tvl_rounded,
-                max_value=max_tvl_rounded,
-                value=(min_tvl_rounded, max_tvl_rounded),
-                step=1000000,
-                format="$%.1fM"
-            )
-        
-        # APR slider with similar optimization
-        min_apr = float(df['apr'].min())
-        max_apr = float(df['apr'].max())
-        
-        # Round values for better slider behavior
-        min_apr_rounded = int(round(min_apr))
-        max_apr_rounded = int(round(max_apr) + 1)  # Add 1 to ensure we include the maximum
-        
-        if mobile_view:
-            # For mobile: simplified APR options
-            apr_options = ["All", "< 5%", "5% - 15%", "15% - 30%", "> 30%"]
-            selected_apr_option = st.sidebar.selectbox("APR Range", apr_options)
-            
-            # Convert selection to actual filter values
-            if selected_apr_option == "< 5%":
-                apr_range = (0, 5)
-            elif selected_apr_option == "5% - 15%":
-                apr_range = (5, 15)
-            elif selected_apr_option == "15% - 30%":
-                apr_range = (15, 30)
-            elif selected_apr_option == "> 30%":
-                apr_range = (30, float('inf'))
-            else:  # "All"
-                apr_range = (min_apr, max_apr)
-        else:
-            # For desktop: full range slider
-            apr_range = st.sidebar.slider(
-                "APR Range (%)",
-                min_value=min_apr_rounded,
-                max_value=max_apr_rounded,
-                value=(min_apr_rounded, max_apr_rounded),
-                step=1
-            )
-        
-        # Prediction score filter - simplified for mobile
-        if mobile_view:
-            # For mobile, use preset options
-            prediction_options = ["All Pools", "High Potential (70+)", "Very High Potential (85+)"]
-            selected_prediction = st.sidebar.selectbox("Prediction Score", prediction_options)
-            
-            if selected_prediction == "High Potential (70+)":
-                min_prediction = 70
-            elif selected_prediction == "Very High Potential (85+)":
-                min_prediction = 85
-            else:
-                min_prediction = 0
-        else:
-            # For desktop: full slider
-            min_prediction = st.sidebar.slider(
-                "Min Prediction Score",
-                min_value=0,
-                max_value=100,
-                value=0,
-                step=5
+        with col_filter3:
+            sort_by = st.selectbox(
+                "Sort by", 
+                options=["Prediction Score", "APR", "Liquidity", "Volume", "APR Change 24h", "TVL Change 24h"]
             )
         
         # Apply filters
         filtered_df = df.copy()
         
-        if selected_dex != 'All':
-            filtered_df = filtered_df[filtered_df['dex'] == selected_dex]
+        if search_term:
+            filtered_df = filtered_df[
+                filtered_df["token1_symbol"].str.contains(search_term, case=False) | 
+                filtered_df["token2_symbol"].str.contains(search_term, case=False) |
+                filtered_df["name"].str.contains(search_term, case=False)
+            ]
         
-        if selected_category != 'All':
-            filtered_df = filtered_df[filtered_df['category'] == selected_category]
+        if dex_filter != "All":
+            filtered_df = filtered_df[filtered_df["dex"] == dex_filter]
         
-        if selected_token != 'All':
-            token_mask = (
-                (filtered_df['token1_symbol'] == selected_token) | 
-                (filtered_df['token2_symbol'] == selected_token)
-            )
-            filtered_df = filtered_df[token_mask]
-        
-        # Apply range filters
-        filtered_df = filtered_df[
-            (filtered_df['liquidity'] >= tvl_range[0]) & 
-            (filtered_df['liquidity'] <= tvl_range[1]) &
-            (filtered_df['apr'] >= apr_range[0]) & 
-            (filtered_df['apr'] <= apr_range[1])
-        ]
-        
-        # Apply prediction score filter
-        if min_prediction > 0:
-            filtered_df = filtered_df[filtered_df['prediction_score'] >= min_prediction]
-        
-        # Sort options
-        sort_options = [
-            "TVL (High to Low)",
-            "APR (High to Low)",
-            "Volume (High to Low)",
-            "Prediction Score (High to Low)"
-        ]
-        
-        selected_sort = st.selectbox("Sort by", sort_options)
+        if category_filter != "All":
+            filtered_df = filtered_df[filtered_df["category"] == category_filter]
         
         # Apply sorting
-        if selected_sort == "TVL (High to Low)":
-            filtered_df = filtered_df.sort_values('liquidity', ascending=False)
-        elif selected_sort == "APR (High to Low)":
-            filtered_df = filtered_df.sort_values('apr', ascending=False)
-        elif selected_sort == "Volume (High to Low)":
-            filtered_df = filtered_df.sort_values('volume_24h', ascending=False)
-        elif selected_sort == "Prediction Score (High to Low)":
-            filtered_df = filtered_df.sort_values('prediction_score', ascending=False)
+        sort_column_map = {
+            "Prediction Score": "prediction_score",
+            "APR": "apr",
+            "Liquidity": "liquidity",
+            "Volume": "volume_24h",
+            "APR Change 24h": "apr_change_24h",
+            "TVL Change 24h": "tvl_change_24h"
+        }
         
-        # Display filtered results
-        st.write(f"Found {len(filtered_df)} pools matching your criteria")
+        sort_column = sort_column_map.get(sort_by, "prediction_score")
+        filtered_df = filtered_df.sort_values(sort_column, ascending=False)
         
-        # Prepare display data
-        display_data = []
+        # Show summary statistics
+        st.subheader("Summary Statistics")
+        metrics_col1, metrics_col2, metrics_col3, metrics_col4 = st.columns(4)
         
-        for _, pool in filtered_df.iterrows():
-            # Format data
-            apr_change_7d = pool.get('apr_change_7d')
-            apr_change_icon = get_trend_icon(apr_change_7d)
-            
-            tvl_change_7d = pool.get('tvl_change_7d')
-            tvl_change_icon = get_trend_icon(tvl_change_7d)
-            
-            category_html = get_category_badge(pool.get('category'))
-            
-            display_data.append({
-                "Name": pool['name'],
-                "DEX": pool['dex'],
-                "Category": category_html,
-                "TVL": format_currency(pool['liquidity']),
-                "TVL Change": f"{tvl_change_icon} {format_percentage(abs(tvl_change_7d)) if tvl_change_7d is not None else 'N/A'}",
-                "APR": format_percentage(pool['apr']),
-                "APR Change": f"{apr_change_icon} {format_percentage(abs(apr_change_7d)) if apr_change_7d is not None else 'N/A'}",
-                "Score": f"{pool['prediction_score']:.0f}/100",
-                "id": pool['id']  # Hidden column for reference
-            })
+        with metrics_col1:
+            st.metric(
+                "Total Pools", 
+                f"{len(filtered_df):,}",
+                f"{len(filtered_df) - len(df):,}" if len(filtered_df) != len(df) else None
+            )
         
-        # Convert to DataFrame
-        display_df = pd.DataFrame(display_data)
+        with metrics_col2:
+            total_tvl = filtered_df["liquidity"].sum()
+            st.metric(
+                "Total Liquidity", 
+                format_currency(total_tvl)
+            )
         
-        # Display as a table with mobile optimizations
-        if mobile_view:
-            # For mobile view, use a simplified table with fewer columns
-            simplified_df = display_df[['Name', 'TVL', 'APR', 'Score']].copy()
-            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-            st.write(simplified_df.to_html(escape=False, index=False), unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-        else:
-            # For desktop view, show full table
-            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-            st.write(display_df.drop(columns=['id']).to_html(escape=False, index=False), unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+        with metrics_col3:
+            avg_apr = filtered_df["apr"].mean()
+            st.metric(
+                "Average APR", 
+                format_percentage(avg_apr)
+            )
         
-        # Pool detail view
-        if len(filtered_df) > 0:
-            st.subheader("Pool Details")
-            
-            # Create a mapping of display names to IDs
-            pool_options = {}
-            for i, row in filtered_df.reset_index().iterrows():
-                display_name = f"{row['name']} ({row['dex']})"
-                pool_options[display_name] = i
-            
-            # Select a pool for detailed view
-            selected_name = st.selectbox("Select pool for detailed view", list(pool_options.keys()))
-            selected_idx = pool_options[selected_name]
-            selected_pool = filtered_df.iloc[selected_idx]
-            
-            # Display detailed information based on device type
-            if mobile_view:
-                # Mobile view: stacked sections
-                # Basic Info section
-                st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
-                st.markdown("### Basic Info")
-                st.write(f"**Name:** {selected_pool['name']}")
-                st.write(f"**DEX:** {selected_pool['dex']}")
-                st.write(f"**Category:** {selected_pool['category']}")
-                st.write(f"**Token 1:** {selected_pool['token1_symbol']}")
-                st.write(f"**Token 2:** {selected_pool['token2_symbol']}")
-                st.markdown("</div>", unsafe_allow_html=True)
-                
-                # Performance section
-                st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
-                st.markdown("### Performance")
-                st.write(f"**TVL:** {format_currency(selected_pool['liquidity'])}")
-                st.write(f"**24h Volume:** {format_currency(selected_pool['volume_24h'])}")
-                st.write(f"**Fee Rate:** {format_percentage(selected_pool['fee'] * 100)}")
-                st.write(f"**APR:** {format_percentage(selected_pool['apr'])}")
-                
-                if 'apr_change_7d' in selected_pool:
-                    apr_change = selected_pool['apr_change_7d']
-                    st.write(f"**7d APR Change:** {get_trend_icon(apr_change)} {format_percentage(abs(apr_change))}")
-                st.markdown("</div>", unsafe_allow_html=True)
-                
-                # Prediction section
-                st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
-                st.markdown("### Prediction")
-                score = selected_pool['prediction_score']
-                st.write(f"**Prediction Score:** {score:.0f}/100")
-                
-                # Prediction indicator
-                if score >= 85:
-                    st.success("High growth potential")
-                elif score >= 70:
-                    st.info("Moderate growth potential")
-                else:
-                    st.warning("Limited growth potential")
-                
-                # Key factors - simplified for mobile
-                st.write("**Key Factors:**")
-                
-                apr_change = selected_pool.get('apr_change_7d', 0)
-                tvl_change = selected_pool.get('tvl_change_7d', 0)
-                
-                factors = []
-                
-                if apr_change > 2:
-                    factors.append("• Strong APR growth")
-                elif apr_change < -2:
-                    factors.append("• APR decline")
-                    
-                if tvl_change > 5:
-                    factors.append("• Increasing liquidity")
-                elif tvl_change < -5:
-                    factors.append("• Decreasing liquidity")
-                    
-                if selected_pool['category'] == 'Meme':
-                    factors.append("• Meme coin volatility")
-                
-                if selected_pool['volume_24h'] / selected_pool['liquidity'] > 0.2:
-                    factors.append("• High trading volume")
-                
-                for factor in factors:
-                    st.write(factor)
-                st.markdown("</div>", unsafe_allow_html=True)
-            else:
-                # Desktop view: 3-column layout
-                col1, col2, col3 = st.columns([1, 1, 1])
-                
-                with col1:
-                    st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
-                    st.markdown("### Basic Info")
-                    st.write(f"**ID:** {selected_pool['id']}")
-                    st.write(f"**Name:** {selected_pool['name']}")
-                    st.write(f"**DEX:** {selected_pool['dex']}")
-                    st.write(f"**Category:** {selected_pool['category']}")
-                    st.write(f"**Token 1:** {selected_pool['token1_symbol']}")
-                    st.write(f"**Token 2:** {selected_pool['token2_symbol']}")
-                    st.markdown("</div>", unsafe_allow_html=True)
-                
-                with col2:
-                    st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
-                    st.markdown("### Performance")
-                    st.write(f"**TVL:** {format_currency(selected_pool['liquidity'])}")
-                    st.write(f"**24h Volume:** {format_currency(selected_pool['volume_24h'])}")
-                    st.write(f"**Fee Rate:** {format_percentage(selected_pool['fee'] * 100)}")
-                    st.write(f"**APR:** {format_percentage(selected_pool['apr'])}")
-                    
-                    if 'apr_change_7d' in selected_pool:
-                        apr_change = selected_pool['apr_change_7d']
-                        st.write(f"**7d APR Change:** {get_trend_icon(apr_change)} {format_percentage(abs(apr_change))}")
-                    st.markdown("</div>", unsafe_allow_html=True)
-                
-                with col3:
-                    st.markdown("<div class='highlight-container'>", unsafe_allow_html=True)
-                    st.markdown("### Prediction")
-                    score = selected_pool['prediction_score']
-                    st.write(f"**Prediction Score:** {score:.0f}/100")
-                    
-                    # Prediction indicator
-                    if score >= 85:
-                        st.success("High growth potential")
-                    elif score >= 70:
-                        st.info("Moderate growth potential")
-                    else:
-                        st.warning("Limited growth potential")
-                    
-                    # Key factors
-                    st.write("**Key Factors:**")
-                    
-                    apr_change = selected_pool.get('apr_change_7d', 0)
-                    tvl_change = selected_pool.get('tvl_change_7d', 0)
-                    
-                    factors = []
-                    
-                    if apr_change > 2:
-                        factors.append("• Strong APR growth")
-                    elif apr_change < -2:
-                        factors.append("• APR decline")
-                        
-                    if tvl_change > 5:
-                        factors.append("• Increasing liquidity")
-                    elif tvl_change < -5:
-                        factors.append("• Decreasing liquidity")
-                        
-                    if selected_pool['category'] == 'Meme':
-                        factors.append("• Meme coin volatility")
-                    
-                    if selected_pool['volume_24h'] / selected_pool['liquidity'] > 0.2:
-                        factors.append("• High trading volume")
-                    
-                    for factor in factors:
-                        st.write(factor)
-                    st.markdown("</div>", unsafe_allow_html=True)
-            
-            # Historical data visualization
-            st.subheader("Historical Performance")
-            
-            # Generate some simulated historical data
-            dates = [(datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(30, 0, -1)]
-            
-            # Create base values
-            base_apr = selected_pool['apr']
-            base_tvl = selected_pool['liquidity']
-            
-            # Generate historical data with realistic trends
-            # Use the 7d and 30d changes to create a trend
-            apr_change_7d = selected_pool.get('apr_change_7d', 0)
-            apr_change_30d = selected_pool.get('apr_change_30d', 0)
-            
-            tvl_change_7d = selected_pool.get('tvl_change_7d', 0)
-            tvl_change_30d = selected_pool.get('tvl_change_30d', 0)
-            
-            # Calculate daily rates
-            apr_daily_change_recent = apr_change_7d / 7 if apr_change_7d is not None else 0
-            apr_daily_change_old = (apr_change_30d - apr_change_7d) / 23 if apr_change_30d is not None and apr_change_7d is not None else 0
-            
-            tvl_daily_change_recent = tvl_change_7d / 7 * 0.01 if tvl_change_7d is not None else 0
-            tvl_daily_change_old = (tvl_change_30d - tvl_change_7d) / 23 * 0.01 if tvl_change_30d is not None and tvl_change_7d is not None else 0
-            
-            # Generate data points
-            apr_data = []
-            tvl_data = []
-            
-            for i in range(30):
-                if i < 7:  # Recent data (last 7 days)
-                    day_apr = base_apr - ((7 - i) * apr_daily_change_recent)
-                    day_tvl = base_tvl / (1 + ((7 - i) * tvl_daily_change_recent))
-                else:  # Older data
-                    day_apr = base_apr - (7 * apr_daily_change_recent) - ((i - 7) * apr_daily_change_old)
-                    day_tvl = base_tvl / (1 + (7 * tvl_daily_change_recent)) / (1 + ((i - 7) * tvl_daily_change_old))
-                
-                # Add small random noise
-                day_apr += random.uniform(-0.5, 0.5)
-                day_tvl *= (1 + random.uniform(-0.01, 0.01))
-                
-                apr_data.append(day_apr)
-                tvl_data.append(day_tvl)
-            
-            # Create figure with two y-axes - optimize for mobile if needed
-            if mobile_view:
-                # For mobile, create separate simpler charts
-                
-                # APR Chart
-                fig_apr = px.line(
-                    x=dates, 
-                    y=apr_data,
-                    labels={"x": "Date", "y": "APR (%)"},
-                    title="30-Day APR History"
-                )
-                fig_apr.update_traces(line=dict(color="#2196F3", width=3))
-                fig_apr.update_layout(margin=dict(l=10, r=10, t=40, b=40))
-                st.plotly_chart(fig_apr, use_container_width=True)
-                
-                # TVL Chart
-                fig_tvl = px.line(
-                    x=dates, 
-                    y=tvl_data,
-                    labels={"x": "Date", "y": "TVL"},
-                    title="30-Day TVL History"
-                )
-                fig_tvl.update_traces(line=dict(color="#4CAF50", width=3))
-                fig_tvl.update_layout(margin=dict(l=10, r=10, t=40, b=40))
-                fig_tvl.update_yaxes(tickformat="$,.0f")
-                st.plotly_chart(fig_tvl, use_container_width=True)
-            else:
-                # Desktop view with dual-axis chart
-                fig = make_subplots(specs=[[{"secondary_y": True}]])
-                
-                # Add APR line
-                fig.add_trace(
-                    go.Scatter(x=dates, y=apr_data, name="APR (%)", line=dict(color="#2196F3", width=2)),
-                    secondary_y=False
-                )
-                
-                # Add TVL line
-                fig.add_trace(
-                    go.Scatter(x=dates, y=tvl_data, name="TVL ($)", line=dict(color="#4CAF50", width=2)),
-                    secondary_y=True
-                )
-                
-                # Update layout
-                fig.update_layout(
-                    title="30-Day Historical Performance",
-                    xaxis_title="Date",
-                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
-                )
-                
-                # Update y-axes
-                fig.update_yaxes(title_text="APR (%)", secondary_y=False)
-                fig.update_yaxes(title_text="TVL ($)", secondary_y=True, tickformat="$,.0f")
-                
-                st.plotly_chart(fig, use_container_width=True)
-    
-    # Tab 3: Insights & Predictions
-    with tabs[2]:
-        st.header("Insights & Predictions")
-        st.write("Machine learning-based predictions and market insights")
+        with metrics_col4:
+            avg_prediction = filtered_df["prediction_score"].mean()
+            st.metric(
+                "Avg Prediction Score", 
+                f"{avg_prediction:.1f}/100"
+            )
         
-        # Prediction score distribution
-        st.subheader("Prediction Score Distribution")
+        # Pool data table
+        st.subheader("Pool Data")
         
-        fig = px.histogram(
-            df,
-            x="prediction_score",
-            nbins=20,
-            title="Distribution of Prediction Scores",
-            labels={"prediction_score": "Prediction Score"},
-            color_discrete_sequence=["#1E88E5"]
+        # Show only the most relevant columns
+        display_columns = [
+            "name", "dex", "category", "liquidity", "volume_24h", 
+            "apr", "apr_change_24h", "apr_change_7d", "prediction_score", "id"
+        ]
+        
+        # Extract display data
+        display_df = filtered_df[display_columns].copy()
+        
+        # Format the display data
+        display_df["liquidity"] = display_df["liquidity"].apply(format_currency)
+        display_df["volume_24h"] = display_df["volume_24h"].apply(format_currency)
+        display_df["apr"] = display_df["apr"].apply(format_percentage)
+        display_df["apr_change_24h"] = display_df["apr_change_24h"].apply(
+            lambda x: f"{get_trend_icon(x)} {format_percentage(x)}"
+        )
+        display_df["apr_change_7d"] = display_df["apr_change_7d"].apply(
+            lambda x: f"{get_trend_icon(x)} {format_percentage(x)}"
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        # Format prediction score with a visual indicator
+        display_df["prediction_score"] = display_df["prediction_score"].apply(
+            lambda x: f"{'🟢' if x > 75 else '🟡' if x > 50 else '🔴'} {x:.1f}/100"
+        )
         
-        # Advanced prediction engine explanation
-        st.subheader("Self-Evolving Prediction Technology")
+        # Format the category column with HTML badges
+        display_df["category"] = filtered_df["category"].apply(get_category_badge)
         
+        # Rename columns for display
+        column_labels = {
+            "name": "Pool Name",
+            "dex": "DEX",
+            "category": "Category",
+            "liquidity": "TVL",
+            "volume_24h": "24h Volume",
+            "apr": "APR",
+            "apr_change_24h": "24h Δ",
+            "apr_change_7d": "7d Δ",
+            "prediction_score": "Pred Score",
+            "id": "Pool ID"
+        }
+        
+        display_df = display_df.rename(columns=column_labels)
+        
+        # Display the table with HTML formatting
+        st.write(
+            display_df.to_html(escape=False, index=False),
+            unsafe_allow_html=True
+        )
+    
+    # Predictions Tab
+    with tab_predict:
+        st.header("Pool Performance Predictions")
         st.markdown("""
-        Our platform uses a sophisticated self-evolving prediction system that continually 
-        improves its accuracy over time. The system combines multiple machine learning approaches:
-        
-        1. **Ensemble Learning** - Multiple models work together to generate predictions
-        2. **Reinforcement Learning** - The system learns from the accuracy of past predictions
-        3. **LSTM Neural Networks** - Recognize complex patterns in time series data
-        4. **Adaptive Hyperparameter Optimization** - Self-tunes for optimal performance
-        
-        With each prediction cycle, the system evaluates its own performance and adjusts its
-        internal weights, feature selection, and model parameters to improve future predictions.
+        Our machine learning algorithms analyze historical pool performance and various on-chain metrics
+        to predict which pools are likely to perform well in the future.
         """)
         
-        # If we have the prediction engine, show a button to run it
-        if HAS_PREDICTION_ENGINE:
-            st.write("#### Generate Advanced Predictions")
-            
-            # Create a demo using the advanced prediction engine
-            use_advanced_engine = st.checkbox("Use advanced prediction engine for pool analysis", value=True)
-            
-            if use_advanced_engine:
-                with st.expander("Advanced Prediction Settings", expanded=False):
-                    prediction_horizon = st.slider(
-                        "Prediction Horizon (Days)", 
-                        min_value=1, 
-                        max_value=30, 
-                        value=7
-                    )
-                    
-                    confidence_threshold = st.slider(
-                        "Minimum Confidence Threshold (%)", 
-                        min_value=0, 
-                        max_value=100, 
-                        value=60
-                    )
-        
         # Top predicted pools
-        st.subheader("Top Growth Potential Pools")
+        st.subheader("Top Predicted Pools")
         
-        # Filter for minimum liquidity
-        min_liquidity = 1_000_000  # $1M
-        top_predictions = df[df['liquidity'] >= min_liquidity].nlargest(10, 'prediction_score')
+        # Get top 10 pools by prediction score
+        top_predicted = df.sort_values("prediction_score", ascending=False).head(10)
         
-        # If we have advanced prediction engine and user wants to use it
-        if HAS_PREDICTION_ENGINE and 'use_advanced_engine' in locals() and use_advanced_engine:
-            with st.spinner("Generating advanced predictions using self-evolving AI..."):
-                try:
-                    # Process the top pools with the advanced engine
-                    top_pools_data = top_predictions.to_dict('records')
-                    
-                    # Initialize the prediction engine
-                    engine = SelfEvolvingPredictionEngine(prediction_horizon=prediction_horizon)
-                    
-                    # Generate predictions
-                    advanced_predictions = []
-                    for pool in top_pools_data:
-                        prediction_result = engine.predict(pool)
-                        
-                        # Extract prediction data
-                        pred_dict = prediction_result.to_dict()
-                        
-                        # Calculate overall score
-                        score = pred_dict.get('prediction_score', 0)
-                        
-                        # Only include if it meets confidence threshold
-                        if score >= confidence_threshold:
-                            # Add prediction details
-                            pool['advanced_prediction'] = pred_dict
-                            advanced_predictions.append(pool)
-                    
-                    # Sort by prediction score
-                    advanced_predictions.sort(key=lambda x: x.get('advanced_prediction', {}).get('prediction_score', 0), reverse=True)
-                    
-                    # Create display data
-                    top_pred_data = []
-                    
-                    for pool in advanced_predictions[:10]:  # Take up to 10
-                        # Format data
-                        apr_change_7d = pool.get('apr_change_7d')
-                        apr_change_icon = get_trend_icon(apr_change_7d)
-                        
-                        tvl_change_7d = pool.get('tvl_change_7d')
-                        tvl_change_icon = get_trend_icon(tvl_change_7d)
-                        
-                        category_html = get_category_badge(pool.get('category'))
-                        
-                        # Get advanced prediction data
-                        adv_pred = pool.get('advanced_prediction', {})
-                        pred_values = adv_pred.get('prediction_values', {})
-                        
-                        # Get predicted changes
-                        pred_apr_change = pred_values.get('apr_change', 0)
-                        pred_tvl_change = pred_values.get('tvl_change_percent', 0)
-                        
-                        top_pred_data.append({
-                            "Name": pool['name'],
-                            "DEX": pool['dex'],
-                            "Category": category_html,
-                            "Current APR": format_percentage(pool['apr']),
-                            "Predicted APR": format_percentage(pred_values.get('future_apr', pool['apr'])),
-                            "APR Trend": f"{get_trend_icon(pred_apr_change)} {format_percentage(abs(pred_apr_change)) if pred_apr_change is not None else 'N/A'}",
-                            "TVL": format_currency(pool['liquidity']),
-                            "TVL Trend": f"{get_trend_icon(pred_tvl_change)} {format_percentage(abs(pred_tvl_change)) if pred_tvl_change is not None else 'N/A'}",
-                            "AI Score": f"{adv_pred.get('prediction_score', 0):.0f}/100"
-                        })
+        # Display in a clean table
+        for i, (_, row) in enumerate(top_predicted.iterrows()):
+            with st.container():
+                col1, col2, col3, col4, col5 = st.columns([2, 1, 1.5, 1, 1.5])
                 
-                except Exception as e:
-                    st.error(f"Error using advanced prediction engine: {str(e)}")
-                    # Fall back to basic predictions
-                    # Create display data from basic predictions
-                    top_pred_data = []
-                    
-                    for _, pool in top_predictions.iterrows():
-                        # Format data
-                        apr_change_7d = pool.get('apr_change_7d')
-                        apr_change_icon = get_trend_icon(apr_change_7d)
-                        
-                        tvl_change_7d = pool.get('tvl_change_7d')
-                        tvl_change_icon = get_trend_icon(tvl_change_7d)
-                        
-                        category_html = get_category_badge(pool.get('category'))
-                        
-                        top_pred_data.append({
-                            "Name": pool['name'],
-                            "DEX": pool['dex'],
-                            "Category": category_html,
-                            "TVL": format_currency(pool['liquidity']),
-                            "TVL Change": f"{tvl_change_icon} {format_percentage(abs(tvl_change_7d)) if tvl_change_7d is not None else 'N/A'}",
-                            "APR": format_percentage(pool['apr']),
-                            "APR Change": f"{apr_change_icon} {format_percentage(abs(apr_change_7d)) if apr_change_7d is not None else 'N/A'}",
-                            "Score": f"{pool['prediction_score']:.0f}/100"
-                        })
-        else:
-            # Create display data from basic predictions
-            top_pred_data = []
-            
-            for _, pool in top_predictions.iterrows():
-                # Format data
-                apr_change_7d = pool.get('apr_change_7d')
-                apr_change_icon = get_trend_icon(apr_change_7d)
+                with col1:
+                    st.markdown(f"**{row['name']}**")
+                    st.markdown(f"*{row['dex']}* • {get_category_badge(row['category'])}", unsafe_allow_html=True)
                 
-                tvl_change_7d = pool.get('tvl_change_7d')
-                tvl_change_icon = get_trend_icon(tvl_change_7d)
+                with col2:
+                    st.markdown("**TVL**")
+                    st.markdown(format_currency(row['liquidity']))
                 
-                category_html = get_category_badge(pool.get('category'))
+                with col3:
+                    st.markdown("**APR**")
+                    st.markdown(f"{format_percentage(row['apr'])} {get_trend_icon(row['apr_change_24h'])}")
                 
-                top_pred_data.append({
-                    "Name": pool['name'],
-                    "DEX": pool['dex'],
-                    "Category": category_html,
-                    "TVL": format_currency(pool['liquidity']),
-                    "TVL Change": f"{tvl_change_icon} {format_percentage(abs(tvl_change_7d)) if tvl_change_7d is not None else 'N/A'}",
-                    "APR": format_percentage(pool['apr']),
-                    "APR Change": f"{apr_change_icon} {format_percentage(abs(apr_change_7d)) if apr_change_7d is not None else 'N/A'}",
-                    "Score": f"{pool['prediction_score']:.0f}/100"
-                })
-        
-        # Convert to DataFrame
-        top_pred_df = pd.DataFrame(top_pred_data)
-        
-        # Display as a table - mobile optimized
-        if mobile_view:
-            # For mobile view, use a simplified table with fewer columns
-            try:
-                # Check which columns are actually available in the DataFrame
-                available_columns = top_pred_df.columns.tolist()
+                with col4:
+                    st.markdown("**Score**")
+                    score_color = "green" if row['prediction_score'] > 75 else "orange" if row['prediction_score'] > 50 else "red"
+                    st.markdown(f"<span style='color:{score_color};font-weight:bold;'>{row['prediction_score']:.1f}/100</span>", unsafe_allow_html=True)
                 
-                if 'AI Score' in available_columns:
-                    # Advanced prediction table for mobile
-                    mobile_cols = ['Name', 'Predicted APR', 'AI Score']
-                else:
-                    # Basic prediction table for mobile
-                    mobile_cols = ['Name', 'APR', 'Score']
-                    
-                # Filter to only include columns that exist
-                mobile_cols = [col for col in mobile_cols if col in available_columns]
-                
-                # Create the mobile view DataFrame
-                mobile_pred_df = top_pred_df[mobile_cols].copy()
-                
-                st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-                st.write(mobile_pred_df.to_html(escape=False, index=False), unsafe_allow_html=True)
-                st.markdown('</div>', unsafe_allow_html=True)
-            except Exception as e:
-                st.error(f"Error displaying mobile table: {str(e)}")
-                # Fallback to the full table
-                st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-                st.write(top_pred_df.to_html(escape=False, index=False), unsafe_allow_html=True)
-                st.markdown('</div>', unsafe_allow_html=True)
-        else:
-            # For desktop view, show full table
-            st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
-            st.write(top_pred_df.to_html(escape=False, index=False), unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
+                with col5:
+                    st.markdown("**Pool ID**")
+                    st.code(row['id'], language=None)
+            
+            st.markdown("---")
+    
+    # Risk Assessment Tab
+    with tab_risk:
+        st.header("Risk Assessment")
+        st.markdown("""
+        This tab provides a risk assessment for various liquidity pools based on
+        volatility, impermanent loss risk, smart contract risk, and other factors.
+        """)
         
-        # Category performance comparison
-        st.subheader("Category Performance Analysis")
+        # Risk metrics
+        risk_col1, risk_col2 = st.columns(2)
         
-        # Calculate metrics by category
-        category_perf = df.groupby('category').agg({
-            'apr': 'mean',
-            'liquidity': 'mean',
-            'volume_24h': 'mean',
-            'prediction_score': 'mean',
-            'id': 'count'
-        }).reset_index()
+        with risk_col1:
+            st.subheader("Highest Volatility Pools")
+            
+            # Get pools with highest APR changes (proxy for volatility)
+            volatile_pools = df.iloc[df['apr_change_24h'].abs().argsort()[::-1]].head(5)
+            
+            for _, row in volatile_pools.iterrows():
+                st.markdown(f"**{row['name']}** ({row['dex']})")
+                st.markdown(f"APR Change 24h: {format_percentage(row['apr_change_24h'])} {get_trend_icon(row['apr_change_24h'])}")
+                st.markdown("---")
         
-        category_perf.columns = ['Category', 'Avg APR', 'Avg TVL', 'Avg Volume', 'Avg Score', 'Pool Count']
+        with risk_col2:
+            st.subheader("Lowest Liquidity Pools")
+            
+            # Get pools with lowest liquidity
+            low_liquidity = df.sort_values("liquidity").head(5)
+            
+            for _, row in low_liquidity.iterrows():
+                st.markdown(f"**{row['name']}** ({row['dex']})")
+                st.markdown(f"TVL: {format_currency(row['liquidity'])}")
+                st.markdown("---")
         
-        # Create radar chart data
-        categories = category_perf['Category'].tolist()
+        # Risk scatter plot
+        st.subheader("Risk vs. Reward Analysis")
         
-        # Normalize metrics for radar chart
-        radar_data = category_perf.copy()
-        for col in ['Avg APR', 'Avg TVL', 'Avg Volume', 'Avg Score']:
-            max_val = radar_data[col].max()
-            if max_val > 0:
-                radar_data[col] = radar_data[col] / max_val
-        
-        # Create radar chart
-        fig = go.Figure()
-        
-        for i, category in enumerate(categories):
-            row = radar_data[radar_data['Category'] == category].iloc[0]
-            
-            fig.add_trace(go.Scatterpolar(
-                r=[row['Avg APR'], row['Avg TVL'], row['Avg Volume'], row['Avg Score']],
-                theta=['APR', 'TVL', 'Volume', 'Prediction Score'],
-                fill='toself',
-                name=category
-            ))
-        
-        fig.update_layout(
-            polar=dict(
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, 1]
-                )
-            ),
-            title="Category Performance (Normalized)"
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Explanation of prediction methodology
-        with st.expander("Prediction Methodology"):
-            st.markdown("""
-            ### Machine Learning Prediction Methodology
-            
-            Our prediction system combines multiple machine learning approaches to forecast the potential for APR and TVL growth:
-            
-            #### Data Features Analyzed
-            
-            - **Historical metrics:** APR, TVL, and volume trends over multiple time periods
-            - **Volatility patterns:** How stable the pool's metrics have been
-            - **Token correlation:** How token prices move in relation to each other
-            - **Market activity:** Trading patterns and liquidity provider behavior
-            - **Social sentiment:** Community interest and activity around tokens
-            - **Protocol factors:** Recent upgrades, incentive programs, etc.
-            
-            #### Model Architecture
-            
-            We use a multi-model ensemble approach:
-            
-            1. **Gradient Boosting Models (XGBoost/LightGBM)**
-               - Handle non-linear relationships between features
-               - Identify key predictive factors
-            
-            2. **LSTM Neural Networks**
-               - Time-series prediction for APR and TVL patterns
-               - Pattern recognition in historical metrics
-            
-            3. **Reinforcement Learning**
-               - Adaptive strategy development
-               - Learning from market responses
-            
-            4. **Statistical Methods**
-               - ARIMA/GARCH for volatility forecasting
-               - Bayesian inference for probability distributions
-            
-            The final prediction score combines outputs from all models using a weighted ensemble approach.
-            Higher scores (80-100) indicate high confidence in positive growth potential,
-            while moderate scores (60-80) suggest moderate potential.
-            """)
-        
-        # Market trends
-        st.subheader("Market Trends")
-        
-        # Calculate DEX trends (7-day changes)
-        if 'apr_change_7d' in df.columns and 'tvl_change_7d' in df.columns:
-            dex_trends = df.groupby('dex').agg({
-                'apr_change_7d': 'mean',
-                'tvl_change_7d': 'mean',
-                'prediction_score': 'mean',
-                'id': 'count'
-            }).reset_index()
-            
-            dex_trends.columns = ['DEX', 'APR Change', 'TVL Change', 'Prediction Score', 'Pool Count']
-            
-            # Create bubble chart
-            fig = px.scatter(
-                dex_trends,
-                x='APR Change',
-                y='TVL Change',
-                size='Pool Count',
-                color='Prediction Score',
-                hover_name='DEX',
-                size_max=60,
-                color_continuous_scale=px.colors.sequential.Viridis,
-                title="DEX Performance Trends"
-            )
-            
-            # Add horizontal and vertical lines at 0
-            fig.add_hline(y=0, line_dash="dash", line_color="gray")
-            fig.add_vline(x=0, line_dash="dash", line_color="gray")
-            
-            # Update layout
-            fig.update_layout(
-                xaxis_title="7-Day APR Change (%)",
-                yaxis_title="7-Day TVL Change (%)",
-                coloraxis_colorbar_title="Prediction Score"
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("Historical trend data not available for market trend analysis")
-        
-        # APR to TVL correlation
-        st.subheader("APR to TVL Correlation")
-        
+        # Create a scatter plot of APR vs Volatility
         fig = px.scatter(
             df,
-            x='liquidity',
-            y='apr',
-            color='category',
-            size='volume_24h',
-            hover_name='name',
-            log_x=True,
-            title="APR vs. TVL Correlation",
-            labels={
-                'liquidity': 'TVL (log scale)',
-                'apr': 'APR (%)',
-                'category': 'Category',
-                'volume_24h': 'Volume'
-            }
+            x="apr_change_24h",
+            y="apr",
+            color="category",
+            size="liquidity",
+            hover_name="name",
+            log_x=False,
+            size_max=30,
+            title="APR vs Volatility by Pool Category"
+        )
+        
+        # Update the layout
+        fig.update_layout(
+            xaxis_title="24h APR Change (%)",
+            yaxis_title="Current APR (%)",
+            legend_title="Category",
+            height=600
         )
         
         st.plotly_chart(fig, use_container_width=True)
-        
+    
+    # NLP Reports Tab
+    with tab_nlp:
+        st.header("NLP-Generated Pool Reports")
         st.markdown("""
-        ### Key Insights
+        Our AI analyzes each pool's metrics and performance to generate human-readable reports.
+        These reports help you understand the pool's performance and potential investment value.
+        """)
         
-        1. **Meme Tokens** generally show the highest APRs but with higher volatility
-        2. **Stablecoin Pairs** have the lowest APRs but highest liquidity and stability
-        3. **Major Pairs** (SOL, BTC, ETH) offer balanced APR to risk ratios
-        4. Higher **prediction scores** correlate with recent positive APR and TVL trends
-        5. Some DEXes consistently outperform others in similar pool categories
+        # Pool selection
+        selected_pool = st.selectbox(
+            "Select a pool for detailed report",
+            options=df["name"].tolist(),
+            index=0
+        )
+        
+        pool_data = df[df["name"] == selected_pool].iloc[0]
+        
+        # Display pool data
+        col1, col2 = st.columns([1, 2])
+        
+        with col1:
+            st.subheader("Pool Metrics")
+            st.metric("TVL", format_currency(pool_data["liquidity"]))
+            st.metric("APR", format_percentage(pool_data["apr"]))
+            st.metric("24h Volume", format_currency(pool_data["volume_24h"]))
+            st.metric("Fee", f"{pool_data['fee']*100:.3f}%")
+            st.metric("Prediction Score", f"{pool_data['prediction_score']:.1f}/100")
+        
+        with col2:
+            st.subheader("AI Analysis Report")
+            
+            # Generate a formatted pool report based on the data
+            dex_name = pool_data["dex"]
+            pool_name = pool_data["name"]
+            liquidity = pool_data["liquidity"]
+            apr = pool_data["apr"]
+            volume = pool_data["volume_24h"]
+            apr_trend_24h = pool_data["apr_change_24h"]
+            liquidity_trend_7d = pool_data["tvl_change_7d"]
+            prediction_score = pool_data["prediction_score"]
+            
+            # Determine sentiment based on metrics
+            sentiment = "very positive" if prediction_score > 80 else "positive" if prediction_score > 60 else "neutral" if prediction_score > 40 else "negative" if prediction_score > 20 else "very negative"
+            
+            apr_sentiment = "excellent" if apr > 30 else "very good" if apr > 20 else "good" if apr > 10 else "moderate" if apr > 5 else "low"
+            
+            liquidity_size = "very high" if liquidity > 20_000_000 else "high" if liquidity > 5_000_000 else "moderate" if liquidity > 1_000_000 else "low" if liquidity > 100_000 else "very low"
+            
+            volume_quality = "excellent" if volume/liquidity > 0.2 else "good" if volume/liquidity > 0.1 else "moderate" if volume/liquidity > 0.05 else "low" if volume/liquidity > 0.01 else "very low"
+            
+            # Trend analysis
+            apr_trend_text = "increasing rapidly" if apr_trend_24h > 5 else "increasing" if apr_trend_24h > 1 else "stable" if abs(apr_trend_24h) <= 1 else "decreasing" if apr_trend_24h > -5 else "decreasing rapidly"
+            
+            liquidity_trend_text = "growing strongly" if liquidity_trend_7d > 10 else "growing" if liquidity_trend_7d > 2 else "stable" if abs(liquidity_trend_7d) <= 2 else "declining" if liquidity_trend_7d > -10 else "declining rapidly"
+            
+            # Investment recommendation
+            if prediction_score > 75:
+                recommendation = "strong opportunity for investment"
+            elif prediction_score > 60:
+                recommendation = "potential opportunity worth considering"
+            elif prediction_score > 40:
+                recommendation = "moderate opportunity with reasonable risk/reward"
+            elif prediction_score > 25:
+                recommendation = "high-risk opportunity, proceed with caution"
+            else:
+                recommendation = "not recommended for investment at this time"
+            
+            # Generate the report
+            report = f"""
+            ## {pool_name} Pool Analysis
+            
+            The {pool_name} pool on {dex_name} currently shows {sentiment} indicators with a prediction score of {prediction_score:.1f}/100.
+            
+            ### Liquidity and Volume
+            The pool has {liquidity_size} liquidity at ${liquidity:,.2f}, which has been {liquidity_trend_text} over the past 7 days ({liquidity_trend_7d:.2f}%).
+            Trading volume is {volume_quality} at ${volume:,.2f} over the past 24 hours, representing a volume/TVL ratio of {volume/liquidity:.2%}.
+            
+            ### Yield Analysis
+            The current APR is {apr_sentiment} at {apr:.2f}% and has been {apr_trend_text} over the past 24 hours ({apr_trend_24h:.2f}%).
+            
+            ### Investment Outlook
+            Based on comprehensive analysis of on-chain metrics, market conditions, and historical performance, this pool presents a {recommendation}.
+            
+            ### Pool ID Reference
+            ```
+            {pool_data['id']}
+            ```
+            """
+            
+            st.markdown(report)
+        
+        # Display historical performance chart
+        st.subheader("Simulated Historical Performance")
+        
+        # Create simulated historical data for demonstration
+        days = 30
+        base_liquidity = pool_data["liquidity"] / (1 + pool_data["tvl_change_30d"]/100)
+        base_apr = pool_data["apr"] / (1 + pool_data["apr_change_30d"]/100)
+        
+        dates = [(datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(days, 0, -1)]
+        
+        # Generate random daily fluctuations within the overall trend
+        liquidity_trend = pool_data["tvl_change_30d"] / 30  # daily trend
+        apr_trend = pool_data["apr_change_30d"] / 30  # daily trend
+        
+        # Create historical data with some randomness
+        historical_data = []
+        
+        for i in range(days):
+            daily_liquidity_change = liquidity_trend + random.uniform(-0.5, 0.5)
+            daily_apr_change = apr_trend + random.uniform(-0.2, 0.2)
+            
+            factor_liquidity = 1 + (daily_liquidity_change / 100)
+            factor_apr = 1 + (daily_apr_change / 100)
+            
+            if i == 0:
+                liquidity = base_liquidity
+                apr = base_apr
+            else:
+                liquidity = historical_data[i-1]["liquidity"] * factor_liquidity
+                apr = historical_data[i-1]["apr"] * factor_apr
+            
+            historical_data.append({
+                "date": dates[i],
+                "liquidity": liquidity,
+                "apr": apr
+            })
+        
+        # Add current day
+        historical_data.append({
+            "date": datetime.now().strftime('%Y-%m-%d'),
+            "liquidity": pool_data["liquidity"],
+            "apr": pool_data["apr"]
+        })
+        
+        # Convert to DataFrame
+        historical_df = pd.DataFrame(historical_data)
+        
+        # Create a subplot with two y-axes
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        
+        # Add TVL line
+        fig.add_trace(
+            go.Scatter(
+                x=historical_df["date"],
+                y=historical_df["liquidity"],
+                name="TVL",
+                line=dict(color="#1E88E5", width=3)
+            ),
+            secondary_y=False,
+        )
+        
+        # Add APR line
+        fig.add_trace(
+            go.Scatter(
+                x=historical_df["date"],
+                y=historical_df["apr"],
+                name="APR",
+                line=dict(color="#43A047", width=3, dash="dash")
+            ),
+            secondary_y=True,
+        )
+        
+        # Set titles
+        fig.update_layout(
+            title=f"Historical Performance: {pool_data['name']}",
+            hovermode="x unified",
+            height=500
+        )
+        
+        # Set y-axes titles
+        fig.update_yaxes(title_text="TVL ($)", secondary_y=False)
+        fig.update_yaxes(title_text="APR (%)", secondary_y=True)
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # REMINDER disclaimer
+        st.info("""
+        **Note**: Historical data shown here is simulated based on current metrics 
+        and trends for demonstration purposes. The AI-generated report is based on 
+        algorithmic analysis and should not be considered financial advice.
         """)
 
 if __name__ == "__main__":
