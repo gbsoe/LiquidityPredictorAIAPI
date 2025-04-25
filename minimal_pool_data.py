@@ -290,16 +290,19 @@ def load_data():
     # Check if we have cached data
     cache_file = "extracted_pools.json"
     
+    # First, always try to load from cache file for faster startup
     if os.path.exists(cache_file):
         try:
             with open(cache_file, "r") as f:
                 pools = json.load(f)
                 # Verify the data is not empty
                 if pools and len(pools) > 0:
-                    st.success(f"Loaded {len(pools)} pools from cache")
+                    st.success(f"✓ Successfully loaded {len(pools)} pools from cache")
+                    st.info("To refresh data from the blockchain, use the settings in the sidebar")
                     return pools
         except Exception as e:
             st.error(f"Error loading cached data: {e}")
+            st.info("Will attempt to fetch fresh data from blockchain")
     
     # If we have the extractor, try to get live data
     if HAS_EXTRACTOR:
@@ -356,7 +359,7 @@ def load_data():
                     st.info("Trying to use cached data instead...")
                 
                 # If we reach here, we either had an error or empty data from blockchain
-                    st.warning("No pools returned from the blockchain extractor")
+                st.warning("No pools returned from the blockchain extractor")
         except Exception as e:
             st.error(f"Error extracting pool data: {e}")
             st.error("Hint: If you're seeing RPC errors, try using a custom RPC endpoint in the sidebar.")
