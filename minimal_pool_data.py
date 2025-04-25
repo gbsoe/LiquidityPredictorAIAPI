@@ -47,76 +47,151 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better mobile responsiveness
+# Custom CSS for enhanced mobile responsiveness
 st.markdown("""
 <style>
-    /* Mobile-friendly styling */
+    /* Mobile-friendly styling - comprehensive improvements */
     @media (max-width: 768px) {
+        /* Improve radio buttons and selectors */
         div.row-widget.stRadio > div {
             flex-direction: column;
         }
         
         div.row-widget.stRadio > div button {
             width: 100%;
-            margin: 2px 0;
+            margin: 3px 0;
+            padding: 12px 8px;
+            font-size: 16px;
         }
         
+        /* Better spacing for mobile */
         div.block-container {
-            padding-top: 1rem;
-            padding-bottom: 1rem;
+            padding: 1rem 0.5rem;
+        }
+        
+        /* Make selectbox elements touch-friendly */
+        div.stSelectbox [data-baseweb="select"] {
+            min-height: 44px;
+        }
+        
+        /* Improve all buttons for touch */
+        button, [role="button"] {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        /* Better tables on mobile */
+        .dataframe-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Adjust metric containers for mobile */
+        .metric-container {
+            padding: 8px 4px;
+            margin-bottom: 10px;
+        }
+        
+        .metric-value {
+            font-size: 18px;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+        }
+        
+        /* Force full width on all charts */
+        [data-testid="stArrowVegaLiteChart"] {
+            width: 100% !important;
+        }
+        
+        /* Improve sidebar on mobile */
+        section[data-testid="stSidebar"] {
+            width: 85% !important;
+            max-width: 300px !important;
+        }
+        
+        /* Optimize sliders for touch */
+        div.stSlider [data-testid="stThumbValue"] {
+            min-height: 40px;
         }
     }
     
-    /* Metric styling */
+    /* Metric styling - enhanced */
     .metric-container {
         background-color: #f9f9fa;
-        border-radius: 8px;
-        padding: 10px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 10px;
+        padding: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         text-align: center;
+        transition: all 0.2s ease;
+    }
+    
+    .metric-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     
     .metric-value {
-        font-size: 24px;
+        font-size: 26px;
         font-weight: bold;
         color: #1E88E5;
     }
     
     .metric-label {
         font-size: 14px;
-        color: #666;
+        color: #555;
+        margin-top: 5px;
     }
     
-    /* Table styling */
+    /* Table styling - improved */
+    .dataframe-container {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin: 15px 0;
+    }
+    
     .dataframe-container th {
-        background-color: #f2f2f2;
+        background-color: #f0f2f6;
         color: #333;
+        padding: 12px 10px;
+        font-weight: 600;
+        border-bottom: 2px solid #e0e0e0;
     }
     
-    .dataframe-container td, .dataframe-container th {
+    .dataframe-container td {
         text-align: left;
-        padding: 8px;
+        padding: 10px;
+        border-bottom: 1px solid #f0f0f0;
     }
     
     .dataframe-container tr:nth-child(even) {
         background-color: #f9f9f9;
     }
     
+    .dataframe-container tr:hover {
+        background-color: #f0f7ff;
+    }
+    
     /* Highlight styling */
     .highlight-container {
         border-left: 4px solid #1E88E5;
-        padding-left: 10px;
-        margin: 10px 0;
+        padding: 12px 15px;
+        margin: 15px 0;
+        background-color: #f8f9fa;
+        border-radius: 0 4px 4px 0;
     }
     
-    /* Category badges */
+    /* Category badges - enhanced */
     .badge {
         display: inline-block;
-        padding: 3px 8px;
-        border-radius: 12px;
+        padding: 4px 10px;
+        border-radius: 15px;
         font-size: 12px;
         font-weight: bold;
         color: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     .badge-meme {
@@ -141,6 +216,39 @@ st.markdown("""
     
     .badge-other {
         background-color: #9E9E9E;
+    }
+    
+    /* Better dark mode compatibility */
+    @media (prefers-color-scheme: dark) {
+        .metric-container {
+            background-color: #262730;
+        }
+        
+        .metric-value {
+            color: #4e8cde;
+        }
+        
+        .metric-label {
+            color: #c2c2c2;
+        }
+        
+        .dataframe-container th {
+            background-color: #262730;
+            color: #f0f2f6;
+            border-bottom: 2px solid #3b3b3b;
+        }
+        
+        .dataframe-container tr:nth-child(even) {
+            background-color: #2e303a;
+        }
+        
+        .dataframe-container tr:hover {
+            background-color: #3d4049;
+        }
+        
+        .highlight-container {
+            background-color: #262730;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -394,6 +502,18 @@ def main():
         pool_data = generate_sample_data()
         df = pd.DataFrame(pool_data)
     
+    # Use a simpler approach for mobile-friendly layout
+    # We'll use browser width as a proxy for mobile
+    # Create a session state to store the layout preference
+    if 'mobile_layout' not in st.session_state:
+        st.session_state.mobile_layout = False
+        
+    # Add a toggle for mobile layout in the sidebar
+    with st.sidebar:
+        st.session_state.mobile_layout = st.checkbox("Mobile-friendly layout", value=st.session_state.mobile_layout)
+    
+    mobile_view = st.session_state.mobile_layout
+    
     # Create tabs for different views
     tabs = st.tabs(["Overview", "Pool Explorer", "Insights & Predictions"])
     
@@ -401,49 +521,52 @@ def main():
     with tabs[0]:
         st.header("Market Overview")
         
-        # Summary metrics
-        col1, col2, col3, col4, col5 = st.columns(5)
-        
-        with col1:
-            st.markdown(
-                f"""<div class="metric-container">
-                <div class="metric-value">{len(df)}</div>
-                <div class="metric-label">Total Pools</div>
-                </div>""", 
-                unsafe_allow_html=True
-            )
-        
-        with col2:
-            total_tvl = df['liquidity'].sum()
-            st.markdown(
-                f"""<div class="metric-container">
-                <div class="metric-value">{format_currency(total_tvl)}</div>
-                <div class="metric-label">Total TVL</div>
-                </div>""", 
-                unsafe_allow_html=True
-            )
-        
-        with col3:
-            total_volume = df['volume_24h'].sum()
-            st.markdown(
-                f"""<div class="metric-container">
-                <div class="metric-value">{format_currency(total_volume)}</div>
-                <div class="metric-label">24h Volume</div>
-                </div>""", 
-                unsafe_allow_html=True
-            )
-        
-        with col4:
-            avg_apr = df['apr'].mean()
-            st.markdown(
-                f"""<div class="metric-container">
-                <div class="metric-value">{format_percentage(avg_apr)}</div>
-                <div class="metric-label">Average APR</div>
-                </div>""", 
-                unsafe_allow_html=True
-            )
-        
-        with col5:
+        # Summary metrics - adjust layout for mobile vs desktop
+        if mobile_view:
+            # Use 2-column layout on mobile for better readability
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown(
+                    f"""<div class="metric-container">
+                    <div class="metric-value">{len(df)}</div>
+                    <div class="metric-label">Total Pools</div>
+                    </div>""", 
+                    unsafe_allow_html=True
+                )
+            
+            with col2:
+                total_tvl = df['liquidity'].sum()
+                st.markdown(
+                    f"""<div class="metric-container">
+                    <div class="metric-value">{format_currency(total_tvl)}</div>
+                    <div class="metric-label">Total TVL</div>
+                    </div>""", 
+                    unsafe_allow_html=True
+                )
+            
+            col3, col4 = st.columns(2)
+            with col3:
+                total_volume = df['volume_24h'].sum()
+                st.markdown(
+                    f"""<div class="metric-container">
+                    <div class="metric-value">{format_currency(total_volume)}</div>
+                    <div class="metric-label">24h Volume</div>
+                    </div>""", 
+                    unsafe_allow_html=True
+                )
+            
+            with col4:
+                avg_apr = df['apr'].mean()
+                st.markdown(
+                    f"""<div class="metric-container">
+                    <div class="metric-value">{format_percentage(avg_apr)}</div>
+                    <div class="metric-label">Average APR</div>
+                    </div>""", 
+                    unsafe_allow_html=True
+                )
+            
+            # Single column for last metric
             high_potential = len(df[df['prediction_score'] >= 80])
             st.markdown(
                 f"""<div class="metric-container">
@@ -452,6 +575,58 @@ def main():
                 </div>""", 
                 unsafe_allow_html=True
             )
+        else:
+            # Desktop view - use 5 columns
+            col1, col2, col3, col4, col5 = st.columns(5)
+            
+            with col1:
+                st.markdown(
+                    f"""<div class="metric-container">
+                    <div class="metric-value">{len(df)}</div>
+                    <div class="metric-label">Total Pools</div>
+                    </div>""", 
+                    unsafe_allow_html=True
+                )
+            
+            with col2:
+                total_tvl = df['liquidity'].sum()
+                st.markdown(
+                    f"""<div class="metric-container">
+                    <div class="metric-value">{format_currency(total_tvl)}</div>
+                    <div class="metric-label">Total TVL</div>
+                    </div>""", 
+                    unsafe_allow_html=True
+                )
+            
+            with col3:
+                total_volume = df['volume_24h'].sum()
+                st.markdown(
+                    f"""<div class="metric-container">
+                    <div class="metric-value">{format_currency(total_volume)}</div>
+                    <div class="metric-label">24h Volume</div>
+                    </div>""", 
+                    unsafe_allow_html=True
+                )
+            
+            with col4:
+                avg_apr = df['apr'].mean()
+                st.markdown(
+                    f"""<div class="metric-container">
+                    <div class="metric-value">{format_percentage(avg_apr)}</div>
+                    <div class="metric-label">Average APR</div>
+                    </div>""", 
+                    unsafe_allow_html=True
+                )
+            
+            with col5:
+                high_potential = len(df[df['prediction_score'] >= 80])
+                st.markdown(
+                    f"""<div class="metric-container">
+                    <div class="metric-value">{high_potential}</div>
+                    <div class="metric-label">High Potential</div>
+                    </div>""", 
+                    unsafe_allow_html=True
+                )
         
         # DEX breakdown
         st.subheader("DEX Breakdown")
