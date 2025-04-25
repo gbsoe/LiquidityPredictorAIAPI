@@ -51,6 +51,10 @@ except ImportError:
     HAS_NEURAL_SEARCH = False
 
 # Advanced ML libraries (would need to be installed)
+# Define a global HAS_TENSORFLOW variable
+HAS_TENSORFLOW = False
+
+# Try to import TensorFlow but handle it gracefully if it fails
 try:
     import tensorflow as tf
     from tensorflow.keras.models import Sequential, load_model, Model
@@ -59,8 +63,10 @@ try:
     from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
     from tensorflow.keras.utils import plot_model
     HAS_TENSORFLOW = True
-except ImportError:
-    HAS_TENSORFLOW = False
+except (ImportError, AttributeError, TypeError) as e:
+    # Log the error but continue - we'll handle the absence of TensorFlow
+    # in the appropriate places
+    print(f"TensorFlow import error: {e}. Advanced neural network features will be disabled.")
 
 try:
     import xgboost as xgb
