@@ -443,8 +443,8 @@ def main():
             pool_count = st.sidebar.slider(
                 "Sample pool count", 
                 min_value=50, 
-                max_value=500, 
-                value=200, 
+                max_value=250, 
+                value=50, 
                 step=50,
                 help="Number of sample pools to generate if real data isn't available"
             )
@@ -702,7 +702,7 @@ def main():
                 pools_per_page = st.select_slider(
                     "Pools per page", 
                     options=slider_options,
-                    value=min(20, slider_options[-1]) if len(slider_options) > 1 else slider_options[0],
+                    value=min(50, max(slider_options)) if len(slider_options) > 1 else slider_options[0],
                     help="Choose how many pools to display on each page"
                 )
             
