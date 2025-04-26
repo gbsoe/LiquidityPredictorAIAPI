@@ -241,32 +241,42 @@ def fetch_live_data_from_blockchain():
 
 @handle_exception
 def load_data():
-    """Load pool data from live blockchain, database, cached file, or generate as needed"""
+    """Load pool data from cache or generate if needed"""
     
-    # Get the force_live_data value from session state (set in main())
-    force_live_data = st.session_state.get('force_live_data', True)  # Default to True
+    # Check if user has requested sample data generation
+    if st.session_state.get('generate_sample_data', False):
+        # Reset the flag so it doesn't regenerate every refresh
+        st.session_state['generate_sample_data'] = False
+        
+        # Get the pool count from session state
+        pool_count = st.session_state.get('pool_count', 15)
+        
+        # Generate fresh sample data
+        st.info(f"Generating fresh sample data with {pool_count} pools...")
+        pools = generate_sample_data(count=pool_count)
+        
+        # Save to cache for future use
+        cache_file = "extracted_pools.json"
+        with open(cache_file, "w") as f:
+            json.dump(pools, f, indent=2)
+            
+        st.success(f"✓ Generated {len(pools)} sample pools")
+        st.session_state['data_source'] = "Freshly generated sample data (not real blockchain data)"
+        return pools
     
-    # Try fetching live data first if requested
-    if force_live_data and HAS_EXTRACTOR:
-        live_pools = fetch_live_data_from_blockchain()
-        if live_pools and len(live_pools) > 0:
-            # Add a data source indicator
-            st.session_state['data_source'] = "Live blockchain data"
-            return live_pools
+    # Try to load from database (disabled for now to prevent errors)
+    # if hasattr(db_handler, 'engine') and db_handler.engine is not None:
+    #     try:
+    #         pools = db_handler.get_pools()
+    #         if pools and len(pools) > 0:
+    #             st.success(f"✓ Successfully loaded {len(pools)} pools from database")
+    #             st.session_state['data_source'] = "Database"
+    #             return pools
+    #     except Exception as db_error:
+    #         logger.error(f"Database error: {str(db_error)}")
+    #         st.warning(f"Could not load from database: {db_error}")
     
-    # Second, try to load from database
-    if hasattr(db_handler, 'engine') and db_handler.engine is not None:
-        try:
-            pools = db_handler.get_pools()
-            if pools and len(pools) > 0:
-                st.success(f"✓ Successfully loaded {len(pools)} pools from database")
-                st.session_state['data_source'] = "Database"
-                return pools
-        except Exception as db_error:
-            logger.error(f"Database error: {str(db_error)}")
-            st.warning(f"Could not load from database: {db_error}")
-    
-    # If no database data, try cached file
+    # Load from cached file
     cache_file = "extracted_pools.json"
     if os.path.exists(cache_file):
         try:
@@ -275,22 +285,29 @@ def load_data():
             
             if pools and len(pools) > 0:
                 st.success(f"✓ Successfully loaded {len(pools)} pools from local cache")
-                st.warning("⚠️ Using cached data! This may not reflect current blockchain state.")
+                
+                # Get modification time for the cache file
+                mod_time = os.path.getmtime(cache_file)
+                mod_time_str = datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M:%S")
                 
                 # Ensure all required fields are present
                 pools = ensure_all_fields(pools)
-                st.session_state['data_source'] = "Local cache (not live data)"
+                st.session_state['data_source'] = f"Cached data from {mod_time_str} (not live data)"
                 return pools
         except Exception as e:
             st.warning(f"Error loading cached data: {e}")
     
-    # Get the pool_count value from session state (set in main())
-    pool_count = st.session_state.get('pool_count', 50)
+    # If we get here, we need to generate sample data
+    pool_count = st.session_state.get('pool_count', 15)
+    st.warning(f"No cached data found - generating {pool_count} sample pools")
+    pools = generate_sample_data(pool_count)
     
-    # Generate sample data if no real data is available
-    st.warning(f"Unable to load pool data - using generated sample data with {pool_count} pools")
-    st.session_state['data_source'] = "Generated sample data (not real)"
-    return generate_sample_data(pool_count)
+    # Save to cache for future use
+    with open(cache_file, "w") as f:
+        json.dump(pools, f, indent=2)
+        
+    st.session_state['data_source'] = "Newly generated sample data (not real blockchain data)"
+    return pools
 
 def generate_sample_data(count=200):
     """Generate sample pool data with the specified number of pools"""
@@ -560,60 +577,31 @@ def main():
         # Store the custom RPC in session state
         st.session_state['custom_rpc'] = custom_rpc
         
-        # Add a manual data refresh button and display status
+        # Add data management section with a clear refresh button
         st.sidebar.header("Data Management")
         
-        # Add data source buttons with clear labels
-        data_source_col1, data_source_col2 = st.sidebar.columns(2)
+        # Pool count selection
+        pool_count = st.sidebar.slider(
+            "Sample Pool Count", 
+            min_value=5, 
+            max_value=50, 
+            value=15,
+            step=5,
+            help="Number of sample pools to generate"
+        )
         
-        with data_source_col1:
-            # Add a refresh button that clearly shows it's for cached sample data
-            if st.button("🔄 Use Sample Data", help="Generate and use sample data - safer option if live data is not working"):
-                st.sidebar.info("Generating sample data...")
-                
-                try:
-                    # Generate sample data (safer option)
-                    pools = generate_sample_data(count=15)
-                    
-                    if pools and len(pools) > 0:
-                        st.sidebar.success(f"Generated {len(pools)} sample pools")
-                        
-                        # Save to file
-                        cache_file = "extracted_pools.json"
-                        with open(cache_file, "w") as f:
-                            json.dump(pools, f, indent=2)
-                        
-                        # Set data source indicator
-                        st.session_state['data_source'] = "Sample data (not real blockchain data)"
-                        
-                        # Force a page reload to show the new data
-                        time.sleep(1)
-                        st.rerun()
-                except Exception as e:
-                    st.sidebar.error(f"Error generating sample data: {e}")
+        # Store the pool count in session state
+        st.session_state['pool_count'] = pool_count
         
-        with data_source_col2:
-            # Add a button specifically for trying to get live data
-            if st.button("🌐 Try Live Data", help="Attempt to fetch real data from the blockchain (may fail if RPC issues)"):
-                st.sidebar.info("Attempting to fetch live blockchain data...")
-                
-                try:
-                    # Check if we have a valid RPC endpoint
-                    if not custom_rpc:
-                        st.sidebar.error("No RPC endpoint configured. Please set a valid endpoint in the Advanced RPC Options.")
-                        return
-                    
-                    # Update session state for data source
-                    st.session_state['force_live_data'] = True
-                    
-                    # Set data source indicator with attempt message
-                    st.session_state['data_source'] = "Attempting to get live blockchain data..."
-                    
-                    # Force a page reload to trigger the data fetch logic
-                    time.sleep(1)
-                    st.rerun()
-                except Exception as e:
-                    st.sidebar.error(f"Error attempting live data fetch: {e}")
+        # Add a single, clear refresh button
+        if st.sidebar.button("🔄 Generate New Sample Data", help="Generate fresh sample data for analysis"):
+            # Set the flag to generate fresh sample data on next load
+            st.session_state['generate_sample_data'] = True
+            
+            # Trigger a page reload
+            st.sidebar.info("Generating fresh sample data...")
+            time.sleep(1)
+            st.rerun()
                 
         # Display last update time if available
         if os.path.exists("extracted_pools.json"):
