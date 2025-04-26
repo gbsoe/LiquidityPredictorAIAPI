@@ -33,7 +33,7 @@ app = Flask(__name__)
 
 # Configuration
 DEBUG = True
-API_VERSION = "v1"
+API_VERSION = "API"
 DEFAULT_LIMIT = 100
 RATE_LIMIT = {
     "free": 100,  # per hour
