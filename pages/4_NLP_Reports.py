@@ -105,8 +105,8 @@ st.sidebar.markdown("---")
 
 # API key management
 if not nlp_generator.has_api_key():
-    st.sidebar.markdown("### OpenAI API Key Required")
-    api_key = st.sidebar.text_input("Enter OpenAI API Key", type="password")
+    st.sidebar.markdown("### Google API Key Required")
+    api_key = st.sidebar.text_input("Enter Google API Key for Gemini", type="password")
     
     if st.sidebar.button("Save API Key"):
         try:
@@ -114,29 +114,29 @@ if not nlp_generator.has_api_key():
             with open(".env", "a+") as f:
                 f.seek(0)
                 content = f.read()
-                if "OPENAI_API_KEY" not in content:
-                    f.write(f"\nOPENAI_API_KEY={api_key}\n")
+                if "GOOGLE_API_KEY" not in content:
+                    f.write(f"\nGOOGLE_API_KEY={api_key}\n")
                 else:
                     # Replace existing API key
                     lines = content.split('\n')
                     with open(".env", "w") as f_write:
                         for line in lines:
-                            if line.startswith("OPENAI_API_KEY="):
-                                f_write.write(f"OPENAI_API_KEY={api_key}\n")
+                            if line.startswith("GOOGLE_API_KEY="):
+                                f_write.write(f"GOOGLE_API_KEY={api_key}\n")
                             else:
                                 f_write.write(f"{line}\n")
             
             st.sidebar.success("API key saved! Please refresh the page.")
             
             # Set environment variable for current session
-            os.environ["OPENAI_API_KEY"] = api_key
+            os.environ["GOOGLE_API_KEY"] = api_key
         except Exception as e:
             st.sidebar.error(f"Error saving API key: {e}")
     
     st.markdown("""
     <div class="api-key-notice">
-        <strong>OpenAI API Key Required</strong><br>
-        To generate NLP reports, please enter your OpenAI API key in the sidebar.
+        <strong>Google API Key Required</strong><br>
+        To generate NLP reports, please enter your Google API key for Vertex AI (Gemini) in the sidebar.
         Your API key will be stored securely in your .env file.
     </div>
     """, unsafe_allow_html=True)
@@ -168,7 +168,7 @@ with tab1:
         
         if st.button("Generate Market Report", type="primary", use_container_width=True):
             if not nlp_generator.has_api_key():
-                st.warning("OpenAI API key is required. Please enter it in the sidebar.")
+                st.warning("Google API key is required. Please enter it in the sidebar.")
             else:
                 with st.spinner("Generating comprehensive market report..."):
                     # Load all pools data
@@ -280,7 +280,7 @@ with tab2:
             # Generate analysis button
             if st.button("Generate Pool Analysis", type="primary"):
                 if not nlp_generator.has_api_key():
-                    st.warning("OpenAI API key is required. Please enter it in the sidebar.")
+                    st.warning("Google API key is required. Please enter it in the sidebar.")
                 else:
                     with st.spinner("Generating detailed pool analysis..."):
                         # Get pool details
@@ -392,7 +392,7 @@ with tab3:
         if not user_query:
             st.warning("Please enter a question for analysis.")
         elif not nlp_generator.has_api_key():
-            st.warning("OpenAI API key is required. Please enter it in the sidebar.")
+            st.warning("Google API key is required. Please enter it in the sidebar.")
         else:
             with st.spinner("Generating custom analysis..."):
                 # Prepare context data based on selection
@@ -464,7 +464,7 @@ st.markdown("---")
 st.markdown("""
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <div>Solana Liquidity Pool Analysis System • NLP Reports</div>
-    <div style="font-size: 12px; color: #6b7280;">Powered by OpenAI GPT-4</div>
+    <div style="font-size: 12px; color: #6b7280;">Powered by Google Vertex AI (Gemini)</div>
 </div>
 """, unsafe_allow_html=True)
 
