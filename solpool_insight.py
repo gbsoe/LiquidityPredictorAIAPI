@@ -1498,6 +1498,196 @@ def main():
             market_report = generate_market_report(df)
             st.markdown(market_report)
         
+        # Token Explorer Tab
+        with tab_tokens:
+            st.header("Token Price Explorer")
+            st.markdown("""
+            Track and analyze token prices using real-time data from CoinGecko. 
+            This tab allows you to monitor token prices, view historical trends, and compare tokens.
+            """)
+            
+            # Get list of popular tokens plus tokens from pools
+            popular_tokens = [
+                "SOL", "BTC", "ETH", "USDC", "USDT", "JUP", "BONK", "RAY", "ORCA", "SAMO", 
+                "WIF", "PYTH", "MNGO", "SRM", "ATLAS", "POLIS"
+            ]
+            
+            # Extract tokens from pools
+            pool_tokens = set()
+            if "token1_symbol" in df.columns and "token2_symbol" in df.columns:
+                for _, row in df.iterrows():
+                    if isinstance(row["token1_symbol"], str) and len(row["token1_symbol"]) > 0:
+                        pool_tokens.add(row["token1_symbol"].upper())
+                    if isinstance(row["token2_symbol"], str) and len(row["token2_symbol"]) > 0:
+                        pool_tokens.add(row["token2_symbol"].upper())
+            
+            # Combine and deduplicate token lists
+            all_tokens = sorted(list(set(popular_tokens) | pool_tokens))
+            
+            # Create token selection interface
+            col_search, col_select = st.columns([1, 2])
+            
+            with col_search:
+                # Allow search by token name
+                token_search = st.text_input("Search for a token", "")
+                
+                if token_search:
+                    filtered_tokens = [t for t in all_tokens if token_search.upper() in t.upper()]
+                else:
+                    filtered_tokens = all_tokens
+                    
+                # List of tokens with selection
+                selected_token = st.selectbox("Select a token", filtered_tokens)
+                
+                # Get token price
+                token_price = get_token_price(selected_token)
+                
+                # Show current price in a big metric
+                if token_price:
+                    st.metric(
+                        f"{selected_token} Price",
+                        f"${token_price:,.4f}",
+                        delta=None  # We don't have historical data for delta yet
+                    )
+                else:
+                    st.warning(f"Could not retrieve price for {selected_token}")
+            
+            with col_select:
+                # Multiple token selection for comparison
+                comparison_tokens = st.multiselect(
+                    "Compare multiple tokens",
+                    options=all_tokens,
+                    default=["SOL", "BTC", "ETH"][:3] if all(t in all_tokens for t in ["SOL", "BTC", "ETH"]) else []
+                )
+                
+                if comparison_tokens:
+                    with st.spinner("Fetching token prices..."):
+                        # Fetch all prices at once
+                        token_prices = get_multiple_prices(comparison_tokens)
+                        
+                        # Create data for display
+                        price_data = []
+                        for token in comparison_tokens:
+                            if token in token_prices and token_prices[token] is not None:
+                                price_data.append({
+                                    "Token": token,
+                                    "Price (USD)": token_prices[token]
+                                })
+                        
+                        # Display as table
+                        if price_data:
+                            price_df = pd.DataFrame(price_data)
+                            st.dataframe(price_df, use_container_width=True)
+                        else:
+                            st.warning("Could not retrieve prices for the selected tokens")
+            
+            # Token price visualization
+            st.subheader("Token Price Visualization")
+            
+            # Simulate a price chart (since we don't have historical data)
+            # In production, you would fetch historical price data from CoinGecko
+            
+            # Create a section to fetch and display token information
+            st.subheader("Token Information")
+            
+            if selected_token:
+                # Create columns for token info
+                info_col1, info_col2 = st.columns(2)
+                
+                with info_col1:
+                    st.write("**Token Details**")
+                    st.write(f"Symbol: {selected_token}")
+                    
+                    # Try to get metadata for the token
+                    try:
+                        # Create a CoinGecko API URL for the token
+                        token_id = selected_token.lower()
+                        # This would normally use the proper CoinGecko ID mapping
+                        # For now, we'll make a best-effort guess
+                        
+                        # Display information from the token_price_service
+                        from token_price_service import DEFAULT_TOKEN_MAPPING
+                        
+                        if selected_token.upper() in DEFAULT_TOKEN_MAPPING:
+                            coingecko_id = DEFAULT_TOKEN_MAPPING[selected_token.upper()]
+                            st.write(f"CoinGecko ID: {coingecko_id}")
+                            
+                            # Try to get more info from CoinGecko
+                            try:
+                                coingecko_url = f"https://api.coingecko.com/api/v3/coins/{coingecko_id}"
+                                response = requests.get(coingecko_url, timeout=10)
+                                
+                                if response.status_code == 200:
+                                    token_data = response.json()
+                                    
+                                    # Extract and display key information
+                                    if 'market_data' in token_data:
+                                        market_data = token_data['market_data']
+                                        
+                                        # Market cap
+                                        if 'market_cap' in market_data and 'usd' in market_data['market_cap']:
+                                            market_cap = market_data['market_cap']['usd']
+                                            st.write(f"Market Cap: ${market_cap:,.2f}")
+                                        
+                                        # 24h volume
+                                        if 'total_volume' in market_data and 'usd' in market_data['total_volume']:
+                                            volume = market_data['total_volume']['usd']
+                                            st.write(f"24h Volume: ${volume:,.2f}")
+                                        
+                                        # All-time high
+                                        if 'ath' in market_data and 'usd' in market_data['ath']:
+                                            ath = market_data['ath']['usd']
+                                            st.write(f"All-Time High: ${ath:,.4f}")
+                                    
+                                    # Basic token info
+                                    if 'name' in token_data:
+                                        st.write(f"Name: {token_data['name']}")
+                                        
+                                    # Description
+                                    if 'description' in token_data and 'en' in token_data['description']:
+                                        with st.expander("Description"):
+                                            st.markdown(token_data['description']['en'][:500] + "...")
+                            except Exception as e:
+                                st.warning(f"Could not fetch additional token data: {e}")
+                        else:
+                            st.warning(f"No CoinGecko mapping available for {selected_token}")
+                    except Exception as e:
+                        st.warning(f"Error retrieving token metadata: {e}")
+                
+                with info_col2:
+                    st.write("**Price Statistics**")
+                    
+                    if token_price:
+                        # In a production app, we would get these from the API
+                        # For now, we'll just show the current price
+                        st.write(f"Current Price: ${token_price:,.4f}")
+                        
+                        # Link to more information
+                        if selected_token.upper() in DEFAULT_TOKEN_MAPPING:
+                            coingecko_id = DEFAULT_TOKEN_MAPPING[selected_token.upper()]
+                            st.markdown(f"[View on CoinGecko](https://www.coingecko.com/en/coins/{coingecko_id})")
+                            
+                        # Provide a link to pools containing this token
+                        st.write("**Pools Containing This Token**")
+                        
+                        # Filter pools that contain the selected token
+                        token_pools = df[
+                            (df["token1_symbol"].str.upper() == selected_token.upper()) | 
+                            (df["token2_symbol"].str.upper() == selected_token.upper())
+                        ]
+                        
+                        if len(token_pools) > 0:
+                            # Show top 5 pools by liquidity
+                            top_pools = token_pools.sort_values("liquidity", ascending=False).head(5)
+                            
+                            for _, pool in top_pools.iterrows():
+                                st.write(f"- {pool['name']} on {pool['dex']} (APR: {pool['apr']:.2f}%)")
+                                
+                            if len(token_pools) > 5:
+                                st.write(f"...and {len(token_pools) - 5} more pools")
+                        else:
+                            st.write("No pools found containing this token")
+        
         # Add documentation and help information at the bottom
         with st.expander("Documentation & Help"):
             st.markdown("""
@@ -1512,10 +1702,12 @@ def main():
             - **Predictions**: View machine learning-based predictions for future pool performance
             - **Risk Assessment**: Analyze risk factors for different pools
             - **NLP Reports**: Read AI-generated insights about market trends
+            - **Token Explorer**: Monitor token prices and find pools containing specific tokens
             
             ### Data Sources
             
             Pool data is sourced directly from the Solana blockchain using RPC endpoints.
+            Token price data is sourced from CoinGecko API.
             Historical data is used for trend analysis and predictions.
             
             ### Disclaimer
