@@ -287,17 +287,20 @@ def load_data():
                     # Format Helius API key if needed (just UUID format)
                     if len(custom_rpc) == 36 and custom_rpc.count('-') == 4:
                         custom_rpc = f"https://mainnet.helius-rpc.com/?api-key={custom_rpc}"
-                        
-                    # Get parameters from environment
-                    max_per_dex = int(os.getenv("MAX_POOLS_PER_DEX", "25"))
-                    timeout = int(os.getenv("RPC_TIMEOUT_SECONDS", "15"))
                     
-                    with st.spinner(f"Fetching live data from {max_per_dex} pools per DEX... (timeout: {timeout}s)"):
-                        # Initialize extractor with timeout
-                        extractor = OnChainExtractor(rpc_endpoint=custom_rpc, timeout=timeout)
+                    # Get parameters from environment
+                    max_per_dex = int(os.getenv("MAX_POOLS_PER_DEX", "10"))
+                    
+                    with st.spinner(f"Fetching live data from {max_per_dex} pools per DEX..."):
+                        # Initialize extractor - note we fixed this to match the actual class signature
+                        extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
                         
-                        # Extract pools with limit
-                        pools = extractor.extract_pools(max_pools_per_dex=max_per_dex)
+                        # Use the correct method - extract_pools_from_all_dexes instead of extract_pools
+                        st.info("Extracting pools from all supported DEXes...")
+                        pools_obj = extractor.extract_pools_from_all_dexes(max_per_dex=max_per_dex)
+                        
+                        # Convert pool objects to dictionaries
+                        pools = [pool.to_dict() for pool in pools_obj] if pools_obj else []
                         
                         if pools and len(pools) > 0:
                             # Save to cache file
@@ -309,12 +312,20 @@ def load_data():
                             st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
                             return pools
                         else:
-                            st.warning("⚠️ No pools retrieved from blockchain. Check your RPC endpoint.")
+                            st.warning("⚠️ No pools retrieved from blockchain. This could be due to RPC endpoint limitations.")
+                            st.info("💡 Try using a different RPC endpoint with higher rate limits and account data access.")
                 except ImportError:
                     st.warning("⚠️ OnChainExtractor module not available. Using cached data instead.")
                 except Exception as e:
                     st.warning(f"⚠️ Error retrieving live data: {str(e)}")
                     logger.warning(f"Live data retrieval error: {str(e)}")
+                    
+                    if "rate limit" in str(e).lower():
+                        st.error("Your RPC endpoint is rate limiting requests. Consider upgrading to a paid plan.")
+                    elif "not authorized" in str(e).lower() or "unauthorized" in str(e).lower():
+                        st.error("Your RPC endpoint is not authorized to access program data. Try a different endpoint.")
+                    elif "time" in str(e).lower() and "out" in str(e).lower():
+                        st.error("Request timed out. The RPC endpoint may be overloaded.")
         except Exception as e:
             st.warning(f"⚠️ Error during live data attempt: {str(e)}")
     
