@@ -215,8 +215,14 @@ def create_risk_heat_map(df):
     
     return fig
 
-def create_impermanent_loss_chart():
-    """Create a chart showing impermanent loss for different price ratios"""
+def create_impermanent_loss_chart(token1_change=None, token2_change=None):
+    """
+    Create a chart showing impermanent loss for different price ratios
+    
+    Args:
+        token1_change: Optional highlight point for token1 price change (percentage)
+        token2_change: Optional highlight point for token2 price change (percentage)
+    """
     # Generate price ratio changes
     price_changes = np.linspace(-0.9, 9, 100)  # -90% to +900%
     
@@ -249,6 +255,41 @@ def create_impermanent_loss_chart():
     
     # Add reference line at 0
     fig.add_hline(y=0, line_dash="dash", line_color="gray")
+    
+    # Add highlight point if token changes are specified
+    if token1_change is not None and token2_change is not None:
+        # Calculate price ratio for the specific changes
+        price_ratio = (1 + token1_change/100) / (1 + token2_change/100)
+        il = 2 * np.sqrt(price_ratio) / (1 + price_ratio) - 1
+        il_pct = il * 100
+        
+        # If one token is stable and one changes
+        if token2_change == 0:
+            # Add highlight point
+            fig.add_trace(go.Scatter(
+                x=[token1_change],
+                y=[il_pct],
+                mode='markers',
+                marker=dict(size=12, color='red'),
+                name='Your Position',
+                hovertemplate='Price Change: %{x:.1f}%<br>IL: %{y:.2f}%'
+            ))
+        else:
+            # Add annotation explaining the combined effect
+            relative_change = (1 + token1_change/100) / (1 + token2_change/100) - 1
+            relative_change_pct = relative_change * 100
+            
+            fig.add_annotation(
+                x=relative_change_pct,
+                y=il_pct,
+                text=f"Your Position (IL: {il_pct:.2f}%)",
+                showarrow=True,
+                arrowhead=2,
+                arrowsize=1,
+                arrowwidth=2,
+                arrowcolor='red',
+                yshift=10
+            )
     
     # Format layout
     fig.update_layout(

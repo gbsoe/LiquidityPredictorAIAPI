@@ -62,22 +62,53 @@ def get_pool_metrics(db, pool_id, days=7):
 def get_token_prices(db, token_symbols, days=7):
     """
     Get historical token prices.
-    Falls back to mock DB if real DB fails.
+    First tries CoinGecko for real data, then falls back to database,
+    and finally to mock DB if needed.
     """
+    # First try to get real-time prices from CoinGecko
+    try:
+        import sys
+        import os
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from token_price_service import get_multiple_prices
+        
+        # Get prices from CoinGecko
+        cg_prices = get_multiple_prices(token_symbols)
+        
+        if cg_prices and any(cg_prices.values()):
+            # Convert to DataFrame format expected by the app
+            price_data = []
+            for token, price in cg_prices.items():
+                if price > 0:
+                    price_data.append({
+                        'token_symbol': token,
+                        'price_usd': price,
+                        'timestamp': pd.Timestamp.now()
+                    })
+            
+            if price_data:
+                return pd.DataFrame(price_data)
+    except Exception as e:
+        logger.warning(f"Could not get prices from CoinGecko: {str(e)}")
+    
+    # If CoinGecko fails, try the database
     try:
         if db is None:
             db = MockDBManager()
         prices = db.get_token_prices(token_symbols, days)
-        if prices.empty:
-            # Fallback to mock if real DB returns empty
-            mock_db = MockDBManager()
-            return mock_db.get_token_prices(token_symbols, days)
-        return prices
+        if not prices.empty:
+            return prices
     except Exception as e:
-        logger.error(f"Error getting token prices: {str(e)}")
-        # Fallback to mock if real DB fails
+        logger.error(f"Error getting token prices from database: {str(e)}")
+    
+    # If all else fails, use mock data
+    try:
         mock_db = MockDBManager()
         return mock_db.get_token_prices(token_symbols, days)
+    except Exception as e:
+        logger.error(f"Error getting mock token prices: {str(e)}")
+        # Return empty DataFrame as last resort
+        return pd.DataFrame(columns=['token_symbol', 'price_usd', 'timestamp'])
 
 def get_top_predictions(db, category="apr", limit=10, ascending=False):
     """

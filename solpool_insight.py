@@ -119,7 +119,9 @@ def ensure_all_fields(pool_data):
     # Extra fields that might be missing but can have default values
     optional_fields = {
         "apr_change_30d": 0.0,
-        "tvl_change_30d": 0.0
+        "tvl_change_30d": 0.0,
+        "token1_price": 0.0,
+        "token2_price": 0.0
     }
     
     validated_pools = []
@@ -140,6 +142,14 @@ def ensure_all_fields(pool_data):
         for field, default_value in optional_fields.items():
             if field not in validated_pool:
                 validated_pool[field] = default_value
+        
+        # Get token prices from CoinGecko if not already present
+        if validated_pool.get("token1_price", 0) == 0 or validated_pool.get("token2_price", 0) == 0:
+            try:
+                from token_price_service import update_pool_with_token_prices
+                validated_pool = update_pool_with_token_prices(validated_pool)
+            except Exception as e:
+                st.warning(f"Could not get token prices: {e}")
         
         validated_pools.append(validated_pool)
     
@@ -326,8 +336,8 @@ def generate_sample_data(count=200):
         token1_address = token_addresses.get(token1, ''.join(random.choices('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz', k=44)))
         token2_address = token_addresses.get(token2, ''.join(random.choices('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz', k=44)))
         
-        # Add to pools list
-        pools.append({
+        # Create pool dictionary
+        pool_data = {
             "id": pool_id,
             "name": f"{token1}/{token2}",
             "dex": dex,
@@ -350,7 +360,23 @@ def generate_sample_data(count=200):
             "prediction_score": prediction_score,
             "created_at": (now - timedelta(days=random.randint(30, 180))).isoformat(),
             "updated_at": current_date_str  # Use the current date for the update timestamp
-        })
+        }
+        
+        # Try to get token prices from CoinGecko
+        try:
+            from token_price_service import update_pool_with_token_prices
+            pool_data = update_pool_with_token_prices(pool_data)
+        except Exception as e:
+            # If we can't get prices from CoinGecko, use generated values
+            # Base price on token name characters (consistent for each token)
+            token1_price = sum(ord(c) for c in token1) % 100 + 1 if token1 != "USDC" and token1 != "USDT" else 1.0
+            token2_price = sum(ord(c) for c in token2) % 100 + 1 if token2 != "USDC" and token2 != "USDT" else 1.0
+            
+            pool_data["token1_price"] = token1_price
+            pool_data["token2_price"] = token2_price
+        
+        # Add to pools list
+        pools.append(pool_data)
         
     return pools
 

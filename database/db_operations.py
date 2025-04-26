@@ -82,6 +82,10 @@ class DBManager:
                     token2 TEXT NOT NULL,
                     token1_address TEXT,
                     token2_address TEXT,
+                    token1_price NUMERIC DEFAULT 0,
+                    token2_price NUMERIC DEFAULT 0,
+                    token1_price_updated_at TIMESTAMP,
+                    token2_price_updated_at TIMESTAMP,
                     category TEXT,
                     created_at TIMESTAMP DEFAULT NOW()
                 );

@@ -262,6 +262,42 @@ def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
     """Convenience function to get multiple token prices"""
     return price_service.get_multiple_prices(symbols)
 
+def update_pool_with_token_prices(pool: dict) -> dict:
+    """
+    Update a pool dictionary with current token prices from CoinGecko
+    
+    Args:
+        pool: Dictionary containing pool data with token1_symbol and token2_symbol
+        
+    Returns:
+        Updated pool dictionary with token prices
+    """
+    if not pool or "token1_symbol" not in pool or "token2_symbol" not in pool:
+        return pool
+        
+    # Make a copy to avoid modifying the original
+    updated_pool = pool.copy()
+    
+    # Get token symbols
+    token1 = pool["token1_symbol"]
+    token2 = pool["token2_symbol"]
+    
+    # Get current prices
+    prices = get_multiple_prices([token1, token2])
+    
+    # Add prices to pool data
+    if token1 in prices:
+        updated_pool["token1_price"] = prices[token1]
+    else:
+        updated_pool["token1_price"] = 0.0
+        
+    if token2 in prices:
+        updated_pool["token2_price"] = prices[token2]
+    else:
+        updated_pool["token2_price"] = 0.0
+        
+    return updated_pool
+
 # Example usage
 if __name__ == "__main__":
     # Test the price service

@@ -170,18 +170,53 @@ try:
                 # Get token prices
                 token_prices = get_token_prices(db, [token_symbol1, token_symbol2], 1)
                 
+                # Get the pool details to see if we have prices stored directly in the pool data
+                pool_details = pool_list[pool_list['pool_id'] == selected_pool_id]
+                
                 initial_price1 = 0
                 initial_price2 = 0
                 
-                if not token_prices.empty:
-                    token1_prices = token_prices[token_prices['token_symbol'] == token_symbol1]
-                    token2_prices = token_prices[token_prices['token_symbol'] == token_symbol2]
+                # First try to get prices from the pool data (added by our token_price_service integration)
+                if not pool_details.empty and 'token1_price' in pool_details.columns and 'token2_price' in pool_details.columns:
+                    token1_price = pool_details.iloc[0].get('token1_price', 0)
+                    token2_price = pool_details.iloc[0].get('token2_price', 0)
                     
-                    if not token1_prices.empty:
-                        initial_price1 = token1_prices.iloc[-1]['price_usd']
+                    if token1_price > 0:
+                        initial_price1 = token1_price
                     
-                    if not token2_prices.empty:
-                        initial_price2 = token2_prices.iloc[-1]['price_usd']
+                    if token2_price > 0:
+                        initial_price2 = token2_price
+                
+                # If we still don't have prices, try the database prices
+                if initial_price1 == 0 or initial_price2 == 0:
+                    if not token_prices.empty:
+                        token1_prices = token_prices[token_prices['token_symbol'] == token_symbol1]
+                        token2_prices = token_prices[token_prices['token_symbol'] == token_symbol2]
+                        
+                        if not token1_prices.empty and initial_price1 == 0:
+                            initial_price1 = token1_prices.iloc[-1]['price_usd']
+                        
+                        if not token2_prices.empty and initial_price2 == 0:
+                            initial_price2 = token2_prices.iloc[-1]['price_usd']
+                
+                # If we still don't have prices, try to get them directly from CoinGecko
+                if initial_price1 == 0 or initial_price2 == 0:
+                    try:
+                        # Import here to avoid circular imports
+                        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                        from token_price_service import get_token_price
+                        
+                        if initial_price1 == 0:
+                            cg_price1 = get_token_price(token_symbol1)
+                            if cg_price1 > 0:
+                                initial_price1 = cg_price1
+                        
+                        if initial_price2 == 0:
+                            cg_price2 = get_token_price(token_symbol2)
+                            if cg_price2 > 0:
+                                initial_price2 = cg_price2
+                    except Exception as e:
+                        st.warning(f"Could not get token prices from CoinGecko: {e}")
                 
                 # Input fields for token prices
                 st.subheader("Initial Prices")
@@ -273,11 +308,31 @@ try:
             st.warning("No pools available for impermanent loss calculation.")
     
     with il_cols[1]:
-        # Impermanent loss chart
-        st.plotly_chart(
-            create_impermanent_loss_chart(),
-            use_container_width=True
-        )
+        # Initialize default price changes (will be overridden if sliders are used)
+        price_change1_param = None
+        price_change2_param = None
+        
+        # Check if we're in the context where price changes have been set via sliders
+        if 'token_symbol1' in locals() and 'token_symbol2' in locals():
+            if 'price_change1' in locals() and 'price_change2' in locals():
+                # Only pass the price changes if valid values are available
+                price_change1_param = price_change1
+                price_change2_param = price_change2
+        
+        # Create the impermanent loss chart
+        if price_change1_param is not None and price_change2_param is not None:
+            st.plotly_chart(
+                create_impermanent_loss_chart(
+                    token1_change=price_change1_param,
+                    token2_change=price_change2_param
+                ),
+                use_container_width=True
+            )
+        else:
+            st.plotly_chart(
+                create_impermanent_loss_chart(),
+                use_container_width=True
+            )
         
         # IL explanation
         st.markdown("""
