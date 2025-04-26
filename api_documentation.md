@@ -16,7 +16,7 @@ With our API, you can:
 ## Base URL
 
 ```
-https://filotanalytics.replit.app:3000/v1
+https://filotanalytics.replit.app/API
 ```
 
 ## Authentication
@@ -114,7 +114,7 @@ GET /pools
 #### Example Request
 
 ```bash
-curl -X GET "https://filotanalytics.replit.app/v1/pools?dex=Raydium&min_tvl=1000000&min_apr=10" \
+curl -X GET "https://filotanalytics.replit.app/API/pools?dex=Raydium&min_tvl=1000000&min_apr=10" \
   -H "X-API-Key: your_api_key"
 ```
 
