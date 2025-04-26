@@ -105,8 +105,8 @@ st.sidebar.markdown("---")
 
 # API key management
 if not nlp_generator.has_api_key():
-    st.sidebar.markdown("### Google API Key Required")
-    api_key = st.sidebar.text_input("Enter Google API Key for Gemini", type="password")
+    st.sidebar.markdown("### Anthropic API Key Required")
+    api_key = st.sidebar.text_input("Enter Anthropic API Key for Claude", type="password")
     
     if st.sidebar.button("Save API Key"):
         try:
@@ -135,8 +135,8 @@ if not nlp_generator.has_api_key():
     
     st.markdown("""
     <div class="api-key-notice">
-        <strong>Google API Key Required</strong><br>
-        To generate NLP reports, please enter your Google API key for Vertex AI (Gemini) in the sidebar.
+        <strong>Anthropic API Key Required</strong><br>
+        To generate NLP reports, please enter your Anthropic API key for Claude in the sidebar.
         Your API key will be stored securely in your .env file.
     </div>
     """, unsafe_allow_html=True)
