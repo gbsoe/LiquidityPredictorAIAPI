@@ -20,9 +20,9 @@ class NLPReportGenerator:
     def __init__(self):
         """Initialize the NLP Report Generator with API credentials"""
         # Initialize Anthropic Client
-        self.api_key = os.getenv("GOOGLE_API_KEY")  # We'll reuse the same env var for simplicity
+        self.api_key = os.getenv("ANTHROPIC_API_KEY")
         if not self.api_key:
-            logger.warning("API key not found. Set GOOGLE_API_KEY environment variable.")
+            logger.warning("API key not found. Set ANTHROPIC_API_KEY environment variable.")
         else:
             try:
                 self.client = anthropic.Anthropic(api_key=self.api_key)
@@ -46,7 +46,7 @@ class NLPReportGenerator:
             String containing the generated summary or None if generation failed
         """
         if not self.has_api_key():
-            return "API key required for summary generation. Please set GOOGLE_API_KEY environment variable."
+            return "API key required for summary generation. Please set ANTHROPIC_API_KEY environment variable."
         
         try:
             # Prepare prompt with pool data
@@ -72,7 +72,7 @@ class NLPReportGenerator:
             
             # Generate response using Anthropic Claude
             message = self.client.messages.create(
-                model="claude-3-sonnet-20240229",
+                model="claude-3-5-sonnet-20241022", # the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
                 max_tokens=500,
                 system=system_prompt,
                 messages=[
@@ -100,7 +100,7 @@ class NLPReportGenerator:
             String containing the generated report or None if generation failed
         """
         if not self.has_api_key():
-            return "API key required for report generation. Please set GOOGLE_API_KEY environment variable."
+            return "API key required for report generation. Please set ANTHROPIC_API_KEY environment variable."
         
         try:
             # Prepare the top 5 pools by liquidity 
@@ -166,7 +166,7 @@ class NLPReportGenerator:
             
             # Generate response using Anthropic Claude
             message = self.client.messages.create(
-                model="claude-3-sonnet-20240229",
+                model="claude-3-5-sonnet-20241022", # the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
                 max_tokens=1000,
                 system=system_prompt,
                 messages=[
@@ -193,7 +193,7 @@ class NLPReportGenerator:
             String containing the generated analysis or None if generation failed
         """
         if not self.has_api_key():
-            return "API key required for analysis generation. Please set GOOGLE_API_KEY environment variable."
+            return "API key required for analysis generation. Please set ANTHROPIC_API_KEY environment variable."
         
         try:
             # Format context data for the prompt
