@@ -629,13 +629,23 @@ def main():
             # First create a clean representation of the data
             table_data = []
             
-            # Allow showing more pools by default - previously the display was limited
-            # Default to showing all pools up to 50, then allow pagination
-            max_display = min(len(filtered_df), 50)
+            # Allow showing more pools per page
+            pools_per_page = st.select_slider(
+                "Pools per page", 
+                options=[5, 10, 20, 50, 100], 
+                value=20,
+                help="Choose how many pools to display on each page"
+            )
+            
+            # Calculate pagination based on the selected number of pools per page
+            max_display = min(len(filtered_df), pools_per_page)
+            
+            # Calculate the maximum number of pages
+            max_pages = max(1, len(filtered_df) // max_display + (1 if len(filtered_df) % max_display > 0 else 0))
             
             # Add pagination control
-            start_idx = st.slider("Page", min_value=1, max_value=max(1, len(filtered_df) // max_display + 1), value=1) - 1
-            start_idx = start_idx * max_display
+            page = st.slider("Page", min_value=1, max_value=max_pages, value=1)
+            start_idx = (page - 1) * max_display
             end_idx = min(start_idx + max_display, len(filtered_df))
             
             st.write(f"Showing pools {start_idx+1}-{end_idx} of {len(filtered_df)}")
