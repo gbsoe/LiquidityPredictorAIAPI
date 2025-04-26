@@ -18,20 +18,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "SolPool Insight"
+args = "API Server"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "API Server"
-
-[[workflows.workflow]]
-name = "SolPool Insight"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "streamlit run solpool_insight.py --server.port 5000"
-waitForPort = 5000
+args = "Test 100 Pools"
 
 [[workflows.workflow]]
 name = "API Server"
@@ -41,6 +32,15 @@ author = "agent"
 task = "shell.exec"
 args = "python api_server.py"
 waitForPort = 3000
+
+[[workflows.workflow]]
+name = "Test 100 Pools"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "streamlit run test_get_100_pools.py --server.port 5000"
+waitForPort = 5000
 
 [[ports]]
 localPort = 3000
