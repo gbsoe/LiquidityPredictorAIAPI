@@ -154,11 +154,17 @@ with tab1:
     with col2:
         st.markdown("### Report Settings")
         include_predictions = st.toggle("Include Predictions", value=True)
-        report_detail = st.select_slider(
-            "Report Detail",
-            options=["Concise", "Standard", "Detailed"],
-            value="Standard"
-        )
+        
+        # Safe select_slider implementation with static options
+        try:
+            report_detail = st.select_slider(
+                "Report Detail",
+                options=["Concise", "Standard", "Detailed"],
+                value="Standard"
+            )
+        except Exception as e:
+            st.warning(f"Error with report detail slider: {e}")
+            report_detail = "Standard"  # Default value
         
         if st.button("Generate Market Report", type="primary", use_container_width=True):
             if not nlp_generator.has_api_key():
