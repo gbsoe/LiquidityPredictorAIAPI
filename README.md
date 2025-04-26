@@ -24,15 +24,39 @@ SolPool Insight is a cutting-edge analytics platform designed to provide compreh
 - **Database**: PostgreSQL for historical data storage
 - **API**: RESTful API with Flask
 
-## Self-Evolving Prediction Technology
+## Prediction Technology
 
-Our platform implements a state-of-the-art self-evolving prediction system that continuously improves itself:
+Our platform implements a comprehensive prediction system that leverages continuous data collection and advanced machine learning:
+
+### Data Collection & Processing
+
+- **Hourly Data Collection**: Automated collection of pool metrics (APR, TVL, volume) every hour
+- **Token Price Updates**: Regular updates of token prices every 30 minutes
+- **Historical Database**: Complete time-series data storage in PostgreSQL
+- **Feature Engineering**: Over 40 derived features from raw metrics
+
+### Multi-Model Architecture
+
+Our prediction system uses multiple specialized models working together:
+
+1. **APR Prediction Model**: Random Forest Regressor/XGBoost predicts future APR changes
+2. **Pool Performance Classifier**: Categorizes pools into performance classes (Excellent, Good, Average, Poor)
+3. **Risk Assessment Model**: Quantifies risk levels through multi-factor analysis
+
+### Advanced ML Techniques
 
 1. **Bayesian Optimization**: Automatically fine-tunes hyperparameters for optimal performance
-2. **Neural Architecture Search**: Discovers the most effective neural network architectures
-3. **Multi-Agent System**: Collaborative intelligence across specialized prediction agents
-4. **Reinforcement Learning**: Optimizes prediction weights through experience
-5. **Evolutionary Algorithms**: Natural selection of the most accurate model configurations
+2. **Time-Series Analysis**: Specialized algorithms for temporal pattern recognition
+3. **Reinforcement Learning**: Optimizes prediction weights through continuous validation
+4. **Ensemble Methods**: Combines multiple prediction signals for greater accuracy
+
+### Continuous Improvement
+
+- **Daily Model Training**: Models automatically retrain daily with fresh data
+- **Prediction Validation**: Historical predictions are validated against actual outcomes
+- **Adaptive Weighting**: Self-adjusting weight allocation to the most accurate model components
+
+For more detailed information about our prediction technology, please see our [Prediction Technology Documentation](./prediction_technology.md).
 
 ## Getting Started
 
