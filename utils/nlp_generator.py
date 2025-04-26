@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-from google import genai
+import google.generativeai as genai
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 
