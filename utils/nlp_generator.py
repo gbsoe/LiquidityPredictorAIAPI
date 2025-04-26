@@ -3,7 +3,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-from google import genai
+import google.generativeai as genai
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
