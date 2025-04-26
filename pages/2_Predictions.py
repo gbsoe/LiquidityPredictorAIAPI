@@ -85,7 +85,11 @@ try:
             )
             
             # Number of pools to show
-            top_n = st.slider("Number of pools to show:", min_value=5, max_value=50, value=10, step=5)
+            try:
+                top_n = st.slider("Number of pools to show:", min_value=5, max_value=50, value=10, step=5)
+            except Exception as e:
+                st.warning(f"Slider error: {e}. Using default value.")
+                top_n = 10  # Default to 10 pools
             
             # Get top predictions based on category
             if prediction_category == "Highest Predicted APR":
@@ -133,9 +137,19 @@ try:
                 
                 # Apply styling
                 styled_df = display_df.style\
-                    .format({'Predicted APR (%)': '{:.2f}', 'Risk Score': '{:.2f}'})\
-                    .applymap(highlight_performance, subset=['Performance Class'])\
-                    .applymap(highlight_risk, subset=['Risk Score'])
+                    .format({'Predicted APR (%)': '{:.2f}', 'Risk Score': '{:.2f}'})
+                
+                # Use .map instead of .applymap (which is deprecated)
+                try:
+                    # Try the new API method
+                    styled_df = styled_df\
+                        .map(highlight_performance, subset=['Performance Class'])\
+                        .map(highlight_risk, subset=['Risk Score'])
+                except AttributeError:
+                    # Fall back to the old method if needed for compatibility
+                    styled_df = styled_df\
+                        .applymap(highlight_performance, subset=['Performance Class'])\
+                        .applymap(highlight_risk, subset=['Risk Score'])
                 
                 st.dataframe(styled_df, use_container_width=True)
                 
