@@ -197,31 +197,41 @@ def fetch_live_data_from_blockchain():
                 # This looks like a Helius API key (UUID format)
                 custom_rpc = f"https://rpc.helius.xyz/?api-key={custom_rpc}"
             
-            # Initialize extractor
-            extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
-            
-            # Extract pools from major DEXes
-            # We'll limit to just 5 pools per DEX for faster results
-            max_per_dex = 10
-            
-            # This is a direct call to extract pools from all supported DEXes
-            pools = extractor.extract_pools_from_all_dexes(max_per_dex=max_per_dex)
-            
-            if pools and len(pools) > 0:
-                # Convert to dictionary format
-                pool_dicts = [pool.to_dict() for pool in pools]
+            # Check if OnChainExtractor is available
+            if not HAS_EXTRACTOR:
+                st.error("OnChainExtractor is not available - cannot fetch live data")
+                return None
                 
-                # Save to cache for future use
-                with open("extracted_pools.json", "w") as f:
-                    json.dump(pool_dicts, f)
+            try:
+                # Initialize extractor
+                extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
                 
-                st.success(f"✓ Successfully fetched {len(pool_dicts)} pools directly from the blockchain")
+                # Extract pools from major DEXes
+                # We'll limit to just 5 pools per DEX for faster results
+                max_per_dex = 10
                 
-                # Ensure all required fields are present
-                pool_dicts = ensure_all_fields(pool_dicts)
-                return pool_dicts
-            else:
-                st.error("No pools were found on the blockchain. Check your RPC endpoint.")
+                # This is a direct call to extract pools from all supported DEXes
+                pools = extractor.extract_pools_from_all_dexes(max_per_dex=max_per_dex)
+                
+                if pools and len(pools) > 0:
+                    # Convert to dictionary format
+                    pool_dicts = [pool.to_dict() for pool in pools]
+                    
+                    # Save to cache for future use
+                    with open("extracted_pools.json", "w") as f:
+                        json.dump(pool_dicts, f)
+                    
+                    st.success(f"✓ Successfully fetched {len(pool_dicts)} pools directly from the blockchain")
+                    
+                    # Ensure all required fields are present
+                    pool_dicts = ensure_all_fields(pool_dicts)
+                    return pool_dicts
+                else:
+                    st.error("No pools were found on the blockchain. Check your RPC endpoint.")
+                    return None
+            except AttributeError as ae:
+                logger.error(f"Function not available in OnChainExtractor: {str(ae)}")
+                st.error(f"OnChainExtractor module is missing required functions. Using cached data instead.")
                 return None
                 
         except Exception as e:
