@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-import openai
+from google import genai
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 
@@ -13,18 +13,24 @@ class NLPReportGenerator:
     """
     NLP Report Generator for Solana Liquidity Pool Analysis
     
-    Uses OpenAI API to generate natural language reports and summaries
+    Uses Google Vertex AI (Gemini) to generate natural language reports and summaries
     about liquidity pool data, predictions, and market trends.
     """
     
     def __init__(self):
         """Initialize the NLP Report Generator with API credentials"""
-        # Initialize OpenAI client
-        self.api_key = os.getenv("OPENAI_API_KEY")
+        # Initialize Google Vertex AI client
+        self.api_key = os.getenv("GOOGLE_API_KEY")
         if not self.api_key:
-            logger.warning("OpenAI API key not found. Set OPENAI_API_KEY environment variable.")
+            logger.warning("Google API key not found. Set GOOGLE_API_KEY environment variable.")
         else:
-            self.client = openai.OpenAI(api_key=self.api_key)
+            try:
+                genai.configure(api_key=self.api_key)
+                self.model = genai.GenerativeModel("gemini-2.0-flash-001")
+                logger.info("Successfully initialized Google Gemini model")
+            except Exception as e:
+                logger.error(f"Error initializing Google Gemini model: {e}")
+                self.api_key = None
             
     def has_api_key(self) -> bool:
         """Check if API key is available"""
@@ -41,7 +47,7 @@ class NLPReportGenerator:
             String containing the generated summary or None if generation failed
         """
         if not self.has_api_key():
-            return "API key required for summary generation. Please set OPENAI_API_KEY environment variable."
+            return "API key required for summary generation. Please set GOOGLE_API_KEY environment variable."
         
         try:
             # Prepare prompt with pool data
@@ -61,22 +67,15 @@ class NLPReportGenerator:
             Highlight key metrics, significant changes, risk level, and potential opportunities.
             Keep the summary under 150 words and make it accessible to crypto investors.
             Include a brief prediction about potential future performance.
+            
+            You are a professional crypto analyst specializing in Solana DeFi pools.
             """
             
-            # Generate response
-            response = self.client.chat.completions.create(
-                # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
-                # do not change this unless explicitly requested by the user
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a professional crypto analyst specializing in Solana DeFi pools."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=300,
-                temperature=0.7
-            )
+            # Generate response using Google Gemini
+            response = self.model.generate_content(prompt)
             
-            return response.choices[0].message.content.strip()
+            # Extract and return text
+            return response.text.strip()
             
         except Exception as e:
             logger.error(f"Error generating pool summary: {e}")
@@ -95,7 +94,7 @@ class NLPReportGenerator:
             String containing the generated report or None if generation failed
         """
         if not self.has_api_key():
-            return "API key required for report generation. Please set OPENAI_API_KEY environment variable."
+            return "API key required for report generation. Please set GOOGLE_API_KEY environment variable."
         
         try:
             # Prepare the top 5 pools by liquidity 
@@ -154,22 +153,15 @@ class NLPReportGenerator:
             
             Write in a professional but accessible style suitable for crypto investors.
             The report should be around 400-500 words.
+            
+            You are a professional crypto market analyst specializing in DeFi liquidity pools on Solana.
             """
             
-            # Generate response
-            response = self.client.chat.completions.create(
-                # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
-                # do not change this unless explicitly requested by the user
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a professional crypto market analyst specializing in DeFi liquidity pools on Solana."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=800,
-                temperature=0.7
-            )
+            # Generate response using Google Gemini
+            response = self.model.generate_content(prompt)
             
-            return response.choices[0].message.content.strip()
+            # Extract and return text
+            return response.text.strip()
             
         except Exception as e:
             logger.error(f"Error generating market report: {e}")
@@ -187,7 +179,7 @@ class NLPReportGenerator:
             String containing the generated analysis or None if generation failed
         """
         if not self.has_api_key():
-            return "API key required for analysis generation. Please set OPENAI_API_KEY environment variable."
+            return "API key required for analysis generation. Please set GOOGLE_API_KEY environment variable."
         
         try:
             # Format context data for the prompt
@@ -205,22 +197,15 @@ class NLPReportGenerator:
             Provide a detailed, data-driven analysis that directly addresses the query.
             Support your analysis with specific metrics from the provided data.
             Make your response accessible to crypto investors while maintaining technical accuracy.
+            
+            You are an expert crypto analyst specializing in detailed analysis of Solana DeFi pools.
             """
             
-            # Generate response
-            response = self.client.chat.completions.create(
-                # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
-                # do not change this unless explicitly requested by the user
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are an expert crypto analyst specializing in detailed analysis of Solana DeFi pools."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=600,
-                temperature=0.5
-            )
+            # Generate response using Google Gemini
+            response = self.model.generate_content(prompt)
             
-            return response.choices[0].message.content.strip()
+            # Extract and return text
+            return response.text.strip()
             
         except Exception as e:
             logger.error(f"Error generating specific analysis: {e}")
