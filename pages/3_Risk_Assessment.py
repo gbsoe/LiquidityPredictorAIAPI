@@ -248,23 +248,33 @@ try:
                 st.subheader("Price Change Scenario")
                 
                 # Price change sliders
-                price_change1 = st.slider(
-                    f"{token_symbol1} Price Change",
-                    min_value=-90,
-                    max_value=900,
-                    value=0,
-                    step=10,
-                    format="%d%%"
-                )
+                # First token slider
+                try:
+                    price_change1 = st.slider(
+                        f"{token_symbol1} Price Change",
+                        min_value=-90,
+                        max_value=900,
+                        value=0,
+                        step=10,
+                        format="%d%%"
+                    )
+                except Exception as e:
+                    st.warning(f"Slider error for {token_symbol1}: {e}. Using default value.")
+                    price_change1 = 0
                 
-                price_change2 = st.slider(
-                    f"{token_symbol2} Price Change",
-                    min_value=-90,
-                    max_value=900,
-                    value=0,
-                    step=10,
-                    format="%d%%"
-                )
+                # Second token slider
+                try:
+                    price_change2 = st.slider(
+                        f"{token_symbol2} Price Change",
+                        min_value=-90,
+                        max_value=900,
+                        value=0,
+                        step=10,
+                        format="%d%%"
+                    )
+                except Exception as e:
+                    st.warning(f"Slider error for {token_symbol2}: {e}. Using default value.")
+                    price_change2 = 0
                 
                 # Calculate new prices
                 new_price1 = initial_price1 * (1 + price_change1 / 100)

@@ -689,12 +689,22 @@ def main():
             table_data = []
             
             # Allow showing more pools per page
-            pools_per_page = st.select_slider(
-                "Pools per page", 
-                options=[5, 10, 20, 50, 100], 
-                value=20,
-                help="Choose how many pools to display on each page"
-            )
+            # When only a few pools are available, limit the options
+            if len(filtered_df) <= 5:
+                pools_per_page = min(len(filtered_df), 5)
+                st.write(f"Pools per page: {pools_per_page}")
+            else:
+                # Only show options that make sense based on number of pools
+                slider_options = [opt for opt in [5, 10, 20, 50, 100] if opt <= len(filtered_df)]
+                if not slider_options:
+                    slider_options = [min(len(filtered_df), 5)]
+                
+                pools_per_page = st.select_slider(
+                    "Pools per page", 
+                    options=slider_options,
+                    value=min(20, slider_options[-1]) if len(slider_options) > 1 else slider_options[0],
+                    help="Choose how many pools to display on each page"
+                )
             
             # Calculate pagination based on the selected number of pools per page
             max_display = min(len(filtered_df), pools_per_page)
@@ -702,8 +712,13 @@ def main():
             # Calculate the maximum number of pages
             max_pages = max(1, len(filtered_df) // max_display + (1 if len(filtered_df) % max_display > 0 else 0))
             
-            # Add pagination control
-            page = st.slider("Page", min_value=1, max_value=max_pages, value=1)
+            # Fix for slider when min_value equals max_value
+            if max_pages == 1:
+                page = 1
+                st.write("Page: 1")
+            else:
+                # Add pagination control 
+                page = st.slider("Page", min_value=1, max_value=max_pages, value=1)
             start_idx = (page - 1) * max_display
             end_idx = min(start_idx + max_display, len(filtered_df))
             
