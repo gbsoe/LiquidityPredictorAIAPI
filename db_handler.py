@@ -201,12 +201,12 @@ def store_pools(pool_data, replace=True):
         session.close()
 
 # Function to retrieve data from database
-def get_pools(limit=100):
+def get_pools(limit=50):
     """
     Retrieve pool data from database
     
     Args:
-        limit: Maximum number of pools to retrieve (default 100, None for all)
+        limit: Maximum number of pools to retrieve (default 50, None for all)
     
     Returns:
         List of dictionaries containing pool data

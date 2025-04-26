@@ -34,7 +34,7 @@ app = Flask(__name__)
 # Configuration
 DEBUG = True
 API_VERSION = "API"
-DEFAULT_LIMIT = 100
+DEFAULT_LIMIT = 50
 RATE_LIMIT = {
     "free": 100,  # per hour
     "standard": 1000,  # per hour
@@ -871,7 +871,7 @@ def get_predictions():
         category = request.args.get("category")
         dex = request.args.get("dex")
         min_tvl = float(request.args.get("min_tvl", 0))
-        limit = min(int(request.args.get("limit", 20)), 100)
+        limit = min(int(request.args.get("limit", 20)), 50)
         offset = max(int(request.args.get("offset", 0)), 0)
         sort_by = request.args.get("sort_by", "score")
         
@@ -1007,7 +1007,7 @@ def find_similar_pools(pool_id):
     """Find pools that are similar to a reference pool"""
     try:
         # Parse query parameters
-        limit = min(int(request.args.get("limit", 5)), 20)
+        limit = min(int(request.args.get("limit", 5)), 50)
         metrics_str = request.args.get("metrics", "tvl,apr,volume")
         min_similarity = float(request.args.get("min_similarity", 50))
         
