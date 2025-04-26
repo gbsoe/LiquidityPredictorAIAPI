@@ -105,8 +105,8 @@ st.sidebar.markdown("---")
 
 # API key management
 if not nlp_generator.has_api_key():
-    st.sidebar.markdown("### Anthropic API Key Required")
-    api_key = st.sidebar.text_input("Enter Anthropic API Key for Claude", type="password")
+    st.sidebar.markdown("### Google Vertex AI (Gemini) API Key Required")
+    api_key = st.sidebar.text_input("Enter Google Vertex AI API Key", type="password")
     
     if st.sidebar.button("Save API Key"):
         try:
@@ -135,8 +135,8 @@ if not nlp_generator.has_api_key():
     
     st.markdown("""
     <div class="api-key-notice">
-        <strong>Anthropic API Key Required</strong><br>
-        To generate NLP reports, please enter your Anthropic API key for Claude in the sidebar.
+        <strong>Google Vertex AI API Key Required</strong><br>
+        To generate NLP reports, please enter your Google Vertex AI (Gemini) API key in the sidebar.
         Your API key will be stored securely in your .env file.
     </div>
     """, unsafe_allow_html=True)
@@ -168,7 +168,7 @@ with tab1:
         
         if st.button("Generate Market Report", type="primary", use_container_width=True):
             if not nlp_generator.has_api_key():
-                st.warning("Anthropic API key is required. Please enter it in the sidebar.")
+                st.warning("Google Vertex AI API key is required. Please enter it in the sidebar.")
             else:
                 with st.spinner("Generating comprehensive market report..."):
                     # Load all pools data
