@@ -28,14 +28,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger('solpool_insight')
 
-# Set page config for proper error handling
-st.set_page_config(
-    page_title="SolPool Insight",
-    page_icon="💧",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
 # Import our database handler
 import db_handler
 
@@ -186,6 +178,7 @@ def ensure_all_fields(pool_data):
     
     return validated_pools
 
+@handle_exception
 def load_data():
     """Load pool data from database, cached file, or generate as needed"""
     # First try to load from database
@@ -196,6 +189,7 @@ def load_data():
                 st.success(f"✓ Successfully loaded {len(pools)} pools from database")
                 return pools
         except Exception as db_error:
+            logger.error(f"Database error: {str(db_error)}")
             st.warning(f"Could not load from database: {db_error}")
     
     # If no database data, try cached file
@@ -411,7 +405,11 @@ def generate_sample_data(count=200):
         
     return pools
 
+@handle_exception
 def main():
+    """
+    Main application function with robust error handling.
+    """
     # Configure the sidebar first to ensure it's always visible
     with st.sidebar:
         st.sidebar.title("SolPool Insight")
