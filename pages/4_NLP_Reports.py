@@ -80,7 +80,7 @@ st.markdown("""
     }
 }
 </style>
-<div class="nlp-title">AI-Generated Market Intelligence</div>
+<div class="nlp-title">AI-Generated Market Intelligence with Claude</div>
 <div class="nlp-subtitle">Advanced NLP analysis of Solana liquidity pool data and predictions</div>
 """, unsafe_allow_html=True)
 
@@ -135,8 +135,8 @@ if not nlp_generator.has_api_key():
     
     st.markdown("""
     <div class="api-key-notice">
-        <strong>Google Vertex AI API Key Required</strong><br>
-        To generate NLP reports, please enter your Google Vertex AI (Gemini) API key in the sidebar.
+        <strong>Anthropic Claude API Key Required</strong><br>
+        To generate NLP reports, please enter your Anthropic Claude API key in the sidebar.
         Your API key will be stored securely in your .env file.
     </div>
     """, unsafe_allow_html=True)
@@ -168,7 +168,7 @@ with tab1:
         
         if st.button("Generate Market Report", type="primary", use_container_width=True):
             if not nlp_generator.has_api_key():
-                st.warning("Google Vertex AI API key is required. Please enter it in the sidebar.")
+                st.warning("Anthropic Claude API key is required. Please enter it in the sidebar.")
             else:
                 with st.spinner("Generating comprehensive market report..."):
                     # Load all pools data
@@ -280,7 +280,7 @@ with tab2:
             # Generate analysis button
             if st.button("Generate Pool Analysis", type="primary"):
                 if not nlp_generator.has_api_key():
-                    st.warning("Google Vertex AI API key is required. Please enter it in the sidebar.")
+                    st.warning("Anthropic Claude API key is required. Please enter it in the sidebar.")
                 else:
                     with st.spinner("Generating detailed pool analysis..."):
                         # Get pool details
@@ -392,7 +392,7 @@ with tab3:
         if not user_query:
             st.warning("Please enter a question for analysis.")
         elif not nlp_generator.has_api_key():
-            st.warning("Google Vertex AI API key is required. Please enter it in the sidebar.")
+            st.warning("Anthropic Claude API key is required. Please enter it in the sidebar.")
         else:
             with st.spinner("Generating custom analysis..."):
                 # Prepare context data based on selection
@@ -464,7 +464,7 @@ st.markdown("---")
 st.markdown("""
 <div style="display: flex; justify-content: space-between; align-items: center;">
     <div>Solana Liquidity Pool Analysis System • NLP Reports</div>
-    <div style="font-size: 12px; color: #6b7280;">Powered by Google Vertex AI (Gemini)</div>
+    <div style="font-size: 12px; color: #6b7280;">Powered by Anthropic Claude</div>
 </div>
 """, unsafe_allow_html=True)
 
