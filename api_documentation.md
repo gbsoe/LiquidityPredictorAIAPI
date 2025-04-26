@@ -16,7 +16,7 @@ With our API, you can:
 ## Base URL
 
 ```
-https://api.filot.io/v1
+https://filotanalytics.replit.app/v1
 ```
 
 ## Authentication
@@ -114,7 +114,7 @@ GET /pools
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/pools?dex=Raydium&min_tvl=1000000&min_apr=10" \
+curl -X GET "https://filotanalytics.replit.app/v1/pools?dex=Raydium&min_tvl=1000000&min_apr=10" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -170,7 +170,7 @@ GET /pools/{pool_id}
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2" \
+curl -X GET "https://filotanalytics.replit.app/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -234,7 +234,7 @@ GET /pools/{pool_id}/history
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/history?days=60&interval=day" \
+curl -X GET "https://filotanalytics.replit.app/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/history?days=60&interval=day" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -284,7 +284,7 @@ GET /dexes/{dex_name}
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/dexes/Raydium" \
+curl -X GET "https://filotanalytics.replit.app/v1/dexes/Raydium" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -340,7 +340,7 @@ GET /categories/{category_name}
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/categories/Meme" \
+curl -X GET "https://filotanalytics.replit.app/v1/categories/Meme" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -399,7 +399,7 @@ Same as `/pools` endpoint.
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/tokens/BONK/pools?min_liquidity=1000000" \
+curl -X GET "https://filotanalytics.replit.app/v1/tokens/BONK/pools?min_liquidity=1000000" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -444,7 +444,7 @@ GET /tokens/{token_symbol}
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/tokens/BONK" \
+curl -X GET "https://filotanalytics.replit.app/v1/tokens/BONK" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -498,7 +498,7 @@ GET /tokens/{token_symbol}/price-history
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/tokens/BONK/price-history?days=60&interval=day" \
+curl -X GET "https://filotanalytics.replit.app/v1/tokens/BONK/price-history?days=60&interval=day" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -550,7 +550,7 @@ GET /predictions
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/predictions?min_score=80&category=Meme" \
+curl -X GET "https://filotanalytics.replit.app/v1/predictions?min_score=80&category=Meme" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -618,7 +618,7 @@ Valid report_type values:
 #### Example Request (Market Report)
 
 ```bash
-curl -X POST "https://api.filot.io/v1/reports/generate" \
+curl -X POST "https://filotanalytics.replit.app/v1/reports/generate" \
   -H "X-API-Key: your_api_key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -634,7 +634,7 @@ curl -X POST "https://api.filot.io/v1/reports/generate" \
 #### Example Request (Pool Report)
 
 ```bash
-curl -X POST "https://api.filot.io/v1/reports/generate" \
+curl -X POST "https://filotanalytics.replit.app/v1/reports/generate" \
   -H "X-API-Key: your_api_key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -710,7 +710,7 @@ GET /mobile/pools/summary
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/mobile/pools/summary?category=Meme&limit=10" \
+curl -X GET "https://filotanalytics.replit.app/v1/mobile/pools/summary?category=Meme&limit=10" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -752,7 +752,7 @@ GET /mobile/pools/{pool_id}
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/mobile/pools/M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K" \
+curl -X GET "https://filotanalytics.replit.app/v1/mobile/pools/M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -803,7 +803,7 @@ GET /mobile/predictions/top
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/mobile/predictions/top?limit=5" \
+curl -X GET "https://filotanalytics.replit.app/v1/mobile/predictions/top?limit=5" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -853,7 +853,7 @@ GET /mobile/pools/{pool_id}/chart
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/mobile/pools/M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K/chart?days=30&metric=apr" \
+curl -X GET "https://filotanalytics.replit.app/v1/mobile/pools/M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K/chart?days=30&metric=apr" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -878,7 +878,7 @@ curl -X GET "https://api.filot.io/v1/mobile/pools/M2mx93ekt1fmXSVkTrUL9xVFHkmME8
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/similar?limit=10" \
+curl -X GET "https://filotanalytics.replit.app/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/similar?limit=10" \
   -H "X-API-Key: your_api_key"
 ```
 
@@ -919,7 +919,7 @@ GET /market-overview
 #### Example Request
 
 ```bash
-curl -X GET "https://api.filot.io/v1/market-overview" \
+curl -X GET "https://filotanalytics.replit.app/v1/market-overview" \
   -H "X-API-Key: your_api_key"
 ```
 

@@ -126,7 +126,7 @@ tab1, tab2, tab3 = st.tabs(["Overview", "Authentication", "Response Format"])
 
 with tab1:
     st.subheader("Base URL")
-    st.code("https://api.filot.io/v1", language="text")
+    st.code("https://filotanalytics.replit.app/v1", language="text")
     
     st.subheader("Features")
     col1, col2 = st.columns(2)
@@ -246,7 +246,7 @@ endpoints = [
             {"name": "trend_days", "type": "integer", "description": "Number of days for trend calculation", "default": "7", "example": "30"},
             {"name": "trend_threshold", "type": "number", "description": "Minimum change percentage for trend filtering", "default": "1", "example": "5"}
         ],
-        "example_request": """curl -X GET "https://api.filot.io/v1/pools?dex=Raydium&min_tvl=1000000&min_apr=10" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/pools?dex=Raydium&min_tvl=1000000&min_apr=10" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
@@ -286,7 +286,7 @@ endpoints = [
         "parameters": [
             {"name": "pool_id", "type": "string", "description": "The unique identifier of the pool", "example": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"}
         ],
-        "example_request": """curl -X GET "https://api.filot.io/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
@@ -329,7 +329,7 @@ endpoints = [
             {"name": "interval", "type": "string", "description": "Time interval ('hour', 'day', 'week')", "default": "day", "example": "hour"},
             {"name": "metrics", "type": "string", "description": "Comma-separated list of metrics to include", "default": "all", "example": "apr,tvl"}
         ],
-        "example_request": """curl -X GET "https://api.filot.io/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/history?days=60&interval=day" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/history?days=60&interval=day" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
@@ -363,7 +363,7 @@ endpoints = [
         "parameters": [
             {"name": "dex_name", "type": "string", "description": "The name of the DEX", "example": "Raydium"}
         ],
-        "example_request": """curl -X GET "https://api.filot.io/v1/dexes/Raydium" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/dexes/Raydium" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
@@ -403,7 +403,7 @@ endpoints = [
         "parameters": [
             {"name": "category_name", "type": "string", "description": "The name of the category", "example": "Meme"}
         ],
-        "example_request": """curl -X GET "https://api.filot.io/v1/categories/Meme" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/categories/Meme" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
@@ -442,7 +442,7 @@ endpoints = [
         "parameters": [
             {"name": "token_symbol", "type": "string", "description": "The token symbol", "example": "BONK"}
         ],
-        "example_request": """curl -X GET "https://api.filot.io/v1/tokens/BONK/pools?min_liquidity=1000000" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/tokens/BONK/pools?min_liquidity=1000000" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
@@ -471,7 +471,7 @@ endpoints = [
         "parameters": [
             {"name": "token_symbol", "type": "string", "description": "The token symbol", "example": "BONK"}
         ],
-        "example_request": """curl -X GET "https://api.filot.io/v1/tokens/BONK" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/tokens/BONK" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
@@ -504,7 +504,7 @@ endpoints = [
             {"name": "days", "type": "integer", "description": "Number of days of history to retrieve", "default": "30", "example": "60"},
             {"name": "interval", "type": "string", "description": "Time interval ('hour', 'day', 'week')", "default": "day", "example": "hour"}
         ],
-        "example_request": """curl -X GET "https://api.filot.io/v1/tokens/BONK/price-history?days=60&interval=day" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/tokens/BONK/price-history?days=60&interval=day" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
@@ -540,7 +540,7 @@ endpoints = [
             {"name": "offset", "type": "integer", "description": "Number of results to skip (for pagination)", "default": "0", "example": "20"},
             {"name": "sort_by", "type": "string", "description": "Field to sort predictions by", "default": "score", "example": "potential_apr"}
         ],
-        "example_request": """curl -X GET "https://api.filot.io/v1/predictions?min_score=80&category=Meme" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/predictions?min_score=80&category=Meme" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
@@ -583,7 +583,7 @@ endpoints = [
             {"name": "min_similarity", "type": "number", "description": "Minimum similarity score (0-100)", "default": "50", "example": "70"},
             {"name": "metrics", "type": "string", "description": "Comma-separated list of metrics to use for similarity calculation", "default": "all", "example": "liquidity,apr,volume_24h"}
         ],
-        "example_request": """curl -X GET "https://api.filot.io/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/similar?limit=10" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2/similar?limit=10" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
@@ -614,7 +614,7 @@ endpoints = [
         "parameters": [
             {"name": "timeframe", "type": "string", "description": "Timeframe for change calculation ('24h', '7d', '30d')", "default": "24h", "example": "7d"}
         ],
-        "example_request": """curl -X GET "https://api.filot.io/v1/market-overview?timeframe=7d" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/market-overview?timeframe=7d" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
