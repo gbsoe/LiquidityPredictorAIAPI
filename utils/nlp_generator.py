@@ -218,7 +218,7 @@ class NLPReportGenerator:
             
             # Generate response using Anthropic Claude
             message = self.client.messages.create(
-                model="claude-3-sonnet-20240229",
+                model="claude-3-5-sonnet-20241022", # the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
                 max_tokens=1500,
                 system=system_prompt,
                 messages=[
