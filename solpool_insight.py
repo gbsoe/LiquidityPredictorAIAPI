@@ -563,53 +563,57 @@ def main():
         # Add a manual data refresh button and display status
         st.sidebar.header("Data Management")
         
-        # Add a refresh button
-        if st.sidebar.button("🔄 Refresh Data Now"):
-            st.sidebar.info("Starting manual data refresh...")
-            
-            try:
-                # Check if we have an RPC endpoint
-                if not custom_rpc:
-                    st.sidebar.error("No RPC endpoint configured. Please set a valid endpoint.")
-                    return
+        # Add data source buttons with clear labels
+        data_source_col1, data_source_col2 = st.sidebar.columns(2)
+        
+        with data_source_col1:
+            # Add a refresh button that clearly shows it's for cached sample data
+            if st.button("🔄 Use Sample Data", help="Generate and use sample data - safer option if live data is not working"):
+                st.sidebar.info("Generating sample data...")
                 
-                # Ensure Helius API key format is correctly handled
-                # Extract just the API key if full URL is provided
-                api_key = ""
-                if "api-key=" in custom_rpc:
-                    # Format: https://rpc.helius.xyz/?api-key=YOUR_API_KEY
-                    api_key = custom_rpc.split("api-key=")[-1].split("&")[0]
-                elif len(custom_rpc) == 36 and custom_rpc.count('-') == 4:
-                    # Format: just the UUID
-                    api_key = custom_rpc
-                
-                if api_key:
-                    # Format properly for Helius
-                    st.sidebar.info(f"Using Helius API with key ending in ...{api_key[-6:]}")
-                    custom_rpc = f"https://mainnet.helius-rpc.com/?api-key={api_key}"
-                
-                # Try to generate simpler synthetic data
-                with st.sidebar.status("Generating sample data..."):
-                    try:
-                        # Instead of trying to use the complex blockchain extractor, 
-                        # generate a simple but useful dataset
-                        pools = generate_sample_data(count=15)
+                try:
+                    # Generate sample data (safer option)
+                    pools = generate_sample_data(count=15)
+                    
+                    if pools and len(pools) > 0:
+                        st.sidebar.success(f"Generated {len(pools)} sample pools")
                         
-                        if pools and len(pools) > 0:
-                            st.sidebar.success(f"Generated {len(pools)} sample pools")
-                            
-                            # Save to file
-                            cache_file = "extracted_pools.json"
-                            with open(cache_file, "w") as f:
-                                json.dump(pools, f, indent=2)
-                                
-                            # Force a page reload to show the new data
-                            time.sleep(1)
-                            st.rerun()
-                    except Exception as e:
-                        st.sidebar.error(f"Error generating data: {e}")
-            except Exception as e:
-                st.sidebar.error(f"Error refreshing data: {e}")
+                        # Save to file
+                        cache_file = "extracted_pools.json"
+                        with open(cache_file, "w") as f:
+                            json.dump(pools, f, indent=2)
+                        
+                        # Set data source indicator
+                        st.session_state['data_source'] = "Sample data (not real blockchain data)"
+                        
+                        # Force a page reload to show the new data
+                        time.sleep(1)
+                        st.rerun()
+                except Exception as e:
+                    st.sidebar.error(f"Error generating sample data: {e}")
+        
+        with data_source_col2:
+            # Add a button specifically for trying to get live data
+            if st.button("🌐 Try Live Data", help="Attempt to fetch real data from the blockchain (may fail if RPC issues)"):
+                st.sidebar.info("Attempting to fetch live blockchain data...")
+                
+                try:
+                    # Check if we have a valid RPC endpoint
+                    if not custom_rpc:
+                        st.sidebar.error("No RPC endpoint configured. Please set a valid endpoint in the Advanced RPC Options.")
+                        return
+                    
+                    # Update session state for data source
+                    st.session_state['force_live_data'] = True
+                    
+                    # Set data source indicator with attempt message
+                    st.session_state['data_source'] = "Attempting to get live blockchain data..."
+                    
+                    # Force a page reload to trigger the data fetch logic
+                    time.sleep(1)
+                    st.rerun()
+                except Exception as e:
+                    st.sidebar.error(f"Error attempting live data fetch: {e}")
                 
         # Display last update time if available
         if os.path.exists("extracted_pools.json"):
