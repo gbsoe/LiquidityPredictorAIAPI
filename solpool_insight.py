@@ -179,14 +179,78 @@ def ensure_all_fields(pool_data):
     return validated_pools
 
 @handle_exception
+def fetch_live_data_from_blockchain():
+    """Fetch live pool data directly from the blockchain using OnChainExtractor"""
+    # Get the custom_rpc value from session state (set in main())
+    custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"))
+    
+    # Notify user
+    with st.spinner("Fetching live data from Solana blockchain... This may take a moment."):
+        try:
+            # Check if we have a valid RPC endpoint
+            if not custom_rpc or len(custom_rpc) < 10:
+                st.error("No valid RPC endpoint configured. Please set up your RPC endpoint in the sidebar.")
+                return None
+                
+            # Format Helius API key if needed
+            if len(custom_rpc) == 36 and custom_rpc.count('-') == 4:
+                # This looks like a Helius API key (UUID format)
+                custom_rpc = f"https://rpc.helius.xyz/?api-key={custom_rpc}"
+            
+            # Initialize extractor
+            extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
+            
+            # Extract pools from major DEXes
+            # We'll limit to just 5 pools per DEX for faster results
+            max_per_dex = 10
+            
+            # This is a direct call to extract pools from all supported DEXes
+            pools = extractor.extract_pools_from_all_dexes(max_per_dex=max_per_dex)
+            
+            if pools and len(pools) > 0:
+                # Convert to dictionary format
+                pool_dicts = [pool.to_dict() for pool in pools]
+                
+                # Save to cache for future use
+                with open("extracted_pools.json", "w") as f:
+                    json.dump(pool_dicts, f)
+                
+                st.success(f"✓ Successfully fetched {len(pool_dicts)} pools directly from the blockchain")
+                
+                # Ensure all required fields are present
+                pool_dicts = ensure_all_fields(pool_dicts)
+                return pool_dicts
+            else:
+                st.error("No pools were found on the blockchain. Check your RPC endpoint.")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error fetching live data: {str(e)}")
+            st.error(f"Could not fetch live data: {str(e)}")
+            return None
+
+@handle_exception
 def load_data():
-    """Load pool data from database, cached file, or generate as needed"""
-    # First try to load from database
+    """Load pool data from live blockchain, database, cached file, or generate as needed"""
+    
+    # Get the force_live_data value from session state (set in main())
+    force_live_data = st.session_state.get('force_live_data', True)  # Default to True
+    
+    # Try fetching live data first if requested
+    if force_live_data and HAS_EXTRACTOR:
+        live_pools = fetch_live_data_from_blockchain()
+        if live_pools and len(live_pools) > 0:
+            # Add a data source indicator
+            st.session_state['data_source'] = "Live blockchain data"
+            return live_pools
+    
+    # Second, try to load from database
     if hasattr(db_handler, 'engine') and db_handler.engine is not None:
         try:
             pools = db_handler.get_pools()
             if pools and len(pools) > 0:
                 st.success(f"✓ Successfully loaded {len(pools)} pools from database")
+                st.session_state['data_source'] = "Database"
                 return pools
         except Exception as db_error:
             logger.error(f"Database error: {str(db_error)}")
@@ -201,24 +265,21 @@ def load_data():
             
             if pools and len(pools) > 0:
                 st.success(f"✓ Successfully loaded {len(pools)} pools from local cache")
+                st.warning("⚠️ Using cached data! This may not reflect current blockchain state.")
                 
                 # Ensure all required fields are present
                 pools = ensure_all_fields(pools)
+                st.session_state['data_source'] = "Local cache (not live data)"
                 return pools
         except Exception as e:
             st.warning(f"Error loading cached data: {e}")
     
-    # Get the force_live_data value from session state (set in main())
-    force_live_data = st.session_state.get('force_live_data', False)
-    
-    # Get the custom_rpc value from session state (set in main())
-    custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"))
-    
     # Get the pool_count value from session state (set in main())
-    pool_count = st.session_state.get('pool_count', 200)
+    pool_count = st.session_state.get('pool_count', 50)
     
     # Generate sample data if no real data is available
     st.warning(f"Unable to load pool data - using generated sample data with {pool_count} pools")
+    st.session_state['data_source'] = "Generated sample data (not real)"
     return generate_sample_data(pool_count)
 
 def generate_sample_data(count=200):
@@ -428,11 +489,11 @@ def main():
             st.sidebar.warning("⚠️ No valid RPC endpoint configured")
         
         # Always show the checkbox for live data (critical feature)
-        # Default to True if has_valid_rpc to encourage live data use
+        # Default to True to always try to get live data
         force_live_data = st.sidebar.checkbox(
             "Use live blockchain data", 
-            value=True if has_valid_rpc else False,
-            help="When checked, attempts to fetch fresh data from blockchain"
+            value=True,
+            help="When checked, attempts to fetch fresh data from blockchain (RECOMMENDED)"
         )
         
         # Store in session state so it's accessible in load_data
@@ -672,6 +733,17 @@ def main():
                     "Avg Prediction Score", 
                     f"{avg_prediction:.1f}/100"
                 )
+            
+            # Display data source
+            data_source = st.session_state.get('data_source', 'Unknown data source')
+            if "Live" in data_source:
+                st.success(f"✓ {data_source} - Real-time information from blockchain")
+            elif "Database" in data_source:
+                st.info(f"ℹ️ {data_source} - Data stored in PostgreSQL database")
+            elif "cache" in data_source.lower():
+                st.warning(f"⚠️ {data_source} - This may not reflect current market conditions")
+            else:
+                st.warning(f"⚠️ {data_source}")
             
             # Pool data table
             st.subheader("Pool Data")
