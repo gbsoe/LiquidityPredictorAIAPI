@@ -239,6 +239,12 @@ try:
                         step=0.01
                     )
                 
+                # Ensure both prices are at least slightly different to avoid slider issues
+                if initial_price1 == 0:
+                    initial_price1 = 0.01
+                if initial_price2 == 0:
+                    initial_price2 = 0.01
+                
                 st.subheader("Price Change Scenario")
                 
                 # Price change sliders

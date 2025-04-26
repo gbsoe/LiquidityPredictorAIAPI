@@ -17,12 +17,43 @@ from plotly.subplots import make_subplots
 import threading
 import time
 import requests
+import logging
+import traceback
+import sys
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger('solpool_insight')
+
+# Set page config for proper error handling
+st.set_page_config(
+    page_title="SolPool Insight",
+    page_icon="💧",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # Import our database handler
 import db_handler
 
 # Import token price service
 from token_price_service import get_token_price, get_multiple_prices
+
+# Custom exception handler for the entire app
+def handle_exception(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            logger.error(f"Error in {func.__name__}: {str(e)}")
+            logger.error(traceback.format_exc())
+            st.error(f"An error occurred: {str(e)}")
+            st.warning("Please try refreshing the page or contact support if the issue persists.")
+            return None
+    return wrapper
 
 # Attempt to import the onchain extractor
 try:
@@ -734,10 +765,16 @@ def main():
                     
                     # Liquidity Filter
                     with st.expander("Liquidity Filter", expanded=True):
+                        # Ensure max_value is greater than min_value for sliders
+                        max_liquidity_value = float(advanced_df["liquidity"].max())
+                        # Add a small buffer to max value if it's 0 to prevent min==max error
+                        if max_liquidity_value == 0:
+                            max_liquidity_value = 0.01
+                            
                         min_liquidity = st.slider(
                             "Minimum Liquidity ($)", 
                             min_value=0.0, 
-                            max_value=float(advanced_df["liquidity"].max()),
+                            max_value=max_liquidity_value,
                             value=0.0,
                             format="$%.2f"
                         )
@@ -745,8 +782,8 @@ def main():
                         max_liquidity = st.slider(
                             "Maximum Liquidity ($)", 
                             min_value=0.0, 
-                            max_value=float(advanced_df["liquidity"].max()),
-                            value=float(advanced_df["liquidity"].max()),
+                            max_value=max_liquidity_value,
+                            value=max_liquidity_value,
                             format="$%.2f"
                         )
                         
