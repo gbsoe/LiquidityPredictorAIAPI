@@ -16,7 +16,7 @@ With our API, you can:
 ## Base URL
 
 ```
-https://filotanalytics.replit.app/v1
+https://filotanalytics.replit.app:3000/v1
 ```
 
 ## Authentication
