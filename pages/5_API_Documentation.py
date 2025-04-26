@@ -126,7 +126,7 @@ tab1, tab2, tab3 = st.tabs(["Overview", "Authentication", "Response Format"])
 
 with tab1:
     st.subheader("Base URL")
-    st.code("https://filotanalytics.replit.app/v1", language="text")
+    st.code("https://filotanalytics.replit.app/API", language="text")
     
     st.subheader("Features")
     col1, col2 = st.columns(2)
@@ -246,7 +246,7 @@ endpoints = [
             {"name": "trend_days", "type": "integer", "description": "Number of days for trend calculation", "default": "7", "example": "30"},
             {"name": "trend_threshold", "type": "number", "description": "Minimum change percentage for trend filtering", "default": "1", "example": "5"}
         ],
-        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/pools?dex=Raydium&min_tvl=1000000&min_apr=10" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/API/pools?dex=Raydium&min_tvl=1000000&min_apr=10" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
@@ -286,7 +286,7 @@ endpoints = [
         "parameters": [
             {"name": "pool_id", "type": "string", "description": "The unique identifier of the pool", "example": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"}
         ],
-        "example_request": """curl -X GET "https://filotanalytics.replit.app/v1/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2" \\
+        "example_request": """curl -X GET "https://filotanalytics.replit.app/API/pools/58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2" \\
   -H "X-API-Key: your_api_key\"""",
         "example_response": """{
   "status": "success",
