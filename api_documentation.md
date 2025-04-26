@@ -44,6 +44,41 @@ X-Rate-Limit-Remaining: 985
 X-Rate-Limit-Reset: 1619231400
 ```
 
+## Response Format
+
+All API responses are returned in JSON format with a consistent structure:
+
+```json
+{
+  "status": "success",
+  "data": {
+    // Response data here
+  }
+}
+```
+
+### Error Responses
+
+Error responses follow a similar structure:
+
+```json
+{
+  "status": "error",
+  "error": "Error message",
+  "code": "ERROR_CODE",
+  "details": {
+    // Additional error details here
+  }
+}
+```
+
+Common error codes include:
+- `AUTHENTICATION_ERROR`: Missing or invalid API key
+- `RATE_LIMIT_EXCEEDED`: You've exceeded your rate limit
+- `RESOURCE_NOT_FOUND`: The requested resource doesn't exist
+- `INVALID_PARAMETER`: One or more parameters are invalid
+- `INTERNAL_ERROR`: An unexpected server error occurred
+
 ## Endpoints
 
 ### Get All Pools
