@@ -3,7 +3,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-import google.generativeai as genai
+import anthropic
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -13,25 +13,22 @@ class NLPReportGenerator:
     """
     NLP Report Generator for Solana Liquidity Pool Analysis
     
-    Uses Google Vertex AI (Gemini) for natural language reports and summaries
+    Uses Anthropic Claude for natural language reports and summaries
     about liquidity pool data, predictions, and market trends.
     """
     
     def __init__(self):
         """Initialize the NLP Report Generator with API credentials"""
-        # Initialize Google Vertex AI Client
-        self.api_key = os.getenv("GOOGLE_API_KEY")
+        # Initialize Anthropic Client
+        self.api_key = os.getenv("GOOGLE_API_KEY")  # We'll reuse the same env var for simplicity
         if not self.api_key:
             logger.warning("API key not found. Set GOOGLE_API_KEY environment variable.")
         else:
             try:
-                # Configure the Google Generative AI with the API key
-                genai.configure(api_key=self.api_key)
-                # Test if we can list models to verify the API key works
-                models = genai.list_models()
-                logger.info(f"Successfully initialized Google Vertex AI Gemini model")
+                self.client = anthropic.Anthropic(api_key=self.api_key)
+                logger.info("Successfully initialized Anthropic Claude model")
             except Exception as e:
-                logger.error(f"Error initializing Google Gemini model: {e}")
+                logger.error(f"Error initializing Anthropic Claude model: {e}")
                 self.api_key = None
             
     def has_api_key(self) -> bool:
@@ -53,9 +50,9 @@ class NLPReportGenerator:
         
         try:
             # Prepare prompt with pool data
-            prompt = f"""
-            You are a professional crypto analyst specializing in Solana DeFi pools.
+            system_prompt = "You are a professional crypto analyst specializing in Solana DeFi pools."
             
+            user_prompt = f"""
             Generate a concise, informative summary of this Solana liquidity pool:
             
             Pool Name: {pool_data.get('name', 'Unknown')}
@@ -73,12 +70,18 @@ class NLPReportGenerator:
             Include a brief prediction about potential future performance.
             """
             
-            # Generate response using Google Vertex AI (Gemini)
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(prompt)
+            # Generate response using Anthropic Claude
+            message = self.client.messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=500,
+                system=system_prompt,
+                messages=[
+                    {"role": "user", "content": user_prompt}
+                ]
+            )
             
             # Extract and return text
-            return response.text
+            return message.content[0].text
             
         except Exception as e:
             logger.error(f"Error generating pool summary: {e}")
@@ -128,10 +131,11 @@ class NLPReportGenerator:
             avg_apr = sum(p.get('apr', 0) for p in pools_data) / len(pools_data) if pools_data else 0
             total_liquidity = sum(p.get('liquidity', 0) for p in pools_data)
             
-            # Prepare prompt for Google Vertex AI (Gemini)
-            prompt = f"""
-            You are a professional crypto market analyst specializing in DeFi liquidity pools on Solana.
+            # Prepare system prompt for Anthropic Claude
+            system_prompt = "You are a professional crypto market analyst specializing in DeFi liquidity pools on Solana."
             
+            # Prepare user prompt for Anthropic Claude
+            user_prompt = f"""
             Generate a comprehensive Solana DeFi market report based on this liquidity pool data.
             
             Date: {datetime.now().strftime('%Y-%m-%d')}
@@ -160,12 +164,18 @@ class NLPReportGenerator:
             The report should be around 400-500 words.
             """
             
-            # Generate response using Google Vertex AI (Gemini)
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(prompt)
+            # Generate response using Anthropic Claude
+            message = self.client.messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=1000,
+                system=system_prompt,
+                messages=[
+                    {"role": "user", "content": user_prompt}
+                ]
+            )
             
             # Extract and return text
-            return response.text
+            return message.content[0].text
             
         except Exception as e:
             logger.error(f"Error generating market report: {e}")
@@ -189,10 +199,11 @@ class NLPReportGenerator:
             # Format context data for the prompt
             context_str = json.dumps(context_data, indent=2)
             
-            # Prepare prompt for Google Vertex AI (Gemini)
-            prompt = f"""
-            You are an expert crypto analyst specializing in detailed analysis of Solana DeFi pools.
+            # Prepare system prompt for Anthropic Claude
+            system_prompt = "You are an expert crypto analyst specializing in detailed analysis of Solana DeFi pools."
             
+            # Prepare user prompt for Anthropic Claude
+            user_prompt = f"""
             Analyze the following Solana liquidity pool data to answer this specific question:
             
             USER QUERY: {query}
@@ -205,12 +216,18 @@ class NLPReportGenerator:
             Make your response accessible to crypto investors while maintaining technical accuracy.
             """
             
-            # Generate response using Google Vertex AI (Gemini)
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(prompt)
+            # Generate response using Anthropic Claude
+            message = self.client.messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=1500,
+                system=system_prompt,
+                messages=[
+                    {"role": "user", "content": user_prompt}
+                ]
+            )
             
             # Extract and return text
-            return response.text
+            return message.content[0].text
             
         except Exception as e:
             logger.error(f"Error generating specific analysis: {e}")

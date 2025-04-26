@@ -105,8 +105,8 @@ st.sidebar.markdown("---")
 
 # API key management
 if not nlp_generator.has_api_key():
-    st.sidebar.markdown("### Google Vertex AI (Gemini) API Key Required")
-    api_key = st.sidebar.text_input("Enter Google Vertex AI API Key", type="password")
+    st.sidebar.markdown("### Anthropic Claude API Key Required")
+    api_key = st.sidebar.text_input("Enter Anthropic Claude API Key", type="password")
     
     if st.sidebar.button("Save API Key"):
         try:
