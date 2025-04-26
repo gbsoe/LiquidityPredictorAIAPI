@@ -25,8 +25,11 @@ class NLPReportGenerator:
             logger.warning("API key not found. Set GOOGLE_API_KEY environment variable.")
         else:
             try:
-                self.client = genai.Client(vertexai=True, api_key=self.api_key)
-                logger.info("Successfully initialized Google Vertex AI Gemini model")
+                # Configure the Google Generative AI with the API key
+                genai.configure(api_key=self.api_key)
+                # Test if we can list models to verify the API key works
+                models = genai.list_models()
+                logger.info(f"Successfully initialized Google Vertex AI Gemini model")
             except Exception as e:
                 logger.error(f"Error initializing Google Gemini model: {e}")
                 self.api_key = None
@@ -71,10 +74,8 @@ class NLPReportGenerator:
             """
             
             # Generate response using Google Vertex AI (Gemini)
-            response = self.client.models.generate_content(
-                model="gemini-2.0-flash-001",
-                contents=prompt
-            )
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(prompt)
             
             # Extract and return text
             return response.text
@@ -160,10 +161,8 @@ class NLPReportGenerator:
             """
             
             # Generate response using Google Vertex AI (Gemini)
-            response = self.client.models.generate_content(
-                model="gemini-2.0-flash-001",
-                contents=prompt
-            )
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(prompt)
             
             # Extract and return text
             return response.text
@@ -207,10 +206,8 @@ class NLPReportGenerator:
             """
             
             # Generate response using Google Vertex AI (Gemini)
-            response = self.client.models.generate_content(
-                model="gemini-2.0-flash-001",
-                contents=prompt
-            )
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(prompt)
             
             # Extract and return text
             return response.text
