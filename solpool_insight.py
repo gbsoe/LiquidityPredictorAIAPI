@@ -16,9 +16,13 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import threading
 import time
+import requests
 
 # Import our database handler
 import db_handler
+
+# Import token price service
+from token_price_service import get_token_price, get_multiple_prices
 
 # Attempt to import the onchain extractor
 try:
@@ -517,8 +521,8 @@ def main():
             st.warning("⚠ Database connection not available - using file-based storage")
         
         # Create tabs for different views
-        tab_explore, tab_advanced, tab_predict, tab_risk, tab_nlp = st.tabs([
-            "Data Explorer", "Advanced Filtering", "Predictions", "Risk Assessment", "NLP Reports"
+        tab_explore, tab_advanced, tab_predict, tab_risk, tab_nlp, tab_tokens = st.tabs([
+            "Data Explorer", "Advanced Filtering", "Predictions", "Risk Assessment", "NLP Reports", "Token Explorer"
         ])
         
         # Load data
