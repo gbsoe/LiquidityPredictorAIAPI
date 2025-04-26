@@ -149,7 +149,7 @@ class RaydiumAPIClient:
             logger.error(f"Error fetching pool {pool_id}: {str(e)}")
             return {}
     
-    def get_filtered_pools(self, token_symbol=None, min_apr=None, max_apr=None, min_liquidity=None, limit=10):
+    def get_filtered_pools(self, token_symbol=None, min_apr=None, max_apr=None, min_liquidity=None, limit=100):
         """Filter pools based on criteria.
         
         Args:
@@ -157,40 +157,68 @@ class RaydiumAPIClient:
             min_apr: Minimum APR percentage
             max_apr: Maximum APR percentage
             min_liquidity: Minimum liquidity in USD
-            limit: Maximum number of results
+            limit: Maximum number of results (default 100)
             
         Returns:
             List of pools matching the criteria
         """
         try:
-            params = {
-                "limit": limit
-            }
+            # For Helius API rate limit (10 pools per second)
+            # We'll fetch in batches if the limit is high
+            all_pools = []
+            batch_size = 10  # Maximum per request due to API rate limits
+            remaining = limit
+            offset = 0
             
-            if token_symbol:
-                params["tokenSymbol"] = token_symbol
-            if min_apr is not None:
-                params["minApr"] = min_apr
-            if max_apr is not None:
-                params["maxApr"] = max_apr
-            if min_liquidity is not None:
-                params["minLiquidity"] = min_liquidity
-            
-            response = self.make_request_with_retry('/api/filter', params=params)
-            
-            # Handle case where response might be None
-            if response is None:
-                logger.warning("Received None response when filtering pools")
-                return []
+            while remaining > 0:
+                current_batch = min(batch_size, remaining)
                 
-            pools = response.get("pools", [])
-            if not isinstance(pools, list):
-                pools = []
+                params = {
+                    "limit": current_batch,
+                    "offset": offset
+                }
                 
-            count = response.get("count", 0)
+                if token_symbol:
+                    params["tokenSymbol"] = token_symbol
+                if min_apr is not None:
+                    params["minApr"] = min_apr
+                if max_apr is not None:
+                    params["maxApr"] = max_apr
+                if min_liquidity is not None:
+                    params["minLiquidity"] = min_liquidity
+                
+                response = self.make_request_with_retry('/api/filter', params=params)
+                
+                # Handle case where response might be None
+                if response is None:
+                    logger.warning(f"Received None response when filtering pools at offset {offset}")
+                    break
+                    
+                batch_pools = response.get("pools", [])
+                if not isinstance(batch_pools, list):
+                    batch_pools = []
+                
+                # Stop if we get an empty batch
+                if not batch_pools:
+                    break
+                
+                all_pools.extend(batch_pools)
+                
+                # Update for next iteration
+                remaining -= len(batch_pools)
+                offset += len(batch_pools)
+                
+                # If we got fewer pools than requested, there are no more
+                if len(batch_pools) < current_batch:
+                    break
+                
+                # Respect API rate limit with a small delay between requests
+                if remaining > 0:
+                    time.sleep(1.0)  # 1 second delay between requests
             
-            logger.info(f"Found {count} pools matching the criteria")
-            return pools
+            logger.info(f"Found {len(all_pools)} pools matching the criteria")
+            return all_pools
+                
         except Exception as e:
             logger.error(f"Error filtering pools: {str(e)}")
             return []

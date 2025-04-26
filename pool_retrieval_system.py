@@ -523,13 +523,13 @@ class PoolRetriever:
         logger.info(f"Found {len(matching_pools)} pools in category {category}")
         return matching_pools
     
-    def get_top_pools_by_metric(self, metric: str, limit: int = 10) -> List[PoolData]:
+    def get_top_pools_by_metric(self, metric: str, limit: int = 100) -> List[PoolData]:
         """
         Get top pools by a specific metric.
         
         Args:
             metric: 'liquidity', 'volume_24h', or 'apr'
-            limit: Maximum number of pools to return
+            limit: Maximum number of pools to return (default 100)
             
         Returns:
             List of top pools
