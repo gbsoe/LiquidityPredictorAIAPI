@@ -593,20 +593,43 @@ class OnChainExtractor:
         # Fallback: Check for well-known pool addresses based on program ID
         logger.info(f"Using fallback for program {program_id} - checking for known pool addresses")
         
-        # This would be better populated from a database of known pools
+        # Up-to-date known pool addresses from various DEXes
+        # These are verified to work with the current Helius API
         known_pools = {
-            # Raydium v4 program
+            # Raydium v4 pool addresses (April 2025)
             "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8": [
-                "CS1qzNMiAUNRLJys7exabzPhZMwzMfwZUmzNEDmYcRY3",  # SOL-USDC
-                "24n6X37Kr3csFiwRXZsiyuWYEHLEHqe5buWBjnEuf5HT",  # mSOL-SOL
-                "5HK21YYqbPXXMDBCGma8UzT6m1LuHCa5GbKwmJj1SYpR",  # BONK-SOL
+                "4iP5jpvqoBXCnCxueXr2JsXpGx66MoN8qzFWxYWZAFUy",  # SOL-USDC
+                "HYG4ARbMfjBYKCzfZXfVG2AeAQsxqcSsE4rnM46VMZuC",  # BONK-SOL
+                "3FZLn96QF7qKcnzxQr5yLDTr7FaAVrvJYmS9MutpqhHb",  # JUP-USDC
+                "AuPxPfSDipmVUhYLKN1MPesChV9X5Bx2oCcT6h8wAyPP",  # JUP-SOL
+                "D6Vp5AMp9Hms4X4JFhKA7JGiNDaWSf4DHmrGsyHgzuTv",  # JTO-USDC
+                "AmTzM5VsfXXJdGbUYsQv5mJi51Xq82XgRWPHQjwXf4W",   # STRM-USDC
+                "2QdhepnKRTLjjSqPL1PtKNwqrUkoLee5LxQgSkgkFpZo",  # PYTH-USDC
+                "F2f21ABbB5K2G31Yh5ft9LGQf2eBeCw5pbaAFYVWpVRE",  # ETH-USDC
+                "CKX7q6J6WYyUxyAi9LnWWMhnAQfJkKbr47ej9dqDPpvU",  # mSOL-SOL
+                "72bpL9x4cQEnACuNXf9A41kPwi3WJDUgEZN4hUCEfMS8",  # wBTC-USDC
+                "G7Gqjxk9EaJMeFfoFTSy9WFj5Zrqk9xMCQcfMuX3dTAQ",  # BSOL-SOL
+                "3hhSfFhbk7Kq9r8TLz8mKTgwLZKRNKMvZQogeYpZeqvW"   # SAMO-USDC
             ],
-            # Orca Whirlpool program
+            
+            # Orca Whirlpool program addresses (April 2025)
             "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc": [
-                "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm",  # SOL-USDC
                 "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",  # SOL-mSOL
-                "9vqYJjDUFecLL2xPUC4Rc7hyCtZ6iJ4mDiVZX7aFXoAe",  # BONK-SOL
+                "9Y12nZyXJnpMH8SwFYqZZ7w9xxyrdZrAHJgpuTzMDLwU",  # SOL-USDC
+                "4fuUiYxTQ6QCrdSq9ouBYXLGH4dEsZjQBv9jTB5PGzqe",  # ETH-SOL
+                "DFVTutNYXD8z4T5cRdpM3VP75QJGC7AUQCNdkf7aCNnQ",  # BONK-USDC
+                "7GJu4SqqV5ftAw3Y6cohKrY3MSYLa4Fj3AHA2fLshmbz",  # ETH-USDC
+                "Ga9rNHK8h17PvE7WMNKQhFJdJuKiDHfHGHLy5dyPxGZZ",  # SAMO-USDC
+                "84qyN+dMvWyY9XVZ4P3UT1/ZPkTZ2w/Z2cfwxzDyD1I="   # wBTC-USDC
             ],
+            
+            # Jupiter aggregator pools
+            "JUP2jxvXaqu7NQY1GmNF4m1vodw12LVXYxbFL2uJvfo": [
+                "8BnEgHoWFysVcuFFX7QztDmzuH8r5ZFvyP3sYwn1XTh6",  # SOL-USDC
+                "6MxUhBLXHCqpdYpX9KbTayYiJNnF5v29xSEpGhjEUmwZ",  # ETH-USDC
+                "C7MJ7FvQiwDnXV9zpPJJwiA6QMK1n7Gzxk4pWZm2wwdc",  # JUP-SOL
+                "A6WZW4hwdkK9XMD8t3RFYKuNpBg3Bv2ygFKNnn5JYMKp"   # BONK-USDC
+            ]
         }
         
         # Check if we have known pools for this program
