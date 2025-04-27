@@ -135,16 +135,25 @@ def ensure_all_fields(pool_data):
     required_fields = [
         "id", "name", "dex", "category", "token1_symbol", "token2_symbol", 
         "token1_address", "token2_address", "liquidity", "volume_24h", 
-        "apr", "fee", "version", "apr_change_24h", "apr_change_7d", 
-        "tvl_change_24h", "tvl_change_7d", "prediction_score"
+        "apr", "fee", "version"
     ]
     
     # Extra fields that might be missing but can have default values
     optional_fields = {
+        "apr_change_24h": 0.0,
+        "apr_change_7d": 0.0,
         "apr_change_30d": 0.0,
+        "tvl_change_24h": 0.0,
+        "tvl_change_7d": 0.0,
         "tvl_change_30d": 0.0,
         "token1_price": 0.0,
-        "token2_price": 0.0
+        "token2_price": 0.0,
+        "prediction_score": 0.0,  # Add prediction score field
+        "risk_score": 0.0,        # Add risk score field
+        "sentiment_score": 0.0,   # Add sentiment score field
+        "volatility": 0.0,        # Add volatility field
+        "volume_change_24h": 0.0, # Add volume change field
+        "liquidity_change_24h": 0.0  # Add liquidity change field
     }
     
     validated_pools = []
@@ -330,6 +339,9 @@ def load_data():
                             with open(cache_file, "w") as f:
                                 json.dump(pools, f, indent=2)
                             
+                            # Ensure all fields are present
+                            pools = ensure_all_fields(pools)
+                            
                             st.success(f"✓ Successfully fetched {len(pools)} pools using reliable fetcher")
                             st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
                             return pools
@@ -367,6 +379,9 @@ def load_data():
                             with open(cache_file, "w") as f:
                                 json.dump(pools, f, indent=2)
                                 
+                            # Ensure all required fields are present
+                            pools = ensure_all_fields(pools)
+                            
                             st.success(f"✅ Successfully fetched {len(pools)} pools from blockchain")
                             st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
                             return pools
@@ -434,6 +449,9 @@ def load_data():
     pool_count = st.session_state.get('pool_count', 15)
     st.warning(f"No cached data found - generating {pool_count} sample pools")
     pools = generate_sample_data(pool_count)
+    
+    # Add any fields that might be missing
+    pools = ensure_all_fields(pools)
     
     # Save to cache for future use
     with open(cache_file, "w") as f:
