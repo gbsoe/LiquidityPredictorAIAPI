@@ -319,18 +319,67 @@ def load_data():
             custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT"))
             
             if custom_rpc and len(custom_rpc) > 10:
-                # First try using the alternative pool fetcher (more reliable with API limitations)
+                # First try the Raydium API fetcher for authentic pool data
+                try:
+                    # Import here to avoid circular imports
+                    from raydium_pool_fetcher import RaydiumPoolFetcher
+                    
+                    st.info("Fetching real-time pool data from Raydium API...")
+                    
+                    # Check if we have an API key in the environment
+                    api_key = os.getenv("RAYDIUM_API_KEY")
+                    
+                    # If the key is still the default placeholder, warn the user
+                    if api_key == "YOUR_API_KEY_HERE":
+                        st.warning("⚠️ Using default Raydium API key which may not work. Consider providing a real API key in the .env file.")
+                    
+                    # Initialize fetcher with our API key
+                    fetcher = RaydiumPoolFetcher()
+                    
+                    # Fetch a reasonable number of pools with authentic data
+                    with st.spinner("Fetching authentic pool data from Raydium API..."):
+                        pools = fetcher.fetch_pools(limit=10)
+                        
+                        if pools and len(pools) > 0:
+                            # Save to cache for future use
+                            cache_file = "extracted_pools.json"
+                            with open(cache_file, "w") as f:
+                                json.dump(pools, f, indent=2)
+                            
+                            # Ensure all fields are present
+                            pools = ensure_all_fields(pools)
+                            
+                            # Check data source
+                            real_time_data = any(pool.get('data_source', '').startswith('Real-time') for pool in pools)
+                            
+                            if real_time_data:
+                                st.success(f"✓ Successfully fetched {len(pools)} pools with authentic data from Raydium API")
+                                st.session_state['data_source'] = f"Real-time Raydium API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                            else:
+                                st.success(f"✓ Successfully fetched {len(pools)} pools from API")
+                                st.session_state['data_source'] = f"Raydium data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                            
+                            return pools
+                except ImportError:
+                    st.warning("Raydium Pool Fetcher not available. Trying alternative method...")
+                except Exception as e:
+                    logger.warning(f"Raydium API fetcher failed: {str(e)}")
+                    st.warning("Issue with Raydium API fetcher. Trying alternative method...")
+                    if "API key" in str(e).lower():
+                        st.error("Invalid or missing Raydium API key. Please provide a valid API key in the .env file.")
+                
+                # Fall back to the alternative pool fetcher if Raydium API fails
                 try:
                     # Import here to avoid circular imports
                     from alternative_pool_fetcher import AlternativePoolFetcher
                     
-                    st.info("Using alternative fetcher to bypass API limitations...")
+                    st.info("Using alternative fetcher as fallback...")
                     
                     # Initialize fetcher with our API endpoint
                     fetcher = AlternativePoolFetcher()
                     
                     # Fetch a reasonable number of pools
-                    with st.spinner("Fetching pool data using optimized fetcher..."):
+                    with st.spinner("Fetching pool data using fallback fetcher..."):
                         pools = fetcher.fetch_pools(limit=10)
                         
                         if pools and len(pools) > 0:
@@ -347,7 +396,7 @@ def load_data():
                             
                             if estimated_data:
                                 st.success(f"✓ Successfully fetched {len(pools)} pools using alternative fetcher")
-                                st.info("⚠️ Due to Helius API limitations, the values shown are realistic estimates rather than real-time data. The token pairs and fee rates are accurate.")
+                                st.info("⚠️ Due to API limitations, the values shown are realistic estimates rather than real-time data. The token pairs and fee rates are accurate.")
                                 st.session_state['data_source'] = f"Estimated pool data (via alternative fetcher, {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
                             else:
                                 st.success(f"✓ Successfully fetched {len(pools)} pools from blockchain")

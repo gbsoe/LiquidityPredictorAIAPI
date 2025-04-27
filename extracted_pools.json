@@ -12,7 +12,8 @@
     "apr": 30.416666666666664,
     "fee": 0.0025,
     "version": "v4",
-    "category": "Major"
+    "category": "Major",
+    "data_source": "Estimated using preset metrics due to API limitations"
   },
   {
     "id": "Raydium-SOL-mSOL",
@@ -27,7 +28,8 @@
     "apr": 14.6,
     "fee": 0.001,
     "version": "v4",
-    "category": "Major"
+    "category": "Major",
+    "data_source": "Estimated using preset metrics due to API limitations"
   },
   {
     "id": "Raydium-SOL-BONK",
@@ -42,7 +44,8 @@
     "apr": 41.0625,
     "fee": 0.003,
     "version": "v4",
-    "category": "Meme"
+    "category": "Meme",
+    "data_source": "Estimated using preset metrics due to API limitations"
   },
   {
     "id": "Raydium-SOL-JUP",
@@ -57,7 +60,8 @@
     "apr": 29.2,
     "fee": 0.002,
     "version": "v4",
-    "category": "DeFi"
+    "category": "DeFi",
+    "data_source": "Estimated using preset metrics due to API limitations"
   },
   {
     "id": "Raydium-USDC-JUP",
@@ -72,7 +76,8 @@
     "apr": 36.5,
     "fee": 0.0025,
     "version": "v4",
-    "category": "DeFi"
+    "category": "DeFi",
+    "data_source": "Estimated using preset metrics due to API limitations"
   },
   {
     "id": "Raydium-USDC-BONK",
@@ -87,7 +92,8 @@
     "apr": 43.8,
     "fee": 0.003,
     "version": "v4",
-    "category": "Meme"
+    "category": "Meme",
+    "data_source": "Estimated using preset metrics due to API limitations"
   },
   {
     "id": "Raydium-USDC-ETH",
@@ -102,7 +108,8 @@
     "apr": 30.416666666666664,
     "fee": 0.0025,
     "version": "v4",
-    "category": "Major"
+    "category": "Major",
+    "data_source": "Estimated using preset metrics due to API limitations"
   },
   {
     "id": "Orca-SOL-USDC",
@@ -117,7 +124,8 @@
     "apr": 36.5,
     "fee": 0.003,
     "version": "Whirlpool",
-    "category": "Major"
+    "category": "Major",
+    "data_source": "Estimated using preset metrics due to API limitations"
   },
   {
     "id": "Orca-SOL-ETH",
@@ -132,7 +140,8 @@
     "apr": 34.21875,
     "fee": 0.003,
     "version": "Whirlpool",
-    "category": "Major"
+    "category": "Major",
+    "data_source": "Estimated using preset metrics due to API limitations"
   },
   {
     "id": "Jupiter-SOL-USDC",
@@ -147,6 +156,7 @@
     "apr": 24.333333333333336,
     "fee": 0.002,
     "version": "v4",
-    "category": "Major"
+    "category": "Major",
+    "data_source": "Estimated using preset metrics due to API limitations"
   }
 ]
