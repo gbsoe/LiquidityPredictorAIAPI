@@ -195,7 +195,7 @@ def fetch_live_data_from_blockchain():
             # Format Helius API key if needed
             if len(custom_rpc) == 36 and custom_rpc.count('-') == 4:
                 # This looks like a Helius API key (UUID format)
-                custom_rpc = f"https://rpc.helius.xyz/?api-key={custom_rpc}"
+                custom_rpc = f"https://mainnet.helius-rpc.com/?api-key={custom_rpc}"
             
             # Check if OnChainExtractor is available
             if not HAS_EXTRACTOR:

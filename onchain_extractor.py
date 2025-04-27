@@ -275,7 +275,7 @@ class OnChainExtractor:
         if len(endpoint) == 36 and endpoint.count('-') == 4:
             # This looks like a Helius API key (UUID format)
             logger.info(f"Detected Helius API key format, converting to proper URL")
-            endpoint = f"https://rpc.helius.xyz/?api-key={endpoint}"
+            endpoint = f"https://mainnet.helius-rpc.com/?api-key={endpoint}"
         
         # Ensure the endpoint has a protocol prefix and is a valid URL
         elif endpoint and not endpoint.startswith(('http://', 'https://')):
@@ -287,7 +287,7 @@ class OnChainExtractor:
             # This is likely the old format with API key as subdomain
             api_key = endpoint.split('.')[0].split('//')[1]
             logger.warning(f"Converting from old Helius format to new format")
-            endpoint = f"https://rpc.helius.xyz/?api-key={api_key}"
+            endpoint = f"https://mainnet.helius-rpc.com/?api-key={api_key}"
             
         logger.info(f"Using RPC endpoint: {endpoint[:20]}...{endpoint[-20:] if len(endpoint) > 40 else endpoint}")
         
