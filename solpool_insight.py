@@ -180,7 +180,7 @@ def ensure_all_fields(pool_data):
 
 @handle_exception
 def fetch_live_data_from_blockchain():
-    """Fetch live pool data directly from the blockchain using OnChainExtractor"""
+    """Fetch live pool data directly from the blockchain using reliable fetch methods"""
     # Get the custom_rpc value from session state (set in main())
     custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"))
     
@@ -197,41 +197,71 @@ def fetch_live_data_from_blockchain():
                 # This looks like a Helius API key (UUID format)
                 custom_rpc = f"https://mainnet.helius-rpc.com/?api-key={custom_rpc}"
             
-            # Check if OnChainExtractor is available
-            if not HAS_EXTRACTOR:
-                st.error("OnChainExtractor is not available - cannot fetch live data")
-                return None
-                
+            # First try using the alternative pool fetcher (more reliable with Helius API limitations)
             try:
-                # Initialize extractor
-                extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
+                # Import here to avoid circular imports
+                from alternative_pool_fetcher import AlternativePoolFetcher
                 
-                # Extract pools from major DEXes
-                # We'll limit to just 5 pools per DEX for faster results
-                max_per_dex = 10
+                st.info("Using alternative fetcher to bypass API limitations...")
                 
-                # This is a direct call to extract pools from all supported DEXes
-                pools = extractor.extract_pools_from_all_dexes(max_per_dex=max_per_dex)
+                # Initialize fetcher with our API endpoint
+                # Note: The fetcher has a hardcoded Helius endpoint that matches our .env file
+                fetcher = AlternativePoolFetcher()
                 
-                if pools and len(pools) > 0:
-                    # Convert to dictionary format
-                    pool_dicts = [pool.to_dict() for pool in pools]
-                    
+                # Fetch a reasonable number of pools
+                pool_dicts = fetcher.fetch_pools(limit=10)
+                
+                if pool_dicts and len(pool_dicts) > 0:
                     # Save to cache for future use
                     with open("extracted_pools.json", "w") as f:
                         json.dump(pool_dicts, f)
                     
-                    st.success(f"✓ Successfully fetched {len(pool_dicts)} pools directly from the blockchain")
+                    st.success(f"✓ Successfully fetched {len(pool_dicts)} pools using alternative fetcher")
                     
                     # Ensure all required fields are present
                     pool_dicts = ensure_all_fields(pool_dicts)
                     return pool_dicts
                 else:
-                    st.error("No pools were found on the blockchain. Check your RPC endpoint.")
+                    st.warning("No pools found with alternative fetcher. Trying original method...")
+            except Exception as e:
+                # Just log and continue to original method
+                logger.warning(f"Alternative fetcher failed: {str(e)}")
+                st.warning("Alternative fetcher encountered an issue. Trying original method...")
+            
+            # Fall back to original OnChainExtractor method
+            if HAS_EXTRACTOR:
+                try:
+                    # Initialize extractor
+                    extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
+                    
+                    # Extract pools from major DEXes with limited number to avoid timeouts
+                    max_per_dex = 3  # Reduced to avoid timeouts
+                    
+                    # This is a direct call to extract pools from all supported DEXes
+                    pools = extractor.extract_pools_from_all_dexes(max_per_dex=max_per_dex)
+                    
+                    if pools and len(pools) > 0:
+                        # Convert to dictionary format
+                        pool_dicts = [pool.to_dict() for pool in pools]
+                        
+                        # Save to cache for future use
+                        with open("extracted_pools.json", "w") as f:
+                            json.dump(pool_dicts, f)
+                        
+                        st.success(f"✓ Successfully fetched {len(pool_dicts)} pools with original extractor")
+                        
+                        # Ensure all required fields are present
+                        pool_dicts = ensure_all_fields(pool_dicts)
+                        return pool_dicts
+                    else:
+                        st.error("No pools were found on the blockchain. Check your RPC endpoint.")
+                        return None
+                except AttributeError as ae:
+                    logger.error(f"Function not available in OnChainExtractor: {str(ae)}")
+                    st.error(f"OnChainExtractor module is missing required functions. Using cached data instead.")
                     return None
-            except AttributeError as ae:
-                logger.error(f"Function not available in OnChainExtractor: {str(ae)}")
-                st.error(f"OnChainExtractor module is missing required functions. Using cached data instead.")
+            else:
+                st.error("OnChainExtractor is not available - cannot fall back to original method")
                 return None
                 
         except Exception as e:
@@ -269,7 +299,7 @@ def load_data():
         st.session_state['try_live_data'] = False
         return pools
     
-    # 3. Try fetching live data if requested and the extractor is available
+    # 3. Try fetching live data if requested
     if try_live_data:
         st.info("Attempting to retrieve live data from the blockchain...")
         # Reset flag to avoid constant retries
@@ -280,7 +310,36 @@ def load_data():
             custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT"))
             
             if custom_rpc and len(custom_rpc) > 10:
-                # Try to import OnChainExtractor here for graceful error handling
+                # First try using the alternative pool fetcher (more reliable with API limitations)
+                try:
+                    # Import here to avoid circular imports
+                    from alternative_pool_fetcher import AlternativePoolFetcher
+                    
+                    st.info("Using alternative fetcher to bypass API limitations...")
+                    
+                    # Initialize fetcher with our API endpoint
+                    fetcher = AlternativePoolFetcher()
+                    
+                    # Fetch a reasonable number of pools
+                    with st.spinner("Fetching pool data using optimized fetcher..."):
+                        pools = fetcher.fetch_pools(limit=10)
+                        
+                        if pools and len(pools) > 0:
+                            # Save to cache for future use
+                            cache_file = "extracted_pools.json"
+                            with open(cache_file, "w") as f:
+                                json.dump(pools, f, indent=2)
+                            
+                            st.success(f"✓ Successfully fetched {len(pools)} pools using reliable fetcher")
+                            st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                            return pools
+                except ImportError:
+                    st.warning("Alternative fetcher not available. Trying original method...")
+                except Exception as e:
+                    logger.warning(f"Alternative fetcher failed: {str(e)}")
+                    st.warning("Issue with alternative fetcher. Trying original method...")
+                
+                # Fall back to original OnChainExtractor method
                 try:
                     from onchain_extractor import OnChainExtractor
                     
@@ -288,15 +347,15 @@ def load_data():
                     if len(custom_rpc) == 36 and custom_rpc.count('-') == 4:
                         custom_rpc = f"https://mainnet.helius-rpc.com/?api-key={custom_rpc}"
                     
-                    # Get parameters from environment
-                    max_per_dex = int(os.getenv("MAX_POOLS_PER_DEX", "10"))
+                    # Get parameters from environment but reduce for better reliability
+                    max_per_dex = int(os.getenv("MAX_POOLS_PER_DEX", "3"))
                     
-                    with st.spinner(f"Fetching live data from {max_per_dex} pools per DEX..."):
-                        # Initialize extractor - note we fixed this to match the actual class signature
+                    with st.spinner(f"Fetching live data using original extractor (max {max_per_dex} pools per DEX)..."):
+                        # Initialize extractor
                         extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
                         
-                        # Use the correct method - extract_pools_from_all_dexes instead of extract_pools
-                        st.info("Extracting pools from all supported DEXes...")
+                        # Use the correct method with limited scope to avoid timeouts
+                        st.info("Extracting pools from supported DEXes...")
                         pools_obj = extractor.extract_pools_from_all_dexes(max_per_dex=max_per_dex)
                         
                         # Convert pool objects to dictionaries
