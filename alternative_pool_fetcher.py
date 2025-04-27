@@ -371,7 +371,7 @@ class AlternativePoolFetcher:
                 # Create a unique ID for the pool
                 pool_id = f"{pool_info['dex']}-{token_a_info['symbol']}-{token_b_info['symbol']}"
                 
-                # Create pool object
+                # Create pool object with estimated values (due to API limitations)
                 pool = {
                     "id": pool_id,
                     "dex": pool_info["dex"],
@@ -385,7 +385,9 @@ class AlternativePoolFetcher:
                     "apr": apr,
                     "fee": pool_info["fee"],
                     "version": pool_info["version"],
-                    "category": pool_info["category"]
+                    "category": pool_info["category"],
+                    # Add note about data source for UI display
+                    "data_source": "Estimated using preset metrics due to API limitations"
                 }
                 
                 pools.append(pool)

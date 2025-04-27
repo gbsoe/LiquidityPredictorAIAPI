@@ -342,8 +342,17 @@ def load_data():
                             # Ensure all fields are present
                             pools = ensure_all_fields(pools)
                             
-                            st.success(f"✓ Successfully fetched {len(pools)} pools using reliable fetcher")
-                            st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                            # Check if these are estimated values
+                            estimated_data = any(pool.get('data_source', '').startswith('Estimated') for pool in pools)
+                            
+                            if estimated_data:
+                                st.success(f"✓ Successfully fetched {len(pools)} pools using alternative fetcher")
+                                st.info("⚠️ Due to Helius API limitations, the values shown are realistic estimates rather than real-time data. The token pairs and fee rates are accurate.")
+                                st.session_state['data_source'] = f"Estimated pool data (via alternative fetcher, {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                            else:
+                                st.success(f"✓ Successfully fetched {len(pools)} pools from blockchain")
+                                st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                            
                             return pools
                 except ImportError:
                     st.warning("Alternative fetcher not available. Trying original method...")
