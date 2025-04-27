@@ -1,142 +1,278 @@
 #!/usr/bin/env python3
 """
-Test script to validate Helius RPC endpoint and API key
+Test script for Helius API connection and functionality.
+This script verifies which methods work with our current API key.
 """
-import json
-import requests
+
 import os
+import json
+import time
+import requests
 import logging
+from dotenv import load_dotenv
 
-# Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger()
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("helius_tester")
 
-def test_helius_endpoint(api_key=None):
-    """
-    Test Helius RPC endpoint with various methods to determine what works
-    
-    Args:
-        api_key: Helius API key to use
-    """
-    # Get API key from parameter or environment
-    api_key = api_key or os.getenv("HELIUS_API_KEY", "1d54c390-7463-4f14-9995-f264140a5993")
-    
-    # Different possible endpoint formats to test
-    endpoints = [
-        f"https://mainnet.helius-rpc.com/?api-key={api_key}",
-        f"https://rpc.helius.xyz/?api-key={api_key}",
-        f"https://api.helius.xyz/v0/rpc?api-key={api_key}"
-    ]
-    
-    # Test each endpoint format
-    for endpoint_url in endpoints:
-        logger.info(f"\n===== TESTING ENDPOINT: {endpoint_url[:30]}...{endpoint_url[-15:]} =====")
-        test_endpoint_with_methods(endpoint_url)
+# Load environment variables
+load_dotenv()
 
-def test_endpoint_with_methods(endpoint):
+# Constants
+DEFAULT_TIMEOUT = 10  # seconds
+MAX_RETRIES = 2  # Keep it low for testing
+RETRY_DELAY = 1.0  # seconds
+
+# Get API endpoint from environment
+ENDPOINT = os.getenv("SOLANA_RPC_ENDPOINT")
+if not ENDPOINT:
+    logger.error("SOLANA_RPC_ENDPOINT not found in environment")
+    exit(1)
+
+# Override for testing - use the specific value from .env file
+ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=1d54c390-7463-4f14-9995-f264140a5993"
+logger.info(f"Using Helius endpoint: {ENDPOINT[:30]}...{ENDPOINT[-15:]}")
+
+# Methods to test
+METHODS_TO_TEST = [
+    # Core account info methods
+    "getAccountInfo",
+    "getProgramAccounts",
+    "getBalance",
     
-    logger.info(f"Testing Helius endpoint: {endpoint[:30]}...{endpoint[-15:]}")
+    # Token methods
+    "getTokenAccountBalance",
+    "getTokenSupply",
     
-    # List of methods to test
-    test_methods = [
-        {
-            "name": "getVersion",
-            "params": [],
-            "description": "Basic RPC connection"
-        },
-        {
-            "name": "getBalance",
-            "params": ["So11111111111111111111111111111111111111112"],
-            "description": "Get SOL token balance"
-        },
-        {
-            "name": "getAccountInfo",
-            "params": ["EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", {"encoding": "jsonParsed"}],
-            "description": "Get USDC token info"
-        },
-        {
-            "name": "getProgramAccounts",
-            "params": ["675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8", {"encoding": "base64", "limit": 3}],
-            "description": "Get Raydium program accounts (limited)"
-        },
-        {
-            "name": "getClusterNodes",
-            "params": [],
-            "description": "Get Solana cluster nodes"
-        }
-    ]
+    # Block and transaction methods
+    "getBlock",
+    "getTransaction",
+    "getSignaturesForAddress",
     
-    # Run each test
-    results = {}
+    # General network methods
+    "getVersion",
+    "getHealth",
+    "getSlot",
     
-    for test in test_methods:
-        method = test["name"]
-        params = test["params"]
-        description = test["description"]
-        
-        logger.info(f"Testing method: {method} - {description}")
-        
+    # Additional methods
+    "getEpochInfo",
+    "getInflationRate",
+    "getLatestBlockhash",
+    "getMinimumBalanceForRentExemption",
+    "getClusterNodes"
+]
+
+# Test addresses and parameters
+TEST_ADDRESSES = {
+    "solana": "So11111111111111111111111111111111111111112",  # Wrapped SOL
+    "usdc": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",  # USDC token mint
+    "raydium_program": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",  # Raydium v4
+    "raydium_pool": "CS1qzNMiAUNRLJys7exabzPhZMwzMfwZUmzNEDmYcRY3",  # SOL-USDC pool
+    "wallet": "3PwAUGXfGwDy9PdGhwXJDhLZXS9PVNR24GhkD9rY9xdq"  # Example wallet with transactions
+}
+
+# Create a session
+session = requests.Session()
+session.headers.update({
+    "Content-Type": "application/json",
+    "User-Agent": "SolanaPoolAnalysis/1.0"
+})
+
+def make_rpc_request(method, params):
+    """Make an RPC request to the Solana API endpoint"""
+    data = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": method,
+        "params": params
+    }
+    
+    for attempt in range(MAX_RETRIES):
         try:
-            # Set up request payload
-            payload = {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": method,
-                "params": params
-            }
+            logger.info(f"Testing method: {method}")
             
-            # Make request
-            response = requests.post(
-                endpoint,
-                json=payload,
-                timeout=20,
-                headers={"Content-Type": "application/json"}
+            response = session.post(
+                ENDPOINT,
+                json=data,
+                timeout=DEFAULT_TIMEOUT
             )
             
-            # Check for HTTP errors
             response.raise_for_status()
-            
-            # Parse JSON response
             result = response.json()
             
-            # Check for RPC errors
             if "error" in result:
                 error = result["error"]
-                results[method] = {
-                    "success": False,
-                    "error": f"RPC error: {error.get('message', str(error))}"
-                }
-                logger.error(f"RPC error: {error}")
-            else:
-                # Success - show a sample of the result
-                result_str = str(result)
-                if len(result_str) > 100:
-                    result_str = result_str[:100] + "..."
-                    
-                results[method] = {
-                    "success": True,
-                    "result_sample": result_str
-                }
-                logger.info(f"Success: {result_str}")
-                
-        except Exception as e:
-            results[method] = {
-                "success": False,
-                "error": f"Request error: {str(e)}"
-            }
-            logger.error(f"Error: {str(e)}")
+                logger.error(f"RPC error for {method}: {error}")
+                return False, result
+            
+            return True, result
+            
+        except requests.RequestException as e:
+            logger.warning(f"Request failed for {method} (attempt {attempt+1}/{MAX_RETRIES}): {e}")
+            
+            if attempt < MAX_RETRIES - 1:
+                time.sleep(RETRY_DELAY)
     
-    # Summarize results
-    logger.info("\n===== TEST RESULTS =====")
-    for method, result in results.items():
-        status = "✅ SUCCESS" if result["success"] else "❌ FAILED"
-        details = result.get("result_sample", "") if result["success"] else result.get("error", "Unknown error")
-        logger.info(f"{status}: {method} - {details}")
+    logger.error(f"All retries failed for method {method}")
+    return False, {"error": "All retries failed"}
+
+def test_methods():
+    """Test all methods and return results"""
+    results = {}
     
-    successful_tests = sum(1 for r in results.values() if r["success"])
-    logger.info(f"\nSUMMARY: {successful_tests}/{len(results)} tests passed")
+    # Test getAccountInfo
+    success, result = make_rpc_request(
+        "getAccountInfo",
+        [TEST_ADDRESSES["solana"], {"encoding": "jsonParsed"}]
+    )
+    results["getAccountInfo"] = {
+        "success": success,
+        "sample_result": result.get("result", {}) if success else "Failed"
+    }
     
-    return successful_tests == len(results)
+    # Test getBalance
+    success, result = make_rpc_request(
+        "getBalance",
+        [TEST_ADDRESSES["wallet"]]
+    )
+    results["getBalance"] = {
+        "success": success,
+        "sample_result": result.get("result", {}) if success else "Failed"
+    }
+    
+    # Test getProgramAccounts (with limit to avoid timeout)
+    success, result = make_rpc_request(
+        "getProgramAccounts",
+        [TEST_ADDRESSES["raydium_program"], {"limit": 2, "encoding": "base64"}]
+    )
+    results["getProgramAccounts"] = {
+        "success": success,
+        "sample_result": result.get("result", {}) if success else "Failed"
+    }
+    
+    # Test getTokenAccountBalance
+    success, result = make_rpc_request(
+        "getTokenAccountBalance",
+        ["AjAXQhXxqGe7erWDCQVrVWwEFJqTjT2H8e9yRvavSdfg"]  # Example USDC token account
+    )
+    results["getTokenAccountBalance"] = {
+        "success": success,
+        "sample_result": result.get("result", {}) if success else "Failed"
+    }
+    
+    # Test getTokenSupply
+    success, result = make_rpc_request(
+        "getTokenSupply",
+        [TEST_ADDRESSES["usdc"]]
+    )
+    results["getTokenSupply"] = {
+        "success": success,
+        "sample_result": result.get("result", {}) if success else "Failed"
+    }
+    
+    # Test getBlock (recent block)
+    success, result = make_rpc_request(
+        "getBlock",
+        [200000000, {"encoding": "json", "maxSupportedTransactionVersion": 0}]
+    )
+    results["getBlock"] = {
+        "success": success, 
+        "sample_result": "Success" if success else "Failed"  # Block result too large to display
+    }
+    
+    # Test getSignaturesForAddress
+    success, result = make_rpc_request(
+        "getSignaturesForAddress",
+        [TEST_ADDRESSES["raydium_pool"], {"limit": 2}]
+    )
+    results["getSignaturesForAddress"] = {
+        "success": success,
+        "sample_result": result.get("result", {}) if success else "Failed"
+    }
+    
+    # Test getTransaction (requires a valid signature)
+    # Skipping for now as we'd need a recent signature
+    
+    # Test getVersion
+    success, result = make_rpc_request(
+        "getVersion",
+        []
+    )
+    results["getVersion"] = {
+        "success": success,
+        "sample_result": result.get("result", {}) if success else "Failed"
+    }
+    
+    # Test getHealth
+    success, result = make_rpc_request(
+        "getHealth",
+        []
+    )
+    results["getHealth"] = {
+        "success": success,
+        "sample_result": result.get("result", {}) if success else "Failed"
+    }
+    
+    # Test getSlot
+    success, result = make_rpc_request(
+        "getSlot",
+        []
+    )
+    results["getSlot"] = {
+        "success": success,
+        "sample_result": result.get("result", {}) if success else "Failed"
+    }
+    
+    # Test getLatestBlockhash
+    success, result = make_rpc_request(
+        "getLatestBlockhash",
+        []
+    )
+    results["getLatestBlockhash"] = {
+        "success": success,
+        "sample_result": result.get("result", {}) if success else "Failed"
+    }
+    
+    # Test getEpochInfo
+    success, result = make_rpc_request(
+        "getEpochInfo",
+        []
+    )
+    results["getEpochInfo"] = {
+        "success": success,
+        "sample_result": result.get("result", {}) if success else "Failed"
+    }
+    
+    return results
+
+def main():
+    logger.info(f"Testing Helius API endpoint: {ENDPOINT[:20]}...{ENDPOINT[-20:] if len(ENDPOINT) > 40 else ENDPOINT}")
+    
+    # Test the connection
+    success, result = make_rpc_request("getHealth", [])
+    if not success:
+        logger.error("Failed to connect to Helius API")
+        return
+    
+    logger.info("Connection successful, testing methods...")
+    
+    # Test all methods
+    results = test_methods()
+    
+    # Print summary
+    logger.info("\n--- Method Test Results ---")
+    for method, data in results.items():
+        status = "✅ Success" if data["success"] else "❌ Failed"
+        logger.info(f"{method}: {status}")
+    
+    # Save detailed results to file
+    with open("helius_api_test_results.json", "w") as f:
+        json.dump(results, f, indent=2)
+    
+    logger.info(f"Detailed results saved to helius_api_test_results.json")
 
 if __name__ == "__main__":
-    test_helius_endpoint()
+    main()

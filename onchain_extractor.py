@@ -46,11 +46,68 @@ logging.basicConfig(
 logger = logging.getLogger("onchain_extractor")
 
 # Constants
-DEFAULT_TIMEOUT = 30  # seconds
-MAX_RETRIES = 5  # Increased from 3 to 5
-RETRY_DELAY = 2.0  # Increased from 0.5 to 2.0 seconds
-MAX_CONCURRENT_REQUESTS = 5  # Reduced from 20 to 5 for Helius free tier
+DEFAULT_TIMEOUT = 20  # seconds - reduced to avoid long timeouts
+MAX_RETRIES = 3  # Reduced from 5 to minimize waiting time on unsupported methods
+RETRY_DELAY = 1.0  # Reduced for faster recovery
+MAX_CONCURRENT_REQUESTS = 3  # Reduced further for Helius API limitations
 DEFAULT_RPC_ENDPOINT = "https://api.mainnet-beta.solana.com"
+
+# Helius API supported methods (documented in helius_api_reference.md)
+HELIUS_SUPPORTED_METHODS = {
+    # Core methods
+    "getAccountInfo": True,
+    "getBalance": True,
+    "getBlock": True,
+    "getBlockHeight": True,
+    "getBlockTime": True,
+    "getBlocks": True,
+    "getClusterNodes": True,
+    "getEpochInfo": True,
+    "getEpochSchedule": True,
+    "getFeeForMessage": True,
+    "getFirstAvailableBlock": True,
+    "getGenesisHash": True,
+    "getHealth": True,
+    "getIdentity": True,
+    "getInflationGovernor": True,
+    "getInflationRate": True,
+    "getLatestBlockhash": True,
+    "getMinimumBalanceForRentExemption": True,
+    "getProgramAccounts": True,  # Limited support - may timeout for large programs
+    "getSlot": True,
+    "getSlotLeader": True,
+    "getStakeActivation": True,
+    "getStakeMinimumDelegation": True,
+    "getSupply": True,
+    "getTokenAccountBalance": True,
+    "getTokenLargestAccounts": True,
+    "getTokenSupply": True,
+    "getTransaction": True,
+    "getTransactionCount": True,
+    "getVersion": True,
+    "getVoteAccounts": True,
+    "isBlockhashValid": True,
+    "minimumLedgerSlot": True,
+    
+    # Additional supported methods
+    "getSignaturesForAddress": True,
+    "getAsset": True,
+    "getAssetProof": True,
+    "getAssetsByGroup": True,
+    "getAssetsByCreator": True,
+    "getAssetsByOwner": True,
+    "getAssetsByAuthority": True,
+    "getSignaturesForAsset": True,
+    
+    # Methods with additional limitations or special handling
+    "getLargestAccounts": True,
+    "getHighestSnapshotSlot": True,
+    "getBlockProduction": True,
+    "getBlockCommitment": True,
+    "getMaxRetransmitSlot": True,
+    "getMaxShredInsertSlot": True,
+    "getRecentPerformanceSamples": True
+}
 
 # Known tokens for easier identification
 KNOWN_TOKENS = {
@@ -317,6 +374,21 @@ class OnChainExtractor:
         Returns:
             RPC response
         """
+        # Check if we're using Helius and verify method support
+        is_helius = "helius" in self.rpc_endpoint.lower()
+        if is_helius and method not in HELIUS_SUPPORTED_METHODS:
+            logger.warning(f"Method '{method}' may not be supported by the Helius API")
+        
+        # Special handling for getProgramAccounts on Helius API
+        # This method can time out easily, so add constraints
+        if is_helius and method == "getProgramAccounts":
+            if len(params) >= 2 and isinstance(params[1], dict):
+                # Ensure we have a reasonable limit to avoid timeouts
+                if "limit" not in params[1]:
+                    params[1]["limit"] = 5
+                # Log the constrained request
+                logger.info(f"Using constrained getProgramAccounts with limit: {params[1]['limit']}")
+        
         data = {
             "jsonrpc": "2.0",
             "id": 1,
@@ -326,44 +398,83 @@ class OnChainExtractor:
         
         for attempt in range(MAX_RETRIES):
             try:
+                # Log the method being called (helpful for debugging)
+                logger.debug(f"Calling RPC method: {method} (attempt {attempt+1}/{MAX_RETRIES})")
+                
                 response = self.session.post(
                     self.rpc_endpoint,
                     json=data,
                     timeout=DEFAULT_TIMEOUT
                 )
                 
+                # Raise HTTP errors
                 response.raise_for_status()
                 result = response.json()
                 
+                # Check for RPC errors in the response
                 if "error" in result:
                     error = result["error"]
-                    logger.warning(f"RPC error: {error}")
+                    error_msg = error.get("message", str(error))
+                    logger.warning(f"RPC error: {error_msg}")
                     
-                    # Check for rate limiting errors
-                    if "rate limited" in str(error).lower() or "too many" in str(error).lower() or "429" in str(error):
+                    # Check for various error conditions
+                    error_str = str(error).lower()
+                    
+                    # Handle rate limiting
+                    if "rate limit" in error_str or "too many" in error_str or "429" in error_str:
                         wait_time = RETRY_DELAY * (2 ** attempt)
                         logger.warning(f"Rate limited, waiting {wait_time} seconds before retry")
                         time.sleep(wait_time)
                         continue
                     
+                    # Handle unsupported methods
+                    if "method not found" in error_str or "not implemented" in error_str:
+                        logger.error(f"Method '{method}' is not supported by the API endpoint")
+                        return {"error": {"message": f"Method '{method}' not supported"}}
+                    
                     # Return the error for further processing
                     return result
                 
+                # Success - return the result
                 return result
                 
             except requests.RequestException as e:
                 logger.warning(f"RPC request failed (attempt {attempt+1}/{MAX_RETRIES}): {e}")
-                # Also handle 429 Too Many Requests in the exception catch
-                if "429" in str(e) or "too many" in str(e).lower():
-                    wait_time = RETRY_DELAY * (4 ** attempt)  # Longer wait for rate limiting
-                    logger.warning(f"Rate limited in exception handler, waiting {wait_time} seconds")
+                
+                error_str = str(e).lower()
+                
+                # Handle different types of errors
+                if "429" in error_str or "too many" in error_str:
+                    # Rate limiting error
+                    wait_time = RETRY_DELAY * (4 ** attempt)
+                    logger.warning(f"Rate limited, waiting {wait_time} seconds")
                     time.sleep(wait_time)
+                elif "timeout" in error_str:
+                    # Timeout errors - may indicate an unsupported method or too much data
+                    if attempt == MAX_RETRIES - 1:
+                        # On the last attempt, check if it's a likely unsupported method
+                        logger.error(f"Request timed out - method '{method}' may be unsupported or limited")
+                        return {"error": {"message": f"Request timed out for method '{method}'"}}
+                    else:
+                        # Wait and retry
+                        wait_time = RETRY_DELAY * (2 ** attempt)
+                        time.sleep(wait_time)
+                elif "unauthorized" in error_str or "401" in error_str:
+                    # Authentication errors
+                    logger.error(f"API authentication failed: {e}")
+                    return {"error": {"message": "API authorization failed. Check your API key."}}
                 elif attempt < MAX_RETRIES - 1:
-                    time.sleep(RETRY_DELAY * (2 ** attempt))  # Exponential backoff
+                    # Other errors - use exponential backoff
+                    wait_time = RETRY_DELAY * (2 ** attempt)
+                    time.sleep(wait_time)
                 else:
-                    raise RuntimeError(f"RPC request failed after {MAX_RETRIES} attempts: {e}")
+                    # Last attempt failed, return an error
+                    logger.error(f"Request failed after {MAX_RETRIES} attempts: {e}")
+                    return {"error": {"message": f"Request failed: {e}"}}
         
-        raise RuntimeError(f"RPC request failed after {MAX_RETRIES} attempts")
+        # If we get here, all retries have failed
+        logger.error(f"All retries failed for method '{method}'")
+        return {"error": {"message": f"Request failed after {MAX_RETRIES} attempts"}}
     
     def get_account_info(self, address: str, encoding: str = "base64") -> Dict[str, Any]:
         """
