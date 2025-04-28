@@ -309,10 +309,16 @@ class DefiAggregationAPI:
                 category = "DeFi"
                 
             # Create transformed pool record with detailed metrics
+            # Use a more descriptive name that includes token symbols, rather than just the pool ID
+            pool_name = pool.get('name', '')
+            if not pool_name and token1_symbol and token2_symbol:
+                pool_name = f"{token1_symbol}-{token2_symbol}"
+            elif not pool_name:
+                pool_name = pool_id  # Fallback to ID if no name available
+                
             transformed = {
                 "id": pool_id,  # Use the authentic base58 pool ID
-                "name": pool_id,  # Use the pool ID as the name per your request
-                "display_name": pool.get('name', ''),  # Keep the user-friendly name separately
+                "name": pool_name,  # Use a human-readable name
                 "dex": pool.get('source', 'Unknown'),
                 "token1_symbol": token1.get('symbol', 'Unknown'),
                 "token2_symbol": token2.get('symbol', 'Unknown'),
@@ -360,12 +366,15 @@ class DefiAggregationAPI:
             logger.error(f"Error transforming pool data: {str(e)}")
             logger.debug(f"Problem pool data: {json.dumps(pool)}")
             # Return a minimal valid record to avoid crashes
+            pool_id = pool.get('poolId', 'unknown-id')
             return {
-                "id": pool.get('poolId', 'unknown-id'),
-                "name": pool.get('poolId', 'unknown-id'),  # Use pool ID as the name
+                "id": pool_id,
+                "name": pool_id,  # Use pool ID as the name
                 "dex": pool.get('source', 'Unknown'),
                 "token1_symbol": "Unknown",
                 "token2_symbol": "Unknown",
+                "token1_address": "",
+                "token2_address": "",
                 "liquidity": 0,
                 "volume_24h": 0,
                 "apr": 0,
@@ -375,8 +384,16 @@ class DefiAggregationAPI:
                 "apr_change_24h": 0,
                 "apr_change_7d": 0,
                 "apr_change_30d": 0,
+                "tvl_change_24h": 0,
+                "tvl_change_7d": 0,
+                "tvl_change_30d": 0,
+                "fee": 0,
                 "prediction_score": 0,
+                "version": "1.0",
+                "risk_score": 0,
                 "category": "Unknown",
+                "created_at": datetime.now().isoformat(),
+                "updated_at": datetime.now().isoformat(),
                 "data_source": "DeFi API (incomplete)",
             }
     
