@@ -191,7 +191,7 @@ def ensure_all_fields(pool_data):
 def fetch_live_data_from_blockchain():
     """Fetch live pool data directly from the blockchain using reliable fetch methods"""
     # Get the custom_rpc value from session state (set in main())
-    custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"))
+    custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT", "YOUR_SOLANA_RPC_ENDPOINT"))
     
     # Notify user
     with st.spinner("Fetching live data from Solana blockchain... This may take a moment."):
@@ -796,8 +796,8 @@ def main():
             if use_custom_rpc:
                 custom_rpc = st.text_input(
                     "Solana RPC Endpoint", 
-                    value=os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"),
-                    help="For Helius, use format: https://rpc.helius.xyz/?api-key=YOUR_API_KEY"
+                    value=os.getenv("SOLANA_RPC_ENDPOINT", "YOUR_SOLANA_RPC_ENDPOINT"),
+                    help="Enter your custom Solana RPC endpoint URL"
                 )
                 if st.button("Save Endpoint"):
                     # Save to .env file for persistence
@@ -823,7 +823,7 @@ def main():
                     except Exception as e:
                         st.warning(f"Could not save endpoint to .env: {e}")
             else:
-                custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com")
+                custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", "YOUR_SOLANA_RPC_ENDPOINT")
                 
         # Store the custom RPC in session state
         st.session_state['custom_rpc'] = custom_rpc

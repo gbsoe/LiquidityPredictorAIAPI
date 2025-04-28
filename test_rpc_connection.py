@@ -33,10 +33,8 @@ def test_rpc_connection(rpc_endpoint=None):
         logger.error("No RPC endpoint provided. Please set SOLANA_RPC_ENDPOINT in .env file")
         return False
     
-    # If the endpoint is just a UUID (Helius API key)
-    if len(endpoint) == 36 and endpoint.count('-') == 4:
-        # Convert to Helius URL
-        endpoint = f"https://mainnet.helius-rpc.com/?api-key={endpoint}"
+    # Use the endpoint directly as provided
+    # No specific provider formatting needed
     
     logger.info(f"Testing connection to: {endpoint[:20]}...{endpoint[-20:] if len(endpoint) > 40 else ''}")
     
@@ -87,10 +85,8 @@ def test_get_raydium_pools(rpc_endpoint=None, max_pools=5):
         logger.error("No RPC endpoint provided. Please set SOLANA_RPC_ENDPOINT in .env file")
         return []
     
-    # If the endpoint is just a UUID (Helius API key)
-    if len(endpoint) == 36 and endpoint.count('-') == 4:
-        # Convert to Helius URL
-        endpoint = f"https://mainnet.helius-rpc.com/?api-key={endpoint}"
+    # Use the endpoint directly as provided
+    # No specific provider formatting needed
     
     logger.info(f"Testing Raydium pools fetch from: {endpoint[:20]}...{endpoint[-20:] if len(endpoint) > 40 else ''}")
     
