@@ -51,6 +51,19 @@ DEFAULT_TOKEN_MAPPING = {
     "DAI": "dai",
     "BUSD": "binance-usd",
     "USDH": "usdh",
+    "MSOL": "marinade-staked-sol",
+    "mSOL": "marinade-staked-sol",
+    "So11": "solana",
+    "Es9v": "usd-coin",
+    "9n4n": "raydium",
+    "4k3D": "raydium",
+    "EPjF": "usd-coin",
+    "DezX": "ethereum",
+    # Common abbreviated token addresses
+    "So11111111111111111111111111111111111111112": "solana",
+    "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "usd-coin",
+    "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R": "raydium",
+    "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So": "marinade-staked-sol",
 }
 
 class TokenPriceService:

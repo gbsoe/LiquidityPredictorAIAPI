@@ -191,16 +191,48 @@ def transform_pool_data(api_pool: Dict[str, Any]) -> Dict[str, Any]:
     # Determine category based on token symbols
     category = determine_category(token1_symbol, token2_symbol)
     
+    # Use the base58 encoded pool ID or the program ID as fallback
+    # If metrics contains ammId, use that as the pool ID
+    base58_id = ""
+    if "extraData" in metrics and "ammId" in metrics["extraData"]:
+        base58_id = metrics["extraData"]["ammId"]
+    else:
+        base58_id = api_pool.get("programId", "") or api_pool.get("poolId", "")
+    
+    # Ensure we have a valid base58 ID - must be at least 32 chars for Solana addresses
+    if len(base58_id) < 32:
+        # Use a fallback strategy to construct an ID that will be consistent
+        # This ensures pools can be tracked properly
+        from hashlib import sha256
+        import base58
+        
+        # Create a composite key that uniquely identifies this pool
+        composite = f"{api_pool.get('source', '')}-{token1_symbol}-{token2_symbol}-{api_pool.get('poolId', '')}"
+        
+        # Hash it and encode as base58
+        hash_bytes = sha256(composite.encode('utf-8')).digest()
+        base58_id = base58.b58encode(hash_bytes).decode('utf-8')
+    
+    # Calculate APR change if possible
+    apr_24h = metrics.get("apy24h", 0)
+    apr_7d = metrics.get("apy7d", 0)
+    apr_change_24h = 0  # Default value
+    apr_change_7d = 0   # Default value
+    
+    # If we have both 24h and 7d values, calculate the change
+    if apr_24h and apr_7d:
+        apr_change_7d = apr_24h - apr_7d
+    
     # Create a unified pool data structure compatible with our application
     return {
-        "id": api_pool.get("poolId", ""),
-        "name": api_pool.get("name", f"{token1_symbol}-{token2_symbol}"),
+        "id": base58_id,  # Use base58 encoded ID
+        "name": f"{token1_symbol}-{token2_symbol}",  # Simple name without LP suffix
         "dex": api_pool.get("source", "Unknown"),
         "liquidity": metrics.get("tvl", 0),
         "volume_24h": metrics.get("volumeUsd", 0),
         "apr": metrics.get("apy24h", 0),
-        "apr_change_24h": 0,  # Calculate from historical data if available
-        "apr_change_7d": metrics.get("apy7d", 0) - metrics.get("apy24h", 0) if metrics.get("apy7d") and metrics.get("apy24h") else 0,
+        "apr_change_24h": apr_change_24h,
+        "apr_change_7d": apr_change_7d,
         "fee_rate": metrics.get("fee", 0) * 100 if metrics.get("fee") else 0,  # Convert to percentage
         "token1_symbol": token1_symbol,
         "token2_symbol": token2_symbol,
