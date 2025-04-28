@@ -11,9 +11,9 @@ if not api_key:
     print("Error: DEFI_API_KEY not found in environment variables")
     exit(1)
     
-# Set up headers
+# Set up headers - API uses X-API-KEY header not Authorization
 headers = {
-    "Authorization": f"Bearer {api_key}",
+    "X-API-KEY": api_key,
     "Content-Type": "application/json"
 }
 

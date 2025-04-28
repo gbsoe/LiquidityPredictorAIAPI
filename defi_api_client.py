@@ -205,6 +205,11 @@ def transform_pool_data(api_pool: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     token1_symbol = token1.get("symbol", "")
     token2_symbol = token2.get("symbol", "")
     
+    # If either token symbol is "UNKNOWN" or empty, this pool is not usable for predictions
+    if not token1_symbol or not token2_symbol or token1_symbol == "UNKNOWN" or token2_symbol == "UNKNOWN":
+        logging.warning(f"Pool with ID {pool_id} has unknown or missing token symbols: {token1_symbol}-{token2_symbol}")
+        return None
+    
     # If we don't have proper token symbols from the API, construct the name from them
     if not pool_name and token1_symbol and token2_symbol:
         pool_name = f"{token1_symbol}-{token2_symbol}"
