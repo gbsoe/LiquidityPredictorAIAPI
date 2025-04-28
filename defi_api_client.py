@@ -117,7 +117,8 @@ class DefiApiClient:
         Returns:
             Dictionary with pools data
         """
-        params = {
+        # Create a properly typed dictionary with all parameters
+        params: Dict[str, Any] = {
             "limit": limit,
             "page": page
         }
@@ -220,12 +221,21 @@ def transform_pool_data(api_pool: Dict[str, Any]) -> Dict[str, Any]:
     # Calculate APR change if possible
     apr_24h = metrics.get("apy24h", 0)
     apr_7d = metrics.get("apy7d", 0)
+    apr_prev_24h = metrics.get("prevApy24h", 0)  # Previous 24h APR if available
+    
     apr_change_24h = 0  # Default value
     apr_change_7d = 0   # Default value
     
-    # If we have both 24h and 7d values, calculate the change
-    if apr_24h and apr_7d:
+    # Calculate 24h APR change if we have previous 24h data
+    if apr_24h != 0 and apr_prev_24h != 0:
+        apr_change_24h = apr_24h - apr_prev_24h
+    
+    # Calculate 7d APR change if we have both current and 7d values
+    if apr_24h != 0 and apr_7d != 0:
         apr_change_7d = apr_24h - apr_7d
+        
+    # Log for debugging
+    logging.debug(f"Pool {token1_symbol}-{token2_symbol} APR: current={apr_24h}, prev24h={apr_prev_24h}, 7d={apr_7d}, change24h={apr_change_24h}, change7d={apr_change_7d}")
     
     # Create a unified pool data structure compatible with our application
     return {
@@ -285,7 +295,7 @@ def determine_category(token1_symbol: str, token2_symbol: str) -> str:
     return "Other"
 
 
-def calculate_prediction_score(pool_data: Dict[str, Any], metrics: Dict[str, Any] = None) -> float:
+def calculate_prediction_score(pool_data: Dict[str, Any], metrics: Optional[Dict[str, Any]] = None) -> float:
     """
     Calculate a prediction score for a pool based on various metrics
     
