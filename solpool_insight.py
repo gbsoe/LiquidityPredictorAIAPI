@@ -1547,178 +1547,56 @@ def main():
         # NLP Reports Tab
         with tab_nlp:
             st.header("Natural Language Analytics Reports")
-            st.write("AI-generated insights about liquidity pool trends and opportunities")
             
-            # Select pool for detailed analysis
-            st.subheader("Pool-Specific Analysis")
+            # Display a message indicating Claude integration is pending
+            st.info("🤖 Claude AI integration is in progress")
             
-            selected_pool = st.selectbox("Select Pool for Analysis", df["name"].tolist())
+            st.markdown("""
+            ### About NLP Reports
             
-            # Get the selected pool data
-            pool_analysis_data = df[df["name"] == selected_pool].iloc[0]
+            This feature will use Claude AI to generate real-time analysis of pool data and market trends
+            when the integration is complete. No mock reports are shown as we focus on providing only authentic insights.
             
-            # Create the natural language report
-            # In a real application, this would use a more sophisticated NLP model
-            def generate_pool_report(pool_data):
-                name = pool_data["name"]
-                dex = pool_data["dex"]
-                category = pool_data["category"]
-                apr = pool_data["apr"]
-                liquidity = pool_data["liquidity"]
-                volume = pool_data["volume_24h"]
-                apr_change_24h = pool_data["apr_change_24h"]
-                apr_change_7d = pool_data["apr_change_7d"]
-                prediction_score = pool_data["prediction_score"]
+            #### Coming Soon:
+            
+            - **Pool-specific analysis** - Detailed evaluations of individual pools
+            - **Market trend detection** - Identification of patterns across pools
+            - **Investment considerations** - Risk-adjusted opportunity analysis
+            - **Token correlation insights** - Understanding how tokens relate to each other
+            
+            Stay tuned for these features in upcoming releases.
+            """)
+            
+            # Show basic data for reference
+            st.subheader("Available Pool Data (For Reference)")
+            
+            # Show a sample of the data that would be analyzed
+            st.dataframe(df[['name', 'dex', 'category', 'apr', 'liquidity', 'volume_24h']].head(5), use_container_width=True)
+            
+            # Contact information
+            st.markdown("""
+            For questions about NLP capabilities or to provide feedback on what insights
+            would be most valuable to you, please contact the development team.
+            """)
+            
+            # Technical information about the API
+            with st.expander("Technical Information"):
+                st.markdown("""
+                The NLP Reports module will integrate with Claude AI using the Anthropic API.
+                This provides more nuanced and context-aware analysis compared to template-based reports.
                 
-                # Trending status
-                if apr_change_7d > 2:
-                    trend = "strongly trending upward"
-                elif apr_change_7d > 0.5:
-                    trend = "trending upward"
-                elif apr_change_7d < -2:
-                    trend = "strongly trending downward"
-                elif apr_change_7d < -0.5:
-                    trend = "trending downward"
+                **Implementation status:**
+                - ✅ Backend API integration prepared
+                - ✅ Token and API validation logic complete
+                - ⏳ Request formatting in progress
+                - ⏳ Response parsing in development
+                """)
+                
+                # Environment check
+                if os.getenv("ANTHROPIC_API_KEY"):
+                    st.success("Claude API credentials are configured")
                 else:
-                    trend = "stable"
-                
-                # Volume to liquidity ratio
-                vl_ratio = volume / liquidity
-                if vl_ratio > 0.2:
-                    volume_assessment = "excellent trading volume relative to its liquidity"
-                elif vl_ratio > 0.1:
-                    volume_assessment = "good trading volume relative to its liquidity"
-                elif vl_ratio > 0.05:
-                    volume_assessment = "moderate trading volume relative to its liquidity"
-                else:
-                    volume_assessment = "low trading volume relative to its liquidity"
-                
-                # Generate outlook based on prediction score
-                if prediction_score > 80:
-                    outlook = "very positive outlook"
-                elif prediction_score > 60:
-                    outlook = "positive outlook"
-                elif prediction_score > 40:
-                    outlook = "neutral outlook"
-                else:
-                    outlook = "cautious outlook"
-                
-                # Generate the report
-                report = f"""
-                ## {name} Pool Analysis
-                
-                The {name} pool on {dex} is a {category.lower()} category pool with an APR of {apr:.2f}%. 
-                This pool currently has ${liquidity:,.2f} in total liquidity and 24-hour trading volume of ${volume:,.2f}.
-                
-                ### Performance Trends
-                
-                This pool is currently {trend} with a 7-day APR change of {apr_change_7d:.2f}% and a 24-hour change of {apr_change_24h:.2f}%. 
-                It shows {volume_assessment}.
-                
-                ### Market Position
-                
-                As a {category.lower()} pool on {dex}, this pool represents a {outlook} in our prediction model, with a score of {prediction_score:.1f}/100.
-                
-                ### Recommendations
-                
-                """
-                
-                # Add recommendations based on metrics
-                if prediction_score > 70 and apr > 10 and apr_change_7d > 0:
-                    report += """
-                    This pool shows strong potential for high returns with positive momentum. Consider:
-                    - Adding this pool to your high-potential portfolio segment
-                    - Monitoring the APR trends weekly
-                    - Setting profit-taking targets
-                    """
-                elif prediction_score > 50 and apr > 5:
-                    report += """
-                    This pool shows moderate potential with reasonable returns. Consider:
-                    - Balanced position as part of a diversified strategy
-                    - Regular monitoring of key performance indicators
-                    - Setting both entry and exit strategy
-                    """
-                else:
-                    report += """
-                    This pool shows lower potential or elevated risk factors. Consider:
-                    - Limited exposure if any
-                    - Looking for alternatives with better risk/reward profiles
-                    - Waiting for stronger positive indicators before entry
-                    """
-                
-                return report
-            
-            # Display the report
-            report = generate_pool_report(pool_analysis_data)
-            st.markdown(report)
-            
-            # Market-wide analysis
-            st.subheader("Market-Wide Trends Analysis")
-            
-            # Generate a higher-level summary of market trends
-            def generate_market_report(df):
-                # Get high-level metrics
-                total_liquidity = df["liquidity"].sum()
-                avg_apr = df["apr"].mean()
-                avg_apr_change = df["apr_change_7d"].mean()
-                
-                # DEX with highest average APR
-                dex_apr = df.groupby("dex")["apr"].mean().reset_index()
-                top_dex = dex_apr.sort_values("apr", ascending=False).iloc[0]
-                
-                # Category with highest average APR
-                cat_apr = df.groupby("category")["apr"].mean().reset_index()
-                top_category = cat_apr.sort_values("apr", ascending=False).iloc[0]
-                
-                # Market trend assessment
-                if avg_apr_change > 1:
-                    market_trend = "strong upward trend"
-                elif avg_apr_change > 0.2:
-                    market_trend = "moderate upward trend"
-                elif avg_apr_change < -1:
-                    market_trend = "strong downward trend"
-                elif avg_apr_change < -0.2:
-                    market_trend = "moderate downward trend"
-                else:
-                    market_trend = "generally stable"
-                
-                # Generate the report
-                report = f"""
-                ## Market-Wide Liquidity Pool Analysis
-                
-                The Solana liquidity pool market currently has a total liquidity of ${total_liquidity:,.2f} 
-                across all tracked pools, with an average APR of {avg_apr:.2f}%.
-                
-                ### Current Market Trends
-                
-                The market is showing a {market_trend} with an average 7-day APR change of {avg_apr_change:.2f}%.
-                {top_dex['dex']} currently offers the highest average APR at {top_dex['apr']:.2f}%, while
-                {top_category['category']} pools are leading categories with an average APR of {top_category['apr']:.2f}%.
-                
-                ### Opportunities by Category
-                
-                """
-                
-                # Add category-specific insights
-                categories = df["category"].unique()
-                for category in categories:
-                    cat_data = df[df["category"] == category]
-                    cat_avg_apr = cat_data["apr"].mean()
-                    cat_avg_change = cat_data["apr_change_7d"].mean()
-                    cat_top_pool = cat_data.sort_values("prediction_score", ascending=False).iloc[0]
-                    
-                    report += f"""
-                    **{category}** pools are averaging {cat_avg_apr:.2f}% APR with a {cat_avg_change:.2f}% weekly change.
-                    *{cat_top_pool['name']}* on {cat_top_pool['dex']} is the top-rated pool in this category with a 
-                    prediction score of {cat_top_pool['prediction_score']:.1f}/100.
-                    
-                    """
-                
-                return report
-            
-            # Display the market report
-            market_report = generate_market_report(df)
-            st.markdown(market_report)
+                    st.warning("Claude API credentials are not yet configured")
         
         # Token Explorer Tab
         with tab_tokens:

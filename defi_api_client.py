@@ -91,6 +91,10 @@ class DefiApiClient:
                     
                     # Don't retry for other errors
                     raise
+        
+        # This code should never be reached, but we need a return to satisfy the type checker
+        # If we've exhausted all retries with no success, we'll have raised an exception
+        raise RuntimeError(f"Failed to make request to {endpoint} after {max_retries} retries")
     
     def get_all_pools(self, 
                      source: Optional[str] = None, 
