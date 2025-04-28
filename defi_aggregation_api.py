@@ -53,7 +53,7 @@ class DefiAggregationAPI:
         
         logger.info(f"DeFi Aggregation API client initialized with base URL: {self.base_url}")
     
-    def _make_request(self, endpoint: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _make_request(self, endpoint: str, params: Dict[str, Any] = None) -> Any:
         """
         Make a rate-limited request to the API.
         
@@ -62,13 +62,16 @@ class DefiAggregationAPI:
             params: Query parameters
             
         Returns:
-            API response data
+            API response data (can be Dict or List depending on endpoint)
         
         Raises:
             ValueError: For various API errors with specific messages
         """
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         
+        if params is None:
+            params = {}
+            
         try:
             response = requests.get(url, headers=self.headers, params=params)
             
@@ -87,7 +90,7 @@ class DefiAggregationAPI:
                 error_message = f"API request failed with status code {response.status_code}"
                 try:
                     error_data = response.json()
-                    if "message" in error_data:
+                    if isinstance(error_data, dict) and "message" in error_data:
                         error_message = f"{error_message}: {error_data['message']}"
                 except:
                     error_message = f"{error_message}: {response.text}"
@@ -114,7 +117,7 @@ class DefiAggregationAPI:
         Returns:
             List of pool data
         """
-        params = {"limit": limit, "page": page}
+        params: Dict[str, Any] = {"limit": limit, "page": page}
         
         if source:
             params["source"] = source
@@ -127,7 +130,14 @@ class DefiAggregationAPI:
         
         try:
             # Note: From testing we found the API returns a list directly, not an object with a 'pools' property
-            return self._make_request("pools", params)
+            result = self._make_request("pools", params)
+            if isinstance(result, list):
+                return result
+            elif isinstance(result, dict) and "pools" in result:
+                return result.get("pools", [])
+            else:
+                logger.warning(f"Unexpected API response format: {type(result)}")
+                return []
         except ValueError as e:
             logger.error(f"Failed to get pools: {str(e)}")
             return []

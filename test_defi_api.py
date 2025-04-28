@@ -31,7 +31,7 @@ if not API_KEY.startswith("defi_"):
 
 # Headers for API requests
 headers = {
-    "X-API-KEY": API_KEY,
+    "Authorization": f"Bearer {API_KEY}",
     "Content-Type": "application/json"
 }
 
@@ -49,7 +49,13 @@ def test_api_connection():
         if response.status_code == 200:
             print("✅ API connection successful")
             data = response.json()
-            print(f"Received {len(data.get('pools', []))} pools out of {data.get('total', 0)} total")
+            # API may return data directly as a list or as an object with 'pools'
+            if isinstance(data, list):
+                pools = data
+                print(f"Received {len(pools)} pools (list format)")
+            else:
+                pools = data.get('pools', [])
+                print(f"Received {len(pools)} pools out of {data.get('total', 0)} total")
             return True
         elif response.status_code == 401:
             print("❌ Authentication failed. Check API key.")
@@ -79,8 +85,21 @@ def fetch_pools_with_rate_limiting(limit=50, page=1):
         
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Successfully fetched {len(data.get('pools', []))} pools")
-            return data
+            
+            # Check if the response is a list (direct pools) or an object with 'pools' key
+            if isinstance(data, list):
+                pools = data
+                print(f"✅ Successfully fetched {len(pools)} pools (list format)")
+            else:
+                pools = data.get('pools', [])
+                print(f"✅ Successfully fetched {len(pools)} pools from object")
+                
+            # Return a standardized format for consistency
+            return {
+                "pools": pools,
+                "total": len(pools),
+                "page": page
+            }
         else:
             print(f"❌ Failed to fetch pools: {response.status_code}")
             print(f"Response: {response.text}")
