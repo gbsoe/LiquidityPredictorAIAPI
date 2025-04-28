@@ -1,18 +1,21 @@
 """
-Test DeFi API Endpoints
+Test DeFi API Endpoints (with hardcoded API key for testing)
 
 This script tests all the API endpoints from the DeFi API documentation and 
-outputs the results to a Markdown file.
+outputs the results to a Markdown file. The API key is hardcoded for easy testing.
 """
 
-import os
 import json
 import requests
 import time
 from typing import Dict, Any, Optional
 
-# API Configuration
-API_KEY = os.getenv("DEFI_API_KEY", "defi_your_api_key_here")  # Replace with actual key for testing
+# ============================================================
+# HARD-CODED API KEY FOR TESTING - REPLACE WITH YOUR ACTUAL KEY
+# ============================================================
+API_KEY = "your_api_key_here"  
+# ============================================================
+
 BASE_URL = "https://filotdefiapi.replit.app/api/v1"
 
 # Output file
@@ -23,7 +26,7 @@ def make_request(endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict
     url = f"{BASE_URL}/{endpoint.lstrip('/')}"
     
     headers = {
-        "X-API-Key": API_KEY,  # Try with X-API-Key format per docs
+        "X-API-Key": API_KEY,  # Using X-API-Key format per docs
         "Content-Type": "application/json"
     }
     
@@ -79,6 +82,7 @@ def test_all_endpoints():
         f.write("# DeFi API Test Results\n\n")
         f.write(f"Tests run on: {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n")
         f.write(f"Base URL: `{BASE_URL}`\n\n")
+        f.write(f"API Key Format Used: `X-API-Key`\n\n")
         f.write("---\n\n")
     
     # 1. Get All Pools
@@ -156,10 +160,39 @@ def test_all_endpoints():
     
     print(f"All tests completed. Results saved to {OUTPUT_MD}")
 
+# This allows you to easily test different header formats by modifying the code directly
+def make_request_bearer(endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Alternative version using Bearer token format"""
+    url = f"{BASE_URL}/{endpoint.lstrip('/')}"
+    
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",  # Alternative Bearer format
+        "Content-Type": "application/json"
+    }
+    
+    print(f"Making request to: {url}")
+    print(f"With headers: {headers}")
+    if params:
+        print(f"With params: {params}")
+    
+    response = requests.get(url, headers=headers, params=params)
+    
+    # Sleep to respect rate limits
+    time.sleep(0.1)
+    
+    try:
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP Error: {e}")
+        print(f"Response text: {response.text}")
+        return {"error": str(e), "status_code": response.status_code, "text": response.text}
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"error": str(e)}
+
 if __name__ == "__main__":
-    # Try other header format if specified
-    if os.getenv("TRY_BEARER_FORMAT", "").lower() == "true":
-        print("Testing with Bearer token format instead of X-API-Key")
-        make_request = lambda endpoint, params=None: _make_request_bearer(endpoint, params)
+    # UNCOMMENT THE LINE BELOW TO TEST WITH BEARER TOKEN FORMAT INSTEAD OF X-API-KEY
+    # make_request = make_request_bearer
     
     test_all_endpoints()

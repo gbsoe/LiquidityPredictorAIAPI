@@ -55,9 +55,9 @@ class DefiAggregationAPI:
         # Configure request delay for rate limiting (10 req/sec)
         self.request_delay = 0.1  # 100ms delay for 10 requests per second 
         
-        # Set authentication headers - using X-API-Key as specified in the API docs
+        # Set authentication headers - using Bearer token authentication (confirmed by testing)
         self.headers = {
-            "X-API-Key": self.api_key,
+            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
         
