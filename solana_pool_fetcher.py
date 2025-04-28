@@ -10,12 +10,12 @@ def fetch_raydium_pools_via_solana_rpc():
     """
     st.subheader("Fetch Raydium Pools via Solana RPC")
     
-    # Solana public RPC endpoints - user can choose which one to use
+    # Solana public RPC endpoints - placeholder values, need to be replaced
     rpc_endpoints = {
-        "Solana Mainnet RPC": "https://api.mainnet-beta.solana.com",
-        "GenesysGo": "https://ssc-dao.genesysgo.net",
-        "Serum": "https://solana-api.projectserum.com",
-        "Triton": "https://free.rpcpool.com"
+        "Solana RPC 1": "YOUR_SOLANA_RPC_ENDPOINT_1",
+        "Solana RPC 2": "YOUR_SOLANA_RPC_ENDPOINT_2",
+        "Solana RPC 3": "YOUR_SOLANA_RPC_ENDPOINT_3",
+        "Solana RPC 4": "YOUR_SOLANA_RPC_ENDPOINT_4"
     }
     
     selected_endpoint = st.selectbox("Select Solana RPC Endpoint", list(rpc_endpoints.keys()))
