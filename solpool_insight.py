@@ -277,33 +277,46 @@ def fetch_live_data_from_blockchain():
 
 @handle_exception
 def load_data():
-    """Load pool data with a prioritized strategy: live, cached, or generated"""
+    """Load pool data with a prioritized strategy: live or cached"""
     
-    # 1. Check if user has requested to force using live blockchain data
-    try_live_data = st.session_state.get('try_live_data', False)
-    
-    # 2. Check if user has requested sample data generation
-    if st.session_state.get('generate_sample_data', False):
-        # Reset the flag so it doesn't regenerate every refresh
-        st.session_state['generate_sample_data'] = False
+    # 1. Check if user has requested to use cached data
+    if st.session_state.get('use_cached_data', False):
+        # Reset the flag so it doesn't keep using cached data every refresh
+        st.session_state['use_cached_data'] = False
         
-        # Get the pool count from session state
-        pool_count = st.session_state.get('pool_count', 15)
-        
-        # Generate fresh sample data
-        st.info(f"Generating fresh sample data with {pool_count} pools...")
-        pools = generate_sample_data(count=pool_count)
-        
-        # Save to cache for future use
         cache_file = "extracted_pools.json"
-        with open(cache_file, "w") as f:
-            json.dump(pools, f, indent=2)
-            
-        st.success(f"✓ Generated {len(pools)} sample pools")
-        st.session_state['data_source'] = "Freshly generated sample data (not real blockchain data)"
-        # Reset live data attempt flag
-        st.session_state['try_live_data'] = False
-        return pools
+        if os.path.exists(cache_file):
+            try:
+                with open(cache_file, "r") as f:
+                    pools = json.load(f)
+                
+                if pools and len(pools) > 0:
+                    # Get modification time for the cache file
+                    mod_time = os.path.getmtime(cache_file)
+                    mod_time_str = datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M:%S")
+                    mod_time_diff = datetime.now() - datetime.fromtimestamp(mod_time)
+                    
+                    # Ensure all required fields are present
+                    pools = ensure_all_fields(pools)
+                    
+                    # Indicate how old the data is
+                    if mod_time_diff.days > 0:
+                        age_str = f"{mod_time_diff.days} days old"
+                    elif mod_time_diff.seconds > 3600:
+                        age_str = f"{mod_time_diff.seconds // 3600} hours old"
+                    else:
+                        age_str = f"{mod_time_diff.seconds // 60} minutes old"
+                    
+                    st.info(f"ℹ️ Using cached data from {mod_time_str} ({age_str})")
+                    st.session_state['data_source'] = f"Cached data ({age_str})"
+                    return pools
+            except Exception as e:
+                st.warning(f"Error loading cached data: {e}")
+        else:
+            st.warning("No cached data found. Attempting to fetch live data...")
+    
+    # 2. Check if user has requested to force using live blockchain data
+    try_live_data = st.session_state.get('try_live_data', False)
     
     # 3. Try fetching live data if requested
     if try_live_data:
@@ -512,201 +525,18 @@ def load_data():
         except Exception as e:
             st.warning(f"Error loading cached data: {e}")
     
-    # 6. If all else fails, generate sample data
-    pool_count = st.session_state.get('pool_count', 15)
-    st.warning(f"No cached data found - generating {pool_count} sample pools")
-    pools = generate_sample_data(pool_count)
+    # 6. If all else fails, show a helpful error message
+    st.error("No pool data available. Please configure a valid Solana RPC endpoint to fetch authentic data.")
+    st.info("Click on 'Use custom RPC endpoint' in the Advanced RPC Options section to set up your endpoint.")
     
-    # Add any fields that might be missing
-    pools = ensure_all_fields(pools)
-    
-    # Save to cache for future use
-    with open(cache_file, "w") as f:
-        json.dump(pools, f, indent=2)
-        
-    st.session_state['data_source'] = "Newly generated sample data (not real blockchain data)"
-    return pools
+    # Return an empty list to avoid errors
+    return []
 
 def generate_sample_data(count=200):
     """Generate sample pool data - disabled for data integrity reasons"""
     logger.warning("Sample data generation is disabled for data integrity reasons")
     st.error("⚠️ Sample data generation has been disabled for data integrity reasons. Please provide a valid Solana RPC endpoint to access authentic data.")
     return []
-    
-    # DEXes and their relative weights
-    dexes = ["Raydium", "Orca", "Jupiter", "Meteora", "Saber"]
-    dex_weights = [0.4, 0.3, 0.15, 0.1, 0.05]
-    
-    # Categories and their weights
-    categories = ["Major", "Meme", "DeFi", "Gaming", "Stablecoin", "Other"]
-    category_weights = [0.3, 0.25, 0.2, 0.1, 0.1, 0.05]
-    
-    # Token pairs by category
-    token_pairs = {
-        "Major": [
-            ("SOL", "USDC"), ("SOL", "USDT"), ("BTC", "USDC"), 
-            ("ETH", "USDC"), ("SOL", "ETH"), ("BTC", "USDT")
-        ],
-        "Meme": [
-            ("BONK", "USDC"), ("SAMO", "USDC"), ("DOGWIFHAT", "USDC"),
-            ("BONK", "SOL"), ("POPCAT", "USDC"), ("FLOKI", "USDC")
-        ],
-        "DeFi": [
-            ("RAY", "USDC"), ("JUP", "USDC"), ("ORCA", "USDC"),
-            ("RAY", "SOL"), ("JUP", "SOL"), ("ORCA", "SOL")
-        ],
-        "Gaming": [
-            ("AURORY", "USDC"), ("STAR", "USDC"), ("ATLAS", "USDC"),
-            ("POLIS", "USDC"), ("GARI", "USDC"), ("COPE", "USDC")
-        ],
-        "Stablecoin": [
-            ("USDC", "USDT"), ("USDC", "DAI"), ("USDT", "DAI"),
-            ("USDC", "USDH"), ("USDT", "USDH"), ("USDC", "USDR")
-        ],
-        "Other": [
-            ("MNGO", "USDC"), ("SLND", "USDC"), ("PORT", "USDC"),
-            ("LARIX", "USDC"), ("STEP", "USDC"), ("MEDIA", "USDC")
-        ]
-    }
-    
-    # Token addresses (simplified)
-    token_addresses = {
-        "SOL": "So11111111111111111111111111111111111111112",
-        "USDC": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "USDT": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-        "RAY": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
-        "BONK": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
-        "SAMO": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
-        "BTC": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
-        "ETH": "2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk",
-        "JUP": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZJB7q2X",
-    }
-    
-    # Generate random pool data
-    for i in range(count):
-        # Select DEX based on weights
-        dex = random.choices(dexes, weights=dex_weights)[0]
-        
-        # Select category based on weights
-        category = random.choices(categories, weights=category_weights)[0]
-        
-        # Select token pair from the category
-        token1, token2 = random.choice(token_pairs[category])
-        
-        # Generate ID
-        pool_id = ''.join(random.choices('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz', k=44))
-        
-        # Generate metrics based on category
-        if category == "Major":
-            liquidity = random.uniform(10_000_000, 50_000_000)
-            volume_24h = liquidity * random.uniform(0.05, 0.15)
-            apr = random.uniform(5, 15)
-            fee = 0.0025
-        elif category == "Meme":
-            liquidity = random.uniform(1_000_000, 10_000_000)
-            volume_24h = liquidity * random.uniform(0.1, 0.3)
-            apr = random.uniform(15, 40)
-            fee = 0.003
-        elif category == "DeFi":
-            liquidity = random.uniform(2_000_000, 20_000_000)
-            volume_24h = liquidity * random.uniform(0.05, 0.2)
-            apr = random.uniform(10, 25)
-            fee = 0.003
-        elif category == "Gaming":
-            liquidity = random.uniform(1_000_000, 5_000_000)
-            volume_24h = liquidity * random.uniform(0.05, 0.2)
-            apr = random.uniform(12, 30)
-            fee = 0.003
-        elif category == "Stablecoin":
-            liquidity = random.uniform(20_000_000, 80_000_000)
-            volume_24h = liquidity * random.uniform(0.02, 0.1)
-            apr = random.uniform(2, 8)
-            fee = 0.0004
-        else:  # Other
-            liquidity = random.uniform(500_000, 5_000_000)
-            volume_24h = liquidity * random.uniform(0.05, 0.15)
-            apr = random.uniform(8, 20)
-            fee = 0.003
-        
-        # Generate historical changes
-        apr_change_24h = random.uniform(-2, 2)
-        apr_change_7d = random.uniform(-5, 5)
-        apr_change_30d = random.uniform(-10, 10)
-        
-        tvl_change_24h = random.uniform(-3, 3)
-        tvl_change_7d = random.uniform(-7, 7)
-        tvl_change_30d = random.uniform(-15, 15)
-        
-        # Generate prediction score (higher for meme coins and positive trends)
-        base_score = 50
-        
-        # Higher APR pools tend to have higher potential
-        apr_factor = min(30, apr) / 30 * 20  # Up to 20 points
-        
-        # Recent positive trends increase the score
-        trend_factor = 0
-        if apr_change_7d > 0:
-            trend_factor += 10
-        if tvl_change_7d > 0:
-            trend_factor += 10
-        
-        # Some categories have higher potential
-        category_factor = 0
-        if category == "Meme":
-            category_factor = 15
-        elif category == "DeFi":
-            category_factor = 10
-        
-        # Calculate final score (capped at 100)
-        prediction_score = min(100, base_score + apr_factor + trend_factor + category_factor)
-        
-        # Add token addresses, falling back to random if not in our mapping
-        token1_address = token_addresses.get(token1, ''.join(random.choices('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz', k=44)))
-        token2_address = token_addresses.get(token2, ''.join(random.choices('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz', k=44)))
-        
-        # Create pool dictionary
-        pool_data = {
-            "id": pool_id,
-            "name": f"{token1}/{token2}",
-            "dex": dex,
-            "category": category,
-            "token1_symbol": token1,
-            "token2_symbol": token2,
-            "token1_address": token1_address,
-            "token2_address": token2_address,
-            "liquidity": liquidity,
-            "volume_24h": volume_24h,
-            "apr": apr,
-            "fee": fee,
-            "version": "v4",
-            "apr_change_24h": apr_change_24h,
-            "apr_change_7d": apr_change_7d,
-            "apr_change_30d": apr_change_30d,
-            "tvl_change_24h": tvl_change_24h,
-            "tvl_change_7d": tvl_change_7d,
-            "tvl_change_30d": tvl_change_30d,
-            "prediction_score": prediction_score,
-            "created_at": (now - timedelta(days=random.randint(30, 180))).isoformat(),
-            "updated_at": current_date_str  # Use the current date for the update timestamp
-        }
-        
-        # Try to get token prices from CoinGecko
-        try:
-            from token_price_service import update_pool_with_token_prices
-            pool_data = update_pool_with_token_prices(pool_data)
-        except Exception as e:
-            # If we can't get prices from CoinGecko, use generated values
-            # Base price on token name characters (consistent for each token)
-            token1_price = sum(ord(c) for c in token1) % 100 + 1 if token1 != "USDC" and token1 != "USDT" else 1.0
-            token2_price = sum(ord(c) for c in token2) % 100 + 1 if token2 != "USDC" and token2 != "USDT" else 1.0
-            
-            pool_data["token1_price"] = token1_price
-            pool_data["token2_price"] = token2_price
-        
-        # Add to pools list
-        pools.append(pool_data)
-        
-    return pools
 
 @handle_exception
 def main():
@@ -788,7 +618,7 @@ def main():
                     except Exception as e:
                         st.warning(f"Could not save endpoint to .env: {e}")
             else:
-                custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", "YOUR_SOLANA_RPC_ENDPOINT")
+                custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", "")
                 
         # Store the custom RPC in session state
         st.session_state['custom_rpc'] = custom_rpc
@@ -831,37 +661,39 @@ def main():
                 st.rerun()
         
         with sample_col:
-            # Add sample data button
-            if st.button("🔄 Use Sample Data", 
-                         help="Generate representative sample data for testing (not real blockchain data)"):
-                # Set flag to generate fresh sample data on next load
-                st.session_state['generate_sample_data'] = True
+            # Add cached data button
+            if st.button("🔄 Use Cached Data", 
+                         help="Use previously fetched data from cache"):
+                # Set flag to use cached data
+                st.session_state['generate_sample_data'] = False
                 st.session_state['try_live_data'] = False
                 st.session_state['use_defi_api'] = False
+                st.session_state['use_cached_data'] = True
                 
                 # Show info message
-                st.info("Generating sample data...")
+                st.info("Loading data from cache...")
                 time.sleep(1)
                 st.rerun()
         
         # Add divider
         st.sidebar.divider()
         
-        # Sample data configuration
-        st.sidebar.markdown("### ⚙️ Sample Data Settings")
+        # Cached data configuration
+        st.sidebar.markdown("### ⚙️ Cache Settings")
         
-        # Pool count selection
-        pool_count = st.sidebar.slider(
-            "Sample Pool Count", 
-            min_value=5, 
-            max_value=50, 
-            value=15,
-            step=5,
-            help="Number of sample pools to generate when using sample data"
-        )
-        
-        # Store the pool count in session state
-        st.session_state['pool_count'] = pool_count
+        # Add a button to clear the cache
+        if st.sidebar.button("Clear Cache", help="Delete cached pool data to force fresh retrieval"):
+            try:
+                if os.path.exists("extracted_pools.json"):
+                    os.remove("extracted_pools.json")
+                    st.sidebar.success("Cache cleared successfully")
+                else:
+                    st.sidebar.info("No cache file found")
+            except Exception as e:
+                st.sidebar.error(f"Error clearing cache: {e}")
+                
+        # Store default pool count in session state (used if falling back to minimal data)
+        st.session_state['pool_count'] = 15
                 
         # Display last update time if available
         if os.path.exists("extracted_pools.json"):
