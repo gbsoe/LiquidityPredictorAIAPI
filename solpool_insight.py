@@ -571,17 +571,8 @@ def main():
         # Store in session state so it's accessible in load_data
         st.session_state['force_live_data'] = force_live_data
         
-        # Show sample pool controls only if needed
-        if not has_valid_rpc or not force_live_data:
-            pool_count = st.sidebar.slider(
-                "Sample pool count", 
-                min_value=50, 
-                max_value=250, 
-                value=50, 
-                step=50,
-                help="Number of sample pools to generate if real data isn't available"
-            )
-            st.session_state['pool_count'] = pool_count
+        # Store default pool count in session state in case it's needed
+        st.session_state['pool_count'] = 15
         
         # Add advanced options
         with st.sidebar.expander("Advanced RPC Options"):
@@ -692,9 +683,7 @@ def main():
             except Exception as e:
                 st.sidebar.error(f"Error clearing cache: {e}")
                 
-        # Store default pool count in session state (used if falling back to minimal data)
-        st.session_state['pool_count'] = 15
-                
+        
         # Display last update time if available
         if os.path.exists("extracted_pools.json"):
             try:
