@@ -29,39 +29,37 @@ metadata = None
 Session = None
 
 try:
-    # Check if DATABASE_URL is available from check_database_status tool
+    # Attempt to connect to PostgreSQL - Replit automatically provides DATABASE_URL
     if DATABASE_URL:
-        # Attempt to connect to PostgreSQL
         print(f"Attempting to connect to PostgreSQL database...")
         # Make the URL easier to print without exposing credentials
         display_url = DATABASE_URL.split('@')[0] + '@' + '@'.join(DATABASE_URL.split('@')[1:])
         print(f"Database URL: {display_url}")
+        
+        # Create the SQLAlchemy engine with the URL
         engine = create_engine(DATABASE_URL)
+        
         # Test the connection
         with engine.connect() as conn:
             conn.execute(sa.text("SELECT 1"))
         print("Successfully connected to PostgreSQL database")
     else:
-        # Try one more time using a different method
-        import subprocess
-        try:
-            # This might help in certain Replit environments
-            result = subprocess.run(['echo', '$DATABASE_URL'], capture_output=True, text=True)
-            potential_url = result.stdout.strip()
-            if potential_url and not potential_url.startswith('$'):
-                print(f"Found DATABASE_URL through subprocess")
-                DATABASE_URL = potential_url
-                engine = create_engine(DATABASE_URL)
-                # Test the connection
-                with engine.connect() as conn:
-                    conn.execute(sa.text("SELECT 1"))
-                print("Successfully connected to PostgreSQL database")
-            else:
-                raise ValueError("DATABASE_URL not found in environment variables")
-        except Exception:
+        # DATABASE_URL not found, try alternative ways to get it
+        print("DATABASE_URL not found in direct environment - trying alternative methods")
+        
+        # Try to get from os.environ directly
+        import os
+        if 'DATABASE_URL' in os.environ:
+            DATABASE_URL = os.environ['DATABASE_URL']
+            print("Found DATABASE_URL in os.environ")
+            engine = create_engine(DATABASE_URL)
+            with engine.connect() as conn:
+                conn.execute(sa.text("SELECT 1"))
+            print("Successfully connected to PostgreSQL database")
+        else:
             raise ValueError("DATABASE_URL not found in environment variables")
 except Exception as e:
-    print(f"PostgreSQL connection error: {e}")
+    print(f"PostgreSQL connection error: {str(e)}")
     print(f"Falling back to SQLite database at {SQLITE_DB_PATH}")
     
     # Use SQLite as fallback
