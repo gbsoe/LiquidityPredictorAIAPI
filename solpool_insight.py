@@ -375,127 +375,98 @@ def load_data():
                     if "API key" in str(e).lower():
                         st.error("Invalid or missing DeFi API key. Please provide a valid API key.")
             
-            # If DeFi API failed, try falling back to Raydium API if available
+            # If DeFi API failed, try using the generic alternative pool fetcher
+            # Skip specialized DEX-specific fetchers for better provider neutrality
             try:
-                # Check if we have a Custom RPC endpoint
-                custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT"))
+                # Import here to avoid circular imports
+                from alternative_pool_fetcher import AlternativePoolFetcher
                 
-                if custom_rpc and len(custom_rpc) > 10:
-                    # Import here to avoid circular imports
-                    from raydium_pool_fetcher import RaydiumPoolFetcher
-                    
-                    st.info("Falling back to Raydium API...")
-                    
-                    # Initialize fetcher
-                    fetcher = RaydiumPoolFetcher()
-                    
-                    # Fetch pools
+                st.info("Using generic provider-neutral fetcher as fallback...")
+                
+                # Initialize fetcher with our custom RPC endpoint
+                custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT"))
+                fetcher = AlternativePoolFetcher(rpc_endpoint=custom_rpc)
+                
+                # Fetch a reasonable number of pools
+                with st.spinner("Fetching pool data using fallback fetcher..."):
                     pools = fetcher.fetch_pools(limit=10)
                     
                     if pools and len(pools) > 0:
-                        # Save to cache
-                        with open("extracted_pools.json", "w") as f:
+                        # Save to cache for future use
+                        cache_file = "extracted_pools.json"
+                        with open(cache_file, "w") as f:
                             json.dump(pools, f, indent=2)
                         
                         # Ensure all fields are present
                         pools = ensure_all_fields(pools)
                         
-                        st.success(f"✓ Successfully fetched {len(pools)} pools from Raydium API")
-                        st.session_state['data_source'] = f"Raydium API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                        return pools
-            except Exception as e:
-                logger.warning(f"Raydium API fallback failed: {str(e)}")
-                st.warning("Raydium API fallback failed. Trying alternative method...")
-                
-                # Fall back to the alternative pool fetcher if Raydium API fails
-                try:
-                    # Import here to avoid circular imports
-                    from alternative_pool_fetcher import AlternativePoolFetcher
-                    
-                    st.info("Using alternative fetcher as fallback...")
-                    
-                    # Initialize fetcher with our custom RPC endpoint
-                    fetcher = AlternativePoolFetcher(rpc_endpoint=custom_rpc)
-                    
-                    # Fetch a reasonable number of pools
-                    with st.spinner("Fetching pool data using fallback fetcher..."):
-                        pools = fetcher.fetch_pools(limit=10)
+                        # Check if these are estimated values
+                        estimated_data = any(pool.get('data_source', '').startswith('Estimated') for pool in pools)
                         
-                        if pools and len(pools) > 0:
-                            # Save to cache for future use
-                            cache_file = "extracted_pools.json"
-                            with open(cache_file, "w") as f:
-                                json.dump(pools, f, indent=2)
-                            
-                            # Ensure all fields are present
-                            pools = ensure_all_fields(pools)
-                            
-                            # Check if these are estimated values
-                            estimated_data = any(pool.get('data_source', '').startswith('Estimated') for pool in pools)
-                            
-                            if estimated_data:
-                                st.success(f"✓ Successfully fetched {len(pools)} pools using alternative fetcher")
-                                st.info("⚠️ Due to API limitations, the values shown are realistic estimates rather than real-time data. The token pairs and fee rates are accurate.")
-                                st.session_state['data_source'] = f"Estimated pool data (via alternative fetcher, {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                            else:
-                                st.success(f"✓ Successfully fetched {len(pools)} pools from blockchain")
-                                st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                            
-                            return pools
-                except ImportError:
-                    st.warning("Alternative fetcher not available. Trying original method...")
-                except Exception as e:
-                    logger.warning(f"Alternative fetcher failed: {str(e)}")
-                    st.warning("Issue with alternative fetcher. Trying original method...")
-                
-                # Fall back to original OnChainExtractor method
-                try:
-                    from onchain_extractor import OnChainExtractor
-                    
-                    # Use the custom RPC endpoint directly
-                    # No specific provider formatting needed
-                    
-                    # Get parameters from environment but reduce for better reliability
-                    max_per_dex = int(os.getenv("MAX_POOLS_PER_DEX", "3"))
-                    
-                    with st.spinner(f"Fetching live data using original extractor (max {max_per_dex} pools per DEX)..."):
-                        # Initialize extractor
-                        extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
-                        
-                        # Use the correct method with limited scope to avoid timeouts
-                        st.info("Extracting pools from supported DEXes...")
-                        pools_obj = extractor.extract_pools_from_all_dexes(max_per_dex=max_per_dex)
-                        
-                        # Convert pool objects to dictionaries
-                        pools = [pool.to_dict() for pool in pools_obj] if pools_obj else []
-                        
-                        if pools and len(pools) > 0:
-                            # Save to cache file
-                            cache_file = "extracted_pools.json"
-                            with open(cache_file, "w") as f:
-                                json.dump(pools, f, indent=2)
-                                
-                            # Ensure all required fields are present
-                            pools = ensure_all_fields(pools)
-                            
-                            st.success(f"✅ Successfully fetched {len(pools)} pools from blockchain")
-                            st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                            return pools
+                        if estimated_data:
+                            st.success(f"✓ Successfully fetched {len(pools)} pools using alternative fetcher")
+                            st.info("⚠️ Due to API limitations, the values shown are realistic estimates rather than real-time data. The token pairs and fee rates are accurate.")
+                            st.session_state['data_source'] = f"Estimated pool data (via alternative fetcher, {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
                         else:
-                            st.warning("⚠️ No pools retrieved from blockchain. This could be due to RPC endpoint limitations.")
-                            st.info("💡 Try using a different RPC endpoint with higher rate limits and account data access.")
-                except ImportError:
-                    st.warning("⚠️ OnChainExtractor module not available. Using cached data instead.")
-                except Exception as e:
-                    st.warning(f"⚠️ Error retrieving live data: {str(e)}")
-                    logger.warning(f"Live data retrieval error: {str(e)}")
+                            st.success(f"✓ Successfully fetched {len(pools)} pools from blockchain")
+                            st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                        
+                        return pools
+            except ImportError:
+                st.warning("Alternative fetcher not available. Trying original method...")
+            except Exception as e:
+                logger.warning(f"Alternative fetcher failed: {str(e)}")
+                st.warning("Issue with alternative fetcher. Trying original method...")
+                
+            # Fall back to original OnChainExtractor method
+            try:
+                from onchain_extractor import OnChainExtractor
+                
+                # Use the custom RPC endpoint directly
+                # No specific provider formatting needed
+                
+                # Get parameters from environment but reduce for better reliability
+                max_per_dex = int(os.getenv("MAX_POOLS_PER_DEX", "3"))
+                custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT"))
+                
+                with st.spinner(f"Fetching live data using generic extractor (max {max_per_dex} pools per DEX)..."):
+                    # Initialize extractor
+                    extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
                     
-                    if "rate limit" in str(e).lower():
-                        st.error("Your RPC endpoint is rate limiting requests. Consider upgrading to a paid plan.")
-                    elif "not authorized" in str(e).lower() or "unauthorized" in str(e).lower():
-                        st.error("Your RPC endpoint is not authorized to access program data. Try a different endpoint.")
-                    elif "time" in str(e).lower() and "out" in str(e).lower():
-                        st.error("Request timed out. The RPC endpoint may be overloaded.")
+                    # Use the correct method with limited scope to avoid timeouts
+                    st.info("Extracting pools from supported DEXes...")
+                    pools_obj = extractor.extract_pools_from_all_dexes(max_per_dex=max_per_dex)
+                    
+                    # Convert pool objects to dictionaries
+                    pools = [pool.to_dict() for pool in pools_obj] if pools_obj else []
+                    
+                    if pools and len(pools) > 0:
+                        # Save to cache file
+                        cache_file = "extracted_pools.json"
+                        with open(cache_file, "w") as f:
+                            json.dump(pools, f, indent=2)
+                            
+                        # Ensure all required fields are present
+                        pools = ensure_all_fields(pools)
+                        
+                        st.success(f"✅ Successfully fetched {len(pools)} pools from blockchain")
+                        st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                        return pools
+                    else:
+                        st.warning("⚠️ No pools retrieved from blockchain. This could be due to RPC endpoint limitations.")
+                        st.info("💡 Try using a different RPC endpoint with higher rate limits and account data access.")
+            except ImportError:
+                st.warning("⚠️ OnChainExtractor module not available. Using cached data instead.")
+            except Exception as e:
+                st.warning(f"⚠️ Error retrieving live data: {str(e)}")
+                logger.warning(f"Live data retrieval error: {str(e)}")
+                
+                if "rate limit" in str(e).lower():
+                    st.error("Your RPC endpoint is rate limiting requests. Consider upgrading to a paid plan.")
+                elif "not authorized" in str(e).lower() or "unauthorized" in str(e).lower():
+                    st.error("Your RPC endpoint is not authorized to access program data. Try a different endpoint.")
+                elif "time" in str(e).lower() and "out" in str(e).lower():
+                    st.error("Request timed out. The RPC endpoint may be overloaded.")
         except Exception as e:
             st.warning(f"⚠️ Error during live data attempt: {str(e)}")
     
@@ -789,8 +760,9 @@ def main():
             if use_custom_rpc:
                 custom_rpc = st.text_input(
                     "Solana RPC Endpoint", 
-                    value=os.getenv("SOLANA_RPC_ENDPOINT", "YOUR_SOLANA_RPC_ENDPOINT"),
-                    help="Enter your custom Solana RPC endpoint URL"
+                    value=os.getenv("SOLANA_RPC_ENDPOINT", ""),
+                    help="Enter a Solana RPC endpoint URL (required for authentic data retrieval)",
+                    placeholder="https://your-rpc-endpoint.com"
                 )
                 if st.button("Save Endpoint"):
                     # Save to .env file for persistence
