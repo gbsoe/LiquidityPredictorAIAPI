@@ -36,7 +36,7 @@ class DefiApiClient:
         # Create a session for better performance
         self.session = requests.Session()
         self.session.headers.update({
-            "X-API-KEY": self.api_key,
+            "X-API-KEY": self.api_key,  # Use X-API-KEY as specified in the API docs
             "Content-Type": "application/json"
         })
     
