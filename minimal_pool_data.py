@@ -198,7 +198,7 @@ def load_data():
                 custom_rpc = st.text_input(
                     "Solana RPC Endpoint", 
                     value=os.getenv("SOLANA_RPC_ENDPOINT", "https://api.mainnet-beta.solana.com"),
-                    help="For Helius, use format: https://rpc.helius.xyz/?api-key=YOUR_API_KEY"
+                    help="Enter your Solana RPC endpoint URL"
                 )
                 if st.button("Save Endpoint"):
                     # Save to .env file for persistence

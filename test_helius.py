@@ -32,9 +32,8 @@ if not ENDPOINT:
     logger.error("SOLANA_RPC_ENDPOINT not found in environment")
     exit(1)
 
-# Override for testing - use the specific value from .env file
-ENDPOINT = "https://mainnet.helius-rpc.com/?api-key=1d54c390-7463-4f14-9995-f264140a5993"
-logger.info(f"Using Helius endpoint: {ENDPOINT[:30]}...{ENDPOINT[-15:]}")
+# Log the endpoint being used (with partial masking for security)
+logger.info(f"Using RPC endpoint: {ENDPOINT[:30]}...{ENDPOINT[-15:] if len(ENDPOINT) > 45 else ''}")
 
 # Methods to test
 METHODS_TO_TEST = [

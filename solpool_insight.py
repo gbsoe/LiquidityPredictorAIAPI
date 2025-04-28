@@ -452,9 +452,8 @@ def load_data():
                 try:
                     from onchain_extractor import OnChainExtractor
                     
-                    # Format Helius API key if needed (just UUID format)
-                    if len(custom_rpc) == 36 and custom_rpc.count('-') == 4:
-                        custom_rpc = f"https://mainnet.helius-rpc.com/?api-key={custom_rpc}"
+                    # Use the custom RPC endpoint directly
+                    # No specific provider formatting needed
                     
                     # Get parameters from environment but reduce for better reliability
                     max_per_dex = int(os.getenv("MAX_POOLS_PER_DEX", "3"))

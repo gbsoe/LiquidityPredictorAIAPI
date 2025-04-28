@@ -126,10 +126,7 @@ def check_all_endpoints():
     # Test current endpoint from environment first
     current_endpoint = os.getenv("SOLANA_RPC_ENDPOINT")
     if current_endpoint:
-        # If it's just a UUID (Helius API key)
-        if len(current_endpoint) == 36 and current_endpoint.count('-') == 4:
-            # Convert to Helius URL
-            current_endpoint = f"https://mainnet.helius-rpc.com/?api-key={current_endpoint}"
+        # Use the RPC endpoint directly without specific provider formatting
         
         result = test_endpoint(current_endpoint)
         results.append(result)
