@@ -310,63 +310,96 @@ def load_data():
     
     # 3. Try fetching live data if requested
     if try_live_data:
-        st.info("Attempting to retrieve live data from the blockchain...")
+        st.info("Attempting to retrieve live data from the DeFi Aggregation API...")
         # Reset flag to avoid constant retries
         st.session_state['try_live_data'] = False
         
         try:
-            # Custom RPC from session state or environment
-            custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT"))
+            # First try the DeFi API fetcher for authentic pool data
+            try:
+                # Import here to avoid circular imports
+                from defi_pool_fetcher import DefiPoolFetcher
+                
+                st.info("Fetching real-time pool data from DeFi Aggregation API...")
+                
+                # Check if we have an API key in the environment
+                defi_api_key = os.getenv("DEFI_API_KEY")
+                
+                # If we don't have an API key, alert the user
+                if not defi_api_key:
+                    st.warning("⚠️ No DeFi API key found. Please provide a valid API key to access live data.")
+                    st.error("Missing DeFi API key. Please add it to the environment variables.")
+                    # Fall back to other methods
+                    raise ValueError("Missing DeFi API key")
+                
+                # Initialize fetcher with our API key
+                fetcher = DefiPoolFetcher()
+                
+                # Fetch a reasonable number of pools with authentic data
+                with st.spinner("Fetching authentic pool data from DeFi Aggregation API..."):
+                    pools = fetcher.fetch_pools(limit=20)
+                    
+                    if pools and len(pools) > 0:
+                        # Save to cache for future use
+                        cache_file = "extracted_pools.json"
+                        with open(cache_file, "w") as f:
+                            json.dump(pools, f, indent=2)
+                        
+                        # Ensure all fields are present
+                        pools = ensure_all_fields(pools)
+                        
+                        # Check data source
+                        real_time_data = any(pool.get('data_source', '').startswith('Real-time') for pool in pools)
+                        
+                        if real_time_data:
+                            st.success(f"✓ Successfully fetched {len(pools)} pools with authentic data from DeFi Aggregation API")
+                            st.session_state['data_source'] = f"Real-time DeFi API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                        else:
+                            st.success(f"✓ Successfully fetched {len(pools)} pools from DeFi API")
+                            st.session_state['data_source'] = f"DeFi API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                        
+                        return pools
+                    else:
+                        st.warning("No pools fetched from DeFi API. Trying alternative methods...")
+            except ImportError:
+                st.warning("DeFi Pool Fetcher not available. Trying alternative method...")
+            except Exception as e:
+                logger.warning(f"DeFi API fetcher failed: {str(e)}")
+                st.warning("Issue with DeFi API fetcher. Trying alternative method...")
+                if "API key" in str(e).lower():
+                    st.error("Invalid or missing DeFi API key. Please provide a valid API key.")
             
-            if custom_rpc and len(custom_rpc) > 10:
-                # First try the Raydium API fetcher for authentic pool data
-                try:
+            # If DeFi API failed, try falling back to Raydium API if available
+            try:
+                # Check if we have a Custom RPC endpoint
+                custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT"))
+                
+                if custom_rpc and len(custom_rpc) > 10:
                     # Import here to avoid circular imports
                     from raydium_pool_fetcher import RaydiumPoolFetcher
                     
-                    st.info("Fetching real-time pool data from Raydium API...")
+                    st.info("Falling back to Raydium API...")
                     
-                    # Check if we have an API key in the environment
-                    api_key = os.getenv("RAYDIUM_API_KEY")
-                    
-                    # If the key is still the default placeholder, warn the user
-                    if api_key == "YOUR_API_KEY_HERE":
-                        st.warning("⚠️ Using default Raydium API key which may not work. Consider providing a real API key in the .env file.")
-                    
-                    # Initialize fetcher with our API key
+                    # Initialize fetcher
                     fetcher = RaydiumPoolFetcher()
                     
-                    # Fetch a reasonable number of pools with authentic data
-                    with st.spinner("Fetching authentic pool data from Raydium API..."):
-                        pools = fetcher.fetch_pools(limit=10)
+                    # Fetch pools
+                    pools = fetcher.fetch_pools(limit=10)
+                    
+                    if pools and len(pools) > 0:
+                        # Save to cache
+                        with open("extracted_pools.json", "w") as f:
+                            json.dump(pools, f, indent=2)
                         
-                        if pools and len(pools) > 0:
-                            # Save to cache for future use
-                            cache_file = "extracted_pools.json"
-                            with open(cache_file, "w") as f:
-                                json.dump(pools, f, indent=2)
-                            
-                            # Ensure all fields are present
-                            pools = ensure_all_fields(pools)
-                            
-                            # Check data source
-                            real_time_data = any(pool.get('data_source', '').startswith('Real-time') for pool in pools)
-                            
-                            if real_time_data:
-                                st.success(f"✓ Successfully fetched {len(pools)} pools with authentic data from Raydium API")
-                                st.session_state['data_source'] = f"Real-time Raydium API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                            else:
-                                st.success(f"✓ Successfully fetched {len(pools)} pools from API")
-                                st.session_state['data_source'] = f"Raydium data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                            
-                            return pools
-                except ImportError:
-                    st.warning("Raydium Pool Fetcher not available. Trying alternative method...")
-                except Exception as e:
-                    logger.warning(f"Raydium API fetcher failed: {str(e)}")
-                    st.warning("Issue with Raydium API fetcher. Trying alternative method...")
-                    if "API key" in str(e).lower():
-                        st.error("Invalid or missing Raydium API key. Please provide a valid API key in the .env file.")
+                        # Ensure all fields are present
+                        pools = ensure_all_fields(pools)
+                        
+                        st.success(f"✓ Successfully fetched {len(pools)} pools from Raydium API")
+                        st.session_state['data_source'] = f"Raydium API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                        return pools
+            except Exception as e:
+                logger.warning(f"Raydium API fallback failed: {str(e)}")
+                st.warning("Raydium API fallback failed. Trying alternative method...")
                 
                 # Fall back to the alternative pool fetcher if Raydium API fails
                 try:
