@@ -721,9 +721,21 @@ def main():
         if not pool_data or len(pool_data) == 0:
             st.error("No pool data available. Please check your data sources.")
             return
-            
+        
+        # Remove duplicate pools based on ID
+        unique_pools = {}
+        for pool in pool_data:
+            pool_id = pool.get('id', '')
+            if pool_id and pool_id not in unique_pools:
+                unique_pools[pool_id] = pool
+        
+        # Log if we found and removed duplicates
+        if len(unique_pools) < len(pool_data):
+            logger.warning(f"Removed {len(pool_data) - len(unique_pools)} duplicate pool IDs")
+            st.info(f"⚠️ Removed {len(pool_data) - len(unique_pools)} duplicate pool IDs for more accurate analysis")
+        
         # Convert to DataFrame for easier manipulation
-        df = pd.DataFrame(pool_data)
+        df = pd.DataFrame(list(unique_pools.values()))
     
         # Data Explorer Tab
         with tab_explore:

@@ -75,12 +75,15 @@ class DefiPoolFetcher:
             # Transform API data to our application format
             transformed_pools = []
             for pool in api_pools:
-                pool_data = transform_pool_data(pool)
-                if pool_data:  # Only include non-None values (valid pool data)
-                    pool_data["data_source"] = "Real-time DeFi API"
-                    transformed_pools.append(pool_data)
+                if isinstance(pool, dict):  # Ensure pool is a dictionary
+                    pool_data = transform_pool_data(pool)
+                    if pool_data:  # Only include non-None values (valid pool data)
+                        pool_data["data_source"] = "Real-time DeFi API"
+                        transformed_pools.append(pool_data)
+                    else:
+                        logger.warning(f"Skipping invalid pool data: missing required fields")
                 else:
-                    logger.warning(f"Skipping invalid pool data: missing required fields")
+                    logger.warning(f"Skipping non-dictionary pool data: {type(pool)}")
             
             logger.info(f"Successfully transformed {len(transformed_pools)} out of {len(api_pools)} pools")
             return transformed_pools
@@ -112,6 +115,11 @@ class DefiPoolFetcher:
                 
             if isinstance(pool_data, dict) and pool_data.get("error"):
                 logger.warning(f"Error in response for pool {pool_id}: {pool_data.get('error')}")
+                return None
+            
+            # Ensure pool_data is a dictionary before transforming
+            if not isinstance(pool_data, dict):
+                logger.warning(f"Pool {pool_id} data is not a dictionary: {type(pool_data)}")
                 return None
             
             # Transform API data to our application format
@@ -157,12 +165,19 @@ class DefiPoolFetcher:
             logger.info(f"Retrieved {len(api_pools)} top pools from DeFi API")
             
             # Transform API data to our application format
-            transformed_pools = [transform_pool_data(pool) for pool in api_pools]
+            transformed_pools = []
+            for pool in api_pools:
+                if isinstance(pool, dict):  # Ensure pool is a dictionary
+                    pool_data = transform_pool_data(pool)
+                    if pool_data:  # Only include non-None values (valid pool data)
+                        pool_data["data_source"] = "Real-time DeFi API (Top Performers)"
+                        transformed_pools.append(pool_data)
+                    else:
+                        logger.warning(f"Skipping invalid top pool data: missing required fields")
+                else:
+                    logger.warning(f"Skipping non-dictionary pool data: {type(pool)}")
             
-            # Add data source to all pools
-            for pool in transformed_pools:
-                pool["data_source"] = "Real-time DeFi API (Top Performers)"
-            
+            logger.info(f"Successfully transformed {len(transformed_pools)} out of {len(api_pools)} top pools")
             return transformed_pools
             
         except Exception as e:
