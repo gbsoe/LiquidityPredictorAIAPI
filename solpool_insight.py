@@ -310,64 +310,73 @@ def load_data():
     
     # 3. Try fetching live data if requested
     if try_live_data:
-        st.info("Attempting to retrieve live data from the DeFi Aggregation API...")
-        # Reset flag to avoid constant retries
+        # Check if specifically requesting DeFi API data
+        use_defi_api = st.session_state.get('use_defi_api', False)
+        
+        # Reset flags to avoid constant retries
         st.session_state['try_live_data'] = False
+        st.session_state['use_defi_api'] = False
+        
+        if use_defi_api:
+            st.info("Attempting to retrieve live data from the DeFi Aggregation API...")
+        else:
+            st.info("Attempting to retrieve live data from available sources...")
         
         try:
-            # First try the DeFi API fetcher for authentic pool data
-            try:
-                # Import here to avoid circular imports
-                from defi_pool_fetcher import DefiPoolFetcher
-                
-                st.info("Fetching real-time pool data from DeFi Aggregation API...")
-                
-                # Check if we have an API key in the environment
-                defi_api_key = os.getenv("DEFI_API_KEY")
-                
-                # If we don't have an API key, alert the user
-                if not defi_api_key:
-                    st.warning("⚠️ No DeFi API key found. Please provide a valid API key to access live data.")
-                    st.error("Missing DeFi API key. Please add it to the environment variables.")
-                    # Fall back to other methods
-                    raise ValueError("Missing DeFi API key")
-                
-                # Initialize fetcher with our API key
-                fetcher = DefiPoolFetcher()
-                
-                # Fetch a reasonable number of pools with authentic data
-                with st.spinner("Fetching authentic pool data from DeFi Aggregation API..."):
-                    pools = fetcher.fetch_pools(limit=20)
+            # If specifically requesting DeFi API or as general first choice
+            if use_defi_api:
+                try:
+                    # Import here to avoid circular imports
+                    from defi_pool_fetcher import DefiPoolFetcher
                     
-                    if pools and len(pools) > 0:
-                        # Save to cache for future use
-                        cache_file = "extracted_pools.json"
-                        with open(cache_file, "w") as f:
-                            json.dump(pools, f, indent=2)
+                    st.info("Fetching real-time pool data from DeFi Aggregation API...")
+                    
+                    # Check if we have an API key in the environment
+                    defi_api_key = os.getenv("DEFI_API_KEY")
+                    
+                    # If we don't have an API key, alert the user
+                    if not defi_api_key:
+                        st.warning("⚠️ No DeFi API key found. Please provide a valid API key to access live data.")
+                        st.error("Missing DeFi API key. Please add it to the environment variables.")
+                        # Fall back to other methods
+                        raise ValueError("Missing DeFi API key")
+                    
+                    # Initialize fetcher with our API key
+                    fetcher = DefiPoolFetcher()
+                    
+                    # Fetch a reasonable number of pools with authentic data
+                    with st.spinner("Fetching authentic pool data from DeFi Aggregation API..."):
+                        pools = fetcher.fetch_pools(limit=20)
                         
-                        # Ensure all fields are present
-                        pools = ensure_all_fields(pools)
-                        
-                        # Check data source
-                        real_time_data = any(pool.get('data_source', '').startswith('Real-time') for pool in pools)
-                        
-                        if real_time_data:
-                            st.success(f"✓ Successfully fetched {len(pools)} pools with authentic data from DeFi Aggregation API")
-                            st.session_state['data_source'] = f"Real-time DeFi API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                        if pools and len(pools) > 0:
+                            # Save to cache for future use
+                            cache_file = "extracted_pools.json"
+                            with open(cache_file, "w") as f:
+                                json.dump(pools, f, indent=2)
+                            
+                            # Ensure all fields are present
+                            pools = ensure_all_fields(pools)
+                            
+                            # Check data source
+                            real_time_data = any(pool.get('data_source', '').startswith('Real-time') for pool in pools)
+                            
+                            if real_time_data:
+                                st.success(f"✓ Successfully fetched {len(pools)} pools with authentic data from DeFi Aggregation API")
+                                st.session_state['data_source'] = f"Real-time DeFi API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                            else:
+                                st.success(f"✓ Successfully fetched {len(pools)} pools from DeFi API")
+                                st.session_state['data_source'] = f"DeFi API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                            
+                            return pools
                         else:
-                            st.success(f"✓ Successfully fetched {len(pools)} pools from DeFi API")
-                            st.session_state['data_source'] = f"DeFi API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                        
-                        return pools
-                    else:
-                        st.warning("No pools fetched from DeFi API. Trying alternative methods...")
-            except ImportError:
-                st.warning("DeFi Pool Fetcher not available. Trying alternative method...")
-            except Exception as e:
-                logger.warning(f"DeFi API fetcher failed: {str(e)}")
-                st.warning("Issue with DeFi API fetcher. Trying alternative method...")
-                if "API key" in str(e).lower():
-                    st.error("Invalid or missing DeFi API key. Please provide a valid API key.")
+                            st.warning("No pools fetched from DeFi API. Trying alternative methods...")
+                except ImportError:
+                    st.warning("DeFi Pool Fetcher not available. Trying alternative method...")
+                except Exception as e:
+                    logger.warning(f"DeFi API fetcher failed: {str(e)}")
+                    st.warning("Issue with DeFi API fetcher. Trying alternative method...")
+                    if "API key" in str(e).lower():
+                        st.error("Invalid or missing DeFi API key. Please provide a valid API key.")
             
             # If DeFi API failed, try falling back to Raydium API if available
             try:
@@ -825,15 +834,30 @@ def main():
         # Show live data option with a badge
         st.sidebar.markdown("### 📊 Data Sources")
         
-        # Create 2 columns
+        # Create a specific button for DeFi API
+        if st.sidebar.button("💹 Fetch DeFi API Data", 
+                    help="Fetch real-time data from the DeFi Aggregation API with authentic on-chain metrics",
+                    use_container_width=True):
+            # Set flags for DeFi API data
+            st.session_state['try_live_data'] = True
+            st.session_state['use_defi_api'] = True
+            st.session_state['generate_sample_data'] = False
+            
+            # Show info message
+            st.info("Attempting to fetch authentic data from DeFi Aggregation API...")
+            time.sleep(1)
+            st.rerun()
+        
+        # Create 2 columns for other options
         live_col, sample_col = st.sidebar.columns(2)
         
         with live_col:
-            # Add live data button
-            if st.button("🌐 Fetch Live Data", 
-                         help="Fetch real-time data from the Solana blockchain using your RPC endpoint"):
+            # Add blockchain data button
+            if st.button("🌐 Blockchain Data", 
+                         help="Fetch real-time data directly from the Solana blockchain using your RPC endpoint"):
                 # Set flag to try live data on next load
                 st.session_state['try_live_data'] = True
+                st.session_state['use_defi_api'] = False  # Explicitly not using DeFi API
                 st.session_state['generate_sample_data'] = False
                 
                 # Show info message
@@ -848,6 +872,7 @@ def main():
                 # Set flag to generate fresh sample data on next load
                 st.session_state['generate_sample_data'] = True
                 st.session_state['try_live_data'] = False
+                st.session_state['use_defi_api'] = False
                 
                 # Show info message
                 st.info("Generating sample data...")

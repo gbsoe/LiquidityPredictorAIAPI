@@ -7,17 +7,14 @@ Raydium, Meteora, and Orca.
 """
 
 import os
-import json
-import logging
+import time
 import requests
-from typing import Dict, List, Any, Optional, Union
+import logging
+from typing import Dict, List, Any, Optional
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger('defi_api_client')
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class DefiApiClient:
     """Client for interacting with the DeFi Aggregation API"""
@@ -30,65 +27,63 @@ class DefiApiClient:
             api_key: API key for authentication (defaults to environment variable)
             base_url: Base URL for the API (defaults to standard endpoint)
         """
-        # Get API key from parameter or environment
         self.api_key = api_key or os.getenv("DEFI_API_KEY")
         if not self.api_key:
-            raise ValueError("API key is required. Provide it as a parameter or set DEFI_API_KEY environment variable.")
-            
-        # Set base URL
-        self.base_url = base_url or "https://filotdefiapi.replit.app/api/v1"
+            raise ValueError("No API key provided. Set the DEFI_API_KEY environment variable or pass it explicitly.")
+        
+        self.base_url = base_url or "https://defi-aggregation-api.solana.com/v1"
         
         # Create a session for better performance
         self.session = requests.Session()
         self.session.headers.update({
-            "X-API-KEY": self.api_key,
-            "Content-Type": "application/json",
-            "Accept": "application/json"
+            "x-api-key": self.api_key,
+            "Content-Type": "application/json"
         })
-        
-        logger.info(f"Initialized DeFi API client with base URL: {self.base_url}")
     
-    def _make_request(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _make_request(self, endpoint: str, params: Optional[Dict[str, Any]] = None, 
+                     max_retries: int = 3) -> Dict[str, Any]:
         """
-        Make a request to the API
+        Make a request to the API with retry logic
         
         Args:
             endpoint: API endpoint (relative to base URL)
             params: Query parameters for the request
+            max_retries: Maximum number of retries for failed requests
             
         Returns:
             API response as a dictionary
         """
-        # Construct full URL
-        url = f"{self.base_url}/{endpoint.lstrip('/')}"
+        url = f"{self.base_url}{endpoint}"
+        retries = 0
         
-        try:
-            # Make the request
-            response = self.session.get(url, params=params, timeout=15)
-            
-            # Raise for HTTP errors
-            response.raise_for_status()
-            
-            # Parse and return JSON response
-            return response.json()
-            
-        except requests.exceptions.RequestException as e:
-            # Handle request errors
-            logger.error(f"API request failed: {str(e)}")
-            
-            # Return error information
-            if hasattr(e, 'response') and e.response is not None:
-                status_code = e.response.status_code
-                try:
-                    error_data = e.response.json()
-                    error_message = error_data.get('error', str(e))
-                except:
-                    error_message = str(e)
-                
-                logger.error(f"API error ({status_code}): {error_message}")
-                return {"error": error_message, "status": status_code}
-            
-            return {"error": str(e), "status": 500}
+        while retries < max_retries:
+            try:
+                response = self.session.get(url, params=params, timeout=15)
+                response.raise_for_status()
+                return response.json()
+            except requests.exceptions.RequestException as e:
+                if (
+                    hasattr(e, 'response') and 
+                    e.response is not None and
+                    (e.response.status_code == 429 or e.response.status_code >= 500) and
+                    retries < max_retries - 1
+                ):
+                    # Retry on rate limit (429) or server errors (5xx)
+                    retries += 1
+                    logger.warning(f"Retry attempt {retries} for {endpoint}")
+                    
+                    # Exponential backoff with jitter
+                    delay = (2 ** retries) + (0.1 * retries)
+                    time.sleep(delay)
+                else:
+                    # Log the error details
+                    if hasattr(e, 'response') and e.response is not None:
+                        logger.error(f"API request failed: {e.response.status_code} - {e.response.text}")
+                    else:
+                        logger.error(f"API request failed: {str(e)}")
+                    
+                    # Don't retry for other errors
+                    raise
     
     def get_all_pools(self, 
                      source: Optional[str] = None, 
@@ -111,23 +106,21 @@ class DefiApiClient:
         Returns:
             Dictionary with pools data
         """
-        # Prepare parameters
-        params = {}
-        if source:
-            params['source'] = source
-        if token:
-            params['token'] = token
-        if sort:
-            params['sort'] = sort
-        if order:
-            params['order'] = order
-        if limit:
-            params['limit'] = limit
-        if page:
-            params['page'] = page
+        params = {
+            "limit": limit,
+            "page": page
+        }
         
-        # Make request
-        return self._make_request('pools', params)
+        if source:
+            params["source"] = source
+        if token:
+            params["token"] = token
+        if sort:
+            params["sort"] = sort
+        if order:
+            params["order"] = order
+        
+        return self._make_request("/pools", params)
     
     def get_pool_by_id(self, pool_id: str) -> Dict[str, Any]:
         """
@@ -139,7 +132,7 @@ class DefiApiClient:
         Returns:
             Dictionary with pool details
         """
-        return self._make_request(f'pools/{pool_id}')
+        return self._make_request(f"/pools/{pool_id}")
     
     def get_token_information(self, token_symbol: str) -> Dict[str, Any]:
         """
@@ -151,7 +144,7 @@ class DefiApiClient:
         Returns:
             Dictionary with token details
         """
-        return self._make_request(f'tokens/{token_symbol}')
+        return self._make_request(f"/tokens/{token_symbol}")
     
     def get_top_pools_by_apr(self, limit: int = 10) -> Dict[str, Any]:
         """
@@ -163,7 +156,8 @@ class DefiApiClient:
         Returns:
             Dictionary with top pools data
         """
-        return self.get_all_pools(sort='apr24h', order='desc', limit=limit)
+        return self.get_all_pools(sort="apr24h", order="desc", limit=limit)
+
 
 def transform_pool_data(api_pool: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -175,57 +169,41 @@ def transform_pool_data(api_pool: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Transformed pool data
     """
-    # Extract token information
-    tokens = api_pool.get('tokens', [])
-    token1 = tokens[0] if len(tokens) > 0 else {"symbol": "Unknown", "address": "", "price": 0}
-    token2 = tokens[1] if len(tokens) > 1 else {"symbol": "Unknown", "address": "", "price": 0}
+    # Extract token symbols
+    token1_symbol = api_pool.get("token1", {}).get("symbol", "Unknown")
+    token2_symbol = api_pool.get("token2", {}).get("symbol", "Unknown")
     
-    # Get volume data (could be a number or an object with timeframes)
-    volume_data = api_pool.get('volumeUsd', 0)
-    if isinstance(volume_data, dict):
-        volume_24h = volume_data.get('24h', 0)
-    else:
-        volume_24h = volume_data
+    # Determine category based on token symbols
+    category = determine_category(token1_symbol, token2_symbol)
     
-    # Calculate changes based on APR values
-    apr24h = api_pool.get('apr24h', 0)
-    apr7d = api_pool.get('apr7d', 0)
-    apr30d = api_pool.get('apr30d', 0)
-    
-    # Calculate approximate changes
-    apr_change_24h = 0  # Can't calculate without previous value
-    apr_change_7d = ((apr24h / apr7d) - 1) * 100 if apr7d > 0 else 0
-    apr_change_30d = ((apr24h / apr30d) - 1) * 100 if apr30d > 0 else 0
-    
-    # Create standardized pool object
-    transformed_pool = {
-        "id": api_pool.get('poolId', ''),
-        "name": api_pool.get('name', ''),
-        "dex": api_pool.get('source', ''),
-        "category": determine_category(token1.get('symbol', ''), token2.get('symbol', '')),
-        "token1_symbol": token1.get('symbol', ''),
-        "token2_symbol": token2.get('symbol', ''),
-        "token1_address": token1.get('address', ''),
-        "token2_address": token2.get('address', ''),
-        "token1_price": token1.get('price', 0),
-        "token2_price": token2.get('price', 0),
-        "liquidity": api_pool.get('tvl', 0),
-        "volume_24h": volume_24h,
-        "apr": apr24h,  # Use 24h APR as the default
-        "fee": api_pool.get('fee', 0) * 100,  # Convert from decimal to percentage
-        "version": "",  # Not provided by the API
-        "apr_change_24h": apr_change_24h,
-        "apr_change_7d": apr_change_7d,
-        "apr_change_30d": apr_change_30d,
-        "tvl_change_24h": 0,  # Not provided directly by the API
-        "tvl_change_7d": 0,   # Not provided directly by the API
-        "tvl_change_30d": 0,  # Not provided directly by the API
-        "prediction_score": 0,  # Not available from this API
-        "risk_score": 0,       # Not available from this API
-        "data_source": "Real-time data from DeFi Aggregation API"
+    # Create a unified pool data structure compatible with our application
+    return {
+        "id": api_pool.get("address", ""),
+        "name": f"{token1_symbol}-{token2_symbol}",
+        "dex": api_pool.get("source", "Unknown"),
+        "liquidity": api_pool.get("tvl", 0),
+        "volume_24h": api_pool.get("volume24h", 0),
+        "apr": api_pool.get("apr24h", 0),
+        "apr_change_24h": api_pool.get("aprChange24h", 0),
+        "apr_change_7d": api_pool.get("aprChange7d", 0),
+        "tvl_change_24h": api_pool.get("tvlChange24h", 0),
+        "fee_rate": api_pool.get("fee", 0) * 100 if "fee" in api_pool else 0,  # Convert to percentage
+        "token1_symbol": token1_symbol,
+        "token2_symbol": token2_symbol,
+        "token1_reserve": api_pool.get("token1Reserve", 0),
+        "token2_reserve": api_pool.get("token2Reserve", 0),
+        "token1_price": api_pool.get("token1", {}).get("price", 0),
+        "token2_price": api_pool.get("token2", {}).get("price", 0),
+        "token1_decimals": api_pool.get("token1", {}).get("decimals", 9),
+        "token2_decimals": api_pool.get("token2", {}).get("decimals", 9),
+        "token1_address": api_pool.get("token1", {}).get("address", ""),
+        "token2_address": api_pool.get("token2", {}).get("address", ""),
+        "category": category,
+        "data_source": "Real-time DeFi API",
+        "prediction_score": calculate_prediction_score(api_pool),
+        "last_updated": api_pool.get("lastUpdated", ""),
     }
-    
-    return transformed_pool
+
 
 def determine_category(token1_symbol: str, token2_symbol: str) -> str:
     """
@@ -238,58 +216,91 @@ def determine_category(token1_symbol: str, token2_symbol: str) -> str:
     Returns:
         Category name as a string
     """
-    # Normalize token symbols
-    token1_upper = token1_symbol.upper()
-    token2_upper = token2_symbol.upper()
+    stablecoins = ["USDC", "USDT", "DAI", "BUSD", "USDH", "USDR", "UXD"]
     
-    # Define token sets for categorization
-    stablecoins = {"USDC", "USDT", "DAI", "BUSD", "USDH"}
-    major_tokens = {"SOL", "BTC", "ETH", "WSOL"}
-    meme_tokens = {"BONK", "SAMO", "WIF", "DOGWIFHAT", "CAT", "POPCAT"}
-    defi_tokens = {"RAY", "ORCA", "JUP", "MER", "SRM"}
-    
-    # Stablecoin pairs
-    if token1_upper in stablecoins and token2_upper in stablecoins:
+    # Both tokens are stablecoins
+    if token1_symbol in stablecoins and token2_symbol in stablecoins:
         return "Stablecoin"
-        
-    # Major token pairs
-    if token1_upper in major_tokens and token2_upper in major_tokens:
-        return "Major"
-        
-    # Major/Stable pairs
-    if (token1_upper in major_tokens and token2_upper in stablecoins) or \
-       (token2_upper in major_tokens and token1_upper in stablecoins):
-        return "Major"
-        
-    # Meme token pairs
-    if token1_upper in meme_tokens or token2_upper in meme_tokens:
-        return "Meme"
-        
-    # DeFi token pairs
-    if token1_upper in defi_tokens or token2_upper in defi_tokens:
-        return "DeFi"
-        
-    # Default category
+    
+    # One token is a stablecoin
+    if token1_symbol in stablecoins or token2_symbol in stablecoins:
+        return "Stable-based"
+    
+    # Either token is SOL
+    if token1_symbol == "SOL" or token2_symbol == "SOL":
+        return "SOL-based"
+    
+    # Default category for other token pairs
     return "Other"
 
+
+def calculate_prediction_score(pool_data: Dict[str, Any]) -> float:
+    """
+    Calculate a prediction score for a pool based on various metrics
+    
+    Args:
+        pool_data: Pool data from the API
+        
+    Returns:
+        Prediction score between 0 and 100
+    """
+    # Base score starts at 50
+    score = 50.0
+    
+    # Add points for higher APR (up to 15 points)
+    apr = pool_data.get("apr24h", 0)
+    if apr > 100:
+        score += 15
+    elif apr > 50:
+        score += 10
+    elif apr > 20:
+        score += 5
+    
+    # Add points for higher TVL (up to 10 points)
+    tvl = pool_data.get("tvl", 0)
+    if tvl > 1000000:  # $1M+
+        score += 10
+    elif tvl > 500000:  # $500K+
+        score += 7
+    elif tvl > 100000:  # $100K+
+        score += 5
+    
+    # Add points for higher volume (up to 10 points)
+    volume = pool_data.get("volume24h", 0)
+    if volume > 500000:  # $500K+
+        score += 10
+    elif volume > 100000:  # $100K+
+        score += 7
+    elif volume > 50000:  # $50K+
+        score += 5
+    
+    # Add points for positive APR change (up to 10 points)
+    apr_change_24h = pool_data.get("aprChange24h", 0)
+    if apr_change_24h > 5:
+        score += 10
+    elif apr_change_24h > 2:
+        score += 7
+    elif apr_change_24h > 0:
+        score += 5
+    
+    # Add points for positive TVL change (up to 5 points)
+    tvl_change_24h = pool_data.get("tvlChange24h", 0)
+    if tvl_change_24h > 5:
+        score += 5
+    elif tvl_change_24h > 2:
+        score += 3
+    elif tvl_change_24h > 0:
+        score += 1
+    
+    # Cap the score at 100
+    return min(score, 100.0)
+
+
 if __name__ == "__main__":
-    # Simple test code for the client
+    # Example usage
     try:
-        # Initialize client with API key from environment
         client = DefiApiClient()
-        
-        # Get top pools
-        result = client.get_top_pools_by_apr(limit=5)
-        
-        if "error" in result:
-            print(f"Error: {result['error']}")
-        else:
-            pools = result.get("pools", [])
-            print(f"Got {len(pools)} top pools:")
-            
-            for pool in pools:
-                transformed = transform_pool_data(pool)
-                print(f"  {transformed['name']} ({transformed['dex']}): ${transformed['liquidity']:,.0f} liquidity, {transformed['apr']:.2f}% APR")
-                
+        pools = client.get_all_pools(limit=5)
+        print(f"Retrieved {len(pools.get('pools', []))} pools")
     except Exception as e:
-        print(f"Error testing DeFi API client: {e}")
+        print(f"Error: {str(e)}")
