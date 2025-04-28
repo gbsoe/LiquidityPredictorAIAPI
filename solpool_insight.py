@@ -557,13 +557,10 @@ def load_data():
     return pools
 
 def generate_sample_data(count=200):
-    """Generate sample pool data with the specified number of pools"""
-    # We'll create data for the requested number of pools across DEXes
-    pools = []
-    
-    # Generate current date for the sample data
-    now = datetime.now()
-    current_date_str = now.strftime("%Y-%m-%d %H:%M:%S")
+    """Generate sample pool data - disabled for data integrity reasons"""
+    logger.warning("Sample data generation is disabled for data integrity reasons")
+    st.error("⚠️ Sample data generation has been disabled for data integrity reasons. Please provide a valid Solana RPC endpoint to access authentic data.")
+    return []
     
     # DEXes and their relative weights
     dexes = ["Raydium", "Orca", "Jupiter", "Meteora", "Saber"]
