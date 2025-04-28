@@ -36,7 +36,7 @@ class DefiApiClient:
         # Create a session for better performance
         self.session = requests.Session()
         self.session.headers.update({
-            "Authorization": f"Bearer {self.api_key}",
+            "X-API-KEY": self.api_key,
             "Content-Type": "application/json"
         })
     
@@ -171,7 +171,7 @@ class DefiApiClient:
         return self.get_all_pools(sort="apr24h", order="desc", limit=limit)
 
 
-def transform_pool_data(api_pool: Dict[str, Any]) -> Dict[str, Any]:
+def transform_pool_data(api_pool: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """
     Transform API pool data to the format expected by the application
     
@@ -181,88 +181,106 @@ def transform_pool_data(api_pool: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Transformed pool data
     """
+    # According to the API docs, poolId is the authentic base58-encoded Solana address
+    # Never create synthetic IDs, always use authentic ones from the API
+    pool_id = api_pool.get("poolId", "")
+    if not pool_id:
+        # If there's no poolId, we cannot reliably identify this pool
+        logging.error(f"Pool missing ID: {api_pool}")
+        # This pool cannot be used for reliable predictions
+        return None
+    
+    # Get the name directly from the API
+    pool_name = api_pool.get("name", "")
+    # Remove ' LP' suffix if present (as seen in the API example: "mSOL-USDC LP")
+    if pool_name.endswith(" LP"):
+        pool_name = pool_name[:-3]
+    
     # Extract token data from the tokens array
     tokens = api_pool.get("tokens", [])
     token1 = tokens[0] if len(tokens) > 0 else {}
     token2 = tokens[1] if len(tokens) > 1 else {}
     
-    # Extract token symbols
-    token1_symbol = token1.get("symbol", "Unknown")
-    token2_symbol = token2.get("symbol", "Unknown")
+    # Extract token symbols - these should always be present in valid API responses
+    token1_symbol = token1.get("symbol", "")
+    token2_symbol = token2.get("symbol", "")
     
-    # Extract metrics from the metrics object
-    metrics = api_pool.get("metrics", {})
+    # If we don't have proper token symbols from the API, construct the name from them
+    if not pool_name and token1_symbol and token2_symbol:
+        pool_name = f"{token1_symbol}-{token2_symbol}"
+    elif not pool_name:
+        # If we still don't have a name, this is not a valid pool for prediction
+        logging.error(f"Pool with ID {pool_id} has no name or token symbols")
+        return None
     
     # Determine category based on token symbols
     category = determine_category(token1_symbol, token2_symbol)
     
-    # Use the base58 encoded pool ID or the program ID as fallback
-    # If metrics contains ammId, use that as the pool ID
-    base58_id = ""
-    if "extraData" in metrics and "ammId" in metrics["extraData"]:
-        base58_id = metrics["extraData"]["ammId"]
-    else:
-        base58_id = api_pool.get("programId", "") or api_pool.get("poolId", "")
+    # Get TVL directly from API
+    tvl = api_pool.get("tvl", 0)
     
-    # Ensure we have a valid base58 ID - must be at least 32 chars for Solana addresses
-    if len(base58_id) < 32:
-        # Use a fallback strategy to construct an ID that will be consistent
-        # This ensures pools can be tracked properly
-        from hashlib import sha256
-        import base58
-        
-        # Create a composite key that uniquely identifies this pool
-        composite = f"{api_pool.get('source', '')}-{token1_symbol}-{token2_symbol}-{api_pool.get('poolId', '')}"
-        
-        # Hash it and encode as base58
-        hash_bytes = sha256(composite.encode('utf-8')).digest()
-        base58_id = base58.b58encode(hash_bytes).decode('utf-8')
+    # Get APR values from API
+    apr_24h = api_pool.get("apr24h", 0)
+    apr_7d = api_pool.get("apr7d", 0)
+    apr_30d = api_pool.get("apr30d", 0)
     
-    # Calculate APR change if possible
-    apr_24h = metrics.get("apy24h", 0)
-    apr_7d = metrics.get("apy7d", 0)
-    apr_prev_24h = metrics.get("prevApy24h", 0)  # Previous 24h APR if available
-    
-    apr_change_24h = 0  # Default value
-    apr_change_7d = 0   # Default value
-    
-    # Calculate 24h APR change if we have previous 24h data
-    if apr_24h != 0 and apr_prev_24h != 0:
-        apr_change_24h = apr_24h - apr_prev_24h
-    
-    # Calculate 7d APR change if we have both current and 7d values
+    # Calculate APR changes
+    apr_change_24h = 0
     if apr_24h != 0 and apr_7d != 0:
-        apr_change_7d = apr_24h - apr_7d
-        
-    # Log for debugging
-    logging.debug(f"Pool {token1_symbol}-{token2_symbol} APR: current={apr_24h}, prev24h={apr_prev_24h}, 7d={apr_7d}, change24h={apr_change_24h}, change7d={apr_change_7d}")
+        # Estimate 24h change as a fraction of the 7d change
+        apr_change_24h = (apr_24h - apr_7d) / 7
+    
+    apr_change_7d = 0
+    if apr_7d != 0 and apr_30d != 0:
+        # Use difference between 7d and 30d APR for weekly change
+        apr_change_7d = apr_7d - apr_30d
+    
+    # Get volume from API
+    volume_24h = api_pool.get("volumeUsd", 0)
+    
+    # Get fee percentage
+    fee_rate = api_pool.get("fee", 0) * 100  # Convert to percentage
+    
+    # Get additional token info
+    token1_price = token1.get("price", 0)
+    token2_price = token2.get("price", 0)
+    token1_address = token1.get("address", "")
+    token2_address = token2.get("address", "")
+    
+    # Set token reserves when available
+    token1_reserve = 0
+    token2_reserve = 0
+    reserves = api_pool.get("reserves", {})
+    if reserves and token1_symbol in reserves:
+        token1_reserve = reserves[token1_symbol]
+    if reserves and token2_symbol in reserves:
+        token2_reserve = reserves[token2_symbol]
     
     # Create a unified pool data structure compatible with our application
     return {
-        "id": base58_id,  # Use base58 encoded ID
-        "name": f"{token1_symbol}-{token2_symbol}",  # Simple name without LP suffix
+        "id": pool_id,  # Use authentic base58-encoded ID directly from API
+        "name": pool_name,  # Use name from API with LP suffix removed
         "dex": api_pool.get("source", "Unknown"),
-        "liquidity": metrics.get("tvl", 0),
-        "volume_24h": metrics.get("volumeUsd", 0),
-        "apr": metrics.get("apy24h", 0),
+        "liquidity": tvl,
+        "volume_24h": volume_24h,
+        "apr": apr_24h,
         "apr_change_24h": apr_change_24h,
         "apr_change_7d": apr_change_7d,
-        "fee_rate": metrics.get("fee", 0) * 100 if metrics.get("fee") else 0,  # Convert to percentage
+        "fee_rate": fee_rate,
         "token1_symbol": token1_symbol,
         "token2_symbol": token2_symbol,
-        "token1_reserve": 0,  # Not provided in this API format
-        "token2_reserve": 0,  # Not provided in this API format
-        "token1_price": token1.get("price", 0),
-        "token2_price": token2.get("price", 0),
+        "token1_reserve": token1_reserve,
+        "token2_reserve": token2_reserve,
+        "token1_price": token1_price,
+        "token2_price": token2_price,
         "token1_decimals": token1.get("decimals", 9),
         "token2_decimals": token2.get("decimals", 9),
-        "token1_address": token1.get("address", ""),
-        "token2_address": token2.get("address", ""),
+        "token1_address": token1_address,
+        "token2_address": token2_address,
         "category": category,
         "data_source": "Real-time DeFi API",
-        "prediction_score": calculate_prediction_score(api_pool, metrics),
-        "last_updated": metrics.get("timestamp", api_pool.get("updatedAt", "")),
-        "program_id": api_pool.get("programId", ""),  # Additional useful data
+        "prediction_score": calculate_prediction_score(api_pool),
+        "last_updated": api_pool.get("updatedAt", ""),
     }
 
 
@@ -295,13 +313,12 @@ def determine_category(token1_symbol: str, token2_symbol: str) -> str:
     return "Other"
 
 
-def calculate_prediction_score(pool_data: Dict[str, Any], metrics: Optional[Dict[str, Any]] = None) -> float:
+def calculate_prediction_score(pool_data: Dict[str, Any]) -> float:
     """
     Calculate a prediction score for a pool based on various metrics
     
     Args:
         pool_data: Pool data from the API
-        metrics: Metrics data from the API (optional)
         
     Returns:
         Prediction score between 0 and 100
@@ -309,11 +326,8 @@ def calculate_prediction_score(pool_data: Dict[str, Any], metrics: Optional[Dict
     # Base score starts at 50
     score = 50.0
     
-    # Use metrics object if provided, otherwise use pool_data directly
-    metrics_data = metrics if metrics else pool_data
-    
     # Add points for higher APR (up to 15 points)
-    apr = metrics_data.get("apy24h", 0)
+    apr = pool_data.get("apr24h", 0)  # Use the field name from API docs
     if apr > 100:
         score += 15
     elif apr > 50:
@@ -322,7 +336,7 @@ def calculate_prediction_score(pool_data: Dict[str, Any], metrics: Optional[Dict
         score += 5
     
     # Add points for higher TVL (up to 10 points)
-    tvl = metrics_data.get("tvl", 0)
+    tvl = pool_data.get("tvl", 0)
     if tvl > 1000000:  # $1M+
         score += 10
     elif tvl > 500000:  # $500K+
@@ -331,7 +345,7 @@ def calculate_prediction_score(pool_data: Dict[str, Any], metrics: Optional[Dict
         score += 5
     
     # Add points for higher volume (up to 10 points)
-    volume = metrics_data.get("volumeUsd", 0)
+    volume = pool_data.get("volumeUsd", 0)
     if volume > 500000:  # $500K+
         score += 10
     elif volume > 100000:  # $100K+
@@ -340,16 +354,17 @@ def calculate_prediction_score(pool_data: Dict[str, Any], metrics: Optional[Dict
         score += 5
     
     # Add points for APR stability or growth (up to 10 points)
-    # Compare apy24h and apy7d
-    apr_24h = metrics_data.get("apy24h", 0)
-    apr_7d = metrics_data.get("apy7d", 0)
+    # Compare apr24h and apr7d from API
+    apr_24h = pool_data.get("apr24h", 0)
+    apr_7d = pool_data.get("apr7d", 0)
     
-    if apr_24h > apr_7d * 1.05:  # 5% increase
-        score += 10  # Strong uptrend
-    elif apr_24h > apr_7d:
-        score += 7   # Moderate uptrend
-    elif apr_24h > apr_7d * 0.95:
-        score += 5   # Stable
+    if apr_24h and apr_7d:  # Only compare if both values exist
+        if apr_24h > apr_7d * 1.05:  # 5% increase
+            score += 10  # Strong uptrend
+        elif apr_24h > apr_7d:
+            score += 7   # Moderate uptrend
+        elif apr_24h > apr_7d * 0.95:
+            score += 5   # Stable
     
     # Add points for having a popular token (up to 5 points)
     tokens = pool_data.get("tokens", [])
@@ -367,6 +382,16 @@ def calculate_prediction_score(pool_data: Dict[str, Any], metrics: Optional[Dict
         score += 4
     elif dex == "meteora":
         score += 3
+    
+    # Add points for fee structure (lower fees are better for traders, up to 5 points)
+    fee = pool_data.get("fee", 0)
+    if fee > 0:  # Only if fee information is available
+        if fee <= 0.001:  # 0.1% or less
+            score += 5
+        elif fee <= 0.002:  # 0.2% or less
+            score += 3
+        elif fee <= 0.003:  # 0.3% or less
+            score += 1
     
     # Cap the score at 100
     return min(score, 100.0)

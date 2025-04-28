@@ -73,12 +73,16 @@ class DefiPoolFetcher:
             logger.info(f"Retrieved {len(api_pools)} pools from DeFi API")
             
             # Transform API data to our application format
-            transformed_pools = [transform_pool_data(pool) for pool in api_pools]
+            transformed_pools = []
+            for pool in api_pools:
+                pool_data = transform_pool_data(pool)
+                if pool_data:  # Only include non-None values (valid pool data)
+                    pool_data["data_source"] = "Real-time DeFi API"
+                    transformed_pools.append(pool_data)
+                else:
+                    logger.warning(f"Skipping invalid pool data: missing required fields")
             
-            # Add data source to all pools
-            for pool in transformed_pools:
-                pool["data_source"] = "Real-time DeFi API"
-            
+            logger.info(f"Successfully transformed {len(transformed_pools)} out of {len(api_pools)} pools")
             return transformed_pools
             
         except Exception as e:
@@ -112,8 +116,11 @@ class DefiPoolFetcher:
             
             # Transform API data to our application format
             transformed_pool = transform_pool_data(pool_data)
+            if not transformed_pool:
+                logger.warning(f"Could not transform pool {pool_id}: missing required fields")
+                return None
+                
             transformed_pool["data_source"] = "Real-time DeFi API"
-            
             return transformed_pool
             
         except Exception as e:
