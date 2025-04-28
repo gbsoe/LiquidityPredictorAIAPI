@@ -153,9 +153,9 @@ class AlternativePoolFetcher:
         Args:
             rpc_endpoint: Solana RPC endpoint
         """
-        # Hardcode the proper Helius endpoint directly to avoid environment variable issues
-        self.rpc_endpoint = "https://mainnet.helius-rpc.com/?api-key=1d54c390-7463-4f14-9995-f264140a5993"
-        logger.info(f"Using Helius RPC endpoint: {self.rpc_endpoint[:30]}...{self.rpc_endpoint[-15:]}")
+        # Use the provided RPC endpoint or get from environment
+        self.rpc_endpoint = rpc_endpoint or os.getenv("SOLANA_RPC_ENDPOINT", "YOUR_SOLANA_RPC_ENDPOINT")
+        logger.info(f"Using RPC endpoint: {self.rpc_endpoint[:30]}...{self.rpc_endpoint[-15:] if len(self.rpc_endpoint) > 30 else ''}")
             
         # Initialize session
         self.session = requests.Session()

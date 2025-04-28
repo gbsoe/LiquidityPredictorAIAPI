@@ -201,10 +201,8 @@ def fetch_live_data_from_blockchain():
                 st.error("No valid RPC endpoint configured. Please set up your RPC endpoint in the sidebar.")
                 return None
                 
-            # Format Helius API key if needed
-            if len(custom_rpc) == 36 and custom_rpc.count('-') == 4:
-                # This looks like a Helius API key (UUID format)
-                custom_rpc = f"https://mainnet.helius-rpc.com/?api-key={custom_rpc}"
+            # Use the custom RPC endpoint directly
+            # No specific provider formatting needed
             
             # First try using the alternative pool fetcher (more reliable with Helius API limitations)
             try:
@@ -213,9 +211,8 @@ def fetch_live_data_from_blockchain():
                 
                 st.info("Using alternative fetcher to bypass API limitations...")
                 
-                # Initialize fetcher with our API endpoint
-                # Note: The fetcher has a hardcoded Helius endpoint that matches our .env file
-                fetcher = AlternativePoolFetcher()
+                # Initialize fetcher with our custom RPC endpoint
+                fetcher = AlternativePoolFetcher(rpc_endpoint=custom_rpc)
                 
                 # Fetch a reasonable number of pools
                 pool_dicts = fetcher.fetch_pools(limit=10)
@@ -417,8 +414,8 @@ def load_data():
                     
                     st.info("Using alternative fetcher as fallback...")
                     
-                    # Initialize fetcher with our API endpoint
-                    fetcher = AlternativePoolFetcher()
+                    # Initialize fetcher with our custom RPC endpoint
+                    fetcher = AlternativePoolFetcher(rpc_endpoint=custom_rpc)
                     
                     # Fetch a reasonable number of pools
                     with st.spinner("Fetching pool data using fallback fetcher..."):
