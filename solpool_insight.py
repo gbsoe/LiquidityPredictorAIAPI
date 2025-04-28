@@ -547,71 +547,20 @@ def main():
     with st.sidebar:
         st.sidebar.title("SolPool Insight")
         
-        # Add Data Source Section - Critical Feature
-        st.sidebar.header("Data Source Settings")
-        
-        # Default to force live data if SOLANA_RPC_ENDPOINT is set
+        # Set defaults for data source
         rpc_endpoint = os.getenv("SOLANA_RPC_ENDPOINT")
         has_valid_rpc = rpc_endpoint and len(rpc_endpoint) > 5
         
-        # Always show the RPC status
-        if has_valid_rpc:
-            st.sidebar.success("✓ Solana RPC Endpoint configured")
-        else:
-            st.sidebar.warning("⚠️ No valid RPC endpoint configured")
-        
-        # Always show the checkbox for live data (critical feature)
-        # Default to True to always try to get live data
-        force_live_data = st.sidebar.checkbox(
-            "Use live blockchain data", 
-            value=True,
-            help="When checked, attempts to fetch fresh data from blockchain (RECOMMENDED)"
-        )
-        
-        # Store in session state so it's accessible in load_data
-        st.session_state['force_live_data'] = force_live_data
+        # Default to always try to use live data
+        st.session_state['force_live_data'] = True
         
         # Store default pool count in session state in case it's needed
         st.session_state['pool_count'] = 15
         
-        # Add advanced options
-        with st.sidebar.expander("Advanced RPC Options"):
-            use_custom_rpc = st.checkbox("Use custom RPC endpoint", value=False)
-            
-            if use_custom_rpc:
-                custom_rpc = st.text_input(
-                    "Solana RPC Endpoint", 
-                    value=os.getenv("SOLANA_RPC_ENDPOINT", ""),
-                    help="Enter a Solana RPC endpoint URL (required for authentic data retrieval)",
-                    placeholder="https://your-rpc-endpoint.com"
-                )
-                if st.button("Save Endpoint"):
-                    # Save to .env file for persistence
-                    try:
-                        with open(".env", "r+") as f:
-                            content = f.read()
-                            f.seek(0)
-                            if "SOLANA_RPC_ENDPOINT=" in content:
-                                # Replace the existing endpoint
-                                new_content = []
-                                for line in content.split("\n"):
-                                    if line.startswith("SOLANA_RPC_ENDPOINT="):
-                                        new_content.append(f"SOLANA_RPC_ENDPOINT={custom_rpc}")
-                                    else:
-                                        new_content.append(line)
-                                f.write("\n".join(new_content))
-                                f.truncate()
-                            else:
-                                # Add new endpoint
-                                f.seek(0, 2)  # Go to end of file
-                                f.write(f"\nSOLANA_RPC_ENDPOINT={custom_rpc}\n")
-                            st.success("RPC endpoint updated in environment")
-                    except Exception as e:
-                        st.warning(f"Could not save endpoint to .env: {e}")
-            else:
-                custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", "")
+        # Get RPC endpoint from environment variables
+        custom_rpc = os.getenv("SOLANA_RPC_ENDPOINT", "")
                 
-        # Store the custom RPC in session state
+        # Store the RPC endpoint in session state
         st.session_state['custom_rpc'] = custom_rpc
         
         # Add data management section with clear data options
