@@ -34,6 +34,13 @@ import db_handler
 # Import token price service
 from token_price_service import get_token_price, get_multiple_prices
 
+# Import DeFi Aggregation API
+try:
+    from defi_aggregation_api import DefiAggregationAPI
+    HAS_DEFI_API = True
+except ImportError:
+    HAS_DEFI_API = False
+
 # Custom exception handler for the entire app
 def handle_exception(func):
     def wrapper(*args, **kwargs):
@@ -75,6 +82,37 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Start continuous data collection for better predictions
+def initialize_continuous_data_collection():
+    """Initialize continuous data collection on startup"""
+    if HAS_DEFI_API:
+        # Check if we have a DeFi API key
+        api_key = os.getenv("DEFI_API_KEY")
+        if api_key:
+            try:
+                # Initialize the API client
+                defi_api = DefiAggregationAPI(api_key=api_key)
+                
+                # Start the continuous data collection scheduler
+                # This runs in a background thread
+                defi_api.schedule_continuous_data_collection(interval_hours=6)
+                
+                logger.info("Initialized continuous data collection for better predictions")
+                return True
+            except Exception as e:
+                logger.error(f"Failed to initialize continuous data collection: {str(e)}")
+                return False
+        else:
+            logger.warning("No DeFi API key found, skipping continuous data collection")
+            return False
+    else:
+        logger.warning("DefiAggregationAPI not available, skipping continuous data collection")
+        return False
+        
+# Run initialization if this is the first time
+if 'initialized_data_collection' not in st.session_state:
+    st.session_state.initialized_data_collection = initialize_continuous_data_collection()
 
 # Formatting helper functions
 def format_currency(value):

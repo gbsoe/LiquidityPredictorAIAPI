@@ -308,6 +308,89 @@ def backup_to_json(pools, filename='extracted_pools.json'):
         print(f"Successfully backed up {len(pools)} pools to {filename}")
     except Exception as e:
         print(f"Error backing up data to {filename}: {e}")
+        
+# Define the PoolHistoricalData model for tracking historical metrics
+class PoolHistoricalData(Base):
+    """SQLAlchemy model for historical pool metrics data"""
+    __tablename__ = 'pool_price_history'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    pool_id = Column(String, nullable=False)
+    timestamp = Column(String, nullable=False)
+    liquidity = Column(Float, nullable=False, default=0)
+    volume_24h = Column(Float, nullable=False, default=0)
+    apr_24h = Column(Float, nullable=False, default=0)
+    apr_7d = Column(Float, nullable=False, default=0)
+    apr_30d = Column(Float, nullable=False, default=0)
+    token1_price = Column(Float, nullable=False, default=0)
+    token2_price = Column(Float, nullable=False, default=0)
+    
+    def __repr__(self):
+        return f"<PoolHistoricalData(pool_id='{self.pool_id}', timestamp='{self.timestamp}')>"
+
+# Function to store historical pool data for better predictions
+def store_historical_pool_data(historical_records):
+    """
+    Store historical pool data for analysis and prediction.
+    
+    This function stores time-series data for each pool, allowing the system
+    to build up historical performance data for better predictive analytics.
+    
+    Args:
+        historical_records: List of dictionaries with historical data points
+        
+    Returns:
+        Number of records stored
+    """
+    if not engine:
+        print("Database connection not available")
+        return 0
+    
+    # Initialize database schema if needed
+    try:
+        Base.metadata.create_all(engine)
+    except Exception as e:
+        print(f"Error ensuring schema for historical data: {e}")
+        return 0
+    
+    # Create a session
+    session = Session()
+    
+    count = 0
+    try:
+        for record in historical_records:
+            try:
+                # Create a new historical data entry
+                new_record = PoolHistoricalData(
+                    pool_id=record.get("pool_id", ""),
+                    timestamp=record.get("timestamp", ""),
+                    liquidity=record.get("liquidity", 0),
+                    volume_24h=record.get("volume_24h", 0),
+                    apr_24h=record.get("apr_24h", 0),
+                    apr_7d=record.get("apr_7d", 0),
+                    apr_30d=record.get("apr_30d", 0),
+                    token1_price=record.get("token1_price", 0),
+                    token2_price=record.get("token2_price", 0)
+                )
+                
+                session.add(new_record)
+                count += 1
+                
+            except Exception as e:
+                print(f"Error processing historical record for pool {record.get('pool_id', 'unknown')}: {e}")
+                continue
+                
+        # Commit changes
+        session.commit()
+        print(f"Successfully stored {count} historical pool records")
+        return count
+        
+    except Exception as e:
+        session.rollback()
+        print(f"Error storing historical pool data: {e}")
+        return 0
+    finally:
+        session.close()
 
 # Function to load data from JSON file
 def load_from_json(filename='extracted_pools.json'):
