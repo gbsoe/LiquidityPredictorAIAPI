@@ -31,12 +31,12 @@ class DefiApiClient:
         if not self.api_key:
             raise ValueError("No API key provided. Set the DEFI_API_KEY environment variable or pass it explicitly.")
         
-        self.base_url = base_url or "https://defi-aggregation-api.solana.com/v1"
+        self.base_url = base_url or "https://filotdefiapi.replit.app/api/v1"
         
         # Create a session for better performance
         self.session = requests.Session()
         self.session.headers.update({
-            "x-api-key": self.api_key,
+            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         })
     
@@ -60,7 +60,14 @@ class DefiApiClient:
             try:
                 response = self.session.get(url, params=params, timeout=15)
                 response.raise_for_status()
-                return response.json()
+                
+                # Parse the JSON response
+                result = response.json()
+                
+                # Rate-limit ourselves to respect the 10 req/sec API limit
+                time.sleep(0.1)
+                
+                return result
             except requests.exceptions.RequestException as e:
                 if (
                     hasattr(e, 'response') and 

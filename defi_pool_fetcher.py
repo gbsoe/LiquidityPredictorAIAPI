@@ -59,12 +59,17 @@ class DefiPoolFetcher:
                 order="desc"     # Highest APR first
             )
             
-            # Extract pools list from response
-            if "pools" not in response or not response["pools"]:
-                logger.warning("No pools returned from API")
+            # Check the response format - it might be a list or an object with 'pools' property
+            if isinstance(response, list):
+                # Direct list of pools
+                api_pools = response
+            elif isinstance(response, dict) and "pools" in response:
+                # Object with 'pools' property
+                api_pools = response["pools"]
+            else:
+                logger.warning("Unexpected API response format or no pools returned")
                 return []
             
-            api_pools = response["pools"]
             logger.info(f"Retrieved {len(api_pools)} pools from DeFi API")
             
             # Transform API data to our application format

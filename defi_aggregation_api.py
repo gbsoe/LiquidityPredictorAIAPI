@@ -6,23 +6,28 @@ authentic on-chain data about Solana liquidity pools across various DEXes
 including Raydium, Meteora, and Orca.
 
 Key features:
-- Rate-limited API requests to respect API constraints
+- Rate-limited API requests to respect API constraints (10 req/sec)
 - Pagination handling for large data sets
 - Data transformation to match application data model
 - Proper error handling with specific error messages
+- Bearer token authentication
 """
 
 import os
 import time
-import requests
-import logging
 import json
+import logging
+import requests
+from typing import Dict, List, Any, Optional
 from datetime import datetime
-from typing import List, Dict, Any, Optional
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("defi_api")
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    logger.addHandler(handler)
 
 class DefiAggregationAPI:
     """
@@ -38,14 +43,18 @@ class DefiAggregationAPI:
             api_key: API key for authentication (defaults to DEFI_API_KEY env var)
             base_url: Base URL for the API (defaults to standard URL)
         """
+        # Use provided API key or get from environment
         self.api_key = api_key or os.getenv("DEFI_API_KEY")
         if not self.api_key:
-            raise ValueError("No API key provided. Set DEFI_API_KEY environment variable.")
-            
-        self.base_url = base_url or "https://filotdefiapi.replit.app/api/v1"
-        self.request_delay = 0.15  # Delay between requests to avoid rate limiting (6-7 requests/second)
+            raise ValueError("API key is required. Set DEFI_API_KEY environment variable or provide api_key parameter.")
         
-        # Headers for authentication - using Bearer format which we found works
+        # Configure base URL
+        self.base_url = base_url or "https://filotdefiapi.replit.app/api/v1"
+        
+        # Configure request delay for rate limiting (10 req/sec)
+        self.request_delay = 0.1  # 100ms delay for 10 requests per second 
+        
+        # Set authentication headers - using Bearer token format
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
@@ -53,7 +62,7 @@ class DefiAggregationAPI:
         
         logger.info(f"DeFi Aggregation API client initialized with base URL: {self.base_url}")
     
-    def _make_request(self, endpoint: str, params: Dict[str, Any] = None) -> Any:
+    def _make_request(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
         """
         Make a rate-limited request to the API.
         
@@ -240,6 +249,7 @@ class DefiAggregationAPI:
                 "token1_price": token1.get('price', 0),
                 "token2_price": token2.get('price', 0),
                 "fee_percentage": metrics.get('fee', pool.get('fee', 0)) * 100,  # Convert to percentage
+                "data_source": "Real-time DeFi API",
                 # Store the original object for reference and additional data
                 "raw_data": pool
             }
@@ -260,6 +270,7 @@ class DefiAggregationAPI:
                 "apr": 0,
                 "prediction_score": 0,
                 "category": "Unknown",
+                "data_source": "DeFi API (incomplete)",
             }
     
     def get_transformed_pools(self, max_pools: int = 500, **kwargs) -> List[Dict[str, Any]]:
@@ -296,12 +307,7 @@ class DefiAggregationAPI:
         """
         try:
             with open(filename, 'w') as f:
-                json.dump({
-                    "timestamp": datetime.now().isoformat(),
-                    "source": "DeFi Aggregation API",
-                    "count": len(pools),
-                    "pools": pools
-                }, f, indent=2)
+                json.dump(pools, f, indent=2)
             
             logger.info(f"Saved {len(pools)} pools to cache file: {filename}")
             return True
