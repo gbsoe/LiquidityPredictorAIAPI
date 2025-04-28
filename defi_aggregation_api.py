@@ -54,7 +54,7 @@ class DefiAggregationAPI:
         # Configure request delay for rate limiting (10 req/sec)
         self.request_delay = 0.1  # 100ms delay for 10 requests per second 
         
-        # Set authentication headers - using Bearer token format
+        # Set authentication headers - using Bearer token format as specified in the updated API docs
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
@@ -109,27 +109,28 @@ class DefiAggregationAPI:
         except requests.exceptions.RequestException as e:
             raise ValueError(f"Network error: {str(e)}")
     
-    def get_pools(self, limit: int = 50, page: int = 1, 
+    def get_pools(self, limit: int = 50, offset: int = 0, 
                  source: Optional[str] = None, token: Optional[str] = None,
                  sort: Optional[str] = None, order: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Get liquidity pools with optional filtering.
         
         Args:
-            limit: Number of pools to retrieve per page
-            page: Page number for pagination
-            source: Filter by DEX source (e.g., "Raydium", "Meteora", "Orca")
+            limit: Number of pools to retrieve per page (max per docs)
+            offset: Offset for pagination (from updated API docs)
+            source: Filter by DEX source (e.g., "raydium", "meteora", "orca") - lowercase per docs
             token: Filter by token symbol
-            sort: Field to sort by (e.g., "apr24h", "tvl")
+            sort: Field to sort by (e.g., "tvl", "apy")
             order: Sort order ("asc" or "desc")
             
         Returns:
             List of pool data
         """
-        params: Dict[str, Any] = {"limit": limit, "page": page}
+        # Updated params based on API docs
+        params: Dict[str, Any] = {"limit": limit, "offset": offset}
         
         if source:
-            params["source"] = source
+            params["source"] = source.lower()  # API expects lowercase DEX names
         if token:
             params["token"] = token
         if sort:
@@ -138,14 +139,19 @@ class DefiAggregationAPI:
             params["order"] = order
         
         try:
-            # Note: From testing we found the API returns a list directly, not an object with a 'pools' property
+            # Based on updated docs, API returns dict with 'pools' property
             result = self._make_request("pools", params)
-            if isinstance(result, list):
-                return result
-            elif isinstance(result, dict) and "pools" in result:
+            
+            # Handle different response formats
+            if isinstance(result, dict) and "pools" in result:
+                logger.info(f"Received {len(result.get('pools', []))} pools from API")
                 return result.get("pools", [])
+            elif isinstance(result, list):
+                logger.info(f"Received {len(result)} pools directly as list")
+                return result
             else:
                 logger.warning(f"Unexpected API response format: {type(result)}")
+                logger.debug(f"Response content: {json.dumps(result)[:200]}...")
                 return []
         except ValueError as e:
             logger.error(f"Failed to get pools: {str(e)}")
@@ -163,15 +169,15 @@ class DefiAggregationAPI:
             List of all retrieved pools
         """
         all_pools = []
-        page = 1
+        offset = 0
         per_page = 10  # Smaller batch size to avoid rate limits
         
         logger.info(f"Fetching up to {max_pools} pools with rate limiting...")
         
         while len(all_pools) < max_pools:
             try:
-                # Get a batch of pools
-                pools = self.get_pools(limit=per_page, page=page, **kwargs)
+                # Get a batch of pools using offset-based pagination
+                pools = self.get_pools(limit=per_page, offset=offset, **kwargs)
                 
                 if not pools:
                     logger.info("No more pools to fetch or error occurred")
@@ -184,7 +190,8 @@ class DefiAggregationAPI:
                 if len(pools) < per_page:
                     break
                 
-                page += 1
+                # Increment offset for next page
+                offset += per_page
                 
             except Exception as e:
                 logger.error(f"Error fetching pools batch: {str(e)}")
@@ -229,12 +236,13 @@ class DefiAggregationAPI:
             metrics = pool.get('metrics', {})
             
             # Get the authentic pool ID (base58 format)
-            pool_id = pool.get('poolId', '')
+            pool_id = pool.get('pool_id', pool.get('poolId', ''))
             
-            # Extract APR metrics for different time periods
-            apr_24h = pool.get('apr24h', metrics.get('apr24h', 0))
-            apr_7d = pool.get('apr7d', metrics.get('apr7d', 0))
-            apr_30d = pool.get('apr30d', metrics.get('apr30d', 0))
+            # Extract APR metrics for different time periods from the apy object or fallback fields
+            apy = pool.get('apy', {})
+            apr_24h = apy.get('24h', pool.get('apr24h', metrics.get('apr24h', 0)))
+            apr_7d = apy.get('7d', pool.get('apr7d', metrics.get('apr7d', 0)))
+            apr_30d = apy.get('30d', pool.get('apr30d', metrics.get('apr30d', 0)))
             
             # Calculate APR changes between time periods
             apr_change_24h = 0  # Default since we don't have prior day's data

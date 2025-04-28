@@ -1,0 +1,222 @@
+DeFi API Hub — Client Dashboard
+Quick links:
+
+API Documentation
+
+A comprehensive guide for integrating with the DeFi API.
+Download as PDF • Manage API Keys
+
+
+---
+
+📑 Quick Navigation
+
+Getting Started
+
+Authentication
+
+Rate Limits
+
+API Endpoints
+
+Error Handling
+
+Code Examples
+
+Interactive Playground
+
+FAQ
+
+
+
+---
+
+Getting Started
+
+Welcome to the DeFi API Hub! Retrieve on-chain data from Raydium, Meteora, Orca, and more.
+
+1. Generate an API Key
+Visit the API Keys page and click Create New Key.
+
+
+2. Include Your API Key
+Add the key as a Bearer token in your HTTP headers:
+
+Authorization: Bearer YOUR_API_KEY
+
+
+3. Make Your First Request
+
+curl -X GET "https://filotdefiapi.replit.app/api/v1/pools" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+
+
+Base URL
+
+https://filotdefiapi.replit.app/api/v1
+
+
+---
+
+Authentication
+
+All endpoints require a valid API key in the Authorization header.
+
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+     "https://filotdefiapi.replit.app/api/v1/pools"
+
+> Keep your API keys secret: do not embed them in client-side code.
+Manage, disable, or revoke keys on the API Keys page.
+
+
+
+
+---
+
+Rate Limits
+
+To ensure fair use, we enforce rate limits:
+
+Response headers
+
+X-RateLimit-Limit: Max requests per window
+
+X-RateLimit-Remaining: Remaining requests
+
+X-RateLimit-Reset: UNIX timestamp when window resets
+
+
+> Exceeding limits returns 429 Too Many Requests.
+
+
+
+
+---
+
+API Endpoints
+
+Pools
+
+Retrieve data on liquidity pools.
+
+Example — List Pools
+
+curl -X GET "https://filotdefiapi.replit.app/api/v1/pools" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer YOUR_API_KEY"
+
+Sample Response
+
+{
+  "pools": [
+    {
+      "pool_id": "RAYUSDC",
+      "program_id": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "source": "raydium",
+      "name": "RAY-USDC LP",
+      "tokens": [
+        {
+          "symbol": "RAY",
+          "name": "Raydium",
+          "decimals": 6,
+          "address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+          "price": 1.23
+        },
+        {
+          "symbol": "USDC",
+          "name": "USD Coin",
+          "decimals": 6,
+          "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "price": 1.00
+        }
+      ],
+      "tvl": 5234789.45,
+      "fee": 0.0025,
+      "apy": { "24h": 12.45, "7d": 11.87, "30d": 10.92 },
+      "volume_usd": 1245678.91,
+      "timestamp": "2023-11-10T15:23:42Z"
+    }
+  ]
+}
+
+Common Query Parameters
+| Parameter | Description                                    | Example          | |-----------|------------------------------------------------|------------------| | source  | Filter by DEX (raydium, meteora, orca)         | ?source=raydium| | limit   | Max number of items to return                  | ?limit=10      | | offset  | Pagination offset                              | ?offset=20     | | sort    | Field to sort by                               | ?sort=tvl      | | order   | Sort direction (asc or desc)               | ?order=desc    |
+
+
+---
+
+Error Handling
+
+The API uses standard HTTP status codes. Errors include a "message" and optional "errors" array.
+
+Error Response Example
+
+{
+  "message": "Invalid pool ID",
+  "errors": [
+    {
+      "field": "poolId",
+      "message": "Pool ID must be a valid string"
+    }
+  ]
+}
+
+
+---
+
+Code Examples
+
+Python
+
+import os
+import requests
+
+API_KEY  = os.getenv('DEFI_API_KEY', 'YOUR_API_KEY')
+BASE_URL = 'https://filotdefiapi.replit.app/api/v1'
+
+def fetch_pools():
+    headers = {
+        'Authorization': f'Bearer {API_KEY}',
+        'Content-Type': 'application/json'
+    }
+    resp = requests.get(f'{BASE_URL}/pools', headers=headers)
+    resp.raise_for_status()
+    return resp.json()
+
+def fetch_token_price(symbol):
+    headers = {
+        'Authorization': f'Bearer {API_KEY}',
+        'Content-Type': 'application/json'
+    }
+    resp = requests.get(f'{BASE_URL}/tokens?symbol={symbol}', headers=headers)
+    resp.raise_for_status()
+    return resp.json()
+
+if __name__ == '__main__':
+    print(fetch_pools())
+    print(fetch_token_price('SOL'))
+
+(Additional examples for JavaScript and Go are available in the full docs.)
+
+
+---
+
+Interactive Playground
+
+Experiment with endpoints directly in your browser:
+
+1. Enter your API key.
+
+
+2. Select an endpoint and method.
+
+
+3. Add any query parameters.
+
+
+4. Execute to see live responses.
+
+
+
+> Navigate to the API Playground section on the documentation page to try it out.
