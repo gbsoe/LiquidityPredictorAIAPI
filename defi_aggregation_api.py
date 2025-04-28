@@ -48,8 +48,9 @@ class DefiAggregationAPI:
         if not self.api_key:
             raise ValueError("API key is required. Set DEFI_API_KEY environment variable or provide api_key parameter.")
         
-        # Configure base URL
+        # Configure base URL - using the base URL from the documentation
         self.base_url = base_url or "https://filotdefiapi.replit.app/api/v1"
+        logger.info(f"Using API base URL: {self.base_url}")
         
         # Configure request delay for rate limiting (10 req/sec)
         self.request_delay = 0.1  # 100ms delay for 10 requests per second 
@@ -82,18 +83,40 @@ class DefiAggregationAPI:
             params = {}
             
         try:
+            # Log the full request URL and headers for debugging
+            logger.info(f"Making API request to URL: {url}")
+            logger.info(f"With params: {params}")
+            
             response = requests.get(url, headers=self.headers, params=params)
             
             # Introduce delay to respect rate limits
             time.sleep(self.request_delay)
             
             if response.status_code == 200:
-                return response.json()
+                try:
+                    result = response.json()
+                    logger.info(f"Received successful response from API: {url}")
+                    
+                    # Log a sample of the response structure for debugging
+                    if isinstance(result, dict):
+                        logger.info(f"Response is a dictionary with keys: {list(result.keys())}")
+                    elif isinstance(result, list):
+                        logger.info(f"Response is a list with {len(result)} items")
+                        if len(result) > 0:
+                            logger.info(f"First item sample keys: {list(result[0].keys()) if isinstance(result[0], dict) else 'not a dict'}")
+                    
+                    return result
+                except ValueError as e:
+                    logger.error(f"Error parsing JSON response: {str(e)}")
+                    raise ValueError(f"Invalid JSON response: {str(e)}")
             elif response.status_code == 401:
+                logger.error("API authentication failed. Check API key.")
                 raise ValueError("API authentication failed. Check your API key.")
             elif response.status_code == 429:
+                logger.error("API rate limit exceeded.")
                 raise ValueError("API rate limit exceeded. Please try again later.")
             elif response.status_code == 404:
+                logger.error(f"Resource not found: {endpoint}")
                 raise ValueError(f"Resource not found: {endpoint}")
             else:
                 error_message = f"API request failed with status code {response.status_code}"
@@ -104,6 +127,7 @@ class DefiAggregationAPI:
                 except:
                     error_message = f"{error_message}: {response.text}"
                 
+                logger.error(error_message)
                 raise ValueError(error_message)
                 
         except requests.exceptions.RequestException as e:
