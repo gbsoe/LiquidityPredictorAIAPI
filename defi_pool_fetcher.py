@@ -102,8 +102,12 @@ class DefiPoolFetcher:
             pool_data = self.client.get_pool_by_id(pool_id)
             
             # Check if pool data is valid
-            if not pool_data or "error" in pool_data:
-                logger.warning(f"Pool {pool_id} not found or error in response")
+            if not pool_data:
+                logger.warning(f"Pool {pool_id} not found or empty response")
+                return None
+                
+            if isinstance(pool_data, dict) and pool_data.get("error"):
+                logger.warning(f"Error in response for pool {pool_id}: {pool_data.get('error')}")
                 return None
             
             # Transform API data to our application format
@@ -132,12 +136,17 @@ class DefiPoolFetcher:
             # Get top pools by APR
             response = self.client.get_top_pools_by_apr(limit=limit)
             
-            # Extract pools list from response
-            if "pools" not in response or not response["pools"]:
-                logger.warning("No top pools returned from API")
+            # Check the response format - it might be a list or an object with 'pools' property
+            if isinstance(response, list):
+                # Direct list of pools
+                api_pools = response
+            elif isinstance(response, dict) and "pools" in response:
+                # Object with 'pools' property
+                api_pools = response["pools"]
+            else:
+                logger.warning("Unexpected API response format or no top pools returned")
                 return []
             
-            api_pools = response["pools"]
             logger.info(f"Retrieved {len(api_pools)} top pools from DeFi API")
             
             # Transform API data to our application format

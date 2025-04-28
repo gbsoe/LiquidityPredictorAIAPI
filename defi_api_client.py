@@ -176,39 +176,47 @@ def transform_pool_data(api_pool: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Transformed pool data
     """
+    # Extract token data from the tokens array
+    tokens = api_pool.get("tokens", [])
+    token1 = tokens[0] if len(tokens) > 0 else {}
+    token2 = tokens[1] if len(tokens) > 1 else {}
+    
     # Extract token symbols
-    token1_symbol = api_pool.get("token1", {}).get("symbol", "Unknown")
-    token2_symbol = api_pool.get("token2", {}).get("symbol", "Unknown")
+    token1_symbol = token1.get("symbol", "Unknown")
+    token2_symbol = token2.get("symbol", "Unknown")
+    
+    # Extract metrics from the metrics object
+    metrics = api_pool.get("metrics", {})
     
     # Determine category based on token symbols
     category = determine_category(token1_symbol, token2_symbol)
     
     # Create a unified pool data structure compatible with our application
     return {
-        "id": api_pool.get("address", ""),
-        "name": f"{token1_symbol}-{token2_symbol}",
+        "id": api_pool.get("poolId", ""),
+        "name": api_pool.get("name", f"{token1_symbol}-{token2_symbol}"),
         "dex": api_pool.get("source", "Unknown"),
-        "liquidity": api_pool.get("tvl", 0),
-        "volume_24h": api_pool.get("volume24h", 0),
-        "apr": api_pool.get("apr24h", 0),
-        "apr_change_24h": api_pool.get("aprChange24h", 0),
-        "apr_change_7d": api_pool.get("aprChange7d", 0),
-        "tvl_change_24h": api_pool.get("tvlChange24h", 0),
-        "fee_rate": api_pool.get("fee", 0) * 100 if "fee" in api_pool else 0,  # Convert to percentage
+        "liquidity": metrics.get("tvl", 0),
+        "volume_24h": metrics.get("volumeUsd", 0),
+        "apr": metrics.get("apy24h", 0),
+        "apr_change_24h": 0,  # Calculate from historical data if available
+        "apr_change_7d": metrics.get("apy7d", 0) - metrics.get("apy24h", 0) if metrics.get("apy7d") and metrics.get("apy24h") else 0,
+        "fee_rate": metrics.get("fee", 0) * 100 if metrics.get("fee") else 0,  # Convert to percentage
         "token1_symbol": token1_symbol,
         "token2_symbol": token2_symbol,
-        "token1_reserve": api_pool.get("token1Reserve", 0),
-        "token2_reserve": api_pool.get("token2Reserve", 0),
-        "token1_price": api_pool.get("token1", {}).get("price", 0),
-        "token2_price": api_pool.get("token2", {}).get("price", 0),
-        "token1_decimals": api_pool.get("token1", {}).get("decimals", 9),
-        "token2_decimals": api_pool.get("token2", {}).get("decimals", 9),
-        "token1_address": api_pool.get("token1", {}).get("address", ""),
-        "token2_address": api_pool.get("token2", {}).get("address", ""),
+        "token1_reserve": 0,  # Not provided in this API format
+        "token2_reserve": 0,  # Not provided in this API format
+        "token1_price": token1.get("price", 0),
+        "token2_price": token2.get("price", 0),
+        "token1_decimals": token1.get("decimals", 9),
+        "token2_decimals": token2.get("decimals", 9),
+        "token1_address": token1.get("address", ""),
+        "token2_address": token2.get("address", ""),
         "category": category,
         "data_source": "Real-time DeFi API",
-        "prediction_score": calculate_prediction_score(api_pool),
-        "last_updated": api_pool.get("lastUpdated", ""),
+        "prediction_score": calculate_prediction_score(api_pool, metrics),
+        "last_updated": metrics.get("timestamp", api_pool.get("updatedAt", "")),
+        "program_id": api_pool.get("programId", ""),  # Additional useful data
     }
 
 
@@ -241,12 +249,13 @@ def determine_category(token1_symbol: str, token2_symbol: str) -> str:
     return "Other"
 
 
-def calculate_prediction_score(pool_data: Dict[str, Any]) -> float:
+def calculate_prediction_score(pool_data: Dict[str, Any], metrics: Dict[str, Any] = None) -> float:
     """
     Calculate a prediction score for a pool based on various metrics
     
     Args:
         pool_data: Pool data from the API
+        metrics: Metrics data from the API (optional)
         
     Returns:
         Prediction score between 0 and 100
@@ -254,8 +263,11 @@ def calculate_prediction_score(pool_data: Dict[str, Any]) -> float:
     # Base score starts at 50
     score = 50.0
     
+    # Use metrics object if provided, otherwise use pool_data directly
+    metrics_data = metrics if metrics else pool_data
+    
     # Add points for higher APR (up to 15 points)
-    apr = pool_data.get("apr24h", 0)
+    apr = metrics_data.get("apy24h", 0)
     if apr > 100:
         score += 15
     elif apr > 50:
@@ -264,7 +276,7 @@ def calculate_prediction_score(pool_data: Dict[str, Any]) -> float:
         score += 5
     
     # Add points for higher TVL (up to 10 points)
-    tvl = pool_data.get("tvl", 0)
+    tvl = metrics_data.get("tvl", 0)
     if tvl > 1000000:  # $1M+
         score += 10
     elif tvl > 500000:  # $500K+
@@ -273,7 +285,7 @@ def calculate_prediction_score(pool_data: Dict[str, Any]) -> float:
         score += 5
     
     # Add points for higher volume (up to 10 points)
-    volume = pool_data.get("volume24h", 0)
+    volume = metrics_data.get("volumeUsd", 0)
     if volume > 500000:  # $500K+
         score += 10
     elif volume > 100000:  # $100K+
@@ -281,23 +293,34 @@ def calculate_prediction_score(pool_data: Dict[str, Any]) -> float:
     elif volume > 50000:  # $50K+
         score += 5
     
-    # Add points for positive APR change (up to 10 points)
-    apr_change_24h = pool_data.get("aprChange24h", 0)
-    if apr_change_24h > 5:
-        score += 10
-    elif apr_change_24h > 2:
-        score += 7
-    elif apr_change_24h > 0:
-        score += 5
+    # Add points for APR stability or growth (up to 10 points)
+    # Compare apy24h and apy7d
+    apr_24h = metrics_data.get("apy24h", 0)
+    apr_7d = metrics_data.get("apy7d", 0)
     
-    # Add points for positive TVL change (up to 5 points)
-    tvl_change_24h = pool_data.get("tvlChange24h", 0)
-    if tvl_change_24h > 5:
+    if apr_24h > apr_7d * 1.05:  # 5% increase
+        score += 10  # Strong uptrend
+    elif apr_24h > apr_7d:
+        score += 7   # Moderate uptrend
+    elif apr_24h > apr_7d * 0.95:
+        score += 5   # Stable
+    
+    # Add points for having a popular token (up to 5 points)
+    tokens = pool_data.get("tokens", [])
+    popular_tokens = ["SOL", "USDC", "ETH", "BTC", "RAY", "BONK", "mSOL"]
+    for token in tokens:
+        if token.get("symbol") in popular_tokens:
+            score += 2.5
+            break
+    
+    # Add points for DEX reputation (up to 5 points)
+    dex = pool_data.get("source", "").lower()
+    if dex == "raydium":
         score += 5
-    elif tvl_change_24h > 2:
+    elif dex == "orca":
+        score += 4
+    elif dex == "meteora":
         score += 3
-    elif tvl_change_24h > 0:
-        score += 1
     
     # Cap the score at 100
     return min(score, 100.0)
