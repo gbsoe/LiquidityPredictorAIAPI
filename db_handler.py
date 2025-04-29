@@ -234,47 +234,79 @@ def get_pools(limit=50):
     Returns:
         List of dictionaries containing pool data
     """
-    # Convert None to None type explicitly to satisfy type checking
-    if limit is not None and not isinstance(limit, int):
+    # For safety, use JSON backup if limit is None
+    if limit is None:
+        print("Using JSON backup for unlimited pool retrieval")
+        return load_from_json()
+        
+    # Convert limit to int if it's not already
+    if not isinstance(limit, int):
         try:
             limit = int(limit)
         except (ValueError, TypeError):
-            limit = None
+            # Default to 50 if conversion fails
+            limit = 50
+            
+    # Try to load from JSON file first if engine is not available
     if not engine:
         print("Database connection not available")
-        # Try to fallback to JSON file
         return load_from_json()
     
-    # Create a session
-    session = Session()
+    # Set a max tries for the database operation
+    max_tries = 3
+    tries = 0
+    last_error = None
     
-    try:
-        query = session.query(LiquidityPool)
+    while tries < max_tries:
+        # Create a fresh session for each attempt
+        session = Session()
         
-        if limit:
-            query = query.limit(limit)
+        try:
+            query = session.query(LiquidityPool)
             
-        pools = [pool.to_dict() for pool in query.all()]
-        print(f"Retrieved {len(pools)} pools from database")
-        
-        # If we got no pools from database, try JSON file as backup
-        if not pools:
+            if limit > 0:
+                query = query.limit(limit)
+                
+            pools = [pool.to_dict() for pool in query.all()]
+            print(f"Retrieved {len(pools)} pools from database")
+            
+            # If we got pools successfully, return them
+            if pools:
+                session.close()
+                return pools
+                
+            # No pools in database, try JSON file as backup
             print("No pools found in database, trying JSON file...")
             pools = load_from_json()
+            
             if pools:
-                # We found pools in JSON, try to save them back to database
+                # We found pools in JSON, try to save them back to database in a new session
                 try:
                     store_pools(pools)
                 except Exception as e:
                     print(f"Failed to save JSON data to database: {e}")
-        
-        return pools
-    except Exception as e:
-        print(f"Error retrieving pools from database: {e}")
-        # Fallback to JSON file
-        return load_from_json()
-    finally:
-        session.close()
+                    
+            session.close()
+            return pools
+            
+        except Exception as e:
+            last_error = e
+            print(f"Error retrieving pools from database (attempt {tries+1}/{max_tries}): {e}")
+            # Close the session safely in case of error
+            try:
+                session.close()
+            except:
+                pass
+                
+            tries += 1
+            # Wait a short time before retrying
+            import time
+            time.sleep(1)
+    
+    # If we get here, all retries failed
+    print(f"All database retrieval attempts failed. Last error: {last_error}")
+    # Fall back to JSON file
+    return load_from_json()
 
 # Function to convert DataFrame to pool data
 def dataframe_to_pools(df):
