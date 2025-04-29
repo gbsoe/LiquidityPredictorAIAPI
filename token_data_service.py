@@ -50,6 +50,10 @@ class TokenDataService:
         
         # Load token cache from file if available
         self._load_token_cache()
+        
+        # If no cache exists, initialize with default token data
+        if not self.token_cache:
+            self._initialize_default_token_data()
     
     def _load_token_cache(self) -> None:
         """Load token cache from file if it exists"""
@@ -62,6 +66,112 @@ class TokenDataService:
                     logger.info(f"Loaded token cache with {len(self.token_cache)} tokens from {self.token_cache_timestamp}")
         except Exception as e:
             logger.warning(f"Failed to load token cache: {str(e)}")
+            
+    def _initialize_default_token_data(self) -> None:
+        """Initialize default token data for common Solana tokens"""
+        logger.info("Initializing default token data")
+        
+        default_tokens = [
+            {
+                "symbol": "SOL",
+                "name": "Solana",
+                "address": "So11111111111111111111111111111111111111112",
+                "decimals": 9,
+                "price": 143.25,
+                "active": True,
+                "id": 1
+            },
+            {
+                "symbol": "USDC",
+                "name": "USD Coin",
+                "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                "decimals": 6,
+                "price": 1.0,
+                "active": True,
+                "id": 2
+            },
+            {
+                "symbol": "USDT",
+                "name": "Tether USD",
+                "address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+                "decimals": 6,
+                "price": 1.0,
+                "active": True,
+                "id": 3
+            },
+            {
+                "symbol": "mSOL",
+                "name": "Marinade Staked SOL",
+                "address": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+                "decimals": 9,
+                "price": 152.87,
+                "active": True,
+                "id": 4
+            },
+            {
+                "symbol": "BTC",
+                "name": "Bitcoin (Sollet)",
+                "address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
+                "decimals": 6,
+                "price": 68245.12,
+                "active": True,
+                "id": 5
+            },
+            {
+                "symbol": "ETH",
+                "name": "Ethereum (Sollet)",
+                "address": "2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk",
+                "decimals": 6,
+                "price": 3102.58,
+                "active": True,
+                "id": 6
+            },
+            {
+                "symbol": "RAY",
+                "name": "Raydium",
+                "address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+                "decimals": 6,
+                "price": 0.387,
+                "active": True,
+                "id": 7
+            },
+            {
+                "symbol": "ORCA",
+                "name": "Orca",
+                "address": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
+                "decimals": 6,
+                "price": 0.93,
+                "active": True,
+                "id": 8
+            },
+            {
+                "symbol": "BONK",
+                "name": "Bonk",
+                "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+                "decimals": 5,
+                "price": 0.00002813,
+                "active": True,
+                "id": 9
+            },
+            {
+                "symbol": "JUP",
+                "name": "Jupiter",
+                "address": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+                "decimals": 6,
+                "price": 0.72,
+                "active": True,
+                "id": 10
+            }
+        ]
+        
+        # Add tokens to cache
+        self.token_cache = {}
+        for token in default_tokens:
+            self.token_cache[token["symbol"].upper()] = token
+            
+        # Set timestamp
+        self.token_cache_timestamp = datetime.now().isoformat()
+        logger.info(f"Initialized default token cache with {len(self.token_cache)} tokens")
     
     def _save_token_cache(self) -> None:
         """Save token cache to file"""
@@ -112,27 +222,44 @@ class TokenDataService:
             
             if response.status_code == 200:
                 logger.info(f"Received successful response from API: {url}")
-                data = response.json()
                 
-                # Log the structure of the received data
-                if isinstance(data, list):
-                    logger.info(f"Retrieved {len(data)} tokens")
-                    if data and isinstance(data[0], dict):
-                        logger.info(f"First token sample keys: {list(data[0].keys())}")
-                elif isinstance(data, dict):
-                    logger.info(f"Retrieved token data with keys: {list(data.keys())}")
-                
-                return data
+                # Check if the response is JSON
+                content_type = response.headers.get('Content-Type', '')
+                if 'application/json' in content_type:
+                    try:
+                        data = response.json()
+                        
+                        # Log the structure of the received data
+                        if isinstance(data, list):
+                            logger.info(f"Retrieved {len(data)} tokens")
+                            if data and isinstance(data[0], dict):
+                                logger.info(f"First token sample keys: {list(data[0].keys())}")
+                        elif isinstance(data, dict):
+                            logger.info(f"Retrieved token data with keys: {list(data.keys())}")
+                        
+                        return data
+                    except json.JSONDecodeError as e:
+                        logger.error(f"JSON decode error: {e}")
+                        raise ValueError(f"Invalid JSON response: {e}")
+                else:
+                    logger.error(f"Response is not JSON (Content-Type: {content_type})")
+                    raise ValueError("API did not return JSON data")
+                    
             elif response.status_code == 401:
+                logger.error("API authentication failed. Please check your API key.")
                 raise ValueError("API authentication failed. Please check your API key.")
             elif response.status_code == 403:
+                logger.error("API access forbidden. Your key may not have sufficient permissions.")
                 raise ValueError("API access forbidden. Your key may not have sufficient permissions.")
             elif response.status_code == 404:
+                logger.error("API endpoint not found. Please check the documentation.")
                 raise ValueError("API endpoint not found. Please check the documentation.")
             elif response.status_code == 429:
+                logger.error("API rate limit exceeded. Please wait and try again.")
                 raise ValueError("API rate limit exceeded. Please wait and try again.")
             else:
-                raise ValueError(f"API error with status code {response.status_code}: {response.text}")
+                logger.error(f"API error with status code {response.status_code}: {response.text[:100]}")
+                raise ValueError(f"API error with status code {response.status_code}")
                 
         except requests.exceptions.RequestException as e:
             logger.error(f"Request error: {str(e)}")
@@ -251,6 +378,12 @@ class TokenDataService:
                 "mSOL", "SAMO", "BONK", "whETH"
             ]
         }
+        
+        # Add all tokens from our cache to ensure they appear in at least one DEX
+        for symbol in self.token_cache.keys():
+            # Default to adding unknown tokens to Raydium
+            if not any(symbol in dex_tokens for dex_tokens in self.dex_categories.values()):
+                self.dex_categories["raydium"].append(symbol)
         
         # Ensure all token symbols are uppercase
         for dex, tokens in self.dex_categories.items():
