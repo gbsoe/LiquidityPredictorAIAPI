@@ -271,19 +271,32 @@ class DefiAggregationAPI:
                     if len(response) > 0 and isinstance(response[0], dict):
                         logger.info(f"First item has keys: {list(response[0].keys())}")
             
-            # Check response format - might be a single object or a list with one item
-            # Based on the API documentation, it should be a single pool object
-            if isinstance(response, list) and len(response) > 0:
-                # If we got a list, use the first item (this handles both API response formats)
-                pool_data = response[0]
-                # Transform to our standard format
+            # Check response format according to the documentation
+            # Expected format: {"pool": {pool_data}} 
+            if isinstance(response, dict) and "pool" in response:
+                # Extract the pool object from the response
+                pool_data = response["pool"]
+                logger.info(f"Found pool data in 'pool' field")
                 return self.transform_pool_data(pool_data)
-            elif isinstance(response, dict):
-                # If we got a direct object, transform it
-                # This is the expected format based on the documentation
+            # Handle alternative formats 
+            elif isinstance(response, list) and len(response) > 0:
+                # If we got a list, use the first item
+                pool_data = response[0]
+                logger.info(f"Got pool as first item in list")
+                return self.transform_pool_data(pool_data)
+            elif isinstance(response, dict) and ("poolId" in response or "id" in response):
+                # Direct pool object
+                logger.info(f"Got direct pool object with poolId/id")
                 return self.transform_pool_data(response)
             else:
                 logger.warning(f"Unexpected response format for pool {pool_id}")
+                if isinstance(response, dict):
+                    logger.warning(f"Response keys: {list(response.keys())}")
+                    # Try to find a candidate pool object in any nested structure
+                    for key, value in response.items():
+                        if isinstance(value, dict) and ("poolId" in value or "id" in value):
+                            logger.info(f"Found pool data in field '{key}'")
+                            return self.transform_pool_data(value)
                 return None
         except ValueError as e:
             logger.error(f"Failed to get pool {pool_id}: {str(e)}")
