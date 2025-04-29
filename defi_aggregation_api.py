@@ -183,6 +183,61 @@ class DefiAggregationAPI:
         except ValueError as e:
             logger.error(f"Failed to get pools: {str(e)}")
             return []
+            
+    def get_supported_dexes(self) -> List[str]:
+        """
+        Get a list of supported DEXes.
+        
+        Returns:
+            List of DEX names
+        """
+        try:
+            # Try to get from API if it has a specific endpoint
+            result = self._make_request("dexes")
+            
+            # Handle different possible response formats
+            if isinstance(result, dict) and "dexes" in result:
+                return result.get("dexes", [])
+            elif isinstance(result, list):
+                return result
+            elif isinstance(result, dict) and "sources" in result:
+                return result.get("sources", [])
+            else:
+                # Fallback to default list
+                logger.warning("Could not determine DEX list from API, using defaults")
+                return ["Raydium", "Orca", "Meteora"]
+        except ValueError as e:
+            logger.error(f"Failed to get supported DEXes: {str(e)}")
+            # Fallback to known DEXes
+            return ["Raydium", "Orca", "Meteora"]
+            
+    def get_pools_by_dex(self, dex: str, limit: int = 30) -> List[Dict[str, Any]]:
+        """
+        Get pools for a specific DEX.
+        
+        Args:
+            dex: DEX name
+            limit: Maximum number of pools to retrieve
+            
+        Returns:
+            List of pool data
+        """
+        # Use the general pool endpoint with source filter
+        return self.get_pools(limit=limit, source=dex)
+        
+    def get_pools_by_token(self, token: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        Get pools containing a specific token.
+        
+        Args:
+            token: Token symbol or address
+            limit: Maximum number of pools to retrieve
+            
+        Returns:
+            List of pool data
+        """
+        # Use the general pool endpoint with token filter
+        return self.get_pools(limit=limit, token=token)
     
     def get_all_pools(self, max_pools: int = 500, **kwargs) -> List[Dict[str, Any]]:
         """

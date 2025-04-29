@@ -1,334 +1,245 @@
 """
-Base data collector class for SolPool Insight.
+Base Collector Interface for SolPool Insight.
 
-This module defines the base class for all data collectors, including
-common functionality and interfaces.
+This module provides the base interface and helpers for all data collectors.
 """
 
+import os
 import time
 import json
 import logging
-import threading
-import requests
-from datetime import datetime, timedelta
-from abc import ABC, abstractmethod
-from typing import Dict, List, Any, Optional, Tuple
+import traceback
 from pathlib import Path
+from datetime import datetime
+from typing import Dict, List, Any, Optional, Tuple
+
+from ..config import API_SETTINGS, FILE_PATHS
 
 # Configure logging
-logger = logging.getLogger('data_collectors')
+logger = logging.getLogger(__name__)
 
-class BaseCollector(ABC):
+class BaseCollector:
     """
-    Abstract base class for all data collectors.
+    Base class for data collectors.
     
-    Implements common functionality like rate limiting, error handling,
-    and result standardization.
+    Provides common functionality and interface for:
+    - Rate limiting and backoff
+    - Error handling and reporting
+    - Stats collection
+    - Data transformation
     """
     
     def __init__(self, 
-                name: str, 
-                priority: int = 5,
-                rate_limit_calls: int = 10,
-                rate_limit_period: int = 60,
-                max_retries: int = 3,
-                backoff_factor: float = 1.5,
-                timeout: int = 30):
+                collector_id: str,
+                collector_name: str,
+                base_url: Optional[str] = None,
+                request_delay: float = 0.1):
         """
-        Initialize a data collector.
+        Initialize the collector.
         
         Args:
-            name: Collector name for identification
-            priority: Priority level (1-10, higher means more authoritative)
-            rate_limit_calls: Number of calls allowed in rate_limit_period
-            rate_limit_period: Period in seconds for rate limiting
-            max_retries: Maximum number of retries on failure
-            backoff_factor: Exponential backoff factor for retries
-            timeout: Request timeout in seconds
+            collector_id: Unique identifier for this collector
+            collector_name: Display name for this collector
+            base_url: Base URL for API requests (if applicable)
+            request_delay: Delay between requests (seconds) for rate limiting
         """
-        self.name = name
-        self.priority = priority
-        self.rate_limit_calls = rate_limit_calls
-        self.rate_limit_period = rate_limit_period
-        self.max_retries = max_retries
-        self.backoff_factor = backoff_factor
-        self.timeout = timeout
+        self.collector_id = collector_id
+        self.collector_name = collector_name
+        self.base_url = base_url
+        self.request_delay = request_delay
         
-        # Rate limiting state
-        self.calls = []  # List of timestamps of recent calls
-        self._lock = threading.RLock()
+        # Last collection time
+        self.last_collection_time = 0
         
-        # Statistics
-        self.total_calls = 0
-        self.successful_calls = 0
-        self.failed_calls = 0
-        self.total_data_points = 0
-        self.last_call_time = None
-        self.last_error = None
-        self.last_success_time = None
-        
-        logger.info(f"Initialized {name} collector with priority {priority}")
-    
-    def apply_rate_limiting(self) -> bool:
-        """
-        Apply rate limiting based on configuration.
-        
-        Returns:
-            True if the call is allowed, False if it would exceed rate limits
-        """
-        with self._lock:
-            current_time = time.time()
-            
-            # Remove old calls from tracking
-            cutoff = current_time - self.rate_limit_period
-            self.calls = [t for t in self.calls if t > cutoff]
-            
-            # Check if we're at the limit
-            if len(self.calls) >= self.rate_limit_calls:
-                logger.warning(f"{self.name} rate limit exceeded: {len(self.calls)} calls in last {self.rate_limit_period} seconds")
-                return False
-            
-            # Add this call
-            self.calls.append(current_time)
-            return True
-    
-    def wait_for_rate_limit(self, max_wait: int = 30) -> bool:
-        """
-        Wait until a call is allowed by rate limiting.
-        
-        Args:
-            max_wait: Maximum seconds to wait
-            
-        Returns:
-            True if call is allowed after waiting, False if max_wait exceeded
-        """
-        start = time.time()
-        while not self.apply_rate_limiting():
-            # Calculate how long to wait
-            wait_time = 0.5  # Default wait
-            
-            if self.calls:
-                # Wait until oldest call expires
-                oldest_call = min(self.calls)
-                wait_time = oldest_call + self.rate_limit_period - time.time()
-                wait_time = max(0.1, min(wait_time, 5))  # Between 0.1 and 5 seconds
-            
-            if time.time() - start > max_wait:
-                logger.warning(f"{self.name} exceeded max wait time for rate limiting")
-                return False
-                
-            # Wait
-            time.sleep(wait_time)
-        
-        return True
-    
-    def _handle_request_with_retries(self, 
-                                    request_func, 
-                                    *args, 
-                                    **kwargs) -> Tuple[Any, bool]:
-        """
-        Handle a request with retries and exponential backoff.
-        
-        Args:
-            request_func: Function to call for the request
-            *args, **kwargs: Arguments to pass to request_func
-            
-        Returns:
-            Tuple of (response, success)
-        """
-        self.total_calls += 1
-        self.last_call_time = datetime.now()
-        
-        retry_wait = 1.0
-        
-        for attempt in range(self.max_retries):
-            try:
-                # Respect rate limits
-                if not self.wait_for_rate_limit():
-                    raise Exception("Rate limit waiting timeout exceeded")
-                
-                # Make request
-                response = request_func(*args, **kwargs)
-                
-                # Success
-                self.successful_calls += 1
-                self.last_success_time = datetime.now()
-                return response, True
-                
-            except Exception as e:
-                self.last_error = str(e)
-                logger.warning(f"{self.name} attempt {attempt+1}/{self.max_retries} failed: {str(e)}")
-                
-                if attempt < self.max_retries - 1:
-                    # Wait before retry with exponential backoff
-                    time.sleep(retry_wait)
-                    retry_wait *= self.backoff_factor
-        
-        # All retries failed
-        self.failed_calls += 1
-        return None, False
-    
-    def make_http_request(self, 
-                        url: str, 
-                        method: str = 'GET', 
-                        params: Dict = None,
-                        headers: Dict = None,
-                        data: Dict = None,
-                        json_data: Dict = None) -> Optional[Dict[str, Any]]:
-        """
-        Make an HTTP request with retries and error handling.
-        
-        Args:
-            url: URL to request
-            method: HTTP method (GET, POST, etc.)
-            params: URL parameters
-            headers: HTTP headers
-            data: Form data
-            json_data: JSON data for POST/PUT
-            
-        Returns:
-            Response data (usually JSON decoded) or None on failure
-        """
-        def do_request():
-            response = requests.request(
-                method=method,
-                url=url,
-                params=params,
-                headers=headers,
-                data=data,
-                json=json_data,
-                timeout=self.timeout
-            )
-            response.raise_for_status()
-            
-            # Try to parse JSON
-            try:
-                return response.json()
-            except ValueError:
-                # Not JSON
-                return response.text
-        
-        result, success = self._handle_request_with_retries(do_request)
-        return result if success else None
-    
-    def standardize_pool_data(self, 
-                            pool_data: Dict[str, Any], 
-                            source: str) -> Dict[str, Any]:
-        """
-        Standardize pool data to a common format.
-        
-        Args:
-            pool_data: Raw pool data
-            source: Data source identifier
-            
-        Returns:
-            Standardized pool data
-        """
-        # Extract required fields with fallbacks
-        pool_id = pool_data.get('poolId', pool_data.get('id', pool_data.get('address')))
-        
-        if not pool_id:
-            raise ValueError("Pool data missing ID")
-        
-        # Get timestamp
-        timestamp = datetime.now().isoformat()
-        
-        # Extract metrics
-        metrics = pool_data.get('metrics', {})
-        if isinstance(metrics, list) and metrics:
-            metrics = metrics[0]  # Some sources use arrays
-        
-        # Get name and extract tokens if needed
-        name = pool_data.get('name', '')
-        token1 = None
-        token2 = None
-        
-        tokens = pool_data.get('tokens', [])
-        if tokens and len(tokens) >= 2:
-            token1 = tokens[0].get('symbol', tokens[0].get('name'))
-            token2 = tokens[1].get('symbol', tokens[1].get('name'))
-        else:
-            # Try to extract from name
-            if name and '-' in name:
-                parts = name.split('-')
-                if len(parts) >= 2:
-                    token1 = parts[0].strip()
-                    token2_parts = parts[1].split(' ')
-                    token2 = token2_parts[0].strip()
-        
-        # Create standardized data
-        standardized = {
-            'id': pool_id,
-            'poolId': pool_id,  # Ensure both formats available
-            'name': name,
-            'timestamp': timestamp,
-            'source': pool_data.get('source', pool_data.get('dex')),
-            'data_source': source,
-            'tokens': [],
-            'metrics': {
-                'tvl': metrics.get('tvl', metrics.get('liquidity')),
-                'apy': metrics.get('apy', metrics.get('apr')),
-                'apy24h': metrics.get('apy24h', metrics.get('apr24h')),
-                'apy7d': metrics.get('apy7d', metrics.get('apr7d')),
-                'volume24h': metrics.get('volumeUsd', metrics.get('volume24h', metrics.get('volume'))),
-                'fee': metrics.get('fee', 0),
-                'priceRatio': metrics.get('priceRatio', metrics.get('price_ratio'))
-            }
+        # Collection stats
+        self.stats = {
+            "total_requests": 0,
+            "successful_requests": 0,
+            "failed_requests": 0,
+            "total_items_collected": 0,
+            "total_collection_time": 0,
+            "last_collection_time": None,
+            "last_collection_duration": 0,
+            "last_collection_item_count": 0,
+            "average_request_time": 0,
+            "error_count": 0,
+            "last_error": None,
+            "last_error_time": None
         }
         
-        # Add tokens if found
-        if token1:
-            standardized['tokens'].append({'symbol': token1})
-        if token2:
-            standardized['tokens'].append({'symbol': token2})
+        # Backup directory
+        self.backup_dir = Path(FILE_PATHS["BACKUP_DIR"]) / collector_id
+        self.backup_dir.mkdir(parents=True, exist_ok=True)
         
-        # Add direct token references for easier access
-        standardized['token1'] = token1
-        standardized['token2'] = token2
-        
-        return standardized
+        # Initialize
+        logger.info(f"Initialized {collector_name} collector (ID: {collector_id})")
     
-    def save_backup(self, 
-                   data: List[Dict[str, Any]], 
-                   filename: str = None,
-                   backup_dir: str = None) -> Optional[str]:
+    def collect(self, force: bool = False) -> Tuple[List[Dict[str, Any]], bool]:
         """
-        Save a backup of collected data.
+        Collect data from this source.
         
         Args:
-            data: Data to save
-            filename: Custom filename, defaults to timestamped name
-            backup_dir: Directory to save in, defaults to standard backup location
+            force: Force collection even if recently collected
             
         Returns:
-            Path to backup file or None on failure
+            Tuple of (collected_data, success_flag)
         """
+        # Check if we should collect (unless forced)
+        current_time = time.time()
+        time_since_last = current_time - self.last_collection_time
+        
+        # Skip if collected recently (within last minute) and not forced
+        if not force and time_since_last < 60:
+            logger.info(f"Skipping collection for {self.collector_name} - collected {time_since_last:.1f}s ago")
+            return [], True
+        
+        # Start collection
+        start_time = time.time()
+        logger.info(f"Starting data collection for {self.collector_name}")
+        
         try:
-            if not backup_dir:
-                from ..config import BACKUP_DIR
-                backup_dir = BACKUP_DIR
+            # Perform the actual collection (implemented by subclasses)
+            collected_data = self._collect_data()
             
-            # Ensure directory exists
-            Path(backup_dir).mkdir(parents=True, exist_ok=True)
+            # Update stats
+            end_time = time.time()
+            duration = end_time - start_time
             
-            # Generate filename if not provided
-            if not filename:
-                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                filename = f"{self.name}_{timestamp}.json"
+            self.stats["total_collection_time"] += duration
+            self.stats["last_collection_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.stats["last_collection_duration"] = duration
+            self.stats["last_collection_item_count"] = len(collected_data)
+            self.stats["total_items_collected"] += len(collected_data)
             
-            # Full path
-            filepath = Path(backup_dir) / filename
+            # Save successful collection as backup
+            self._save_backup(collected_data)
             
-            # Save data
-            with open(filepath, 'w') as f:
-                json.dump(data, f, indent=2)
+            # Update last collection time
+            self.last_collection_time = current_time
             
-            logger.info(f"Saved backup to {filepath}")
-            return str(filepath)
+            logger.info(
+                f"Completed collection for {self.collector_name} - " +
+                f"collected {len(collected_data)} items in {duration:.2f}s"
+            )
+            
+            return collected_data, True
             
         except Exception as e:
-            logger.error(f"Failed to save backup: {str(e)}")
-            return None
+            # Log the error
+            logger.error(f"Error during collection for {self.collector_name}: {str(e)}")
+            logger.error(traceback.format_exc())
+            
+            # Update error stats
+            self.stats["error_count"] += 1
+            self.stats["last_error"] = str(e)
+            self.stats["last_error_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            # Try to load the most recent backup
+            backup_data = self._load_latest_backup()
+            if backup_data:
+                logger.info(f"Loaded {len(backup_data)} items from backup for {self.collector_name}")
+                return backup_data, False
+            
+            return [], False
+    
+    def _collect_data(self) -> List[Dict[str, Any]]:
+        """
+        Collect data from the source.
+        
+        This method should be implemented by subclasses.
+        
+        Returns:
+            List of collected data items
+        """
+        raise NotImplementedError("Subclasses must implement _collect_data method")
+    
+    def _save_backup(self, data: List[Dict[str, Any]]) -> bool:
+        """
+        Save collected data as a backup.
+        
+        Args:
+            data: The data to save
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        if not data:
+            return False
+            
+        try:
+            # Generate filename with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"{self.collector_id}_{timestamp}.json"
+            filepath = self.backup_dir / filename
+            
+            # Save to file
+            with open(filepath, "w") as f:
+                json.dump(data, f, indent=2)
+                
+            # Remove old backups (keep last 10)
+            self._cleanup_old_backups()
+                
+            return True
+        except Exception as e:
+            logger.error(f"Error saving backup for {self.collector_name}: {str(e)}")
+            return False
+    
+    def _cleanup_old_backups(self, max_backups: int = 10) -> int:
+        """
+        Remove old backup files to avoid disk space issues.
+        
+        Args:
+            max_backups: Maximum number of backup files to keep
+            
+        Returns:
+            Number of files removed
+        """
+        try:
+            # Get all backup files
+            backup_files = list(self.backup_dir.glob(f"{self.collector_id}_*.json"))
+            
+            # Sort by modification time (oldest first)
+            backup_files.sort(key=lambda x: os.path.getmtime(x))
+            
+            # Remove oldest files if we have too many
+            removed = 0
+            while len(backup_files) > max_backups:
+                # Remove oldest file
+                oldest = backup_files.pop(0)
+                oldest.unlink(missing_ok=True)
+                removed += 1
+                
+            return removed
+        except Exception as e:
+            logger.error(f"Error cleaning up old backups for {self.collector_name}: {str(e)}")
+            return 0
+    
+    def _load_latest_backup(self) -> List[Dict[str, Any]]:
+        """
+        Load the most recent backup file.
+        
+        Returns:
+            The loaded data or an empty list if no backup found
+        """
+        try:
+            # Get all backup files
+            backup_files = list(self.backup_dir.glob(f"{self.collector_id}_*.json"))
+            
+            if not backup_files:
+                return []
+                
+            # Sort by modification time (newest first)
+            backup_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+            
+            # Load newest file
+            newest = backup_files[0]
+            with open(newest, "r") as f:
+                data = json.load(f)
+                
+            return data
+        except Exception as e:
+            logger.error(f"Error loading backup for {self.collector_name}: {str(e)}")
+            return []
     
     def get_stats(self) -> Dict[str, Any]:
         """
@@ -337,25 +248,135 @@ class BaseCollector(ABC):
         Returns:
             Dictionary of statistics
         """
-        return {
-            'name': self.name,
-            'priority': self.priority,
-            'total_calls': self.total_calls,
-            'successful_calls': self.successful_calls,
-            'failed_calls': self.failed_calls,
-            'success_rate': self.successful_calls / max(1, self.total_calls),
-            'total_data_points': self.total_data_points,
-            'last_call_time': self.last_call_time.isoformat() if self.last_call_time else None,
-            'last_success_time': self.last_success_time.isoformat() if self.last_success_time else None,
-            'last_error': self.last_error
-        }
-    
-    @abstractmethod
-    def collect(self) -> Tuple[List[Dict[str, Any]], bool]:
-        """
-        Collect data from the source.
+        stats = self.stats.copy()
         
-        Returns:
-            Tuple of (data_list, success)
+        # Add collector identity
+        stats["collector_id"] = self.collector_id
+        stats["collector_name"] = self.collector_name
+        
+        # Add additional info
+        stats["has_backups"] = self._has_backups()
+        stats["backup_count"] = self._count_backups()
+        
+        return stats
+    
+    def _has_backups(self) -> bool:
+        """Check if backups exist."""
+        backup_files = list(self.backup_dir.glob(f"{self.collector_id}_*.json"))
+        return len(backup_files) > 0
+    
+    def _count_backups(self) -> int:
+        """Count backup files."""
+        backup_files = list(self.backup_dir.glob(f"{self.collector_id}_*.json"))
+        return len(backup_files)
+    
+    def _track_request_stats(self, success: bool, duration: float) -> None:
         """
-        pass
+        Track statistics for a request.
+        
+        Args:
+            success: Whether the request was successful
+            duration: Time taken for the request in seconds
+        """
+        # Update request counts
+        self.stats["total_requests"] += 1
+        
+        if success:
+            self.stats["successful_requests"] += 1
+        else:
+            self.stats["failed_requests"] += 1
+        
+        # Update average request time
+        if self.stats["total_requests"] == 1:
+            self.stats["average_request_time"] = duration
+        else:
+            # Running average
+            prev_avg = self.stats["average_request_time"]
+            count = self.stats["total_requests"]
+            self.stats["average_request_time"] = prev_avg + (duration - prev_avg) / count
+    
+    def _normalize_pool_data(self, pool: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Normalize pool data to a standard format.
+        
+        Args:
+            pool: Raw pool data
+            
+        Returns:
+            Normalized pool data
+        """
+        # Create a normalized pool object
+        normalized = {
+            "pool_id": pool.get("id") or pool.get("pool_id") or pool.get("address") or "",
+            "name": pool.get("name") or pool.get("displayName") or pool.get("symbol") or "",
+            "dex": pool.get("dex") or pool.get("platform") or pool.get("amm") or "Unknown",
+            "liquidity": pool.get("liquidity") or pool.get("tvl") or 0,
+            "volume_24h": pool.get("volume_24h") or pool.get("volume") or 0,
+            "fees_24h": pool.get("fees_24h") or pool.get("fees") or 0,
+            "apr": pool.get("apr") or pool.get("apy") or 0,
+            "price": pool.get("price") or 0,
+            "token0": self._normalize_token(pool.get("token0") or pool.get("baseToken")),
+            "token1": self._normalize_token(pool.get("token1") or pool.get("quoteToken")),
+            "fee_tier": pool.get("fee_tier") or pool.get("fee") or 0,
+            "data_source": pool.get("data_source") or f"Collected by {self.collector_name}",
+            "collected_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "collector_id": self.collector_id,
+            # Track original data for reference
+            "original_data": pool
+        }
+        
+        return normalized
+    
+    def _normalize_token(self, token: Any) -> Dict[str, Any]:
+        """
+        Normalize token data to a standard format.
+        
+        Args:
+            token: Raw token data (can be string or dict)
+            
+        Returns:
+            Normalized token data
+        """
+        if token is None:
+            return {
+                "symbol": "UNKNOWN",
+                "address": "",
+                "name": "Unknown Token",
+                "decimals": 9
+            }
+        
+        # If token is already a dict, extract fields
+        if isinstance(token, dict):
+            return {
+                "symbol": token.get("symbol") or "UNKNOWN",
+                "address": token.get("address") or token.get("mint") or "",
+                "name": token.get("name") or token.get("displayName") or token.get("symbol") or "Unknown Token",
+                "decimals": token.get("decimals") or 9
+            }
+        
+        # If token is a string, it's likely the symbol or address
+        if isinstance(token, str):
+            # Check if it looks like an address (base58 for Solana is ~32-44 chars)
+            if len(token) > 30:
+                return {
+                    "symbol": "UNKNOWN",
+                    "address": token,
+                    "name": "Unknown Token",
+                    "decimals": 9
+                }
+            else:
+                # It's probably a symbol
+                return {
+                    "symbol": token,
+                    "address": "",
+                    "name": token,
+                    "decimals": 9
+                }
+        
+        # Fallback
+        return {
+            "symbol": "UNKNOWN",
+            "address": "",
+            "name": "Unknown Token",
+            "decimals": 9
+        }

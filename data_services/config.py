@@ -1,109 +1,134 @@
 """
-Configuration for the data services system.
+Configuration for data services.
 
-This module contains all the configuration parameters for the data collection,
+This module provides configuration settings for the data collection,
 processing, and caching services.
 """
 
 import os
-from pathlib import Path
+import logging
+from datetime import timedelta
+from typing import Dict, Any
 
-# Base directories
-ROOT_DIR = Path(__file__).parent.parent
-DATA_DIR = ROOT_DIR / "data"
-CACHE_DIR = DATA_DIR / "cache"
-BACKUP_DIR = DATA_DIR / "backups"
+# Configure logging
+logger = logging.getLogger(__name__)
 
-# Ensure directories exist
-os.makedirs(DATA_DIR, exist_ok=True)
-os.makedirs(CACHE_DIR, exist_ok=True)
-os.makedirs(BACKUP_DIR, exist_ok=True)
+# Cache TTL settings (in seconds)
+CACHE_SETTINGS = {
+    # Short-lived cache for frequently changing data (5 minutes)
+    "DEFAULT_TTL": 60 * 5,
+    # Medium-lived cache for data that changes less frequently (1 hour)
+    "MEDIUM_TTL": 60 * 60,
+    # Long-lived cache for relatively static data (24 hours)
+    "LONG_TTL": 60 * 60 * 24,
+    # Cache directory location
+    "CACHE_DIR": "data/cache",
+    # Memory cache size limit (items)
+    "MEMORY_CACHE_MAX_ITEMS": 1000,
+}
 
-# API Configuration
-API_CONFIG = {
-    "defi_aggregation": {
-        "base_url": "https://filotdefiapi.replit.app/api/v1",
-        "api_key_env": "DEFI_API_KEY",
-        "rate_limit": {
-            "calls_per_minute": 25,
-            "max_concurrent": 2
-        },
-        "timeout": 10,  # seconds
-        "retries": 3,
-        "backoff_factor": 1.5
-    },
-    "direct_dex": {
-        "raydium": {
-            "enabled": False,  # Will be enabled once implemented
-            "priority": 7
-        },
-        "orca": {
-            "enabled": False,  # Will be enabled once implemented
-            "priority": 7
-        },
-        "meteora": {
-            "enabled": False,  # Will be enabled once implemented
-            "priority": 7
-        }
+# Collection schedule settings
+SCHEDULE_SETTINGS = {
+    # How often to collect new data (minutes)
+    "COLLECTION_INTERVAL_MINUTES": 15,
+    # Maximum collection threads
+    "MAX_COLLECTION_THREADS": 3,
+    # Collection timeout (seconds)
+    "COLLECTION_TIMEOUT": 60,
+}
+
+# API settings
+API_SETTINGS = {
+    # Base URL for DeFi API
+    "DEFI_API_URL": os.getenv("DEFI_API_URL", "https://filotdefiapi.replit.app/api/v1"),
+    # API key for DeFi API
+    "DEFI_API_KEY": os.getenv("DEFI_API_KEY"),
+    # Request delay for rate limiting (seconds)
+    "REQUEST_DELAY": 0.1,
+    # Maximum retries for API requests
+    "MAX_RETRIES": 3,
+    # Retry delay (seconds)
+    "RETRY_DELAY": 1.0,
+}
+
+# Database settings
+DB_SETTINGS = {
+    # Database URL
+    "DB_URL": os.getenv("DATABASE_URL"),
+    # Table names
+    "POOL_TABLE": "liquidity_pools",
+    "POOL_HISTORY_TABLE": "pool_history",
+    "TOKEN_TABLE": "tokens",
+    "TOKEN_PRICE_TABLE": "token_prices",
+}
+
+# File paths
+FILE_PATHS = {
+    # Backup directory
+    "BACKUP_DIR": "data/backups",
+    # Log directory
+    "LOG_DIR": "logs",
+}
+
+def get_settings() -> Dict[str, Any]:
+    """
+    Get all settings as a dictionary.
+    
+    Returns:
+        Dictionary with all settings
+    """
+    return {
+        "cache": CACHE_SETTINGS,
+        "schedule": SCHEDULE_SETTINGS,
+        "api": API_SETTINGS,
+        "db": DB_SETTINGS,
+        "paths": FILE_PATHS,
     }
-}
 
-# Collection Schedule Configuration
-COLLECTION_CONFIG = {
-    "interval_minutes": 15,  # Run every 15 minutes
-    "staggered_start": True,  # Stagger starts to avoid API hammering
-    "initial_delay": 10,  # seconds before first collection
-    "timeout": 120,  # Maximum time for collection job in seconds
-    "skip_if_recent": 5  # Skip collection if data is less than X minutes old
-}
-
-# Database Configuration
-DB_CONFIG = {
-    "use_postgresql": True,
-    "connection_string_env": "DATABASE_URL",
-    "sqlite_fallback": "historical_pools.db",
-    "pool_size": 5,
-    "max_overflow": 10,
-    "timeout": 30
-}
-
-# Cache Configuration
-CACHE_CONFIG = {
-    "default_ttl": 300,  # 5 minutes for most data
-    "long_ttl": 1800,  # 30 minutes for rarely changing data
-    "extended_ttl": 3600 * 4,  # 4 hours for static data
-    "use_memory_cache": True,
-    "use_disk_cache": True,
-    "disk_cache_size": 1024 * 1024 * 100  # 100 MB
-}
-
-# Prediction Model Configuration
-PREDICTION_CONFIG = {
-    "enabled": True,
-    "models_dir": ROOT_DIR / "models",
-    "training_interval_hours": 24,  # Retrain models daily
-    "min_history_points": 10,  # Minimum data points needed for prediction
-    "prediction_horizon_days": [1, 7, 30],  # Make predictions for these horizons
-    "ensemble_method": "weighted_average",
-    "default_models": ["linear", "xgboost", "prophet"]
-}
-
-# Data Retention Policy
-RETENTION_CONFIG = {
-    "max_days": 90,  # Keep data for 90 days
-    "pruning_schedule": "0 1 * * *",  # Run at 1 AM daily (cron format)
-    "min_snapshots_per_pool": 50,  # Always keep at least this many snapshots
-    "backup_before_pruning": True
-}
-
-# Logging Configuration
-LOGGING_CONFIG = {
-    "level": "INFO",
-    "file": ROOT_DIR / "logs" / "data_services.log",
-    "max_size": 10 * 1024 * 1024,  # 10 MB
-    "backup_count": 5,
-    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-}
-
-# Ensure logs directory exists
-os.makedirs(ROOT_DIR / "logs", exist_ok=True)
+def validate_settings() -> bool:
+    """
+    Validate all settings and ensure required values are present.
+    
+    Returns:
+        True if all settings are valid, False otherwise
+    """
+    # Check if API key is available
+    if not API_SETTINGS["DEFI_API_KEY"]:
+        logger.warning("DEFI_API_KEY is not set. DeFi API collector will not work.")
+        return False
+        
+    # Check if database URL is available
+    if not DB_SETTINGS["DB_URL"]:
+        logger.warning("DATABASE_URL is not set. Database operations will not work.")
+        
+    # Ensure cache directory exists
+    cache_dir = CACHE_SETTINGS["CACHE_DIR"]
+    if not os.path.exists(cache_dir):
+        try:
+            os.makedirs(cache_dir, exist_ok=True)
+            logger.info(f"Created cache directory: {cache_dir}")
+        except Exception as e:
+            logger.error(f"Failed to create cache directory: {str(e)}")
+            return False
+            
+    # Ensure backup directory exists
+    backup_dir = FILE_PATHS["BACKUP_DIR"]
+    if not os.path.exists(backup_dir):
+        try:
+            os.makedirs(backup_dir, exist_ok=True)
+            logger.info(f"Created backup directory: {backup_dir}")
+        except Exception as e:
+            logger.error(f"Failed to create backup directory: {str(e)}")
+            return False
+            
+    # Ensure log directory exists
+    log_dir = FILE_PATHS["LOG_DIR"]
+    if not os.path.exists(log_dir):
+        try:
+            os.makedirs(log_dir, exist_ok=True)
+            logger.info(f"Created log directory: {log_dir}")
+        except Exception as e:
+            logger.error(f"Failed to create log directory: {str(e)}")
+            return False
+            
+    return True

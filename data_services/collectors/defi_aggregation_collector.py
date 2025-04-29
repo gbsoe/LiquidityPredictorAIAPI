@@ -1,219 +1,216 @@
 """
-DefiAggregation API Collector for SolPool Insight.
+DeFi Aggregation API Collector for SolPool Insight.
 
-This collector fetches data from the DefiAggregation API with
-advanced rate limiting and error handling.
+This collector retrieves data from the DeFi Aggregation API.
 """
 
-import os
 import time
 import logging
+import traceback
 from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime
 
 from .base_collector import BaseCollector
-from ..config import API_CONFIG
+from ..config import API_SETTINGS
+from defi_aggregation_api import DefiAggregationAPI
 
 # Configure logging
-logger = logging.getLogger('defi_aggregation_collector')
+logger = logging.getLogger(__name__)
 
 class DefiAggregationCollector(BaseCollector):
     """
-    Collector for the DefiAggregation API.
+    Collector for DeFi Aggregation API data.
     
-    Handles pagination, rate limiting, and data standardization.
+    This collector handles:
+    - Authentication with API key
+    - Rate limiting for API requests
+    - Data transformation to unified format
+    - Backoff strategy for errors
     """
     
-    def __init__(self):
-        """Initialize the collector with DefiAggregation API specific settings."""
-        # Get API config
-        config = API_CONFIG['defi_aggregation']
+    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
+        """
+        Initialize the DeFi API collector.
         
-        # Set up rate limiting
-        rate_limit = config['rate_limit']
-        
+        Args:
+            api_key: API key for authentication (defaults to config)
+            base_url: Base URL for the API (defaults to config)
+        """
         # Initialize base class
         super().__init__(
-            name="DefiAggregation",
-            priority=8,  # High priority source
-            rate_limit_calls=rate_limit['calls_per_minute'],
-            rate_limit_period=60,  # 1 minute period
-            max_retries=config['retries'],
-            backoff_factor=config['backoff_factor'],
-            timeout=config['timeout']
+            collector_id="defi_aggregation_api",
+            collector_name="DeFi Aggregation API",
+            base_url=base_url or API_SETTINGS["DEFI_API_URL"],
+            request_delay=API_SETTINGS["REQUEST_DELAY"]
         )
         
-        # API specific config
-        self.base_url = config['base_url']
-        self.api_key = os.getenv(config['api_key_env'])
+        # API key from args or config
+        self.api_key = api_key or API_SETTINGS["DEFI_API_KEY"]
         
-        if not self.api_key:
-            logger.warning("No API key found for DefiAggregation API")
-        
-        logger.info(f"Initialized DefiAggregation collector with base URL: {self.base_url}")
-    
-    def collect(self) -> Tuple[List[Dict[str, Any]], bool]:
-        """
-        Collect data from the DefiAggregation API.
-        
-        Returns:
-            Tuple of (pool_list, success)
-        """
-        # Initialize results
-        all_pools = []
-        success = False
-        
+        # Initialize API client
         try:
-            # Get all pools from API with pagination
-            pools = self._get_all_pools()
-            
-            if not pools:
-                logger.warning("No pools returned from DefiAggregation API")
-                return [], False
-            
-            # Standardize data format
-            for pool in pools:
-                try:
-                    standardized = self.standardize_pool_data(pool, source=self.name)
-                    all_pools.append(standardized)
-                except Exception as e:
-                    logger.warning(f"Error standardizing pool data: {str(e)}")
-            
-            # Update stats
-            self.total_data_points += len(all_pools)
-            
-            # Save backup if we have data
-            if all_pools:
-                self.save_backup(all_pools)
-                success = True
-            
-            logger.info(f"Collected {len(all_pools)} pools from DefiAggregation API")
-            return all_pools, success
-            
-        except Exception as e:
-            logger.error(f"Error collecting from DefiAggregation API: {str(e)}")
-            return all_pools, False
-    
-    def _get_all_pools(self, max_pools: int = 200) -> List[Dict[str, Any]]:
-        """
-        Get all pools with pagination.
-        
-        Args:
-            max_pools: Maximum number of pools to retrieve
-            
-        Returns:
-            List of pool data
-        """
-        all_pools = []
-        offset = 0
-        limit = 20  # Max per request
-        unique_pool_ids = set()
-        
-        while len(all_pools) < max_pools:
-            # Prepare headers
-            headers = {}
-            if self.api_key:
-                headers['Authorization'] = f"Bearer {self.api_key}"
-            
-            # Make request
-            url = f"{self.base_url}/pools"
-            params = {
-                'limit': limit,
-                'offset': offset
-            }
-            
-            response = self.make_http_request(
-                url=url,
-                method='GET',
-                params=params,
-                headers=headers
+            self.api_client = DefiAggregationAPI(
+                api_key=self.api_key,
+                base_url=self.base_url
             )
-            
-            if not response:
-                logger.warning(f"Failed to get pools at offset {offset}")
-                break
-            
-            # Handle response
-            if isinstance(response, list):
-                pools = response
-            elif isinstance(response, dict) and 'data' in response:
-                pools = response.get('data', [])
-            else:
-                logger.warning(f"Unexpected response format: {type(response)}")
-                break
-            
-            if not pools:
-                # No more pools
-                break
-            
-            # Process pools and handle duplicates
-            new_pools = 0
-            for pool in pools:
-                pool_id = pool.get('poolId') or pool.get('id')
-                if not pool_id or pool_id in unique_pool_ids:
-                    continue
-                    
-                unique_pool_ids.add(pool_id)
-                all_pools.append(pool)
-                new_pools += 1
-            
-            logger.info(f"Retrieved {len(pools)} pools from API, {new_pools} new pools")
-            
-            if new_pools == 0:
-                # We're only getting duplicates now, stop
-                logger.info("Only duplicates returned, stopping pagination")
-                break
-            
-            # Update offset for next page
-            offset += limit
-            
-            # Brief pause to avoid hammering the API
-            time.sleep(0.2)
-        
-        logger.info(f"Retrieved a total of {len(all_pools)} unique pools")
-        return all_pools
+            logger.info(f"Initialized DeFi Aggregation API client with base URL: {self.base_url}")
+        except Exception as e:
+            logger.error(f"Error initializing DeFi Aggregation API client: {str(e)}")
+            logger.error(traceback.format_exc())
     
-    def get_pool_by_id(self, pool_id: str) -> Optional[Dict[str, Any]]:
+    def _collect_data(self) -> List[Dict[str, Any]]:
         """
-        Get detailed data for a specific pool.
+        Collect pool data from the DeFi Aggregation API.
         
-        Args:
-            pool_id: Pool ID
-            
         Returns:
-            Pool data or None on failure
+            List of collected pool data
         """
-        # Prepare headers
-        headers = {}
-        if self.api_key:
-            headers['Authorization'] = f"Bearer {self.api_key}"
+        # Validate API client
+        if not hasattr(self, 'api_client') or self.api_client is None:
+            raise ValueError("API client not initialized")
+            
+        # List to store all collected pools
+        all_pools = []
         
-        # Make request
-        url = f"{self.base_url}/pools/{pool_id}"
+        # Track collection start time
+        start_time = time.time()
         
-        response = self.make_http_request(
-            url=url,
-            method='GET',
-            headers=headers
+        # Get available DEXes
+        logger.info("Retrieving supported DEXes from API")
+        try:
+            dexes = self.api_client.get_supported_dexes()
+            logger.info(f"Found {len(dexes)} supported DEXes: {', '.join(dexes)}")
+        except Exception as e:
+            logger.warning(f"Error retrieving DEXes, using default list: {str(e)}")
+            # Fallback to known DEXes
+            dexes = ["Raydium", "Orca", "Meteora"]
+        
+        # Track maximum pools per DEX
+        max_pools_per_dex = 30  # Adjust based on API limitations
+        
+        # Track API request stats
+        total_requests = 0
+        total_pools = 0
+        
+        # Process each DEX
+        for dex in dexes:
+            try:
+                logger.info(f"Collecting pools for DEX: {dex}")
+                
+                # Get pools for this DEX
+                request_start = time.time()
+                pools = self.api_client.get_pools_by_dex(dex=dex, limit=max_pools_per_dex)
+                request_duration = time.time() - request_start
+                
+                # Track request stats
+                self._track_request_stats(success=True, duration=request_duration)
+                total_requests += 1
+                
+                # Process pools
+                if pools:
+                    logger.info(f"Retrieved {len(pools)} pools from {dex}")
+                    
+                    # Normalize each pool
+                    for pool in pools:
+                        # Add DEX info if not present
+                        if not pool.get("dex"):
+                            pool["dex"] = dex
+                            
+                        # Add data source info
+                        pool["data_source"] = f"Real-time data from {dex} via DeFi API"
+                        
+                        # Normalize and add to results
+                        normalized_pool = self._normalize_pool_data(pool)
+                        all_pools.append(normalized_pool)
+                        
+                    total_pools += len(pools)
+                else:
+                    logger.warning(f"No pools retrieved for DEX: {dex}")
+            except Exception as e:
+                logger.error(f"Error retrieving pools for DEX {dex}: {str(e)}")
+                logger.error(traceback.format_exc())
+                self._track_request_stats(success=False, duration=0)
+                total_requests += 1
+        
+        # Try to get pools by token if we have fewer than expected
+        if total_pools < 30:
+            try:
+                # Common tokens to check
+                common_tokens = ["SOL", "USDC", "ETH", "BTC", "mSOL", "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"]
+                
+                for token in common_tokens[:3]:  # Limit to 3 to avoid too many requests
+                    logger.info(f"Collecting pools for token: {token}")
+                    
+                    # Get pools for this token
+                    request_start = time.time()
+                    token_pools = self.api_client.get_pools_by_token(token=token, limit=10)
+                    request_duration = time.time() - request_start
+                    
+                    # Track request stats
+                    self._track_request_stats(success=True, duration=request_duration)
+                    total_requests += 1
+                    
+                    # Process pools
+                    if token_pools:
+                        logger.info(f"Retrieved {len(token_pools)} pools for token {token}")
+                        
+                        # Keep track of pools we've already added
+                        existing_pool_ids = {p.get("pool_id") for p in all_pools}
+                        
+                        # Add new pools
+                        for pool in token_pools:
+                            pool_id = pool.get("id") or pool.get("pool_id") or pool.get("address") or ""
+                            
+                            # Skip if already added
+                            if pool_id in existing_pool_ids:
+                                continue
+                                
+                            # Add data source info
+                            pool["data_source"] = f"Real-time data via DeFi API (token: {token})"
+                            
+                            # Normalize and add to results
+                            normalized_pool = self._normalize_pool_data(pool)
+                            all_pools.append(normalized_pool)
+                            existing_pool_ids.add(pool_id)
+                            
+                        total_pools = len(all_pools)
+                    else:
+                        logger.warning(f"No pools retrieved for token: {token}")
+            except Exception as e:
+                logger.error(f"Error retrieving pools by token: {str(e)}")
+                logger.error(traceback.format_exc())
+        
+        # Calculate collection duration
+        duration = time.time() - start_time
+        
+        # Log collection stats
+        logger.info(
+            f"DeFi API collection complete: {total_pools} pools from {len(dexes)} DEXes " +
+            f"in {duration:.2f}s ({total_requests} API requests)"
         )
         
-        if not response:
-            logger.warning(f"Failed to get pool {pool_id}")
-            return None
+        return all_pools
+
+# Singleton instance
+_collector_instance = None
+
+def get_collector(api_key: Optional[str] = None, 
+                 base_url: Optional[str] = None) -> DefiAggregationCollector:
+    """
+    Get the singleton collector instance.
+    
+    Args:
+        api_key: Optional API key
+        base_url: Optional base URL
         
-        # Standardize response
-        try:
-            return self.standardize_pool_data(response, source=self.name)
-        except Exception as e:
-            logger.error(f"Error standardizing pool {pool_id}: {str(e)}")
-            return None
-
-# Create singleton instance
-_instance = None
-
-def get_collector() -> DefiAggregationCollector:
-    """Get the singleton collector instance."""
-    global _instance
-    if _instance is None:
-        _instance = DefiAggregationCollector()
-    return _instance
+    Returns:
+        DefiAggregationCollector instance
+    """
+    global _collector_instance
+    
+    if _collector_instance is None:
+        _collector_instance = DefiAggregationCollector(
+            api_key=api_key,
+            base_url=base_url
+        )
+        
+    return _collector_instance

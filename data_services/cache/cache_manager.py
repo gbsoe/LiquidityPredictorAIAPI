@@ -6,19 +6,19 @@ for improved performance and reduced API load.
 """
 
 import os
-import json
 import time
+import json
 import logging
 import threading
 import hashlib
-from datetime import datetime
-from typing import Dict, List, Any, Optional, Union, Callable
 from pathlib import Path
+from typing import Dict, List, Any, Optional, Callable
+from datetime import datetime, timedelta
 
-from ..config import CACHE_CONFIG, CACHE_DIR
+from ..config import CACHE_SETTINGS
 
 # Configure logging
-logger = logging.getLogger('cache_manager')
+logger = logging.getLogger(__name__)
 
 class CacheEntry:
     """Represents a single cache entry with metadata."""
@@ -35,48 +35,44 @@ class CacheEntry:
         self.key = key
         self.data = data
         self.created_at = time.time()
+        self.accessed_at = time.time()
         self.ttl = ttl
-        self.last_accessed = self.created_at
         self.access_count = 0
     
     def is_expired(self) -> bool:
         """Check if the entry is expired."""
-        return time.time() > (self.created_at + self.ttl)
+        return time.time() > self.created_at + self.ttl
     
     def access(self) -> Any:
         """Mark as accessed and return data."""
-        self.last_accessed = time.time()
+        self.accessed_at = time.time()
         self.access_count += 1
         return self.data
     
     def remaining_ttl(self) -> float:
         """Get remaining TTL in seconds."""
-        return max(0, (self.created_at + self.ttl) - time.time())
+        elapsed = time.time() - self.created_at
+        return max(0, self.ttl - elapsed)
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
-            'key': self.key,
-            'data': self.data,
-            'created_at': self.created_at,
-            'ttl': self.ttl,
-            'last_accessed': self.last_accessed,
-            'access_count': self.access_count
+            "key": self.key,
+            "data": self.data,
+            "created_at": self.created_at,
+            "accessed_at": self.accessed_at,
+            "ttl": self.ttl,
+            "access_count": self.access_count
         }
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'CacheEntry':
         """Create from dictionary."""
-        entry = cls(
-            key=data['key'],
-            data=data['data'],
-            ttl=data['ttl']
-        )
-        entry.created_at = data['created_at']
-        entry.last_accessed = data['last_accessed']
-        entry.access_count = data['access_count']
+        entry = cls(data["key"], data["data"], data["ttl"])
+        entry.created_at = data["created_at"]
+        entry.accessed_at = data["accessed_at"]
+        entry.access_count = data["access_count"]
         return entry
-
 
 class CacheManager:
     """
@@ -85,48 +81,89 @@ class CacheManager:
     Uses TTL-based caching with different expiration periods for
     different types of data.
     """
+    _instance = None  # Singleton instance
+    
+    def __new__(cls):
+        """Create or return the singleton instance."""
+        if cls._instance is None:
+            cls._instance = super(CacheManager, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
     
     def __init__(self):
         """Initialize the cache manager."""
-        self.memory_cache: Dict[str, CacheEntry] = {}
-        self.disk_cache_dir = CACHE_DIR
-        self.config = CACHE_CONFIG
-        self._lock = threading.RLock()
+        # Skip initialization if already initialized
+        if getattr(self, '_initialized', False):
+            return
+            
+        # Memory cache
+        self._memory_cache: Dict[str, CacheEntry] = {}
+        
+        # Cache settings
+        self.cache_dir = Path(CACHE_SETTINGS["CACHE_DIR"])
+        self.default_ttl = CACHE_SETTINGS["DEFAULT_TTL"]
+        self.memory_cache_max_items = CACHE_SETTINGS["MEMORY_CACHE_MAX_ITEMS"]
         
         # Create cache directory if it doesn't exist
-        os.makedirs(self.disk_cache_dir, exist_ok=True)
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Thread lock for thread safety
+        self._lock = threading.RLock()
         
         # Stats
-        self.memory_hits = 0
-        self.disk_hits = 0
-        self.misses = 0
+        self._stats = {
+            "memory_hits": 0,
+            "disk_hits": 0,
+            "misses": 0,
+            "sets": 0,
+            "deletes": 0,
+            "cleanups": 0
+        }
         
-        logger.info(f"Initialized cache manager with directory: {self.disk_cache_dir}")
-        
-        # Start cleanup thread
+        # Start background cleanup thread
         self._start_cleanup_thread()
+        
+        logger.info(f"Cache manager initialized with cache directory: {self.cache_dir}")
+        self._initialized = True
     
     def _start_cleanup_thread(self):
         """Start a background thread to clean up expired cache entries."""
         def cleanup_worker():
             while True:
-                try:
-                    self.cleanup()
-                except Exception as e:
-                    logger.error(f"Error in cache cleanup: {str(e)}")
-                
-                # Sleep for 5 minutes between cleanups
+                # Sleep for 5 minutes before cleanup
                 time.sleep(300)
+                
+                # Perform cleanup
+                try:
+                    removed = self.cleanup()
+                    if removed > 0:
+                        logger.info(f"Cache cleanup removed {removed} expired entries")
+                except Exception as e:
+                    logger.error(f"Error during cache cleanup: {str(e)}")
         
-        thread = threading.Thread(target=cleanup_worker, daemon=True)
+        # Start the thread
+        thread = threading.Thread(
+            target=cleanup_worker, 
+            daemon=True,
+            name="CacheCleanupThread"
+        )
         thread.start()
-        logger.info("Started cache cleanup thread")
     
     def _get_disk_path(self, key: str) -> Path:
         """Get the disk path for a cache key."""
-        # Create a hash of the key for the filename
-        key_hash = hashlib.md5(key.encode()).hexdigest()
-        return Path(self.disk_cache_dir) / f"{key_hash}.json"
+        # Use MD5 hash of the key for the filename
+        hash_obj = hashlib.md5(key.encode())
+        hash_hex = hash_obj.hexdigest()
+        
+        # Use the first 2 characters as a subdirectory for better organization
+        subdir = hash_hex[:2]
+        
+        # Create subdirectory if it doesn't exist
+        subdir_path = self.cache_dir / subdir
+        subdir_path.mkdir(exist_ok=True)
+        
+        # Return full path
+        return subdir_path / f"{hash_hex}.json"
     
     def get(self, key: str, default: Any = None) -> Any:
         """
@@ -140,43 +177,58 @@ class CacheManager:
             Cached value or default
         """
         with self._lock:
-            # Check memory cache first
-            if key in self.memory_cache:
-                entry = self.memory_cache[key]
-                if not entry.is_expired():
-                    self.memory_hits += 1
-                    return entry.access()
+            # Try memory cache first
+            if key in self._memory_cache:
+                entry = self._memory_cache[key]
+                
+                # Check if expired
+                if entry.is_expired():
+                    # Remove from memory cache
+                    del self._memory_cache[key]
                 else:
-                    # Expired entry
-                    del self.memory_cache[key]
+                    # Update stats
+                    self._stats["memory_hits"] += 1
+                    
+                    # Return data
+                    return entry.access()
             
-            # Check disk cache if memory_cache failed
-            if self.config['use_disk_cache']:
-                disk_path = self._get_disk_path(key)
-                if disk_path.exists():
-                    try:
-                        with open(disk_path, 'r') as f:
-                            entry_data = json.load(f)
-                            entry = CacheEntry.from_dict(entry_data)
+            # Try disk cache
+            disk_path = self._get_disk_path(key)
+            if disk_path.exists():
+                try:
+                    with open(disk_path, "r") as f:
+                        entry_dict = json.load(f)
+                        entry = CacheEntry.from_dict(entry_dict)
+                        
+                        # Check if expired
+                        if entry.is_expired():
+                            # Remove from disk
+                            disk_path.unlink(missing_ok=True)
+                        else:
+                            # Update stats
+                            self._stats["disk_hits"] += 1
                             
-                            if not entry.is_expired():
-                                # Valid entry, add to memory cache
-                                self.memory_cache[key] = entry
-                                self.disk_hits += 1
-                                return entry.access()
-                            else:
-                                # Expired entry, remove from disk
-                                os.unlink(disk_path)
-                    except (json.JSONDecodeError, KeyError) as e:
-                        logger.warning(f"Error reading disk cache for {key}: {str(e)}")
-                        # Remove corrupted entry
-                        try:
-                            os.unlink(disk_path)
-                        except:
-                            pass
+                            # Put in memory cache
+                            self._memory_cache[key] = entry
+                            
+                            # Manage memory cache size
+                            if len(self._memory_cache) > self.memory_cache_max_items:
+                                # Remove least recently accessed item
+                                lru_key = min(
+                                    self._memory_cache.keys(),
+                                    key=lambda k: self._memory_cache[k].accessed_at
+                                )
+                                del self._memory_cache[lru_key]
+                            
+                            # Return data
+                            return entry.access()
+                except Exception as e:
+                    logger.error(f"Error reading cache from disk: {str(e)}")
             
-            # Cache miss
-            self.misses += 1
+            # Update stats
+            self._stats["misses"] += 1
+            
+            # Not found
             return default
     
     def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
@@ -189,23 +241,34 @@ class CacheManager:
             ttl: Time to live in seconds (uses default if None)
         """
         if ttl is None:
-            ttl = self.config['default_ttl']
-        
+            ttl = self.default_ttl
+            
         with self._lock:
-            # Create new entry
+            # Create entry
             entry = CacheEntry(key, value, ttl)
             
-            # Add to memory cache
-            self.memory_cache[key] = entry
+            # Update memory cache
+            self._memory_cache[key] = entry
             
-            # Add to disk cache if enabled
-            if self.config['use_disk_cache']:
-                disk_path = self._get_disk_path(key)
-                try:
-                    with open(disk_path, 'w') as f:
-                        json.dump(entry.to_dict(), f)
-                except Exception as e:
-                    logger.warning(f"Error writing to disk cache for {key}: {str(e)}")
+            # Manage memory cache size
+            if len(self._memory_cache) > self.memory_cache_max_items:
+                # Remove least recently accessed item
+                lru_key = min(
+                    self._memory_cache.keys(),
+                    key=lambda k: self._memory_cache[k].accessed_at
+                )
+                del self._memory_cache[lru_key]
+            
+            # Update disk cache
+            disk_path = self._get_disk_path(key)
+            try:
+                with open(disk_path, "w") as f:
+                    json.dump(entry.to_dict(), f)
+            except Exception as e:
+                logger.error(f"Error writing cache to disk: {str(e)}")
+            
+            # Update stats
+            self._stats["sets"] += 1
     
     def delete(self, key: str) -> bool:
         """
@@ -220,20 +283,23 @@ class CacheManager:
         with self._lock:
             deleted = False
             
-            # Delete from memory cache
-            if key in self.memory_cache:
-                del self.memory_cache[key]
+            # Remove from memory cache
+            if key in self._memory_cache:
+                del self._memory_cache[key]
                 deleted = True
             
-            # Delete from disk cache
-            if self.config['use_disk_cache']:
-                disk_path = self._get_disk_path(key)
-                if disk_path.exists():
-                    try:
-                        os.unlink(disk_path)
-                        deleted = True
-                    except Exception as e:
-                        logger.warning(f"Error deleting disk cache for {key}: {str(e)}")
+            # Remove from disk cache
+            disk_path = self._get_disk_path(key)
+            if disk_path.exists():
+                try:
+                    disk_path.unlink()
+                    deleted = True
+                except Exception as e:
+                    logger.error(f"Error deleting cache from disk: {str(e)}")
+            
+            # Update stats if deleted
+            if deleted:
+                self._stats["deletes"] += 1
             
             return deleted
     
@@ -248,33 +314,25 @@ class CacheManager:
             True if exists and not expired
         """
         with self._lock:
-            # Check memory cache first
-            if key in self.memory_cache:
-                entry = self.memory_cache[key]
+            # Check memory cache
+            if key in self._memory_cache:
+                entry = self._memory_cache[key]
                 if not entry.is_expired():
                     return True
-                else:
-                    # Expired entry
-                    del self.memory_cache[key]
-            
-            # Check disk cache if memory_cache failed
-            if self.config['use_disk_cache']:
-                disk_path = self._get_disk_path(key)
-                if disk_path.exists():
-                    try:
-                        with open(disk_path, 'r') as f:
-                            entry_data = json.load(f)
-                            entry = CacheEntry.from_dict(entry_data)
-                            
-                            if not entry.is_expired():
-                                # Valid entry, add to memory cache
-                                self.memory_cache[key] = entry
-                                return True
-                            else:
-                                # Expired entry, remove from disk
-                                os.unlink(disk_path)
-                    except:
-                        pass
+                    
+            # Check disk cache
+            disk_path = self._get_disk_path(key)
+            if disk_path.exists():
+                try:
+                    with open(disk_path, "r") as f:
+                        entry_dict = json.load(f)
+                        entry = CacheEntry.from_dict(entry_dict)
+                        
+                        # Check if expired
+                        if not entry.is_expired():
+                            return True
+                except Exception as e:
+                    logger.error(f"Error checking cache on disk: {str(e)}")
             
             return False
     
@@ -313,15 +371,18 @@ class CacheManager:
         """Clear all cache entries."""
         with self._lock:
             # Clear memory cache
-            self.memory_cache.clear()
+            self._memory_cache.clear()
             
             # Clear disk cache
-            if self.config['use_disk_cache']:
-                for path in Path(self.disk_cache_dir).glob('*.json'):
-                    try:
-                        os.unlink(path)
-                    except Exception as e:
-                        logger.warning(f"Error deleting disk cache file {path}: {str(e)}")
+            try:
+                # Only remove files, not directories
+                for subdir in self.cache_dir.iterdir():
+                    if subdir.is_dir():
+                        for file in subdir.iterdir():
+                            if file.is_file() and file.suffix == ".json":
+                                file.unlink()
+            except Exception as e:
+                logger.error(f"Error clearing disk cache: {str(e)}")
     
     def cleanup(self) -> int:
         """
@@ -330,41 +391,47 @@ class CacheManager:
         Returns:
             Number of entries removed
         """
-        count = 0
         with self._lock:
+            removed = 0
+            
             # Clean memory cache
             expired_keys = []
-            for key, entry in self.memory_cache.items():
+            for key, entry in self._memory_cache.items():
                 if entry.is_expired():
                     expired_keys.append(key)
             
             for key in expired_keys:
-                del self.memory_cache[key]
-                count += 1
+                del self._memory_cache[key]
+                removed += 1
             
             # Clean disk cache
-            if self.config['use_disk_cache']:
-                for path in Path(self.disk_cache_dir).glob('*.json'):
-                    try:
-                        with open(path, 'r') as f:
-                            entry_data = json.load(f)
-                            entry = CacheEntry.from_dict(entry_data)
-                            
-                            if entry.is_expired():
-                                os.unlink(path)
-                                count += 1
-                    except:
-                        # Delete corrupted files
-                        try:
-                            os.unlink(path)
-                            count += 1
-                        except:
-                            pass
-        
-        if count > 0:
-            logger.info(f"Cleaned up {count} expired cache entries")
-        
-        return count
+            try:
+                # Check each file in the cache directory
+                for subdir in self.cache_dir.iterdir():
+                    if subdir.is_dir():
+                        for file in subdir.iterdir():
+                            if file.is_file() and file.suffix == ".json":
+                                try:
+                                    with open(file, "r") as f:
+                                        entry_dict = json.load(f)
+                                        entry = CacheEntry.from_dict(entry_dict)
+                                        
+                                        # Remove if expired
+                                        if entry.is_expired():
+                                            file.unlink()
+                                            removed += 1
+                                except Exception as e:
+                                    logger.error(f"Error checking file {file}: {str(e)}")
+                                    # Remove corrupted files
+                                    file.unlink(missing_ok=True)
+                                    removed += 1
+            except Exception as e:
+                logger.error(f"Error during disk cache cleanup: {str(e)}")
+            
+            # Update stats
+            self._stats["cleanups"] += 1
+            
+            return removed
     
     def get_stats(self) -> Dict[str, Any]:
         """
@@ -374,33 +441,32 @@ class CacheManager:
             Dictionary of statistics
         """
         with self._lock:
-            memory_size = len(self.memory_cache)
+            # Add current size info
+            stats = self._stats.copy()
+            stats["memory_cache_size"] = len(self._memory_cache)
             
-            # Count disk cache
-            disk_size = 0
-            disk_bytes = 0
-            if self.config['use_disk_cache']:
-                for path in Path(self.disk_cache_dir).glob('*.json'):
-                    disk_size += 1
-                    try:
-                        disk_bytes += path.stat().st_size
-                    except:
-                        pass
+            # Count disk cache files
+            disk_cache_size = 0
+            try:
+                for subdir in self.cache_dir.iterdir():
+                    if subdir.is_dir():
+                        for file in subdir.iterdir():
+                            if file.is_file() and file.suffix == ".json":
+                                disk_cache_size += 1
+            except Exception as e:
+                logger.error(f"Error counting disk cache files: {str(e)}")
             
-            # Calculate hit rate
-            total_requests = self.memory_hits + self.disk_hits + self.misses
-            hit_rate = 0 if total_requests == 0 else (self.memory_hits + self.disk_hits) / total_requests
+            stats["disk_cache_size"] = disk_cache_size
+            stats["total_size"] = stats["memory_cache_size"] + stats["disk_cache_size"]
             
-            return {
-                'memory_cache_size': memory_size,
-                'disk_cache_size': disk_size,
-                'disk_cache_bytes': disk_bytes,
-                'memory_hits': self.memory_hits,
-                'disk_hits': self.disk_hits,
-                'misses': self.misses,
-                'hit_rate': hit_rate,
-                'total_requests': total_requests
-            }
+            # Calculate hit ratio
+            total_requests = stats["memory_hits"] + stats["disk_hits"] + stats["misses"]
+            if total_requests > 0:
+                stats["hit_ratio"] = (stats["memory_hits"] + stats["disk_hits"]) / total_requests
+            else:
+                stats["hit_ratio"] = 0.0
+                
+            return stats
     
     def cached(self, 
               ttl: Optional[int] = None, 
@@ -422,8 +488,8 @@ class CacheManager:
                 if key_fn:
                     key = key_fn(*args, **kwargs)
                 else:
-                    # Default key generation
-                    key = f"{func.__name__}:{args!r}:{kwargs!r}"
+                    # Default key is function name + args + kwargs
+                    key = f"{func.__module__}.{func.__name__}:{str(args)}:{str(sorted(kwargs.items()))}"
                 
                 # Check cache
                 cached_result = self.get(key)
@@ -437,15 +503,13 @@ class CacheManager:
                 self.set(key, result, ttl)
                 
                 return result
+            
             return wrapper
+        
         return decorator
 
-# Create singleton instance
-_instance = None
 
+# Singleton instance getter
 def get_cache_manager() -> CacheManager:
     """Get the singleton cache manager instance."""
-    global _instance
-    if _instance is None:
-        _instance = CacheManager()
-    return _instance
+    return CacheManager()
