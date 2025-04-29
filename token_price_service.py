@@ -132,6 +132,10 @@ class TokenPriceService:
         Returns:
             Current price in USD, or None if not available
         """
+        # Skip processing for UNKNOWN tokens to avoid spam warnings
+        if symbol == "UNKNOWN":
+            return None
+            
         # Try cache first
         if self._is_cache_valid() and symbol in self.cached_prices:
             return self.cached_prices[symbol]
@@ -139,6 +143,7 @@ class TokenPriceService:
         # Convert symbol to CoinGecko ID
         coingecko_id = self.token_mapping.get(symbol.upper())
         if not coingecko_id:
+            # Only log warnings for non-UNKNOWN tokens to reduce noise
             logger.warning(f"No mapping for token: {symbol}")
             return None
         
@@ -188,12 +193,17 @@ class TokenPriceService:
         
         for symbol in symbols:
             symbol = symbol.upper()
+            # Skip UNKNOWN tokens
+            if symbol == "UNKNOWN":
+                continue
+                
             # Use cache if valid
             if self._is_cache_valid() and symbol in self.cached_prices:
                 result[symbol] = self.cached_prices[symbol]
             elif symbol in self.token_mapping:
                 symbols_to_fetch.append(symbol)
             else:
+                # Only log warning for non-UNKNOWN tokens to reduce noise
                 logger.warning(f"No mapping for token: {symbol}")
         
         if not symbols_to_fetch:
