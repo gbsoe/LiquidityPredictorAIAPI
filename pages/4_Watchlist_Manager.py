@@ -195,7 +195,7 @@ def display_pool_card(pool: Dict[str, Any]) -> None:
                                     # Update in database for future use
                                     db_handler.save_pool_to_database(updated_pool)
                                     # Force refresh the page
-                                    st.experimental_rerun()
+                                    st.rerun()
                                 else:
                                     st.warning(f"Could not fetch updated data for pool {pool_id}")
                             else:
@@ -253,7 +253,7 @@ def display_pool_card(pool: Dict[str, Any]) -> None:
                         if success:
                             st.success(f"Successfully updated pool data for {manual_name}")
                             st.session_state.pop(f"editing_pool_{pool_id}", None)
-                            st.experimental_rerun()
+                            st.rerun()
                         else:
                             st.error("Failed to update pool data. Please try again.")
 
