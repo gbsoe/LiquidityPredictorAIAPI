@@ -154,8 +154,17 @@ def add_batch_pools(watchlist_id: int, pool_ids: List[str]) -> int:
         progress_bar.progress(progress)
         status_text.text(f"Processing pool {i+1} of {len(pool_ids)}: {pool_id[:10]}...")
         
+        # Get pools DataFrame if not already defined in this scope
+        # This ensures that even if pools_df changes outside this function, we'll have access to it
+        try:
+            # Try to access pools_df from the global scope
+            global_pools_df = pools_df
+        except NameError:
+            # If pools_df is not defined, get a fresh copy from the database
+            global_pools_df = pd.DataFrame(db_handler.get_pools(limit=None))
+            
         # Check if pool exists in our database
-        pool_exists = pool_id in pools_df["id"].values if not pools_df.empty else False
+        pool_exists = pool_id in global_pools_df["id"].values if not global_pools_df.empty else False
         
         if not pool_exists:
             unknown_pools.append(pool_id)
@@ -551,9 +560,11 @@ def main():
                     max_display = min(20, len(filtered_df))
                     for i in range(max_display):
                         pool = filtered_df.iloc[i].to_dict()
+                        # Use index as part of the key to ensure uniqueness
+                        unique_key = f"pool_check_{pool['id']}_{i}"
                         pool_selected = st.checkbox(
                             f"{pool['name']} - {get_dex_badge(pool['dex'])} - APR: {format_percentage(pool['apr'])}",
-                            key=f"pool_check_{pool['id']}",
+                            key=unique_key,
                             value=False
                         )
                         if pool_selected:
@@ -582,7 +593,8 @@ def main():
                     selected_suggestions = []
                     
                     with st.form("suggestions_form"):
-                        for suggestion in suggestions:
+                        # Use enumerate to get unique indexes even if there are duplicate pools
+                        for i, suggestion in enumerate(suggestions):
                             pool_id = suggestion['id']
                             pool_info = pools_df[pools_df["id"] == pool_id].iloc[0].to_dict() if pool_id in pools_df["id"].values else None
                             
@@ -591,7 +603,9 @@ def main():
                                 st.markdown(f"**Recommendation reason:** {suggestion['reason']}")
                                 display_pool_card(pool_info)
                                 
-                                add_this = st.checkbox(f"Add to watchlist", key=f"sugg_{pool_id}")
+                                # Use the enumeration index for key uniqueness
+                                unique_key = f"sugg_{pool_id}_{i}"
+                                add_this = st.checkbox(f"Add to watchlist", key=unique_key)
                                 if add_this:
                                     selected_suggestions.append(pool_id)
                                     
