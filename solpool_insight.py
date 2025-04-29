@@ -872,11 +872,22 @@ def main():
             # Pool data table
             st.subheader("Pool Data")
             
-            # Show only the most relevant columns
+            # Create token information display option
+            show_token_details = st.checkbox("Show Detailed Token Information", value=False)
+            
+            # Show only the most relevant columns, with option for token details
             display_columns = [
                 "name", "dex", "category", "liquidity", "volume_24h", 
                 "apr", "apr_change_24h", "apr_change_7d", "prediction_score", "id"
             ]
+            
+            # Add token columns if requested
+            if show_token_details:
+                # Create tabs for different views
+                token_tab1, token_tab2 = st.tabs(["Basic Token Info", "Advanced Token Details"])
+                
+                with token_tab1:
+                    st.info("The tables below will include token symbols, addresses, and prices")
             
             # Create a proper Streamlit table instead of HTML
             # This avoids formatting issues with HTML badges
@@ -934,8 +945,20 @@ def main():
                 pred_icon = "🟢" if pred_score > 75 else "🟡" if pred_score > 50 else "🔴"
                 pred_text = f"{pred_icon} {pred_score:.1f}"
                 
-                # Add to table data
-                table_data.append({
+                # Prepare token data if available
+                token1_symbol = row.get("token1_symbol", "Unknown")
+                token2_symbol = row.get("token2_symbol", "Unknown")
+                token1_address = row.get("token1_address", "")
+                token2_address = row.get("token2_address", "")
+                token1_price = row.get("token1_price", 0)
+                token2_price = row.get("token2_price", 0)
+                
+                # Format token addresses for display (truncated)
+                token1_addr_display = f"{token1_address[:6]}...{token1_address[-4:]}" if len(token1_address) > 10 else token1_address
+                token2_addr_display = f"{token2_address[:6]}...{token2_address[-4:]}" if len(token2_address) > 10 else token2_address
+                
+                # Create standard table entry
+                table_entry = {
                     "Name": pool_name,
                     "DEX": dex_name,
                     "Category": category_text,
@@ -946,11 +969,59 @@ def main():
                     "APR Δ (7d)": apr_change_7d_val,
                     "Prediction": pred_text,
                     "ID": row["id"]
-                })
+                }
+                
+                # If showing token details, add token-specific fields
+                if show_token_details:
+                    table_entry.update({
+                        "Token1": token1_symbol,
+                        "Token2": token2_symbol,
+                        "Token1 Address": token1_addr_display,
+                        "Token2 Address": token2_addr_display,
+                        "Token1 Price": f"${token1_price:.6f}" if token1_price < 0.01 else f"${token1_price:.2f}",
+                        "Token2 Price": f"${token2_price:.6f}" if token2_price < 0.01 else f"${token2_price:.2f}"
+                    })
+                
+                # Add to table data
+                table_data.append(table_entry)
             
             # Show as dataframe
             table_df = pd.DataFrame(table_data)
-            st.dataframe(table_df, use_container_width=True)
+            
+            # Display the dataframe
+            if show_token_details:
+                with token_tab1:
+                    st.dataframe(table_df, use_container_width=True)
+                
+                # Display detailed token information in the second tab if tokens data is available
+                with token_tab2:
+                    st.subheader("Tokens Detailed View")
+                    
+                    # Create expanded token information
+                    expanded_token_data = []
+                    
+                    for _, row in filtered_df.iloc[start_idx:end_idx].iterrows():
+                        # Check if tokens field exists in the data
+                        if 'tokens' in row:
+                            tokens = row.get('tokens', [])
+                            if isinstance(tokens, list) and len(tokens) > 0:
+                                for token in tokens:
+                                    expanded_token_data.append({
+                                        "Pool Name": row["name"],
+                                        "Token Symbol": token.get("symbol", "Unknown"),
+                                        "Token Name": token.get("name", "Unknown"),
+                                        "Address": token.get("address", ""),
+                                        "Decimals": token.get("decimals", 0),
+                                        "Price": f"${token.get('price', 0):.6f}" if token.get('price', 0) < 0.01 else f"${token.get('price', 0):.2f}",
+                                        "Active": "✓" if token.get("active", False) else "✗"
+                                    })
+                    
+                    if expanded_token_data:
+                        st.dataframe(pd.DataFrame(expanded_token_data), use_container_width=True)
+                    else:
+                        st.info("Detailed token information not available in the current dataset")
+            else:
+                st.dataframe(table_df, use_container_width=True)
     
         # Advanced Filtering Tab
         with tab_advanced:

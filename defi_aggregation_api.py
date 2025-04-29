@@ -325,6 +325,32 @@ class DefiAggregationAPI:
                 "token2_symbol": token2.get('symbol', 'Unknown'),
                 "token1_address": token1.get('address', ''),
                 "token2_address": token2.get('address', ''),
+                "token1_price": token1.get('price', 0),
+                "token2_price": token2.get('price', 0),
+                
+                # Store the full token objects for more detailed access
+                "tokens": [
+                    {
+                        "symbol": token1.get('symbol', 'Unknown'),
+                        "name": token1.get('name', 'Unknown'),
+                        "address": token1.get('address', ''),
+                        "decimals": token1.get('decimals', 0),
+                        "price": token1.get('price', 0),
+                        "active": token1.get('active', True)
+                    },
+                    {
+                        "symbol": token2.get('symbol', 'Unknown'),
+                        "name": token2.get('name', 'Unknown'),
+                        "address": token2.get('address', ''),
+                        "decimals": token2.get('decimals', 0),
+                        "price": token2.get('price', 0),
+                        "active": token2.get('active', True)
+                    }
+                ],
+                
+                # Pool ID from API for reference
+                "poolId": pool.get('poolId', ''),
+                "programId": pool.get('programId', ''),
                 
                 # Liquidity and volume metrics (only include fields in LiquidityPool model)
                 "liquidity": pool.get('tvl', metrics.get('tvl', 0)),
@@ -346,7 +372,10 @@ class DefiAggregationAPI:
                 "fee": pool.get('fee', metrics.get('fee', 0)),
                 "version": pool.get('version', '1.0'),
                 "created_at": datetime.now().isoformat(),
-                "updated_at": datetime.now().isoformat()
+                "updated_at": datetime.now().isoformat(),
+                
+                # Store the original metrics object for reference
+                "metrics_data": metrics
             }
             
             return transformed
@@ -364,6 +393,28 @@ class DefiAggregationAPI:
                 "token2_symbol": "Unknown",
                 "token1_address": "",
                 "token2_address": "",
+                "token1_price": 0,
+                "token2_price": 0,
+                "tokens": [
+                    {
+                        "symbol": "Unknown",
+                        "name": "Unknown",
+                        "address": "",
+                        "decimals": 0,
+                        "price": 0,
+                        "active": True
+                    },
+                    {
+                        "symbol": "Unknown",
+                        "name": "Unknown",
+                        "address": "",
+                        "decimals": 0,
+                        "price": 0,
+                        "active": True
+                    }
+                ],
+                "poolId": pool.get('poolId', ''),
+                "programId": pool.get('programId', ''),
                 "liquidity": 0,
                 "volume_24h": 0,
                 "apr": 0,
