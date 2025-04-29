@@ -31,8 +31,9 @@ logger = logging.getLogger('solpool_insight')
 # Import our database handler
 import db_handler
 
-# Import token price service
+# Import token services
 from token_price_service import get_token_price, get_multiple_prices
+from token_data_service import get_token_service
 
 # Import DeFi Aggregation API
 try:
@@ -1723,9 +1724,12 @@ def main():
         with tab_tokens:
             st.header("Token Price Explorer")
             st.markdown("""
-            Track and analyze token prices using real-time data from CoinGecko. 
+            Track and analyze token prices using real-time data from the DeFi API and CoinGecko. 
             This tab allows you to monitor token prices, view historical trends, and compare tokens.
             """)
+            
+            # Initialize token service for enhanced token data
+            token_service = get_token_service()
             
             # Get list of popular tokens plus tokens from pools
             popular_tokens = [
@@ -1929,13 +1933,31 @@ def main():
                     st.write("**Token Details**")
                     st.write(f"Symbol: {selected_token}")
                     
-                    # Try to get metadata for the token
-                    try:
-                        # Create a CoinGecko API URL for the token
-                        token_id = selected_token.lower()
-                        # This would normally use the proper CoinGecko ID mapping
-                        # For now, we'll make a best-effort guess
+                    # First try to get metadata from our token service
+                    token_metadata = token_service.get_token_metadata(selected_token)
+                    
+                    if token_metadata and token_metadata.get('name'):
+                        st.write(f"Name: {token_metadata.get('name', 'Unknown')}")
                         
+                        if token_metadata.get('address'):
+                            st.write(f"Address: `{token_metadata.get('address')}`")
+                        
+                        if token_metadata.get('decimals') is not None:
+                            st.write(f"Decimals: {token_metadata.get('decimals')}")
+                            
+                        price = token_metadata.get('price', 0)
+                        if price > 0:
+                            st.write(f"Price (from API): ${price:.6f}" if price < 0.01 else f"Price (from API): ${price:.2f}")
+                            
+                        # Show which DEXes use this token
+                        dexes = token_metadata.get('dexes', [])
+                        if dexes:
+                            st.write("**Used by DEXes:**")
+                            for dex in dexes:
+                                st.write(f"- {dex.capitalize()}")
+                    
+                    # Fallback to CoinGecko
+                    try:
                         # Display information from the token_price_service
                         from token_price_service import DEFAULT_TOKEN_MAPPING
                         
