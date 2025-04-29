@@ -8,11 +8,31 @@ import json
 import sys
 import sqlite3
 from datetime import datetime
-import pandas as pd
-import sqlalchemy as sa
-from sqlalchemy import create_engine, Column, Integer, String, Float, MetaData, Table, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+    
+try:
+    import sqlalchemy as sa
+    from sqlalchemy import create_engine, Column, Integer, String, Float, MetaData, Table, DateTime, Boolean, ForeignKey, func
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import sessionmaker
+except ImportError:
+    sa = None
+    create_engine = None
+    Column = None
+    Integer = None
+    String = None
+    Float = None
+    MetaData = None
+    Table = None
+    DateTime = None
+    Boolean = None
+    ForeignKey = None
+    func = None
+    declarative_base = None
+    sessionmaker = None
 
 # Get the database URL from environment variables
 # Load from environment directly (more reliable than os.environ.get)
@@ -764,51 +784,59 @@ def add_pool_to_watchlist(watchlist_id, pool_id, notes=""):
         if not pool_exists:
             print(f"Pool {pool_id} not found in database")
             
-            # Attempt to create a smarter pool entry with metadata derived from the ID
+            # Try to fetch it from the API first
             try:
-                # Try to derive some metadata from the pool ID
-                dex = "Unknown"
+                # Import here to avoid circular imports
+                from defi_aggregation_api import DefiAggregationAPI
+                import os
                 
-                # Extract potential DEX information from pool ID
-                if pool_id.startswith("8sLb") or pool_id.startswith("7WQK"):  # Common Meteora pool prefixes
-                    dex = "Meteora"
-                elif pool_id.startswith("3") and len(pool_id) > 20:  # Common Raydium pattern
-                    dex = "Raydium"
-                elif pool_id.startswith("5Q5") or pool_id.startswith("2AX"):  # Common Orca pattern
-                    dex = "Orca"
-                
-                # Create a better placeholder pool with derived info
-                default_pool = LiquidityPool(
-                    id=pool_id,
-                    name=f"Pool {pool_id[:8]}...",  # Shortened ID as name
-                    dex=dex,
-                    category="Custom",
-                    token1_symbol="Unknown",
-                    token2_symbol="Unknown",
-                    token1_address="",
-                    token2_address="",
-                    liquidity=0.0,
-                    volume_24h=0.0,
-                    apr=0.0,
-                    fee=0.0,
-                    version="",
-                    apr_change_24h=0.0,
-                    apr_change_7d=0.0,
-                    tvl_change_24h=0.0,
-                    tvl_change_7d=0.0,
-                    prediction_score=0.0,
-                    apr_change_30d=0.0,
-                    tvl_change_30d=0.0,
-                    created_at=datetime.now().isoformat(),
-                    updated_at=datetime.now().isoformat()
-                )
-                session.add(default_pool)
-                session.commit()
-                print(f"Created placeholder for pool {pool_id} - will be updated on next data refresh")
+                # Get API key
+                api_key = os.getenv("DEFI_API_KEY")
+                if api_key:
+                    print(f"Attempting to fetch pool {pool_id} from API...")
+                    api = DefiAggregationAPI(api_key=api_key)
+                    pool_data = api.get_pool_by_id(pool_id)
+                    
+                    if pool_data:
+                        print(f"Found pool {pool_id} in API, saving to database")
+                        new_pool = LiquidityPool(
+                            id=pool_data.get("id", ""),
+                            name=pool_data.get("name", ""),
+                            dex=pool_data.get("dex", "Unknown"),
+                            category=pool_data.get("category", "Custom"),
+                            token1_symbol=pool_data.get("token1_symbol", "Unknown"),
+                            token2_symbol=pool_data.get("token2_symbol", "Unknown"),
+                            token1_address=pool_data.get("token1_address", ""),
+                            token2_address=pool_data.get("token2_address", ""),
+                            liquidity=pool_data.get("liquidity", 0.0),
+                            volume_24h=pool_data.get("volume_24h", 0.0),
+                            apr=pool_data.get("apr", 0.0),
+                            fee=pool_data.get("fee", 0.0),
+                            version=pool_data.get("version", ""),
+                            apr_change_24h=pool_data.get("apr_change_24h", 0.0),
+                            apr_change_7d=pool_data.get("apr_change_7d", 0.0),
+                            tvl_change_24h=pool_data.get("tvl_change_24h", 0.0),
+                            tvl_change_7d=pool_data.get("tvl_change_7d", 0.0),
+                            prediction_score=pool_data.get("prediction_score", 0.0),
+                            apr_change_30d=pool_data.get("apr_change_30d", 0.0),
+                            tvl_change_30d=pool_data.get("tvl_change_30d", 0.0),
+                            created_at=pool_data.get("created_at", datetime.now().isoformat()),
+                            updated_at=pool_data.get("updated_at", datetime.now().isoformat())
+                        )
+                        session.add(new_pool)
+                        session.commit()
+                        print(f"Saved pool {pool_id} to database")
+                        pool_exists = True
+                    else:
+                        print(f"Pool {pool_id} not found in API")
+                        # Add a message to the notes of this watchlist pool
+                        notes = notes or "Pool not found in API - not yet available or incorrect ID."
+                else:
+                    print("Cannot fetch pool: API key not found in environment")
             except Exception as e:
                 session.rollback()
-                print(f"Failed to create placeholder pool: {e}")
-                # Continue anyway to add to watchlist
+                print(f"Error fetching pool from API: {e}")
+                # Add to watchlist anyway, but we'll include a note
         
         # Add pool to watchlist
         watchlist_pool = WatchlistPool(
@@ -1031,9 +1059,32 @@ def get_watchlist_details(watchlist_id, fetch_missing_pools=True):
                                     # Still add to result even if DB store fails
                                     pool_data.append(pool_data_from_api)
                             else:
-                                print(f"Could not fetch pool {missing_id} from API")
+                                print(f"Could not fetch pool {missing_id} from API - it may not be available through the API")
+                                # Log information for the user but do not add a placeholder
+                                try:
+                                    # Create a note in the watchlist entry to indicate this pool needs verification
+                                    watchlist_pool = session.query(WatchlistPool).filter_by(
+                                        watchlist_id=watchlist_id, pool_id=missing_id).first()
+                                    if watchlist_pool:
+                                        if not watchlist_pool.notes:
+                                            watchlist_pool.notes = "Pool not found in API - manual verification required."
+                                        session.commit()
+                                        print(f"Added verification note to pool {missing_id}")
+                                except Exception as note_err:
+                                    print(f"Error adding note to watchlist pool: {note_err}")
+                                    session.rollback()
                         except Exception as pool_err:
                             print(f"Error fetching individual pool {missing_id}: {pool_err}")
+                            # Make the same note as above since we couldn't fetch it
+                            try:
+                                watchlist_pool = session.query(WatchlistPool).filter_by(
+                                    watchlist_id=watchlist_id, pool_id=missing_id).first()
+                                if watchlist_pool:
+                                    if not watchlist_pool.notes:
+                                        watchlist_pool.notes = "Pool not found in API - manual verification required."
+                                    session.commit()
+                            except Exception:
+                                session.rollback()
                 else:
                     print("Cannot fetch missing pools: API key not found in environment")
             except Exception as api_err:

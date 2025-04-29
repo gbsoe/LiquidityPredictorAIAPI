@@ -775,7 +775,11 @@ class DefiAggregationAPI:
             interval_hours: Hours between data collection
         """
         try:
-            import schedule
+            try:
+                import schedule
+            except ImportError:
+                print("Warning: 'schedule' package not found. Continuous data collection disabled.")
+                return False
             import threading
             import time
             
