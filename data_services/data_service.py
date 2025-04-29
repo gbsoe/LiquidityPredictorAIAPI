@@ -5,22 +5,22 @@ This module provides a unified interface for data collection,
 processing, and retrieval with caching and scheduling.
 """
 
-import os
-import time
-import json
 import logging
+import os
 import threading
-import traceback
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional, Tuple, Callable
-import schedule
-
-from .config import SCHEDULE_SETTINGS, validate_settings
-from .cache import get_cache_manager
-from .collectors import get_defi_collector
+import time
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+# Import collectors
+from .collectors import get_defi_collector
+from .cache import get_cache_manager
+
+# Singleton instance
+_instance = None
 
 class DataService:
     """
@@ -40,52 +40,46 @@ class DataService:
     
     def __init__(self):
         """Initialize the data service."""
-        # Skip initialization if already initialized
-        if getattr(self, '_initialized', False):
+        # Only initialize once
+        if self._initialized:
             return
-            
-        # Validate configuration
-        if not validate_settings():
-            logger.warning("Some settings are invalid or missing")
-            
-        # Initialize cache manager
-        self.cache_manager = get_cache_manager()
         
-        # Initialize collectors
-        self.collectors = {}
+        # Set up collectors
+        self._collectors = []
         self._init_collectors()
         
-        # Scheduled collection
-        self.scheduler = schedule.Scheduler()
-        self.scheduler_thread = None
-        self.scheduler_running = False
+        # Set up cache
+        self._cache_manager = get_cache_manager()
         
-        # Collection stats
+        # Set up scheduling
+        self.scheduler_running = False
+        self.scheduler_thread = None
+        self.collection_interval = 15 * 60  # 15 minutes
+        
+        # Set up stats
         self.stats = {
+            "startup_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "last_collection_time": None,
-            "last_collection_duration": 0,
             "last_collection_pool_count": 0,
             "total_collections": 0,
-            "total_pools_collected": 0,
-            "collection_errors": 0
+            "successful_collections": 0,
+            "failed_collections": 0,
+            "average_collection_time": 0,
+            "average_pools_count": 0
         }
         
-        logger.info("Data service initialized")
+        # Mark as initialized
         self._initialized = True
+        logger.info("Data service initialized")
     
     def _init_collectors(self):
         """Initialize data collectors."""
-        # Add DeFi API collector
-        try:
-            defi_collector = get_defi_collector()
-            self.collectors["defi_api"] = defi_collector
-            logger.info("Added DeFi API collector")
-        except Exception as e:
-            logger.error(f"Error initializing DeFi API collector: {str(e)}")
+        # Add DeFi Aggregation API collector
+        defi_collector = get_defi_collector()
+        self._collectors.append(defi_collector)
         
-        # Add other collectors here as needed
-        
-        logger.info(f"Initialized {len(self.collectors)} data collectors")
+        # Log collectors
+        logger.info(f"Initialized {len(self._collectors)} collectors")
     
     def get_collector_stats(self) -> List[Dict[str, Any]]:
         """
@@ -94,19 +88,7 @@ class DataService:
         Returns:
             List of collector statistics
         """
-        stats = []
-        for collector_id, collector in self.collectors.items():
-            try:
-                collector_stats = collector.get_stats()
-                stats.append(collector_stats)
-            except Exception as e:
-                logger.error(f"Error getting stats for collector {collector_id}: {str(e)}")
-                stats.append({
-                    "collector_id": collector_id,
-                    "error": str(e)
-                })
-        
-        return stats
+        return [collector.get_stats() for collector in self._collectors]
     
     def collect_data(self, force: bool = False) -> Tuple[List[Dict[str, Any]], bool]:
         """
@@ -118,97 +100,73 @@ class DataService:
         Returns:
             Tuple of (collected_data, success)
         """
-        # Track collection time
+        # Check if we need to collect
+        if not force and self.stats["last_collection_time"]:
+            # Check if we have recent data
+            last_time = datetime.strptime(self.stats["last_collection_time"], "%Y-%m-%d %H:%M:%S")
+            time_diff = (datetime.now() - last_time).total_seconds()
+            
+            if time_diff < self.collection_interval / 2:
+                logger.info(f"Skipping collection, last collection was {time_diff:.1f}s ago")
+                
+                # Return cached data
+                cached_pools = self._cache_manager.get("all_pools", [])
+                return cached_pools, True
+        
+        # Collect from all sources
+        logger.info("Starting data collection from all sources")
         start_time = time.time()
         
-        # Store all collected pools
-        all_pools = []
-        
-        # Track success
+        all_data = []
         success = True
         
-        # Track pool IDs to avoid duplicates
-        pool_ids = set()
+        # Use each collector
+        for collector in self._collectors:
+            try:
+                # Collect data
+                data = collector.collect()
+                
+                if data:
+                    logger.info(f"Collected {len(data)} items from {collector.name}")
+                    all_data.extend(data)
+                else:
+                    logger.warning(f"No data collected from {collector.name}")
+            except Exception as e:
+                logger.error(f"Error collecting from {collector.name}: {str(e)}")
+                success = False
         
         # Update stats
+        elapsed_time = time.time() - start_time
         self.stats["last_collection_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.stats["last_collection_pool_count"] = len(all_data)
         self.stats["total_collections"] += 1
         
-        # Collect from each collector
-        for collector_id, collector in self.collectors.items():
-            try:
-                logger.info(f"Collecting data from {collector_id}")
-                pools, collector_success = collector.collect(force=force)
-                
-                # Update overall success
-                success = success and collector_success
-                
-                if pools:
-                    # Filter out duplicates
-                    unique_pools = []
-                    for pool in pools:
-                        pool_id = pool.get("pool_id")
-                        if pool_id and pool_id not in pool_ids:
-                            pool_ids.add(pool_id)
-                            unique_pools.append(pool)
-                    
-                    # Add unique pools to result
-                    logger.info(f"Adding {len(unique_pools)} unique pools from {collector_id}")
-                    all_pools.extend(unique_pools)
-                else:
-                    logger.warning(f"No pools collected from {collector_id}")
-            except Exception as e:
-                logger.error(f"Error collecting from {collector_id}: {str(e)}")
-                logger.error(traceback.format_exc())
-                success = False
-                self.stats["collection_errors"] += 1
+        if success:
+            self.stats["successful_collections"] += 1
+        else:
+            self.stats["failed_collections"] += 1
         
-        # Update stats
-        duration = time.time() - start_time
-        self.stats["last_collection_duration"] = duration
-        self.stats["last_collection_pool_count"] = len(all_pools)
-        self.stats["total_pools_collected"] += len(all_pools)
-        
-        # Log stats
-        logger.info(
-            f"Collection complete in {duration:.2f}s: {len(all_pools)} pools " +
-            f"({len(pool_ids)} unique) from {len(self.collectors)} collectors"
+        # Update averages
+        self.stats["average_collection_time"] = (
+            (self.stats["average_collection_time"] * (self.stats["total_collections"] - 1) + elapsed_time) / 
+            self.stats["total_collections"]
+        )
+        self.stats["average_pools_count"] = (
+            (self.stats["average_pools_count"] * (self.stats["total_collections"] - 1) + len(all_data)) / 
+            self.stats["total_collections"]
         )
         
-        # Update cache
-        if all_pools:
-            try:
-                # Cache the combined pool data
-                cache_key = "all_pools"
-                self.cache_manager.set(
-                    key=cache_key,
-                    value=all_pools,
-                    ttl=300  # 5 minutes
-                )
-                logger.info(f"Cached {len(all_pools)} pools with key '{cache_key}'")
-                
-                # Also cache by DEX for more granular access
-                dex_pools = {}
-                for pool in all_pools:
-                    dex = pool.get("dex", "unknown").lower()
-                    if dex not in dex_pools:
-                        dex_pools[dex] = []
-                    dex_pools[dex].append(pool)
-                
-                # Cache each DEX's pools
-                for dex, pools in dex_pools.items():
-                    dex_cache_key = f"pools_by_dex_{dex}"
-                    self.cache_manager.set(
-                        key=dex_cache_key,
-                        value=pools,
-                        ttl=300  # 5 minutes
-                    )
-                    logger.info(f"Cached {len(pools)} pools for DEX '{dex}'")
-            except Exception as e:
-                logger.error(f"Error caching pools: {str(e)}")
-                logger.error(traceback.format_exc())
+        # Cache the results
+        if all_data:
+            self._cache_manager.set("all_pools", all_data)
         
-        return all_pools, success
+        # Log results
+        logger.info(
+            f"Data collection completed in {elapsed_time:.2f}s: " +
+            f"{len(all_data)} items, success: {success}"
+        )
+        
+        return all_data, success
     
     def get_all_pools(self, force_refresh: bool = False) -> List[Dict[str, Any]]:
         """
@@ -220,14 +178,14 @@ class DataService:
         Returns:
             List of pool data
         """
-        # Check cache first (unless forced)
+        # Check cache first
         if not force_refresh:
-            cached_pools = self.cache_manager.get("all_pools")
+            cached_pools = self._cache_manager.get("all_pools", None)
             if cached_pools:
-                logger.info(f"Using {len(cached_pools)} cached pools")
+                logger.info(f"Retrieved {len(cached_pools)} pools from cache")
                 return cached_pools
         
-        # Collect fresh data
+        # If not cached or forced refresh, collect
         pools, _ = self.collect_data(force=force_refresh)
         return pools
     
@@ -242,25 +200,39 @@ class DataService:
         Returns:
             Pool data or None if not found
         """
-        # Check cache first (unless forced)
-        cache_key = f"pool_{pool_id}"
+        # Check cache first using a pool-specific key
+        cache_key = f"pool:{pool_id}"
+        
         if not force_refresh:
-            cached_pool = self.cache_manager.get(cache_key)
+            cached_pool = self._cache_manager.get(cache_key, None)
             if cached_pool:
-                logger.info(f"Using cached data for pool {pool_id}")
+                logger.info(f"Retrieved pool {pool_id} from cache")
                 return cached_pool
         
-        # Try to find in all pools
-        pools = self.get_all_pools(force_refresh=force_refresh)
+        # Try to find in all pools first (cheaper than a specific request)
+        all_pools = self.get_all_pools(force_refresh=force_refresh)
         
-        # Find matching pool
-        for pool in pools:
-            if pool.get("pool_id") == pool_id:
+        for pool in all_pools:
+            if pool.get("id") == pool_id or pool.get("poolId") == pool_id:
                 # Cache for future use
-                self.cache_manager.set(cache_key, pool, ttl=300)  # 5 minutes
+                self._cache_manager.set(cache_key, pool)
                 return pool
         
+        # If not found in all pools, try a specific collector
+        # DeFi Aggregation API has a specific endpoint for individual pools
+        try:
+            defi_collector = get_defi_collector()
+            pool = defi_collector.get_pool_by_id(pool_id)
+            
+            if pool:
+                # Cache for future use
+                self._cache_manager.set(cache_key, pool)
+                return pool
+        except Exception as e:
+            logger.error(f"Error getting pool {pool_id}: {str(e)}")
+        
         # Not found
+        logger.warning(f"Pool {pool_id} not found")
         return None
     
     def get_pools_by_token(self, token: str) -> List[Dict[str, Any]]:
@@ -274,40 +246,53 @@ class DataService:
             List of matching pools
         """
         # Check cache first
-        cache_key = f"pools_by_token_{token}"
-        cached_pools = self.cache_manager.get(cache_key)
+        cache_key = f"token_pools:{token}"
+        cached_pools = self._cache_manager.get(cache_key, None)
+        
         if cached_pools:
-            logger.info(f"Using {len(cached_pools)} cached pools for token {token}")
+            logger.info(f"Retrieved {len(cached_pools)} pools for token {token} from cache")
             return cached_pools
         
-        # Get all pools
+        # First try to filter the existing pools
         all_pools = self.get_all_pools()
-        
-        # Find pools containing the token
         matching_pools = []
-        token_lower = token.lower()
         
         for pool in all_pools:
-            # Check token0
-            token0 = pool.get("token0", {})
-            token0_symbol = token0.get("symbol", "").lower()
-            token0_address = token0.get("address", "").lower()
+            # Check both tokens in the pool
+            token1_symbol = pool.get("token1_symbol", "").lower()
+            token2_symbol = pool.get("token2_symbol", "").lower()
+            token1_address = pool.get("token1_address", "").lower()
+            token2_address = pool.get("token2_address", "").lower()
             
-            # Check token1
-            token1 = pool.get("token1", {})
-            token1_symbol = token1.get("symbol", "").lower()
-            token1_address = token1.get("address", "").lower()
-            
-            # Match on symbol or address
-            if (token_lower in token0_symbol or token_lower == token0_address or
-                token_lower in token1_symbol or token_lower == token1_address):
+            # Match against the token
+            token_lower = token.lower()
+            if (
+                token_lower == token1_symbol or
+                token_lower == token2_symbol or
+                token_lower == token1_address or
+                token_lower == token2_address
+            ):
                 matching_pools.append(pool)
         
-        # Cache results
+        # If we found matches, cache and return
         if matching_pools:
-            self.cache_manager.set(cache_key, matching_pools, ttl=300)  # 5 minutes
+            self._cache_manager.set(cache_key, matching_pools)
+            return matching_pools
+        
+        # If no matches in existing pools, try specific API
+        try:
+            defi_collector = get_defi_collector()
+            token_pools = defi_collector.get_pools_by_token(token)
             
-        return matching_pools
+            if token_pools:
+                # Cache for future use
+                self._cache_manager.set(cache_key, token_pools)
+                return token_pools
+        except Exception as e:
+            logger.error(f"Error getting pools for token {token}: {str(e)}")
+        
+        # Return empty list if nothing found
+        return []
     
     def get_pool_history(self, pool_id: str, days: int = 30) -> Dict[str, Any]:
         """
@@ -320,27 +305,13 @@ class DataService:
         Returns:
             Dictionary with historical data series
         """
-        # TODO: Implement historical data retrieval from database
-        # For now, return mock time series data
-        
-        # Get current pool data for reference
-        pool = self.get_pool_by_id(pool_id)
-        if not pool:
-            return {"error": "Pool not found"}
-            
-        # Create result structure
-        result = {
+        # TODO: Implement historical data retrieval
+        # This is a placeholder for future implementation
+        return {
             "pool_id": pool_id,
-            "name": pool.get("name", ""),
-            "dates": [],
-            "liquidity": [],
-            "volume_24h": [],
-            "apr": []
+            "days": days,
+            "message": "Historical data not yet implemented"
         }
-            
-        # This will be replaced with actual database lookups
-        # when historical data collection is implemented
-        return result
     
     def start_scheduled_collection(self) -> bool:
         """
@@ -350,40 +321,39 @@ class DataService:
             True if started, False if already running
         """
         if self.scheduler_running:
-            logger.warning("Scheduled collection already running")
+            logger.warning("Scheduler already running")
             return False
-            
-        # Define the collection job
+        
+        # Set up collection function
         def run_collection():
             logger.info("Running scheduled data collection")
-            try:
-                self.collect_data()
-            except Exception as e:
-                logger.error(f"Error in scheduled collection: {str(e)}")
+            self.collect_data(force=True)
         
-        # Schedule collection
-        interval_minutes = SCHEDULE_SETTINGS["COLLECTION_INTERVAL_MINUTES"]
-        self.scheduler.every(interval_minutes).minutes.do(run_collection)
-        
-        # Run collection immediately
-        run_collection()
+        # Set up scheduler thread
+        def run_scheduler():
+            self.scheduler_running = True
+            logger.info(f"Starting scheduled collection every {self.collection_interval}s")
+            
+            while self.scheduler_running:
+                try:
+                    # Run collection
+                    run_collection()
+                except Exception as e:
+                    logger.error(f"Error in scheduled collection: {str(e)}")
+                
+                # Sleep until next collection
+                for _ in range(self.collection_interval):
+                    # Check if still running every second
+                    if not self.scheduler_running:
+                        break
+                    time.sleep(1)
         
         # Start scheduler thread
-        def run_scheduler():
-            while self.scheduler_running:
-                self.scheduler.run_pending()
-                time.sleep(1)
-        
-        self.scheduler_thread = threading.Thread(
-            target=run_scheduler,
-            daemon=True,
-            name="DataCollectionScheduler"
-        )
-        
-        self.scheduler_running = True
+        self.scheduler_thread = threading.Thread(target=run_scheduler)
+        self.scheduler_thread.daemon = True
         self.scheduler_thread.start()
         
-        logger.info(f"Started scheduled collection every {interval_minutes} minutes")
+        logger.info("Scheduled collection started")
         return True
     
     def stop_scheduled_collection(self) -> bool:
@@ -394,20 +364,17 @@ class DataService:
             True if stopped, False if not running
         """
         if not self.scheduler_running:
-            logger.warning("Scheduled collection not running")
+            logger.warning("Scheduler not running")
             return False
-            
-        # Clear the schedule
-        self.scheduler.clear()
         
-        # Stop the thread
+        # Stop scheduler
         self.scheduler_running = False
         
-        # Wait for thread to stop
+        # Wait for thread to exit
         if self.scheduler_thread and self.scheduler_thread.is_alive():
-            self.scheduler_thread.join(timeout=5)
-            
-        logger.info("Stopped scheduled collection")
+            self.scheduler_thread.join(1.0)
+        
+        logger.info("Scheduled collection stopped")
         return True
     
     def get_system_stats(self) -> Dict[str, Any]:
@@ -417,39 +384,27 @@ class DataService:
         Returns:
             Dictionary with system statistics
         """
-        # Service stats
+        # Get data service stats
         stats = self.stats.copy()
         
-        # Add cache stats
-        try:
-            cache_stats = self.cache_manager.get_stats()
-            stats["cache"] = cache_stats
-        except Exception as e:
-            logger.error(f"Error getting cache stats: {str(e)}")
-            stats["cache"] = {"error": str(e)}
-            
         # Add collector stats
-        try:
-            collector_stats = self.get_collector_stats()
-            stats["collectors"] = collector_stats
-        except Exception as e:
-            logger.error(f"Error getting collector stats: {str(e)}")
-            stats["collectors"] = {"error": str(e)}
-            
-        # Add scheduler status
+        stats["collectors"] = self.get_collector_stats()
+        
+        # Add cache stats
+        stats["cache"] = self._cache_manager.get_stats()
+        
+        # Add system info
         stats["scheduler_running"] = self.scheduler_running
-        if self.scheduler_running:
-            stats["scheduled_jobs"] = len(self.scheduler.jobs)
-            next_job = next(iter(self.scheduler.jobs), None)
-            if next_job:
-                stats["next_collection"] = str(next_job.next_run)
+        stats["collection_interval"] = self.collection_interval
         
         return stats
 
-# Singleton instance getter
 def get_data_service() -> DataService:
     """Get the singleton data service instance."""
-    return DataService()
+    global _instance
+    if _instance is None:
+        _instance = DataService()
+    return _instance
 
 def initialize_data_service() -> DataService:
     """
@@ -458,11 +413,10 @@ def initialize_data_service() -> DataService:
     Returns:
         The data service instance
     """
-    # Initialize service
-    service = get_data_service()
+    # Get data service
+    data_service = get_data_service()
     
-    # Start scheduled collection if not already running
-    if not service.scheduler_running:
-        service.start_scheduled_collection()
-        
-    return service
+    # Start scheduled collection
+    data_service.start_scheduled_collection()
+    
+    return data_service

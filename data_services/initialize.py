@@ -1,60 +1,58 @@
 """
-Initialization module for SolPool Insight data services.
+Initialization module for the data services package.
 
-This module provides a simple way to initialize the data services
-and start the scheduled data collection.
+This module provides functions to initialize and configure 
+the data services package for use in the application.
 """
 
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
-from .data_service import initialize_data_service, get_data_service
-from .cache import get_cache_manager
-
-# Configure logging
+# Setup logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def init_services() -> Dict[str, Any]:
+# Import data service
+from .data_service import initialize_data_service, get_data_service
+
+# Flag to track initialization
+_initialized = False
+
+def init_services() -> None:
     """
     Initialize all data services.
     
-    Returns:
-        Dictionary with service instances
+    This function sets up all required data services and 
+    starts background collection if needed.
     """
-    logger.info("Initializing data services...")
+    global _initialized
     
-    # Initialize data service (which starts scheduled collection)
+    if _initialized:
+        logger.info("Data services already initialized")
+        return
+    
+    logger.info("Initializing data services")
+    
+    # Initialize the data service
     data_service = initialize_data_service()
     
-    # Get cache manager
-    cache_manager = get_cache_manager()
-    
-    # Return services
-    services = {
-        "data_service": data_service,
-        "cache_manager": cache_manager
-    }
-    
+    # Mark as initialized
+    _initialized = True
     logger.info("Data services initialized successfully")
-    return services
 
 def get_stats() -> Dict[str, Any]:
     """
-    Get statistics for all services.
+    Get statistics for all data services.
     
     Returns:
-        Dictionary with service statistics
+        Dictionary with system statistics
     """
-    # Get data service
+    # Make sure services are initialized
+    if not _initialized:
+        init_services()
+    
+    # Get the data service
     data_service = get_data_service()
     
-    # Get cache manager
-    cache_manager = get_cache_manager()
-    
-    # Get statistics
-    stats = {
-        "data_service": data_service.get_system_stats(),
-        "cache": cache_manager.get_stats()
-    }
-    
-    return stats
+    # Get the system stats
+    return data_service.get_system_stats()

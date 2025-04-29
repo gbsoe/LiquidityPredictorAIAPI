@@ -1,134 +1,64 @@
 """
-Configuration for data services.
+Configuration module for the data services package.
 
-This module provides configuration settings for the data collection,
-processing, and caching services.
+This module provides configuration options and settings
+for data services.
 """
 
 import os
-import logging
-from datetime import timedelta
 from typing import Dict, Any
 
-# Configure logging
-logger = logging.getLogger(__name__)
+# API keys and endpoints from environment variables
+DEFI_API_KEY = os.getenv("DEFI_API_KEY")
+DEFI_API_BASE_URL = os.getenv("DEFI_API_BASE_URL", "https://filotdefiapi.replit.app/api/v1")
 
-# Cache TTL settings (in seconds)
-CACHE_SETTINGS = {
-    # Short-lived cache for frequently changing data (5 minutes)
-    "DEFAULT_TTL": 60 * 5,
-    # Medium-lived cache for data that changes less frequently (1 hour)
-    "MEDIUM_TTL": 60 * 60,
-    # Long-lived cache for relatively static data (24 hours)
-    "LONG_TTL": 60 * 60 * 24,
-    # Cache directory location
-    "CACHE_DIR": "data/cache",
-    # Memory cache size limit (items)
-    "MEMORY_CACHE_MAX_ITEMS": 1000,
-}
+# Default collection settings
+DEFAULT_COLLECTION_INTERVAL = 15 * 60  # 15 minutes
+MAX_POOLS_PER_COLLECTION = 100
 
-# Collection schedule settings
-SCHEDULE_SETTINGS = {
-    # How often to collect new data (minutes)
-    "COLLECTION_INTERVAL_MINUTES": 15,
-    # Maximum collection threads
-    "MAX_COLLECTION_THREADS": 3,
-    # Collection timeout (seconds)
-    "COLLECTION_TIMEOUT": 60,
-}
+# Default cache settings
+DEFAULT_CACHE_TTL = 300  # 5 minutes
+POOL_CACHE_TTL = 600  # 10 minutes
+TOKEN_CACHE_TTL = 900  # 15 minutes
 
-# API settings
-API_SETTINGS = {
-    # Base URL for DeFi API
-    "DEFI_API_URL": os.getenv("DEFI_API_URL", "https://filotdefiapi.replit.app/api/v1"),
-    # API key for DeFi API
-    "DEFI_API_KEY": os.getenv("DEFI_API_KEY"),
-    # Request delay for rate limiting (seconds)
-    "REQUEST_DELAY": 0.1,
-    # Maximum retries for API requests
-    "MAX_RETRIES": 3,
-    # Retry delay (seconds)
-    "RETRY_DELAY": 1.0,
-}
+# Collection sources
+ENABLE_DEFI_AGGREGATION_API = True
 
-# Database settings
-DB_SETTINGS = {
-    # Database URL
-    "DB_URL": os.getenv("DATABASE_URL"),
-    # Table names
-    "POOL_TABLE": "liquidity_pools",
-    "POOL_HISTORY_TABLE": "pool_history",
-    "TOKEN_TABLE": "tokens",
-    "TOKEN_PRICE_TABLE": "token_prices",
-}
+# Data storage configuration
+DATA_DIR = "data"
+CACHE_DIR = os.path.join(DATA_DIR, "cache")
+BACKUP_DIR = os.path.join(DATA_DIR, "backups")
 
-# File paths
-FILE_PATHS = {
-    # Backup directory
-    "BACKUP_DIR": "data/backups",
-    # Log directory
-    "LOG_DIR": "logs",
-}
+# Ensure directories exist
+os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(CACHE_DIR, exist_ok=True)
+os.makedirs(BACKUP_DIR, exist_ok=True)
 
-def get_settings() -> Dict[str, Any]:
+def get_config() -> Dict[str, Any]:
     """
-    Get all settings as a dictionary.
+    Get the full configuration.
     
     Returns:
-        Dictionary with all settings
+        Dictionary with configuration
     """
     return {
-        "cache": CACHE_SETTINGS,
-        "schedule": SCHEDULE_SETTINGS,
-        "api": API_SETTINGS,
-        "db": DB_SETTINGS,
-        "paths": FILE_PATHS,
+        "api": {
+            "defi_api_key": DEFI_API_KEY,
+            "defi_api_base_url": DEFI_API_BASE_URL,
+        },
+        "collection": {
+            "interval": DEFAULT_COLLECTION_INTERVAL,
+            "max_pools": MAX_POOLS_PER_COLLECTION,
+            "enable_defi_aggregation_api": ENABLE_DEFI_AGGREGATION_API,
+        },
+        "cache": {
+            "ttl": DEFAULT_CACHE_TTL,
+            "pool_ttl": POOL_CACHE_TTL,
+            "token_ttl": TOKEN_CACHE_TTL,
+        },
+        "storage": {
+            "data_dir": DATA_DIR,
+            "cache_dir": CACHE_DIR,
+            "backup_dir": BACKUP_DIR,
+        }
     }
-
-def validate_settings() -> bool:
-    """
-    Validate all settings and ensure required values are present.
-    
-    Returns:
-        True if all settings are valid, False otherwise
-    """
-    # Check if API key is available
-    if not API_SETTINGS["DEFI_API_KEY"]:
-        logger.warning("DEFI_API_KEY is not set. DeFi API collector will not work.")
-        return False
-        
-    # Check if database URL is available
-    if not DB_SETTINGS["DB_URL"]:
-        logger.warning("DATABASE_URL is not set. Database operations will not work.")
-        
-    # Ensure cache directory exists
-    cache_dir = CACHE_SETTINGS["CACHE_DIR"]
-    if not os.path.exists(cache_dir):
-        try:
-            os.makedirs(cache_dir, exist_ok=True)
-            logger.info(f"Created cache directory: {cache_dir}")
-        except Exception as e:
-            logger.error(f"Failed to create cache directory: {str(e)}")
-            return False
-            
-    # Ensure backup directory exists
-    backup_dir = FILE_PATHS["BACKUP_DIR"]
-    if not os.path.exists(backup_dir):
-        try:
-            os.makedirs(backup_dir, exist_ok=True)
-            logger.info(f"Created backup directory: {backup_dir}")
-        except Exception as e:
-            logger.error(f"Failed to create backup directory: {str(e)}")
-            return False
-            
-    # Ensure log directory exists
-    log_dir = FILE_PATHS["LOG_DIR"]
-    if not os.path.exists(log_dir):
-        try:
-            os.makedirs(log_dir, exist_ok=True)
-            logger.info(f"Created log directory: {log_dir}")
-        except Exception as e:
-            logger.error(f"Failed to create log directory: {str(e)}")
-            return False
-            
-    return True

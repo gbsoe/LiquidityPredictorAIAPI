@@ -1,9 +1,8 @@
 """
-Caching System for SolPool Insight
+Cache module for the data services package.
 
-This package provides caching services for improved performance.
+This module provides caching functionality for data services
+to reduce API calls and improve performance.
 """
 
 from .cache_manager import get_cache_manager
-
-__all__ = ['get_cache_manager']

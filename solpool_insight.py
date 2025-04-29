@@ -21,6 +21,10 @@ import logging
 import traceback
 import sys
 
+# Import our data service modules
+from data_services.initialize import init_services, get_stats
+from data_services.data_service import get_data_service
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -87,28 +91,26 @@ st.set_page_config(
 # Start continuous data collection for better predictions
 def initialize_continuous_data_collection():
     """Initialize continuous data collection on startup"""
-    if HAS_DEFI_API:
-        # Check if we have a DeFi API key
-        api_key = os.getenv("DEFI_API_KEY")
-        if api_key:
-            try:
-                # Initialize the API client
-                defi_api = DefiAggregationAPI(api_key=api_key)
-                
-                # Start the continuous data collection scheduler
-                # This runs in a background thread
-                defi_api.schedule_continuous_data_collection(interval_hours=6)
-                
-                logger.info("Initialized continuous data collection for better predictions")
-                return True
-            except Exception as e:
-                logger.error(f"Failed to initialize continuous data collection: {str(e)}")
-                return False
-        else:
-            logger.warning("No DeFi API key found, skipping continuous data collection")
-            return False
-    else:
-        logger.warning("DefiAggregationAPI not available, skipping continuous data collection")
+    try:
+        # Initialize our new data services
+        services = init_services()
+        
+        # Store services in session state for future access
+        st.session_state["data_services"] = services
+        
+        # Get the data service
+        data_service = services["data_service"]
+        
+        # Start scheduled collection if not already running
+        if not data_service.scheduler_running:
+            data_service.start_scheduled_collection()
+            logger.info("Started scheduled data collection service")
+        
+        logger.info("Initialized data services with continuous collection for better predictions")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to initialize data services: {str(e)}")
+        logger.error(traceback.format_exc())
         return False
         
 # Run initialization if this is the first time
@@ -360,223 +362,130 @@ def fetch_live_data_from_blockchain():
 def load_data():
     """Load pool data with a prioritized strategy: live or cached"""
     
+    # Check if data service is initialized
+    if "data_services" not in st.session_state:
+        try:
+            # Initialize data services if not already done
+            services = init_services()
+            st.session_state["data_services"] = services
+            logger.info("Initialized data services on demand")
+        except Exception as e:
+            logger.error(f"Failed to initialize data services on demand: {str(e)}")
+            logger.error(traceback.format_exc())
+            
+            # Fallback to legacy cache file loading
+            st.warning("Could not initialize data services. Using legacy data loading.")
+            return _load_data_legacy()
+    
+    # Get the data service
+    try:
+        data_service = get_data_service()
+    except Exception as e:
+        logger.error(f"Failed to get data service: {str(e)}")
+        logger.error(traceback.format_exc())
+        
+        # Fallback to legacy cache file loading
+        st.warning("Could not access data service. Using legacy data loading.")
+        return _load_data_legacy()
+    
     # 1. Check if user has requested to use cached data
     if st.session_state.get('use_cached_data', False):
         # Reset the flag so it doesn't keep using cached data every refresh
         st.session_state['use_cached_data'] = False
         
-        cache_file = "extracted_pools.json"
-        if os.path.exists(cache_file):
-            try:
-                with open(cache_file, "r") as f:
-                    pools = json.load(f)
-                
-                if pools and len(pools) > 0:
-                    # Get modification time for the cache file
-                    mod_time = os.path.getmtime(cache_file)
-                    mod_time_str = datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M:%S")
-                    mod_time_diff = datetime.now() - datetime.fromtimestamp(mod_time)
-                    
-                    # Ensure all required fields are present
-                    pools = ensure_all_fields(pools)
-                    
-                    # Indicate how old the data is
-                    if mod_time_diff.days > 0:
-                        age_str = f"{mod_time_diff.days} days old"
-                    elif mod_time_diff.seconds > 3600:
-                        age_str = f"{mod_time_diff.seconds // 3600} hours old"
-                    else:
-                        age_str = f"{mod_time_diff.seconds // 60} minutes old"
-                    
-                    st.info(f"ℹ️ Using cached data from {mod_time_str} ({age_str})")
-                    st.session_state['data_source'] = f"Cached data ({age_str})"
-                    return pools
-            except Exception as e:
-                st.warning(f"Error loading cached data: {e}")
-        else:
-            st.warning("No cached data found. Attempting to fetch live data...")
-    
-    # 2. Check if user has requested to force using live blockchain data
-    try_live_data = st.session_state.get('try_live_data', False)
-    
-    # 3. Try fetching live data if requested
-    if try_live_data:
-        # Check if specifically requesting DeFi API data
-        use_defi_api = st.session_state.get('use_defi_api', False)
-        
-        # Reset flags to avoid constant retries
-        st.session_state['try_live_data'] = False
-        st.session_state['use_defi_api'] = False
-        
-        if use_defi_api:
-            st.info("Attempting to retrieve live data from the DeFi Aggregation API...")
-        else:
-            st.info("Attempting to retrieve live data from available sources...")
-        
+        # Get cached pools from the data service
         try:
-            # If specifically requesting DeFi API or as general first choice
-            if use_defi_api:
-                try:
-                    # Import here to avoid circular imports
-                    from defi_pool_fetcher import DefiPoolFetcher
-                    
-                    st.info("Fetching real-time pool data from DeFi Aggregation API...")
-                    
-                    # Check if we have an API key in the environment
-                    defi_api_key = os.getenv("DEFI_API_KEY")
-                    
-                    # If we don't have an API key, alert the user
-                    if not defi_api_key:
-                        st.warning("⚠️ No DeFi API key found. Please provide a valid API key to access live data.")
-                        st.error("Missing DeFi API key. Please add it to the environment variables.")
-                        # Fall back to other methods
-                        raise ValueError("Missing DeFi API key")
-                    
-                    # Initialize fetcher with our API key
-                    fetcher = DefiPoolFetcher()
-                    
-                    # Fetch a reasonable number of pools with authentic data
-                    with st.spinner("Fetching authentic pool data from DeFi Aggregation API..."):
-                        pools = fetcher.fetch_pools(limit=20)
-                        
-                        if pools and len(pools) > 0:
-                            # Save to cache for future use
-                            cache_file = "extracted_pools.json"
-                            with open(cache_file, "w") as f:
-                                json.dump(pools, f, indent=2)
-                            
-                            # Ensure all fields are present
-                            pools = ensure_all_fields(pools)
-                            
-                            # Check data source
-                            real_time_data = any(pool.get('data_source', '').startswith('Real-time') for pool in pools)
-                            
-                            if real_time_data:
-                                st.success(f"✓ Successfully fetched {len(pools)} pools with authentic data from DeFi Aggregation API")
-                                st.session_state['data_source'] = f"Real-time DeFi API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                            else:
-                                st.success(f"✓ Successfully fetched {len(pools)} pools from DeFi API")
-                                st.session_state['data_source'] = f"DeFi API data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                            
-                            return pools
-                        else:
-                            st.warning("No pools fetched from DeFi API. Trying alternative methods...")
-                except ImportError:
-                    st.warning("DeFi Pool Fetcher not available. Trying alternative method...")
-                except Exception as e:
-                    logger.warning(f"DeFi API fetcher failed: {str(e)}")
-                    st.warning("Issue with DeFi API fetcher. Trying alternative method...")
-                    if "API key" in str(e).lower():
-                        st.error("Invalid or missing DeFi API key. Please provide a valid API key.")
+            cached_pools = data_service.get_all_pools(force_refresh=False)
             
-            # If DeFi API failed, try using the generic alternative pool fetcher
-            # Skip specialized DEX-specific fetchers for better provider neutrality
-            try:
-                # Import here to avoid circular imports
-                from alternative_pool_fetcher import AlternativePoolFetcher
+            if cached_pools and len(cached_pools) > 0:
+                # Get cache stats
+                cache_stats = st.session_state["data_services"]["cache_manager"].get_stats()
                 
-                st.info("Using generic provider-neutral fetcher as fallback...")
-                
-                # Initialize fetcher with our custom RPC endpoint
-                custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT"))
-                fetcher = AlternativePoolFetcher(rpc_endpoint=custom_rpc)
-                
-                # Fetch a reasonable number of pools
-                with st.spinner("Fetching pool data using fallback fetcher..."):
-                    pools = fetcher.fetch_pools(limit=10)
-                    
-                    if pools and len(pools) > 0:
-                        # Save to cache for future use
-                        cache_file = "extracted_pools.json"
-                        with open(cache_file, "w") as f:
-                            json.dump(pools, f, indent=2)
+                # Estimate age
+                last_collection_time = data_service.stats.get("last_collection_time")
+                if last_collection_time:
+                    try:
+                        last_time = datetime.strptime(last_collection_time, "%Y-%m-%d %H:%M:%S")
+                        time_diff = datetime.now() - last_time
                         
-                        # Ensure all fields are present
-                        pools = ensure_all_fields(pools)
-                        
-                        # Check if these are estimated values
-                        estimated_data = any(pool.get('data_source', '').startswith('Estimated') for pool in pools)
-                        
-                        if estimated_data:
-                            st.success(f"✓ Successfully fetched {len(pools)} pools using alternative fetcher")
-                            st.info("⚠️ Due to API limitations, the values shown are realistic estimates rather than real-time data. The token pairs and fee rates are accurate.")
-                            st.session_state['data_source'] = f"Estimated pool data (via alternative fetcher, {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
+                        if time_diff.days > 0:
+                            age_str = f"{time_diff.days} days old"
+                        elif time_diff.seconds > 3600:
+                            age_str = f"{time_diff.seconds // 3600} hours old"
                         else:
-                            st.success(f"✓ Successfully fetched {len(pools)} pools from blockchain")
-                            st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                        
-                        return pools
-            except ImportError:
-                st.warning("Alternative fetcher not available. Trying original method...")
-            except Exception as e:
-                logger.warning(f"Alternative fetcher failed: {str(e)}")
-                st.warning("Issue with alternative fetcher. Trying original method...")
+                            age_str = f"{time_diff.seconds // 60} minutes old"
+                    except Exception:
+                        age_str = "Unknown age"
+                else:
+                    age_str = "Unknown age"
                 
-            # Fall back to original OnChainExtractor method
-            try:
-                from onchain_extractor import OnChainExtractor
+                # Ensure all required fields are present
+                pools = ensure_all_fields(cached_pools)
                 
-                # Use the custom RPC endpoint directly
-                # No specific provider formatting needed
-                
-                # Get parameters from environment but reduce for better reliability
-                max_per_dex = int(os.getenv("MAX_POOLS_PER_DEX", "3"))
-                custom_rpc = st.session_state.get('custom_rpc', os.getenv("SOLANA_RPC_ENDPOINT"))
-                
-                with st.spinner(f"Fetching live data using generic extractor (max {max_per_dex} pools per DEX)..."):
-                    # Initialize extractor
-                    extractor = OnChainExtractor(rpc_endpoint=custom_rpc)
-                    
-                    # Use the correct method with limited scope to avoid timeouts
-                    st.info("Extracting pools from supported DEXes...")
-                    pools_obj = extractor.extract_pools_from_all_dexes(max_per_dex=max_per_dex)
-                    
-                    # Convert pool objects to dictionaries
-                    pools = [pool.to_dict() for pool in pools_obj] if pools_obj else []
-                    
-                    if pools and len(pools) > 0:
-                        # Save to cache file
-                        cache_file = "extracted_pools.json"
-                        with open(cache_file, "w") as f:
-                            json.dump(pools, f, indent=2)
-                            
-                        # Ensure all required fields are present
-                        pools = ensure_all_fields(pools)
-                        
-                        st.success(f"✅ Successfully fetched {len(pools)} pools from blockchain")
-                        st.session_state['data_source'] = f"Live blockchain data (fetched {datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
-                        return pools
-                    else:
-                        st.warning("⚠️ No pools retrieved from blockchain. This could be due to RPC endpoint limitations.")
-                        st.info("💡 Try using a different RPC endpoint with higher rate limits and account data access.")
-            except ImportError:
-                st.warning("⚠️ OnChainExtractor module not available. Using cached data instead.")
-            except Exception as e:
-                st.warning(f"⚠️ Error retrieving live data: {str(e)}")
-                logger.warning(f"Live data retrieval error: {str(e)}")
-                
-                if "rate limit" in str(e).lower():
-                    st.error("Your RPC endpoint is rate limiting requests. Consider upgrading to a paid plan.")
-                elif "not authorized" in str(e).lower() or "unauthorized" in str(e).lower():
-                    st.error("Your RPC endpoint is not authorized to access program data. Try a different endpoint.")
-                elif "time" in str(e).lower() and "out" in str(e).lower():
-                    st.error("Request timed out. The RPC endpoint may be overloaded.")
-        except Exception as e:
-            st.warning(f"⚠️ Error during live data attempt: {str(e)}")
-    
-    # 4. Try to load from database
-    if hasattr(db_handler, 'engine') and db_handler.engine is not None:
-        try:
-            pools = db_handler.get_pools()
-            if pools and len(pools) > 0:
-                st.success(f"✓ Successfully loaded {len(pools)} pools from database")
-                st.session_state['data_source'] = "Database"
+                st.info(f"ℹ️ Using cached data ({age_str}) - Hit ratio: {cache_stats.get('hit_ratio', 0):.2%}")
+                st.session_state['data_source'] = f"Cached data ({age_str})"
                 return pools
-        except Exception as db_error:
-            logger.error(f"Database error: {str(db_error)}")
-            st.warning(f"Could not load from database: {db_error}")
+            else:
+                st.warning("No cached data found. Attempting to fetch fresh data...")
+        except Exception as e:
+            logger.error(f"Error accessing cached data: {str(e)}")
+            st.warning(f"Could not access cached data: {e}")
     
-    # 5. Load from cached file
+    # 2. Check if user has requested to force using live data
+    force_refresh = st.session_state.get('try_live_data', False)
+    
+    # Reset flags to avoid constant retries
+    st.session_state['try_live_data'] = False
+    st.session_state['use_defi_api'] = False
+    
+    # 3. Fetch/refresh data from service
+    try:
+        with st.spinner("Collecting data from available sources..."):
+            pools, success = data_service.collect_data(force=force_refresh)
+            
+            if pools and len(pools) > 0:
+                # Ensure all required fields are present
+                pools = ensure_all_fields(pools)
+                
+                # Show success message
+                if success:
+                    st.success(f"✓ Successfully collected {len(pools)} pools from data service")
+                else:
+                    st.warning(f"⚠️ Retrieved {len(pools)} pools, but with some collection errors")
+                
+                # Update session state
+                collection_time = data_service.stats.get("last_collection_time", 
+                                                       datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                st.session_state['data_source'] = f"Live data service ({collection_time})"
+                
+                return pools
+            else:
+                st.warning("No pools collected from data service")
+                
+                # Check if we should fall back to legacy method
+                if not success:
+                    st.info("Trying legacy data loading methods...")
+                    return _load_data_legacy()
+                else:
+                    st.error("No pool data available")
+                    return []
+    except Exception as e:
+        logger.error(f"Error collecting data from service: {str(e)}")
+        logger.error(traceback.format_exc())
+        
+        st.warning(f"Error collecting data: {str(e)}")
+        st.info("Falling back to legacy data loading...")
+        
+        # Try legacy method as fallback
+        return _load_data_legacy()
+
+# Legacy data loading method for fallback
+@handle_exception
+def _load_data_legacy():
+    """Legacy method to load pool data from file cache"""
+    logger.info("Using legacy data loading method")
+    
+    # Load from cached file
     cache_file = "extracted_pools.json"
     if os.path.exists(cache_file):
         try:
@@ -600,15 +509,15 @@ def load_data():
                 else:
                     age_str = f"{mod_time_diff.seconds // 60} minutes old"
                 
-                st.info(f"ℹ️ Using cached data from {mod_time_str} ({age_str})")
-                st.session_state['data_source'] = f"Cached data ({age_str})"
+                st.info(f"ℹ️ Using legacy cached data from {mod_time_str} ({age_str})")
+                st.session_state['data_source'] = f"Legacy cached data ({age_str})"
                 return pools
         except Exception as e:
-            st.warning(f"Error loading cached data: {e}")
+            st.warning(f"Error loading legacy cached data: {e}")
     
-    # 6. If all else fails, show a helpful error message
-    st.error("No pool data available. Please configure a valid Solana RPC endpoint to fetch authentic data.")
-    st.info("Click on 'Use custom RPC endpoint' in the Advanced RPC Options section to set up your endpoint.")
+    # If all else fails, show a helpful error message
+    st.error("No pool data available. Please configure a valid DeFi API key to fetch authentic data.")
+    st.info("Check the 'API Key Configuration' section to set up your API key.")
     
     # Return an empty list to avoid errors
     return []
@@ -702,26 +611,61 @@ def main():
         # Cached data configuration
         st.sidebar.markdown("### ⚙️ Cache Settings")
         
-        # Add a button to clear the cache
-        if st.sidebar.button("Clear Cache", help="Delete cached pool data to force fresh retrieval"):
+        # Display data service stats if available
+        if "data_services" in st.session_state:
+            try:
+                # Get data service stats
+                data_service = get_data_service()
+                stats = data_service.get_system_stats()
+                
+                # Show collection stats
+                last_collection = stats.get("last_collection_time", "Never")
+                pool_count = stats.get("last_collection_pool_count", 0)
+                
+                # Show collection info
+                st.sidebar.info(f"Last collection: {last_collection}")
+                st.sidebar.info(f"Pools collected: {pool_count}")
+                
+                # Get cache stats
+                cache_stats = st.session_state["data_services"]["cache_manager"].get_stats()
+                cache_hit_ratio = cache_stats.get("hit_ratio", 0)
+                
+                # Show cache hit ratio as progress bar
+                st.sidebar.text("Cache efficiency:")
+                st.sidebar.progress(cache_hit_ratio)
+                st.sidebar.caption(f"{cache_hit_ratio:.1%} cache hit ratio")
+                
+                # Add a button to clear system cache
+                if st.sidebar.button("Clear System Cache", help="Clear the data service cache to force fresh data collection"):
+                    try:
+                        # Clear the cache
+                        st.session_state["data_services"]["cache_manager"].clear()
+                        st.sidebar.success("System cache cleared successfully")
+                    except Exception as e:
+                        st.sidebar.error(f"Error clearing system cache: {e}")
+            except Exception as e:
+                st.sidebar.warning(f"Data service stats unavailable: {str(e)}")
+                
+        # Add a button to clear the legacy cache
+        if st.sidebar.button("Clear Legacy Cache", help="Delete legacy cached pool data file"):
             try:
                 if os.path.exists("extracted_pools.json"):
                     os.remove("extracted_pools.json")
-                    st.sidebar.success("Cache cleared successfully")
+                    st.sidebar.success("Legacy cache cleared successfully")
                 else:
-                    st.sidebar.info("No cache file found")
+                    st.sidebar.info("No legacy cache file found")
             except Exception as e:
-                st.sidebar.error(f"Error clearing cache: {e}")
+                st.sidebar.error(f"Error clearing legacy cache: {e}")
                 
         
-        # Display last update time if available
+        # Display legacy cache update time if available
         if os.path.exists("extracted_pools.json"):
             try:
                 mod_time = os.path.getmtime("extracted_pools.json")
                 mod_time_str = datetime.fromtimestamp(mod_time).strftime("%Y-%m-%d %H:%M:%S")
-                st.sidebar.info(f"Last data update: {mod_time_str}")
+                st.sidebar.info(f"Legacy cache update: {mod_time_str}")
             except Exception:
-                st.sidebar.info("Last update time unavailable")
+                pass
     
     # Display logo and title in the main area
     col_logo, col_title = st.columns([1, 3])
