@@ -1,0 +1,130 @@
+[
+  {
+    "id": 1,
+    "poolId": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
+    "programId": "LbVRzDTJEz6PA1RBxMK2B2CalYJgF8C9tYMszWkRESZ",
+    "source": "meteora",
+    "name": "mSoL-EPjF Meteora LP",
+    "active": true,
+    "createdAt": "2025-04-29T13:34:45.530Z",
+    "updatedAt": "2025-04-29T13:34:45.530Z",
+    "metrics": {
+      "id": 170,
+      "poolId": 1,
+      "timestamp": "2025-04-29T20:34:19.964Z",
+      "tvl": 2000000,
+      "fee": 0.003,
+      "apy24h": 11.570175,
+      "apy7d": 10.644561,
+      "apy30d": 9.834649,
+      "volumeUsd": 200000,
+      "extraData": {
+        "bins": "120",
+        "concentrationBounds": "medium"
+      }
+    },
+    "tokens": []
+  },
+  {
+    "id": 2,
+    "poolId": "FLKdMRsS7dvj9mMsEBxciUJc3TKJcEmVUbQRf5UnYEpw",
+    "programId": "LbVRzDTJEz6PA1RBxMK2B2CalYJgF8C9tYMszWkRESZ",
+    "source": "meteora",
+    "name": "So11-EPjF Meteora LP",
+    "active": true,
+    "createdAt": "2025-04-29T13:34:45.565Z",
+    "updatedAt": "2025-04-29T13:34:45.565Z",
+    "metrics": {
+      "id": 171,
+      "poolId": 2,
+      "timestamp": "2025-04-29T20:34:19.968Z",
+      "tvl": 3000000,
+      "fee": 0.003,
+      "apy24h": 11.570175,
+      "apy7d": 10.644561,
+      "apy30d": 9.834649,
+      "volumeUsd": 300000,
+      "extraData": {
+        "bins": "120",
+        "concentrationBounds": "medium"
+      }
+    },
+    "tokens": []
+  },
+  {
+    "id": 3,
+    "poolId": "Cv3YJJvCZQJKP5G6AHh77GVbewGZUVs4Y1WJ6Yc3HbQj",
+    "programId": "LbVRzDTJEz6PA1RBxMK2B2CalYJgF8C9tYMszWkRESZ",
+    "source": "meteora",
+    "name": "9n4n-EPjF Meteora LP",
+    "active": true,
+    "createdAt": "2025-04-29T13:34:45.735Z",
+    "updatedAt": "2025-04-29T13:34:45.735Z",
+    "metrics": {
+      "id": 172,
+      "poolId": 3,
+      "timestamp": "2025-04-29T20:34:19.969Z",
+      "tvl": 4000000,
+      "fee": 0.003,
+      "apy24h": 11.570175,
+      "apy7d": 10.644561,
+      "apy30d": 9.834649,
+      "volumeUsd": 400000,
+      "extraData": {
+        "bins": "120",
+        "concentrationBounds": "medium"
+      }
+    },
+    "tokens": []
+  },
+  {
+    "id": 4,
+    "poolId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
+    "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+    "source": "raydium",
+    "name": "4k3D-EPjF LP",
+    "active": true,
+    "createdAt": "2025-04-29T13:34:45.768Z",
+    "updatedAt": "2025-04-29T13:34:45.768Z",
+    "metrics": {
+      "id": 173,
+      "poolId": 4,
+      "timestamp": "2025-04-29T20:34:19.969Z",
+      "tvl": 5000000,
+      "fee": 0.0025,
+      "apy24h": 14.665538,
+      "apy7d": 13.198984,
+      "apy30d": 12.465708,
+      "volumeUsd": 750000,
+      "extraData": {
+        "ammId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8"
+      }
+    },
+    "tokens": []
+  },
+  {
+    "id": 5,
+    "poolId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+    "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+    "source": "raydium",
+    "name": "So11-EPjF LP",
+    "active": true,
+    "createdAt": "2025-04-29T13:34:45.801Z",
+    "updatedAt": "2025-04-29T13:34:45.801Z",
+    "metrics": {
+      "id": 174,
+      "poolId": 5,
+      "timestamp": "2025-04-29T20:34:19.980Z",
+      "tvl": 6500000,
+      "fee": 0.0025,
+      "apy24h": 14.665538,
+      "apy7d": 13.198984,
+      "apy30d": 12.465708,
+      "volumeUsd": 975000,
+      "extraData": {
+        "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
+      }
+    },
+    "tokens": []
+  }
+]
