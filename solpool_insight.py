@@ -93,13 +93,13 @@ def initialize_continuous_data_collection():
     """Initialize continuous data collection on startup"""
     try:
         # Initialize our new data services
-        services = init_services()
-        
-        # Store services in session state for future access
-        st.session_state["data_services"] = services
+        init_services()
         
         # Get the data service
-        data_service = services["data_service"]
+        data_service = get_data_service()
+        
+        # Store data service in session state for future access
+        st.session_state["data_service"] = data_service
         
         # Start scheduled collection if not already running
         if not data_service.scheduler_running:
