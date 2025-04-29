@@ -757,3 +757,156 @@ class DefiAggregationAPI:
         except Exception as e:
             logger.error(f"Failed to schedule continuous data collection: {str(e)}")
             return False
+    
+    def run_quick_test(self, max_calls=5):
+        """
+        Run a quick test of the API to validate it's working and return results.
+        
+        Args:
+            max_calls: Maximum number of API calls to make
+            
+        Returns:
+            Dict with test results
+        """
+        from collections import Counter
+        import time
+        
+        start_time = time.time()
+        
+        print(f"Starting DeFi API quick test with {max_calls} API calls...")
+        print(f"Using base URL: {self.base_url}")
+        
+        results = {
+            "success": True,
+            "api_calls": 0,
+            "total_pools": 0,
+            "unique_pools": set(),
+            "unique_tokens": set(),
+            "token_pairs": [],
+            "dexes": [],
+            "errors": [],
+            "call_times": []
+        }
+        
+        try:
+            # Make API calls
+            for i in range(max_calls):
+                print(f"\nAPI Call #{i+1}/{max_calls}")
+                
+                call_start = time.time()
+                
+                try:
+                    # Get pools data
+                    pools = self._make_request("pools", params={"limit": 20, "offset": 0})
+                    call_time = time.time() - call_start
+                    results["call_times"].append(call_time)
+                    
+                    if pools and isinstance(pools, list):
+                        pool_count = len(pools)
+                        results["api_calls"] += 1
+                        results["total_pools"] += pool_count
+                        
+                        print(f"✅ Received {pool_count} pools in {call_time:.2f} seconds")
+                        
+                        # Process pools to extract token info
+                        for pool in pools:
+                            pool_id = pool.get('poolId', '')
+                            results["unique_pools"].add(pool_id)
+                            
+                            # Extract token info from name
+                            name = pool.get('name', 'Unknown')
+                            dex = pool.get('source', 'Unknown')
+                            
+                            # Try to extract token symbols from name
+                            if name and '-' in name:
+                                parts = name.split('-')
+                                if len(parts) >= 2:
+                                    token1 = parts[0].strip()
+                                    token2_parts = parts[1].split(' ')
+                                    token2 = token2_parts[0].strip()
+                                    
+                                    if token1 != "Unknown":
+                                        results["unique_tokens"].add(token1)
+                                    if token2 != "Unknown":
+                                        results["unique_tokens"].add(token2)
+                                    
+                                    results["token_pairs"].append(f"{token1}-{token2}")
+                            
+                            # Track DEX
+                            if dex != "Unknown":
+                                results["dexes"].append(dex)
+                    else:
+                        print(f"❌ Received invalid response: {pools}")
+                        results["errors"].append(f"Invalid response in call {i+1}")
+                    
+                except Exception as e:
+                    error = f"Error in API call {i+1}: {str(e)}"
+                    print(f"❌ {error}")
+                    results["errors"].append(error)
+                
+                # Don't sleep after the last call
+                if i < max_calls - 1:
+                    time.sleep(0.5)  # Brief pause between calls
+        
+        except Exception as e:
+            results["success"] = False
+            results["errors"].append(f"Test failed: {str(e)}")
+            print(f"❌ Test failed: {str(e)}")
+        
+        # Calculate stats
+        end_time = time.time()
+        total_time = end_time - start_time
+        
+        # Convert sets to lists for easier handling
+        results["unique_pools"] = list(results["unique_pools"])
+        results["unique_tokens"] = list(results["unique_tokens"])
+        
+        # Get token stats
+        token_counts = Counter()
+        for token in results["unique_tokens"]:
+            token_counts[token] += 1
+        
+        pair_counts = Counter(results["token_pairs"])
+        dex_counts = Counter(results["dexes"])
+        
+        results["top_tokens"] = token_counts.most_common(10)
+        results["top_pairs"] = pair_counts.most_common(10)
+        results["dex_counts"] = dict(dex_counts)
+        
+        # Print summary
+        print("\n" + "="*60)
+        print("DeFi API QUICK TEST RESULTS")
+        print("="*60)
+        
+        print(f"\nTest duration: {total_time:.2f} seconds")
+        print(f"API calls made: {results['api_calls']}")
+        print(f"Total pools received: {results['total_pools']}")
+        print(f"Unique pools found: {len(results['unique_pools'])}")
+        print(f"Unique tokens found: {len(results['unique_tokens'])}")
+        
+        if results["call_times"]:
+            print(f"Average call time: {sum(results['call_times']) / len(results['call_times']):.2f} seconds")
+        
+        if results["errors"]:
+            print(f"\nEncountered {len(results['errors'])} errors:")
+            for i, error in enumerate(results["errors"], 1):
+                print(f"  {i}. {error}")
+        
+        print("\nTOP TOKENS:")
+        for token, count in results["top_tokens"]:
+            print(f"  {token}: {count} occurrences")
+        
+        print("\nTOP TOKEN PAIRS:")
+        for pair, count in results["top_pairs"]:
+            print(f"  {pair}: {count} occurrences")
+        
+        print("\nDEXES:")
+        for dex, count in dex_counts.most_common():
+            print(f"  {dex}: {count} pools")
+        
+        print("\nALL TOKENS:")
+        print(", ".join(sorted(results["unique_tokens"])))
+        
+        print("\n" + "="*60)
+        
+        return results
