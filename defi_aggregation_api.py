@@ -227,15 +227,42 @@ class DefiAggregationAPI:
     def get_pool_by_id(self, pool_id: str) -> Optional[Dict[str, Any]]:
         """
         Get detailed information for a specific pool by its ID.
+        Based on the GET Pool Docs which provides endpoints in the format:
+        /api/v1/pools/{poolId}
         
         Args:
             pool_id: The authentic base58 pool ID
             
         Returns:
-            Pool data or None if not found
+            Pool data or None if not found, transformed to application format
         """
         try:
-            return self._make_request(f"pools/{pool_id}")
+            # Make the API request using the documented endpoint format
+            response = self._make_request(f"pools/{pool_id}")
+            
+            # Log the received data structure
+            if response:
+                if isinstance(response, dict):
+                    logger.info(f"Received pool data with keys: {list(response.keys())}")
+                elif isinstance(response, list):
+                    logger.info(f"Received pool data as list with {len(response)} items")
+                    if len(response) > 0 and isinstance(response[0], dict):
+                        logger.info(f"First item has keys: {list(response[0].keys())}")
+            
+            # Check response format - might be a single object or a list with one item
+            # Based on the API documentation, it should be a single pool object
+            if isinstance(response, list) and len(response) > 0:
+                # If we got a list, use the first item (this handles both API response formats)
+                pool_data = response[0]
+                # Transform to our standard format
+                return self.transform_pool_data(pool_data)
+            elif isinstance(response, dict):
+                # If we got a direct object, transform it
+                # This is the expected format based on the documentation
+                return self.transform_pool_data(response)
+            else:
+                logger.warning(f"Unexpected response format for pool {pool_id}")
+                return None
         except ValueError as e:
             logger.error(f"Failed to get pool {pool_id}: {str(e)}")
             return None
@@ -243,6 +270,7 @@ class DefiAggregationAPI:
     def transform_pool_data(self, pool: Dict[str, Any]) -> Dict[str, Any]:
         """
         Transform API pool data to match our application's data model.
+        Based on the GET Pool Docs structure with enhanced metrics and tokens.
         
         Args:
             pool: Raw pool data from the API
@@ -251,22 +279,31 @@ class DefiAggregationAPI:
             Transformed pool data
         """
         try:
-            # Extract token data
+            # Extract token data from the tokens array with improved error handling
             tokens = pool.get('tokens', [])
             token1 = tokens[0] if len(tokens) > 0 else {}
             token2 = tokens[1] if len(tokens) > 1 else {}
             
-            # Extract metrics
+            # Extract metrics from the metrics object with improved handling
             metrics = pool.get('metrics', {})
             
-            # Get the authentic pool ID (base58 format)
-            pool_id = pool.get('pool_id', pool.get('poolId', ''))
+            # Get the pool ID (both API formats supported)
+            pool_id = pool.get('poolId', pool.get('id', ''))
             
-            # Extract APR metrics for different time periods from the apy object or fallback fields
-            apy = pool.get('apy', {})
-            apr_24h = apy.get('24h', pool.get('apr24h', metrics.get('apr24h', 0)))
-            apr_7d = apy.get('7d', pool.get('apr7d', metrics.get('apr7d', 0)))
-            apr_30d = apy.get('30d', pool.get('apr30d', metrics.get('apr30d', 0)))
+            # Extract APR metrics from the metrics structure (new API format)
+            # The metrics.apy24h, metrics.apy7d, and metrics.apy30d fields contain APR values
+            # These may also be directly in the metrics object
+            apr_24h = metrics.get('apy24h', 0)
+            if apr_24h == 0:  # Try alternative field names
+                apr_24h = metrics.get('apr24h', 0)
+                
+            apr_7d = metrics.get('apy7d', 0)
+            if apr_7d == 0:  # Try alternative field names
+                apr_7d = metrics.get('apr7d', 0)
+                
+            apr_30d = metrics.get('apy30d', 0)
+            if apr_30d == 0:  # Try alternative field names
+                apr_30d = metrics.get('apr30d', 0)
             
             # Calculate APR changes between time periods
             apr_change_24h = 0  # Default since we don't have prior day's data
@@ -283,17 +320,30 @@ class DefiAggregationAPI:
             else:
                 apr_change_30d = 0
                 
-            # Extract volume metrics
-            volume_24h = pool.get('volumeUsd', metrics.get('volumeUsd', 0))
-            volume_7d = pool.get('volume7d', metrics.get('volume7d', 0))
+            # Extract volume metrics from the metrics object
+            volume_24h = metrics.get('volumeUsd', 0)
             
-            # Calculate volume change
-            volume_change_24h = 0  # Default
-            if volume_7d and volume_24h > 0:
-                # Calculate average daily volume for 7d and compare to 24h
-                avg_daily_volume_7d = volume_7d / 7 if volume_7d else 0
-                volume_change_24h = ((volume_24h - avg_daily_volume_7d) / avg_daily_volume_7d) * 100 if avg_daily_volume_7d > 0 else 0
-                
+            # TVL changes - these might be in metrics or directly in pool
+            tvl_change_24h = metrics.get('tvlChange24h', 0)
+            tvl_change_7d = metrics.get('tvlChange7d', 0)
+            tvl_change_30d = metrics.get('tvlChange30d', 0)
+            
+            # Extract the programId (DEX protocol ID)
+            program_id = pool.get('programId', '')
+            
+            # DEX source
+            dex_source = pool.get('source', 'Unknown')
+            
+            # Creation and update timestamps
+            created_at = pool.get('createdAt', datetime.now().isoformat())
+            updated_at = pool.get('updatedAt', datetime.now().isoformat())
+            
+            # Active status
+            active = pool.get('active', True)
+            
+            # Extract any extra data from metrics
+            extra_data = metrics.get('extraData', {})
+            
             # Determine category based on token pair
             category = "Unknown"
             token1_symbol = token1.get('symbol', '').upper()
@@ -308,19 +358,22 @@ class DefiAggregationAPI:
             else:
                 category = "DeFi"
                 
-            # Create transformed pool record with detailed metrics
-            # Use a more descriptive name that includes token symbols, rather than just the pool ID
+            # Get the pool name from API or construct a descriptive one
             pool_name = pool.get('name', '')
             if not pool_name and token1_symbol and token2_symbol:
                 pool_name = f"{token1_symbol}-{token2_symbol}"
             elif not pool_name:
                 pool_name = pool_id  # Fallback to ID if no name available
                 
+            # Create a comprehensive transformed data structure based on GET Pool Docs structure
             transformed = {
+                # Core pool identifiers
                 "id": pool_id,  # Use the authentic base58 pool ID
                 "name": pool_name,  # Use a human-readable name
-                "dex": pool.get('source', 'Unknown'),
-                "category": category,
+                "dex": dex_source,  # Use the standardized source field (raydium, meteora, orca)
+                "category": category,  # Derived category
+                
+                # Token information from the legacy format (for backward compatibility)
                 "token1_symbol": token1.get('symbol', 'Unknown'),
                 "token2_symbol": token2.get('symbol', 'Unknown'),
                 "token1_address": token1.get('address', ''),
@@ -328,75 +381,103 @@ class DefiAggregationAPI:
                 "token1_price": token1.get('price', 0),
                 "token2_price": token2.get('price', 0),
                 
-                # Store the full token objects for more detailed access
-                "tokens": [
-                    {
-                        "symbol": token1.get('symbol', 'Unknown'),
-                        "name": token1.get('name', 'Unknown'),
-                        "address": token1.get('address', ''),
-                        "decimals": token1.get('decimals', 0),
-                        "price": token1.get('price', 0),
-                        "active": token1.get('active', True)
-                    },
-                    {
-                        "symbol": token2.get('symbol', 'Unknown'),
-                        "name": token2.get('name', 'Unknown'),
-                        "address": token2.get('address', ''),
-                        "decimals": token2.get('decimals', 0),
-                        "price": token2.get('price', 0),
-                        "active": token2.get('active', True)
-                    }
-                ],
+                # Complete token objects based on the new API structure (array of tokens)
+                "tokens": tokens,  # Use the full tokens array directly from the API
                 
-                # Pool ID from API for reference
-                "poolId": pool.get('poolId', ''),
-                "programId": pool.get('programId', ''),
+                # Technical identifiers from API
+                "poolId": pool_id,  # The base58 pool ID
+                "programId": program_id,  # The program ID of the DEX protocol
                 
-                # Liquidity and volume metrics (only include fields in LiquidityPool model)
-                "liquidity": pool.get('tvl', metrics.get('tvl', 0)),
-                "volume_24h": volume_24h,
-                
-                # APR metrics
+                # Core metrics from the metrics object
+                "liquidity": metrics.get('tvl', 0),  # Main liquidity/TVL value
+                "volume_24h": volume_24h,  # 24h volume in USD
                 "apr": apr_24h,  # Use 24h APR as the default APR value
+                "fee": metrics.get('fee', 0),  # Fee percentage
                 
-                # Changes (only include fields in LiquidityPool model)
+                # Time-based APR values for different periods
+                "apr_24h": apr_24h,  # 24h APR explicitly stored
+                "apr_7d": apr_7d,  # 7d APR
+                "apr_30d": apr_30d,  # 30d APR
+                
+                # Computed change metrics
                 "apr_change_24h": apr_change_24h,
                 "apr_change_7d": apr_change_7d,
                 "apr_change_30d": apr_change_30d,
-                "tvl_change_24h": pool.get('tvlChange24h', metrics.get('tvlChange24h', 0)),
-                "tvl_change_7d": pool.get('tvlChange7d', metrics.get('tvlChange7d', 0)),
-                "tvl_change_30d": pool.get('tvlChange30d', metrics.get('tvlChange30d', 0)),
+                "tvl_change_24h": tvl_change_24h,
+                "tvl_change_7d": tvl_change_7d,
+                "tvl_change_30d": tvl_change_30d,
                 
-                # Additional required fields
-                "prediction_score": 0,  # Will be calculated later based on historical data
-                "fee": pool.get('fee', metrics.get('fee', 0)),
+                # Timestamps and status from API
+                "active": active,  # Whether the pool is currently active
+                "created_at": created_at,  # Creation timestamp
+                "updated_at": updated_at,  # Last update timestamp
+                
+                # Extracted from extraData if available
+                "extra_data": extra_data,  # Any protocol-specific extra data
+                
+                # Version information
                 "version": pool.get('version', '1.0'),
-                "created_at": datetime.now().isoformat(),
-                "updated_at": datetime.now().isoformat(),
                 
-                # Store the original metrics object for reference
-                "metrics_data": metrics
+                # Prediction-related fields (will be populated by prediction models)
+                "prediction_score": 0,  # Will be calculated later based on historical data
+                "risk_score": 0,  # Risk assessment score
+                "volatility": 0,  # Volatility measurement
+                
+                # Complete DEX specific fields based on source
+                "dex_specific": {
+                    # Raydium pools have ammId
+                    "ammId": extra_data.get('ammId', '') if dex_source == 'raydium' else '',
+                    
+                    # Meteora pools have concentration bounds
+                    "concentrationBounds": extra_data.get('concentrationBounds', '') if dex_source == 'meteora' else '',
+                    
+                    # Orca pools have whirlpoolId
+                    "whirlpoolId": extra_data.get('whirlpoolId', '') if dex_source == 'orca' else ''
+                },
+                
+                # Store the original objects for reference
+                "metrics_data": metrics,
+                "api_response": {
+                    "id": pool.get('id', ''),
+                    "poolId": pool_id,
+                    "programId": program_id,
+                    "source": dex_source,
+                    "name": pool_name,
+                    "active": active,
+                    "metrics": metrics
+                }
             }
             
             return transformed
         except Exception as e:
             logger.error(f"Error transforming pool data: {str(e)}")
             logger.debug(f"Problem pool data: {json.dumps(pool)}")
-            # Return a minimal valid record to avoid crashes
+            # Return a minimal valid record to avoid crashes, but with the same structure
+            # as our comprehensive transformed data for consistency
             pool_id = pool.get('poolId', 'unknown-id')
+            
+            # Create current timestamps for fallback
+            current_time = datetime.now().isoformat()
+            
             return {
+                # Core pool identifiers
                 "id": pool_id,
                 "name": pool_id,  # Use pool ID as the name
                 "dex": pool.get('source', 'Unknown'),
                 "category": "Unknown",
+                
+                # Token information (legacy format)
                 "token1_symbol": "Unknown",
                 "token2_symbol": "Unknown",
                 "token1_address": "",
                 "token2_address": "",
                 "token1_price": 0,
                 "token2_price": 0,
+                
+                # Complete token objects (new format)
                 "tokens": [
                     {
+                        "id": 0,
                         "symbol": "Unknown",
                         "name": "Unknown",
                         "address": "",
@@ -405,6 +486,7 @@ class DefiAggregationAPI:
                         "active": True
                     },
                     {
+                        "id": 0,
                         "symbol": "Unknown",
                         "name": "Unknown",
                         "address": "",
@@ -413,22 +495,62 @@ class DefiAggregationAPI:
                         "active": True
                     }
                 ],
+                
+                # Technical identifiers
                 "poolId": pool.get('poolId', ''),
                 "programId": pool.get('programId', ''),
+                
+                # Core metrics
                 "liquidity": 0,
                 "volume_24h": 0,
                 "apr": 0,
+                "fee": 0,
+                
+                # Time-based APR values
+                "apr_24h": 0,
+                "apr_7d": 0,
+                "apr_30d": 0,
+                
+                # Change metrics
                 "apr_change_24h": 0,
                 "apr_change_7d": 0,
                 "apr_change_30d": 0,
                 "tvl_change_24h": 0,
                 "tvl_change_7d": 0,
                 "tvl_change_30d": 0,
-                "fee": 0,
-                "prediction_score": 0,
+                
+                # Status and timestamps
+                "active": True,
+                "created_at": current_time,
+                "updated_at": current_time,
+                
+                # Extra data
+                "extra_data": {},
                 "version": "1.0",
-                "created_at": datetime.now().isoformat(),
-                "updated_at": datetime.now().isoformat()
+                
+                # Prediction fields
+                "prediction_score": 0,
+                "risk_score": 0,
+                "volatility": 0,
+                
+                # DEX specific fields
+                "dex_specific": {
+                    "ammId": "",
+                    "concentrationBounds": "",
+                    "whirlpoolId": ""
+                },
+                
+                # Original data references (empty for fallback)
+                "metrics_data": {},
+                "api_response": {
+                    "id": "",
+                    "poolId": pool_id,
+                    "programId": "",
+                    "source": pool.get('source', 'Unknown'),
+                    "name": pool_id,
+                    "active": True,
+                    "metrics": {}
+                }
             }
     
     def get_transformed_pools(self, max_pools: int = 500, **kwargs) -> List[Dict[str, Any]]:
