@@ -50,25 +50,59 @@ def fetch_pools(limit=10):
     """
     url = f"{BASE_URL}/pools"
     params = {
-        "limit": limit,
-        "network": "solana",
-        "sort": "liquidity",
-        "order": "desc"
+        "limit": limit
     }
     
+    # Try with Bearer token authentication first
     try:
-        logger.info(f"Fetching pool data from {url}")
-        response = requests.get(url, headers=HEADERS, params=params)
+        logger.info(f"Fetching pool data from {url} using Bearer token")
+        response = requests.get(url, headers=HEADERS_BEARER, params=params)
         
         if response.status_code == 200:
             data = response.json()
-            logger.info(f"Successfully fetched {len(data['pools'])} pools")
-            return data['pools']
+            # Check if the response is a list directly
+            if isinstance(data, list):
+                logger.info(f"Successfully fetched {len(data)} pools (directly as list)")
+                return data
+            # Check if the response is a dict with a 'pools' key
+            elif isinstance(data, dict) and 'pools' in data:
+                logger.info(f"Successfully fetched {len(data['pools'])} pools")
+                return data['pools']
+            else:
+                logger.info(f"Response structure: {type(data)}")
+                logger.info(f"Sample response: {str(data)[:200]}")
+                return None
         else:
-            logger.error(f"Error fetching pools: {response.status_code} - {response.text}")
+            logger.warning(f"Error fetching pools with Bearer token: {response.status_code} - {response.text}")
+            # Fall through to try with X-API-Key
+    except Exception as e:
+        logger.warning(f"Exception fetching pools with Bearer token: {str(e)}")
+        # Fall through to try with X-API-Key
+    
+    # Try with X-API-Key authentication
+    try:
+        logger.info(f"Fetching pool data from {url} using X-API-Key")
+        response = requests.get(url, headers=HEADERS_X_API_KEY, params=params)
+        
+        if response.status_code == 200:
+            data = response.json()
+            # Check if the response is a list directly
+            if isinstance(data, list):
+                logger.info(f"Successfully fetched {len(data)} pools (directly as list)")
+                return data
+            # Check if the response is a dict with a 'pools' key
+            elif isinstance(data, dict) and 'pools' in data:
+                logger.info(f"Successfully fetched {len(data['pools'])} pools")
+                return data['pools']
+            else:
+                logger.info(f"Response structure: {type(data)}")
+                logger.info(f"Sample response: {str(data)[:200]}")
+                return None
+        else:
+            logger.error(f"Error fetching pools with X-API-Key: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        logger.error(f"Exception fetching pools: {str(e)}")
+        logger.error(f"Exception fetching pools with X-API-Key: {str(e)}")
         return None
 
 def fetch_pool_history(pool_id):
@@ -87,19 +121,36 @@ def fetch_pool_history(pool_id):
         "interval": "day"
     }
     
+    # Try with Bearer token first
     try:
-        logger.info(f"Fetching historical data for pool {pool_id}")
-        response = requests.get(url, headers=HEADERS, params=params)
+        logger.info(f"Fetching historical data for pool {pool_id} with Bearer token")
+        response = requests.get(url, headers=HEADERS_BEARER, params=params)
         
         if response.status_code == 200:
             data = response.json()
             logger.info(f"Successfully fetched historical data for pool {pool_id}")
             return data
         else:
-            logger.error(f"Error fetching pool history: {response.status_code} - {response.text}")
+            logger.warning(f"Error fetching pool history with Bearer token: {response.status_code}")
+            # Fall through to try X-API-Key
+    except Exception as e:
+        logger.warning(f"Exception fetching pool history with Bearer token: {str(e)}")
+        # Fall through to try X-API-Key
+    
+    # Try with X-API-Key
+    try:
+        logger.info(f"Fetching historical data for pool {pool_id} with X-API-Key")
+        response = requests.get(url, headers=HEADERS_X_API_KEY, params=params)
+        
+        if response.status_code == 200:
+            data = response.json()
+            logger.info(f"Successfully fetched historical data for pool {pool_id}")
+            return data
+        else:
+            logger.error(f"Error fetching pool history with X-API-Key: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        logger.error(f"Exception fetching pool history: {str(e)}")
+        logger.error(f"Exception fetching pool history with X-API-Key: {str(e)}")
         return None
 
 def fetch_token_prices(token_addresses):
@@ -118,19 +169,36 @@ def fetch_token_prices(token_addresses):
         "network": "solana"
     }
     
+    # Try with Bearer token first
     try:
-        logger.info(f"Fetching token prices for {len(token_addresses)} tokens")
-        response = requests.get(url, headers=HEADERS, params=params)
+        logger.info(f"Fetching token prices for {len(token_addresses)} tokens with Bearer token")
+        response = requests.get(url, headers=HEADERS_BEARER, params=params)
         
         if response.status_code == 200:
             data = response.json()
             logger.info(f"Successfully fetched token prices")
-            return data['prices']
+            return data.get('prices', {})
         else:
-            logger.error(f"Error fetching token prices: {response.status_code} - {response.text}")
+            logger.warning(f"Error fetching token prices with Bearer token: {response.status_code}")
+            # Fall through to try X-API-Key
+    except Exception as e:
+        logger.warning(f"Exception fetching token prices with Bearer token: {str(e)}")
+        # Fall through to try X-API-Key
+        
+    # Try with X-API-Key
+    try:
+        logger.info(f"Fetching token prices for {len(token_addresses)} tokens with X-API-Key")
+        response = requests.get(url, headers=HEADERS_X_API_KEY, params=params)
+        
+        if response.status_code == 200:
+            data = response.json()
+            logger.info(f"Successfully fetched token prices")
+            return data.get('prices', {})
+        else:
+            logger.error(f"Error fetching token prices with X-API-Key: {response.status_code} - {response.text}")
             return {}
     except Exception as e:
-        logger.error(f"Exception fetching token prices: {str(e)}")
+        logger.error(f"Exception fetching token prices with X-API-Key: {str(e)}")
         return {}
 
 def calculate_pool_metrics(pool, historical_data):
@@ -253,43 +321,118 @@ def standardize_pool_data(pool_data):
     Returns:
         Standardized pool data dictionary
     """
-    standardized = {}
-    
-    # Basic pool information
-    standardized['id'] = pool_data.get('address', '')
-    standardized['name'] = f"{pool_data.get('token1', {}).get('symbol', '')}/{pool_data.get('token2', {}).get('symbol', '')}"
-    standardized['dex'] = pool_data.get('dex', {}).get('name', 'Unknown')
-    standardized['token1_symbol'] = pool_data.get('token1', {}).get('symbol', '')
-    standardized['token2_symbol'] = pool_data.get('token2', {}).get('symbol', '')
-    standardized['token1_address'] = pool_data.get('token1', {}).get('address', '')
-    standardized['token2_address'] = pool_data.get('token2', {}).get('address', '')
-    
-    # Financial metrics
-    standardized['liquidity'] = pool_data.get('tvl', 0)
-    standardized['volume_24h'] = pool_data.get('volume24h', 0)
-    standardized['apr'] = pool_data.get('apr', 0)
-    standardized['fee'] = pool_data.get('fee', 0) * 100  # Convert to percentage
-    
-    # Historical trend data - these will be calculated from historical data
-    standardized['apr_change_24h'] = pool_data.get('apr_change_24h', 0)
-    standardized['apr_change_7d'] = pool_data.get('apr_change_7d', 0)
-    standardized['apr_change_30d'] = pool_data.get('apr_change_30d', 0)
-    standardized['tvl_change_24h'] = pool_data.get('tvl_change_24h', 0)
-    standardized['tvl_change_7d'] = pool_data.get('tvl_change_7d', 0)
-    standardized['tvl_change_30d'] = pool_data.get('tvl_change_30d', 0)
-    
-    # Categorization
-    standardized['category'] = pool_data.get('category', 'Other')
-    standardized['version'] = pool_data.get('dex', {}).get('version', 'v1')
-    
-    # Time-based data
-    standardized['created_at'] = pool_data.get('created_at', datetime.now().isoformat())
-    standardized['updated_at'] = datetime.now().isoformat()
-    
-    # Prediction results
-    standardized['prediction_score'] = pool_data.get('prediction_score', 0)
-    
-    return standardized
+    try:
+        standardized = {}
+        
+        # Basic pool information
+        standardized['id'] = pool_data.get('poolId', '')
+        
+        # Handle tokens data
+        tokens = pool_data.get('tokens', [])
+        token1 = tokens[0] if len(tokens) > 0 else {}
+        token2 = tokens[1] if len(tokens) > 1 else {}
+        
+        # Extract token symbols for name
+        token1_symbol = token1.get('symbol', '')
+        token2_symbol = token2.get('symbol', '')
+        standardized['name'] = f"{token1_symbol}/{token2_symbol}"
+        
+        # Extract token details
+        standardized['dex'] = pool_data.get('source', 'Unknown')
+        standardized['token1_symbol'] = token1_symbol
+        standardized['token2_symbol'] = token2_symbol
+        standardized['token1_address'] = token1.get('address', '')
+        standardized['token2_address'] = token2.get('address', '')
+        
+        # Financial metrics from the metrics field
+        metrics = pool_data.get('metrics', {})
+        standardized['liquidity'] = metrics.get('tvl', 0)
+        standardized['volume_24h'] = metrics.get('volumeUsd', 0)
+        standardized['apr'] = metrics.get('apy24h', 0)  # Use 24h APY as the current APR
+        standardized['fee'] = metrics.get('fee', 0) * 100  # Convert to percentage
+        
+        # Historical trend data - calculated as percent changes between periods
+        apy24h = metrics.get('apy24h', 0)
+        apy7d = metrics.get('apy7d', 0)
+        apy30d = metrics.get('apy30d', 0)
+        
+        # Calculate APR changes if we have the values
+        if apy7d != 0 and apy24h != 0:
+            standardized['apr_change_24h'] = ((apy24h - apy7d) / apy7d) * 100
+        else:
+            standardized['apr_change_24h'] = 0
+            
+        if apy30d != 0 and apy7d != 0:
+            standardized['apr_change_7d'] = ((apy7d - apy30d) / apy30d) * 100
+        else:
+            standardized['apr_change_7d'] = 0
+            
+        standardized['apr_change_30d'] = 0  # No data for previous 30d period
+        
+        # No TVL change data in API, will be calculated from historical records
+        standardized['tvl_change_24h'] = 0
+        standardized['tvl_change_7d'] = 0
+        standardized['tvl_change_30d'] = 0
+        
+        # Categorization based on token names
+        token_symbols = [token1_symbol, token2_symbol]
+        if any(symbol in ['USDC', 'USDT', 'DAI'] for symbol in token_symbols):
+            if all(symbol in ['USDC', 'USDT', 'DAI'] for symbol in token_symbols):
+                standardized['category'] = 'Stablecoin'
+            elif any(symbol in ['SOL', 'ETH', 'BTC'] for symbol in token_symbols):
+                standardized['category'] = 'Major'
+            elif any(symbol in ['BONK', 'SAMO', 'PEPE'] for symbol in token_symbols):
+                standardized['category'] = 'Meme'
+            elif any(symbol in ['GMT', 'ATLAS', 'POLIS'] for symbol in token_symbols):
+                standardized['category'] = 'Gaming'
+            elif any(symbol in ['JUP', 'RAY', 'SRM', 'ORCA'] for symbol in token_symbols):
+                standardized['category'] = 'DeFi'
+            else:
+                standardized['category'] = 'Other'
+        else:
+            standardized['category'] = 'Other'
+            
+        standardized['version'] = 'v1'  # Default version
+        
+        # Time-based data
+        standardized['created_at'] = pool_data.get('createdAt', datetime.now().isoformat())
+        standardized['updated_at'] = pool_data.get('updatedAt', datetime.now().isoformat())
+        
+        # Calculate a basic prediction score
+        prediction_score = 50  # Base score
+        
+        # APR contributes up to 20 points
+        prediction_score += min(20, standardized['apr'] / 2)
+        
+        # Positive trends add points
+        if standardized['apr_change_7d'] > 0:
+            prediction_score += 5
+        if standardized['apr_change_24h'] > 0:
+            prediction_score += 3
+            
+        # Volume to liquidity ratio adds points (high volume relative to liquidity is good)
+        if standardized['liquidity'] > 0:
+            vol_liq_ratio = standardized['volume_24h'] / standardized['liquidity']
+            if vol_liq_ratio > 0.5:
+                prediction_score += 5
+            elif vol_liq_ratio > 0.2:
+                prediction_score += 3
+                
+        # Category adjustments
+        if standardized['category'] == 'Meme':
+            prediction_score += 7  # Higher volatility, higher potential
+        elif standardized['category'] == 'DeFi':
+            prediction_score += 5  # Good potential
+        elif standardized['category'] == 'Major':
+            prediction_score += 3  # Stable but lower ceiling
+            
+        # Cap at 100
+        standardized['prediction_score'] = min(100, prediction_score)
+        
+        return standardized
+    except Exception as e:
+        logger.error(f"Error processing pool {pool_data.get('poolId', 'unknown')}: {str(e)}")
+        return None
 
 def write_markdown_results(pools):
     """
@@ -390,25 +533,18 @@ def main():
     
     processed_pools = []
     
-    # Process each pool
+    # Process each pool directly with the pool data from API
     for pool in pools:
-        try:
-            # Fetch historical data
-            historical_data = fetch_pool_history(pool['address'])
-            
-            # Rate limiting to avoid API throttling
-            time.sleep(0.5)
-            
-            # Calculate additional metrics
-            enhanced_pool = calculate_pool_metrics(pool, historical_data)
-            
-            # Standardize the data structure
-            standardized_pool = standardize_pool_data(enhanced_pool)
-            
+        standardized_pool = standardize_pool_data(pool)
+        if standardized_pool:
             processed_pools.append(standardized_pool)
-            
-        except Exception as e:
-            logger.error(f"Error processing pool {pool.get('address', 'unknown')}: {str(e)}")
+    
+    # Filter out None values
+    processed_pools = [p for p in processed_pools if p is not None]
+    
+    if not processed_pools:
+        logger.error("No pools were successfully processed. Exiting.")
+        return
     
     # Write results to markdown file
     write_markdown_results(processed_pools)
