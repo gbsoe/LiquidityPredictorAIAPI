@@ -920,12 +920,13 @@ def get_pools_in_watchlist(watchlist_id):
     finally:
         session.close()
 
-def get_watchlist_details(watchlist_id):
+def get_watchlist_details(watchlist_id, fetch_missing_pools=True):
     """
     Get detailed information about a watchlist including all its pools
     
     Args:
         watchlist_id: ID of the watchlist
+        fetch_missing_pools: If True, will attempt to fetch missing pools via the API
         
     Returns:
         Dictionary with watchlist details and pools
@@ -950,10 +951,83 @@ def get_watchlist_details(watchlist_id):
         
         # Get the pool data for these IDs
         pool_data = []
+        missing_pool_ids = []
+        
         for pool_id in pool_ids:
             pool = session.query(LiquidityPool).filter_by(id=pool_id).first()
             if pool:
                 pool_data.append(pool.to_dict())
+            else:
+                if fetch_missing_pools:
+                    missing_pool_ids.append(pool_id)
+        
+        # If we're fetching missing pools and have some missing
+        if fetch_missing_pools and missing_pool_ids:
+            try:
+                print(f"Attempting to fetch {len(missing_pool_ids)} missing pools via API...")
+                # Import here to avoid circular imports
+                from defi_aggregation_api import DefiAggregationAPI
+                import os
+                
+                # Try to get the API key from environment
+                api_key = os.getenv("DEFI_API_KEY")
+                if api_key:
+                    api = DefiAggregationAPI(api_key=api_key)
+                    
+                    for missing_id in missing_pool_ids:
+                        try:
+                            print(f"Fetching pool {missing_id} directly from API...")
+                            pool_data_from_api = api.get_pool_by_id(missing_id)
+                            
+                            if pool_data_from_api:
+                                print(f"Successfully fetched pool {missing_id}")
+                                
+                                # Store in database for future use
+                                try:
+                                    # Create a model instance
+                                    new_pool = LiquidityPool(
+                                        id=pool_data_from_api.get("id", ""),
+                                        name=pool_data_from_api.get("name", ""),
+                                        dex=pool_data_from_api.get("dex", "Unknown"),
+                                        category=pool_data_from_api.get("category", "Custom"),
+                                        token1_symbol=pool_data_from_api.get("token1_symbol", "Unknown"),
+                                        token2_symbol=pool_data_from_api.get("token2_symbol", "Unknown"),
+                                        token1_address=pool_data_from_api.get("token1_address", ""),
+                                        token2_address=pool_data_from_api.get("token2_address", ""),
+                                        liquidity=pool_data_from_api.get("liquidity", 0.0),
+                                        volume_24h=pool_data_from_api.get("volume_24h", 0.0),
+                                        apr=pool_data_from_api.get("apr", 0.0),
+                                        fee=pool_data_from_api.get("fee", 0.0),
+                                        version=pool_data_from_api.get("version", ""),
+                                        apr_change_24h=pool_data_from_api.get("apr_change_24h", 0.0),
+                                        apr_change_7d=pool_data_from_api.get("apr_change_7d", 0.0),
+                                        tvl_change_24h=pool_data_from_api.get("tvl_change_24h", 0.0),
+                                        tvl_change_7d=pool_data_from_api.get("tvl_change_7d", 0.0),
+                                        prediction_score=pool_data_from_api.get("prediction_score", 0.0),
+                                        apr_change_30d=pool_data_from_api.get("apr_change_30d", 0.0),
+                                        tvl_change_30d=pool_data_from_api.get("tvl_change_30d", 0.0),
+                                        created_at=pool_data_from_api.get("created_at", datetime.now().isoformat()),
+                                        updated_at=pool_data_from_api.get("updated_at", datetime.now().isoformat())
+                                    )
+                                    session.add(new_pool)
+                                    session.commit()
+                                    print(f"Stored pool {missing_id} in database")
+                                    
+                                    # Add to our result set
+                                    pool_data.append(pool_data_from_api)
+                                except Exception as store_err:
+                                    print(f"Error storing pool in database: {store_err}")
+                                    session.rollback()
+                                    # Still add to result even if DB store fails
+                                    pool_data.append(pool_data_from_api)
+                            else:
+                                print(f"Could not fetch pool {missing_id} from API")
+                        except Exception as pool_err:
+                            print(f"Error fetching individual pool {missing_id}: {pool_err}")
+                else:
+                    print("Cannot fetch missing pools: API key not found in environment")
+            except Exception as api_err:
+                print(f"Error setting up API for pool fetching: {api_err}")
         
         # Combine the data
         return {

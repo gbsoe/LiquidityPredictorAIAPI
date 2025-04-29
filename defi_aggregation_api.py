@@ -238,7 +238,29 @@ class DefiAggregationAPI:
         """
         try:
             # Make the API request using the documented endpoint format
-            response = self._make_request(f"pools/{pool_id}")
+            logger.info(f"Fetching individual pool data for {pool_id}")
+            
+            try:
+                # First try the specific pool endpoint
+                response = self._make_request(f"pools/{pool_id}")
+            except ValueError as e:
+                if "Resource not found" in str(e):
+                    # If the specific endpoint fails, try to find it in the main list
+                    logger.info(f"Specific pool endpoint failed, trying to find pool in main list")
+                    all_pools = self.get_all_pools(max_pools=200)  # Try to get a large sample
+                    
+                    # Search for this specific pool ID
+                    for pool in all_pools:
+                        if pool.get('id') == pool_id or pool.get('poolId') == pool_id:
+                            logger.info(f"Found pool {pool_id} in main pool list")
+                            return self.transform_pool_data(pool)
+                    
+                    # If we get here, we didn't find it
+                    logger.warning(f"Pool {pool_id} not found in API responses")
+                    return None
+                else:
+                    # Some other error occurred
+                    raise
             
             # Log the received data structure
             if response:
@@ -265,6 +287,9 @@ class DefiAggregationAPI:
                 return None
         except ValueError as e:
             logger.error(f"Failed to get pool {pool_id}: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error fetching pool {pool_id}: {str(e)}")
             return None
     
     def transform_pool_data(self, pool: Dict[str, Any]) -> Dict[str, Any]:
