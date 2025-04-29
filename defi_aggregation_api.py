@@ -353,17 +353,64 @@ class DefiAggregationAPI:
                 if "Resource not found" in str(e):
                     # If the specific endpoint fails, try to find it in the main list
                     logger.info(f"Specific pool endpoint failed, trying to find pool in main list")
+                    
+                    # Try to search in source-specific endpoints
+                    for source in ["raydium", "orca", "meteora"]:
+                        try:
+                            logger.info(f"Trying to find pool {pool_id} in {source} pools")
+                            source_pools = self._make_request(f"pools?source={source}")
+                            
+                            if isinstance(source_pools, list):
+                                # Search in this source's pools
+                                for pool in source_pools:
+                                    if (pool.get('id') == pool_id or 
+                                        pool.get('poolId') == pool_id or 
+                                        pool.get('id') == pool_id.lower() or 
+                                        pool.get('poolId') == pool_id.lower()):
+                                        logger.info(f"Found pool {pool_id} in {source} pools")
+                                        return self.transform_pool_data(pool)
+                        except Exception as source_err:
+                            logger.info(f"Error searching in {source} pools: {source_err}")
+                    
+                    # If not found in specific sources, try the full pool list
                     all_pools = self.get_all_pools(max_pools=200)  # Try to get a large sample
                     
-                    # Search for this specific pool ID
+                    # Search for this specific pool ID (case-insensitive)
+                    pool_id_lower = pool_id.lower()
                     for pool in all_pools:
-                        if pool.get('id') == pool_id or pool.get('poolId') == pool_id:
+                        pool_id_match = False
+                        api_id = pool.get('id', '')
+                        api_pool_id = pool.get('poolId', '')
+                        
+                        # Try multiple matching approaches
+                        if (api_id and (api_id == pool_id or api_id.lower() == pool_id_lower)) or \
+                           (api_pool_id and (api_pool_id == pool_id or api_pool_id.lower() == pool_id_lower)):
+                            pool_id_match = True
+                        
+                        if pool_id_match:
                             logger.info(f"Found pool {pool_id} in main pool list")
                             return self.transform_pool_data(pool)
                     
                     # If we get here, we didn't find it
                     logger.warning(f"Pool {pool_id} not found in API responses")
-                    return None
+                    
+                    # Create a minimal viable placeholder for the pool
+                    # This ensures watchlists can display something when API doesn't have full data
+                    placeholder_pool = {
+                        "id": pool_id,
+                        "poolId": pool_id,
+                        "name": f"Pool {pool_id[:8]}...",
+                        "source": "Unknown",
+                        "tokens": [],
+                        "metrics": {
+                            "tvl": 0,
+                            "fee": 0,
+                            "apy24h": 0
+                        }
+                    }
+                    
+                    logger.info(f"Created placeholder pool data for {pool_id}")
+                    return self.transform_pool_data(placeholder_pool)
                 else:
                     # Some other error occurred
                     raise
@@ -378,7 +425,8 @@ class DefiAggregationAPI:
                         logger.info(f"First item has keys: {list(response[0].keys())}")
             
             # Check response format according to the documentation
-            # Expected format: {"pool": {pool_data}} 
+            # Expected format based on GET Pool Docs: {"poolId": "...", "name": "...", ...}
+            # or {"pool": {pool_data}}
             if isinstance(response, dict) and "pool" in response:
                 # Extract the pool object from the response
                 pool_data = response["pool"]
@@ -403,13 +451,80 @@ class DefiAggregationAPI:
                         if isinstance(value, dict) and ("poolId" in value or "id" in value):
                             logger.info(f"Found pool data in field '{key}'")
                             return self.transform_pool_data(value)
-                return None
+                    
+                    # Check if this might be an array of pools rather than a single pool
+                    for key, value in response.items():
+                        if isinstance(value, list) and len(value) > 0:
+                            for item in value:
+                                if isinstance(item, dict) and ("poolId" in item or "id" in item):
+                                    pool_id_match = False
+                                    api_id = item.get('id', '')
+                                    api_pool_id = item.get('poolId', '')
+                                    pool_id_lower = pool_id.lower()
+                                    
+                                    # Try multiple matching approaches
+                                    if (api_id and (api_id == pool_id or api_id.lower() == pool_id_lower)) or \
+                                       (api_pool_id and (api_pool_id == pool_id or api_pool_id.lower() == pool_id_lower)):
+                                        pool_id_match = True
+                                    
+                                    if pool_id_match:
+                                        logger.info(f"Found pool {pool_id} in nested array")
+                                        return self.transform_pool_data(item)
+                
+                # Create a minimal placeholder if nothing else worked
+                placeholder_pool = {
+                    "id": pool_id,
+                    "poolId": pool_id,
+                    "name": f"Pool {pool_id[:8]}...",
+                    "source": "Unknown",
+                    "tokens": [],
+                    "metrics": {
+                        "tvl": 0,
+                        "fee": 0,
+                        "apy24h": 0
+                    }
+                }
+                
+                logger.info(f"Created placeholder pool data for {pool_id}")
+                return self.transform_pool_data(placeholder_pool)
         except ValueError as e:
             logger.error(f"Failed to get pool {pool_id}: {str(e)}")
-            return None
+            
+            # Provide a fallback placeholder for the watchlist
+            placeholder_pool = {
+                "id": pool_id,
+                "poolId": pool_id,
+                "name": f"Pool {pool_id[:8]}...",
+                "source": "Unknown",
+                "tokens": [],
+                "metrics": {
+                    "tvl": 0,
+                    "fee": 0,
+                    "apy24h": 0
+                }
+            }
+            
+            logger.info(f"Created placeholder pool data after error for {pool_id}")
+            return self.transform_pool_data(placeholder_pool)
         except Exception as e:
             logger.error(f"Unexpected error fetching pool {pool_id}: {str(e)}")
-            return None
+            
+            # Provide a fallback placeholder
+            placeholder_pool = {
+                "id": pool_id,
+                "poolId": pool_id,
+                "name": f"Pool {pool_id[:8]}...",
+                "source": "Unknown",
+                "tokens": [],
+                "metrics": {
+                    "tvl": 0,
+                    "fee": 0,
+                    "apy24h": 0
+                }
+            }
+            
+            logger.info(f"Created placeholder pool data after error for {pool_id}")
+            return self.transform_pool_data(placeholder_pool)
     
     def transform_pool_data(self, pool: Dict[str, Any]) -> Dict[str, Any]:
         """
