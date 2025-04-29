@@ -7,9 +7,10 @@ import os
 import json
 import sys
 import sqlite3
+from datetime import datetime
 import pandas as pd
 import sqlalchemy as sa
-from sqlalchemy import create_engine, Column, Integer, String, Float, MetaData, Table
+from sqlalchemy import create_engine, Column, Integer, String, Float, MetaData, Table, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -318,7 +319,7 @@ class PoolHistoricalData(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     pool_id = Column(String, nullable=False)
-    timestamp = Column(String, nullable=False)
+    timestamp = Column(DateTime, nullable=False)
     price_ratio = Column(Float, nullable=False, default=0)
     liquidity = Column(Float, nullable=False, default=0)
     volume_24h = Column(Float, nullable=False, default=0)
@@ -364,9 +365,24 @@ def store_historical_pool_data(historical_records):
         for record in historical_records:
             try:
                 # Create a new historical data entry
+                # Parse the timestamp string to a datetime object
+                timestamp_str = record.get("timestamp", "")
+                try:
+                    # If it's already a datetime object, use it directly
+                    if hasattr(timestamp_str, 'isoformat'):
+                        timestamp = timestamp_str
+                    else:
+                        # Try to parse as ISO format
+                        from datetime import datetime
+                        timestamp = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+                except Exception as e:
+                    print(f"Error parsing timestamp {timestamp_str}: {e}")
+                    # Fallback to current time
+                    timestamp = datetime.now()
+                
                 new_record = PoolHistoricalData(
                     pool_id=record.get("pool_id", ""),
-                    timestamp=record.get("timestamp", ""),
+                    timestamp=timestamp,
                     price_ratio=record.get("price_ratio", 0),
                     liquidity=record.get("liquidity", 0),
                     volume_24h=record.get("volume_24h", 0),
