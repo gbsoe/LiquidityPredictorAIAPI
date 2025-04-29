@@ -7,6 +7,8 @@ This collector retrieves data from the DeFi Aggregation API.
 import logging
 import os
 import time
+import json
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from defi_aggregation_api import DefiAggregationAPI
@@ -49,11 +51,17 @@ class DefiAggregationCollector(BaseCollector):
         self.api_client = DefiAggregationAPI(api_key=self.api_key, base_url=base_url)
         
         # Collection configuration
-        self.max_pools_per_collection = 50
-        self.delay_between_requests = 0.1  # 100ms delay for rate limiting
+        self.max_pools_per_collection = 100  # Increased maximum pools per collection
+        self.delay_between_requests = 0.1     # 100ms delay for rate limiting
+        self.max_pages_per_dex = 3           # Maximum pages to fetch per DEX
+        self.page_size = 16                  # Standard page size for pagination
         
         # Cache DEX list
         self.supported_dexes = []
+        
+        # Historical data tracking
+        self.last_collection_time = None
+        self.historical_collections = []
         
         logger.info("DefiAggregationCollector initialized")
     
@@ -135,7 +143,7 @@ class DefiAggregationCollector(BaseCollector):
     
     def _collect_data(self) -> List[Dict[str, Any]]:
         """
-        Collect pool data from the DeFi Aggregation API.
+        Collect pool data from the DeFi Aggregation API with pagination support.
         
         Returns:
             List of collected pool data
@@ -148,6 +156,7 @@ class DefiAggregationCollector(BaseCollector):
         # Start collection
         logger.info(f"Starting pool data collection from DeFi Aggregation API")
         start_time = time.time()
+        collection_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         # Try to get supported DEXes
         try:
@@ -158,27 +167,59 @@ class DefiAggregationCollector(BaseCollector):
             logger.warning(f"Could not get supported DEXes: {str(e)}")
             dexes = []
         
-        # Collect pools using the optimal API collection strategy
+        # Collect pools using the optimal API collection strategy with pagination
         all_pools = []
         
-        # If we have a list of DEXes, collect pools for each DEX
+        # If we have a list of DEXes, collect pools for each DEX with pagination
         if dexes:
             for dex in dexes:
+                dex_pools = []
                 try:
-                    # Add a small delay between requests
-                    time.sleep(self.delay_between_requests)
+                    # Implement pagination: collect multiple pages of results for each DEX
+                    for page in range(self.max_pages_per_dex):
+                        # Add a small delay between requests
+                        time.sleep(self.delay_between_requests)
+                        
+                        # Calculate offset for pagination
+                        offset = page * self.page_size
+                        
+                        # Log pagination information
+                        if page > 0:
+                            logger.info(f"Fetching page {page+1} for DEX {dex} (offset: {offset})")
+                        
+                        # Get pools for this DEX and page
+                        page_pools = self.api_client.get_pools_by_dex(
+                            dex=dex, 
+                            limit=self.page_size, 
+                            offset=offset
+                        )
+                        
+                        if page_pools:
+                            logger.info(f"Retrieved {len(page_pools)} pools for DEX {dex} (page {page+1})")
+                            dex_pools.extend(page_pools)
+                            
+                            # Add collection metadata to each pool for historical tracking
+                            for pool in page_pools:
+                                pool['collection_timestamp'] = collection_timestamp
+                                pool['collection_source'] = f"{dex}-API"
+                            
+                            # If we got fewer results than requested, we've reached the end
+                            if len(page_pools) < self.page_size:
+                                logger.info(f"Reached end of results for DEX {dex} at page {page+1}")
+                                break
+                        else:
+                            # No more results for this DEX
+                            if page == 0:
+                                logger.warning(f"No pools found for DEX {dex}")
+                            else:
+                                logger.info(f"No more pools available for DEX {dex} after page {page}")
+                            break
                     
-                    # Get pools for this DEX
-                    dex_pools = self.api_client.get_pools_by_dex(
-                        dex=dex, 
-                        limit=min(20, self.max_pools_per_collection // len(dexes))
-                    )
-                    
+                    # Add the collected pools from this DEX to the overall pool list
                     if dex_pools:
-                        logger.info(f"Retrieved {len(dex_pools)} pools for DEX {dex}")
+                        logger.info(f"Total: Retrieved {len(dex_pools)} pools for DEX {dex}")
                         all_pools.extend(dex_pools)
-                    else:
-                        logger.warning(f"No pools found for DEX {dex}")
+                
                 except Exception as e:
                     logger.error(f"Error collecting pools for DEX {dex}: {str(e)}")
         
@@ -187,10 +228,20 @@ class DefiAggregationCollector(BaseCollector):
             try:
                 logger.info("Falling back to general pools endpoint")
                 all_pools = self.api_client.get_all_pools(max_pools=self.max_pools_per_collection)
+                
+                # Add collection metadata to each pool
+                for pool in all_pools:
+                    pool['collection_timestamp'] = collection_timestamp
+                    pool['collection_source'] = "general-API"
+                
                 logger.info(f"Retrieved {len(all_pools)} pools from general endpoint")
             except Exception as e:
                 logger.error(f"Error collecting pools from general endpoint: {str(e)}")
                 raise  # Re-raise the exception
+        
+        # Update historical data tracking
+        self.last_collection_time = collection_timestamp
+        self._update_historical_data(all_pools, collection_timestamp)
         
         # Log collection results
         elapsed_time = time.time() - start_time
@@ -200,6 +251,43 @@ class DefiAggregationCollector(BaseCollector):
         )
         
         return all_pools
+        
+    def _update_historical_data(self, pools: List[Dict[str, Any]], timestamp: str) -> None:
+        """
+        Update historical data tracking.
+        
+        Args:
+            pools: List of collected pools
+            timestamp: Collection timestamp
+        """
+        # Create a historical snapshot record
+        snapshot = {
+            'timestamp': timestamp,
+            'pool_count': len(pools),
+            'dexes': {},
+            'collection_rate': len(pools) / (time.time() - time.time()) if time.time() != time.time() else 0
+        }
+        
+        # Aggregate DEX statistics
+        for pool in pools:
+            dex = pool.get('source', 'unknown')
+            if dex not in snapshot['dexes']:
+                snapshot['dexes'][dex] = 0
+            snapshot['dexes'][dex] += 1
+        
+        # Add to historical collections (limit to last 100 for memory usage)
+        self.historical_collections.append(snapshot)
+        if len(self.historical_collections) > 100:
+            self.historical_collections = self.historical_collections[-100:]
+            
+    def get_historical_stats(self) -> List[Dict[str, Any]]:
+        """
+        Get historical collection statistics.
+        
+        Returns:
+            List of historical collection records
+        """
+        return self.historical_collections
 
 def get_collector(api_key: Optional[str] = None, 
                  base_url: Optional[str] = None) -> DefiAggregationCollector:
