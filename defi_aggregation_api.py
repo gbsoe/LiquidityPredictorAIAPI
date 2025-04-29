@@ -320,45 +320,33 @@ class DefiAggregationAPI:
                 "id": pool_id,  # Use the authentic base58 pool ID
                 "name": pool_name,  # Use a human-readable name
                 "dex": pool.get('source', 'Unknown'),
+                "category": category,
                 "token1_symbol": token1.get('symbol', 'Unknown'),
                 "token2_symbol": token2.get('symbol', 'Unknown'),
                 "token1_address": token1.get('address', ''),
                 "token2_address": token2.get('address', ''),
                 
-                # Liquidity (TVL) metrics
+                # Liquidity and volume metrics (only include fields in LiquidityPool model)
                 "liquidity": pool.get('tvl', metrics.get('tvl', 0)),
+                "volume_24h": volume_24h,
+                
+                # APR metrics
+                "apr": apr_24h,  # Use 24h APR as the default APR value
+                
+                # Changes (only include fields in LiquidityPool model)
+                "apr_change_24h": apr_change_24h,
+                "apr_change_7d": apr_change_7d,
+                "apr_change_30d": apr_change_30d,
                 "tvl_change_24h": pool.get('tvlChange24h', metrics.get('tvlChange24h', 0)),
                 "tvl_change_7d": pool.get('tvlChange7d', metrics.get('tvlChange7d', 0)),
                 "tvl_change_30d": pool.get('tvlChange30d', metrics.get('tvlChange30d', 0)),
                 
-                # Volume metrics
-                "volume_24h": volume_24h,
-                "volume_7d": volume_7d,
-                "volume_change_24h": volume_change_24h,
-                
-                # APR metrics
-                "apr": apr_24h,  # Use 24h APR as the default APR value
-                "apr_24h": apr_24h,
-                "apr_7d": apr_7d,
-                "apr_30d": apr_30d,
-                "apr_change_24h": apr_change_24h,
-                "apr_change_7d": apr_change_7d,
-                "apr_change_30d": apr_change_30d,
-                
-                # Additional metrics
+                # Additional required fields
                 "prediction_score": 0,  # Will be calculated later based on historical data
-                "risk_score": 0,  # Will be calculated later
-                "category": category,
-                "token1_price": token1.get('price', 0),
-                "token2_price": token2.get('price', 0),
                 "fee": pool.get('fee', metrics.get('fee', 0)),
                 "version": pool.get('version', '1.0'),
-                "data_source": "Real-time DeFi API",
                 "created_at": datetime.now().isoformat(),
-                "updated_at": datetime.now().isoformat(),
-                
-                # Store the original object for reference and additional data
-                "raw_data": pool
+                "updated_at": datetime.now().isoformat()
             }
             
             return transformed
@@ -371,6 +359,7 @@ class DefiAggregationAPI:
                 "id": pool_id,
                 "name": pool_id,  # Use pool ID as the name
                 "dex": pool.get('source', 'Unknown'),
+                "category": "Unknown",
                 "token1_symbol": "Unknown",
                 "token2_symbol": "Unknown",
                 "token1_address": "",
@@ -378,9 +367,6 @@ class DefiAggregationAPI:
                 "liquidity": 0,
                 "volume_24h": 0,
                 "apr": 0,
-                "apr_24h": 0,
-                "apr_7d": 0,
-                "apr_30d": 0,
                 "apr_change_24h": 0,
                 "apr_change_7d": 0,
                 "apr_change_30d": 0,
@@ -390,11 +376,8 @@ class DefiAggregationAPI:
                 "fee": 0,
                 "prediction_score": 0,
                 "version": "1.0",
-                "risk_score": 0,
-                "category": "Unknown",
                 "created_at": datetime.now().isoformat(),
-                "updated_at": datetime.now().isoformat(),
-                "data_source": "DeFi API (incomplete)",
+                "updated_at": datetime.now().isoformat()
             }
     
     def get_transformed_pools(self, max_pools: int = 500, **kwargs) -> List[Dict[str, Any]]:
