@@ -764,14 +764,24 @@ def add_pool_to_watchlist(watchlist_id, pool_id, notes=""):
         if not pool_exists:
             print(f"Pool {pool_id} not found in database")
             
-            # Attempt to create a skeleton pool entry for tracking
+            # Attempt to create a smarter pool entry with metadata derived from the ID
             try:
-                # Create a basic placeholder pool with default values
-                # This will allow us to track the pool even if we don't have full data yet
+                # Try to derive some metadata from the pool ID
+                dex = "Unknown"
+                
+                # Extract potential DEX information from pool ID
+                if pool_id.startswith("8sLb") or pool_id.startswith("7WQK"):  # Common Meteora pool prefixes
+                    dex = "Meteora"
+                elif pool_id.startswith("3") and len(pool_id) > 20:  # Common Raydium pattern
+                    dex = "Raydium"
+                elif pool_id.startswith("5Q5") or pool_id.startswith("2AX"):  # Common Orca pattern
+                    dex = "Orca"
+                
+                # Create a better placeholder pool with derived info
                 default_pool = LiquidityPool(
                     id=pool_id,
                     name=f"Pool {pool_id[:8]}...",  # Shortened ID as name
-                    dex="Unknown",
+                    dex=dex,
                     category="Custom",
                     token1_symbol="Unknown",
                     token2_symbol="Unknown",

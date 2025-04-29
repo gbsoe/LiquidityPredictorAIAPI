@@ -104,6 +104,39 @@ def get_dex_badge(dex: str) -> str:
     color = get_dex_color(dex)
     return f'<span style="color:{color};font-weight:bold">{dex}</span>'
 
+def parse_pool_id_for_metadata(pool_id: str) -> Dict[str, Any]:
+    """
+    Analyze a pool ID to extract any meaningful information
+    This is a fallback when API data is unavailable
+    """
+    if not pool_id:
+        return {}
+    
+    # Default metadata from pool ID
+    metadata = {
+        "id": pool_id,
+        "name": f"Pool {pool_id[:8]}...",
+        "dex": "Unknown",
+        "category": "Custom",
+        "token1_symbol": "Unknown",
+        "token2_symbol": "Unknown",
+        "liquidity": 0.0,
+        "volume_24h": 0.0,
+        "apr": 0.0,
+        "apr_change_24h": 0.0,
+        "apr_change_7d": 0.0
+    }
+    
+    # Try to match with known patterns
+    if pool_id.startswith("8sLb") or pool_id.startswith("7WQK"):  # Common Meteora pool prefixes
+        metadata["dex"] = "Meteora"
+    elif pool_id.startswith("3") and len(pool_id) > 20:  # Common Raydium pattern
+        metadata["dex"] = "Raydium"
+    elif pool_id.startswith("5Q5") or pool_id.startswith("2AX"):  # Common Orca pattern
+        metadata["dex"] = "Orca"
+    
+    return metadata
+
 def display_pool_card(pool: Dict[str, Any]) -> None:
     """Display a pool as a card with detailed information"""
     if not pool:
@@ -140,34 +173,89 @@ def display_pool_card(pool: Dict[str, Any]) -> None:
         </div>
         """, unsafe_allow_html=True)
         
-        # If we have a pool ID but minimal data, add a refresh button
+        # If we have a pool ID but minimal data, add options to manually enter data or refresh
         if pool_id != 'N/A' and (pool_name == f"Pool {pool_id[:8]}..." or pool_liquidity == 0):
-            if st.button(f"🔄 Refresh Pool Data", key=f"refresh_{pool_id}"):
-                with st.spinner("Fetching latest pool data..."):
-                    try:
-                        # Try to fetch fresh data for this pool
-                        from defi_aggregation_api import DefiAggregationAPI
-                        import os
-                        
-                        api_key = os.getenv("DEFI_API_KEY")
-                        if api_key:
-                            api = DefiAggregationAPI(api_key=api_key)
-                            updated_pool = api.get_pool_by_id(pool_id)
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                if st.button(f"🔄 Refresh Data", key=f"refresh_{pool_id}"):
+                    with st.spinner("Fetching latest pool data..."):
+                        try:
+                            # Try to fetch fresh data for this pool
+                            from defi_aggregation_api import DefiAggregationAPI
+                            import os
                             
-                            if updated_pool:
-                                st.success(f"Successfully fetched latest data for {updated_pool.get('name', pool_id)}")
-                                # Update in database for future use
-                                db_handler.save_pool_to_database(updated_pool)
-                                # Force refresh the page
-                                st.experimental_rerun()
+                            api_key = os.getenv("DEFI_API_KEY")
+                            if api_key:
+                                api = DefiAggregationAPI(api_key=api_key)
+                                updated_pool = api.get_pool_by_id(pool_id)
+                                
+                                if updated_pool:
+                                    st.success(f"Successfully fetched latest data for {updated_pool.get('name', pool_id)}")
+                                    # Update in database for future use
+                                    db_handler.save_pool_to_database(updated_pool)
+                                    # Force refresh the page
+                                    st.experimental_rerun()
+                                else:
+                                    st.warning(f"Could not fetch updated data for pool {pool_id}")
                             else:
-                                st.warning(f"Could not fetch updated data for pool {pool_id}")
+                                st.error("API key not available. Cannot fetch pool data.")
+                        except Exception as e:
+                            st.error(f"Error refreshing pool data: {str(e)}")
+            
+            with col2:
+                if st.button(f"✏️ Edit Manually", key=f"edit_{pool_id}"):
+                    st.session_state[f"editing_pool_{pool_id}"] = True
+            
+            # If in editing mode, show form to manually enter pool data
+            if st.session_state.get(f"editing_pool_{pool_id}", False):
+                with st.form(key=f"manual_pool_form_{pool_id}"):
+                    st.subheader(f"Edit Pool Data for {pool_id[:8]}...")
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        manual_name = st.text_input("Pool Name", value=pool_name if pool_name != f"Pool {pool_id[:8]}..." else "")
+                        manual_dex = st.selectbox("DEX", options=["Raydium", "Orca", "Meteora", "Jupiter", "Saber", "Unknown"], index=0 if pool_dex == "Unknown" else 0)
+                        manual_token1 = st.text_input("Token 1 Symbol", value=pool.get('token1_symbol', ''))
+                        manual_token2 = st.text_input("Token 2 Symbol", value=pool.get('token2_symbol', ''))
+                    
+                    with col2:
+                        manual_category = st.selectbox("Category", options=["Major", "Stablecoin", "DeFi", "Meme", "Custom"], index=4)
+                        manual_liquidity = st.number_input("Liquidity (USD)", value=float(pool_liquidity), min_value=0.0)
+                        manual_apr = st.number_input("APR (%)", value=float(pool_apr), min_value=0.0)
+                        manual_volume = st.number_input("24h Volume (USD)", value=float(pool_volume), min_value=0.0)
+                    
+                    submit = st.form_submit_button("Save Pool Data")
+                    
+                    if submit:
+                        # If no pool name was entered but we have token symbols, generate a name
+                        if not manual_name and manual_token1 and manual_token2:
+                            manual_name = f"{manual_token1}-{manual_token2}"
+                        elif not manual_name:
+                            manual_name = f"Pool {pool_id[:8]}..."
+                        
+                        # Create an updated pool dictionary
+                        updated_pool = {
+                            "id": pool_id,
+                            "name": manual_name,
+                            "dex": manual_dex,
+                            "category": manual_category,
+                            "token1_symbol": manual_token1,
+                            "token2_symbol": manual_token2,
+                            "liquidity": manual_liquidity,
+                            "volume_24h": manual_volume,
+                            "apr": manual_apr
+                        }
+                        
+                        # Update in database
+                        success = db_handler.save_pool_to_database(updated_pool)
+                        
+                        if success:
+                            st.success(f"Successfully updated pool data for {manual_name}")
+                            st.session_state.pop(f"editing_pool_{pool_id}", None)
+                            st.experimental_rerun()
                         else:
-                            st.error("API key not available. Cannot fetch pool data.")
-                    except Exception as e:
-                        st.error(f"Error refreshing pool data: {str(e)}")
-                        import traceback
-                        st.code(traceback.format_exc())
+                            st.error("Failed to update pool data. Please try again.")
 
 def add_batch_pools(watchlist_id: int, pool_ids: List[str]) -> int:
     """
