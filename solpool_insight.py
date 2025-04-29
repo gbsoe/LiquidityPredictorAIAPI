@@ -563,17 +563,17 @@ def load_data():
         except Exception as e:
             st.warning(f"⚠️ Error during live data attempt: {str(e)}")
     
-    # 4. Try to load from database (disabled for now to prevent errors)
-    # if hasattr(db_handler, 'engine') and db_handler.engine is not None:
-    #     try:
-    #         pools = db_handler.get_pools()
-    #         if pools and len(pools) > 0:
-    #             st.success(f"✓ Successfully loaded {len(pools)} pools from database")
-    #             st.session_state['data_source'] = "Database"
-    #             return pools
-    #     except Exception as db_error:
-    #         logger.error(f"Database error: {str(db_error)}")
-    #         st.warning(f"Could not load from database: {db_error}")
+    # 4. Try to load from database
+    if hasattr(db_handler, 'engine') and db_handler.engine is not None:
+        try:
+            pools = db_handler.get_pools()
+            if pools and len(pools) > 0:
+                st.success(f"✓ Successfully loaded {len(pools)} pools from database")
+                st.session_state['data_source'] = "Database"
+                return pools
+        except Exception as db_error:
+            logger.error(f"Database error: {str(db_error)}")
+            st.warning(f"Could not load from database: {db_error}")
     
     # 5. Load from cached file
     cache_file = "extracted_pools.json"
