@@ -496,7 +496,12 @@ def load_data():
             init_services()
             data_service = get_data_service()
             st.session_state["data_service"] = data_service
-            logger.info("Initialized data service on demand")
+            
+            # Initialize historical service for data visualization
+            historical_service = get_historical_service()
+            st.session_state["historical_service"] = historical_service
+            
+            logger.info("Initialized data services on demand")
         except Exception as e:
             logger.error(f"Failed to initialize data service on demand: {str(e)}")
             logger.error(traceback.format_exc())
@@ -1132,6 +1137,216 @@ def main():
                         st.info("Detailed token information not available in the current dataset")
             else:
                 st.dataframe(table_df, use_container_width=True)
+            
+            # Add pool details section with historical data
+            st.subheader("Pool Details & Historical Data")
+            
+            # Create a selectbox for choosing a pool
+            if not filtered_df.empty:
+                # Create a dictionary of pool names to IDs for the selectbox
+                pool_options = {f"{row['name']} ({row['dex']})": row['id'] for _, row in filtered_df.iterrows()}
+                
+                selected_pool_name = st.selectbox("Select Pool for Detailed Analysis", 
+                                                 options=list(pool_options.keys()),
+                                                 key="pool_detail_selector")
+                
+                # Get the selected pool ID
+                selected_pool_id = pool_options[selected_pool_name]
+                
+                # Get the selected pool data
+                pool = filtered_df[filtered_df['id'] == selected_pool_id].iloc[0]
+                
+                # Pool detail tabs
+                pool_tabs = st.tabs(["Basic Info", "Historical Data", "Advanced Analysis"])
+                
+                # Basic Info Tab
+                with pool_tabs[0]:
+                    col1, col2 = st.columns([1, 1])
+                    
+                    with col1:
+                        st.write("### Basic Information")
+                        st.write(f"**Pool ID:** {pool['id']}")
+                        st.write(f"**Name:** {pool['name']}")
+                        st.write(f"**DEX:** {pool['dex']}")
+                        st.write(f"**Category:** {pool['category']}")
+                        st.write(f"**Token 1:** {pool['token1_symbol']}")
+                        st.write(f"**Token 2:** {pool['token2_symbol']}")
+                        
+                        if 'version' in pool:
+                            st.write(f"**Version:** {pool['version']}")
+                            
+                        if 'fee' in pool:
+                            st.write(f"**Fee:** {format_percentage(pool['fee'] * 100)}")
+                    
+                    with col2:
+                        st.write("### Performance Metrics")
+                        st.write(f"**TVL:** {format_currency(pool['liquidity'])}")
+                        st.write(f"**24h Volume:** {format_currency(pool['volume_24h'])}")
+                        st.write(f"**APR:** {format_percentage(pool['apr'])}")
+                        st.write(f"**APR Change (24h):** {get_trend_icon(pool['apr_change_24h'])} {format_percentage(pool['apr_change_24h'])}")
+                        st.write(f"**APR Change (7d):** {get_trend_icon(pool['apr_change_7d'])} {format_percentage(pool['apr_change_7d'])}")
+                        
+                    # Token information
+                    st.write("### Token Information")
+                    token_cols = st.columns(2)
+                    
+                    with token_cols[0]:
+                        st.write(f"**Token 1:** {pool['token1_symbol']}")
+                        st.write(f"**Address:** `{pool['token1_address']}`")
+                        if 'token1_price' in pool and pool['token1_price'] > 0:
+                            st.write(f"**Price:** {format_currency(pool['token1_price'])}")
+                    
+                    with token_cols[1]:
+                        st.write(f"**Token 2:** {pool['token2_symbol']}")
+                        st.write(f"**Address:** `{pool['token2_address']}`")
+                        if 'token2_price' in pool and pool['token2_price'] > 0:
+                            st.write(f"**Price:** {format_currency(pool['token2_price'])}")
+                
+                # Historical Data Tab
+                with pool_tabs[1]:
+                    # Time period selection
+                    period_options = ["Last 7 Days", "Last 30 Days", "Last 90 Days"]
+                    selected_period = st.selectbox(
+                        "Select Time Period:", 
+                        options=period_options, 
+                        index=1,  # Default to 30 days
+                        key="historical_period_selector"
+                    )
+                    
+                    # Convert period to days
+                    if selected_period == "Last 7 Days":
+                        days = 7
+                    elif selected_period == "Last 30 Days":
+                        days = 30
+                    else:  # Last 90 Days
+                        days = 90
+                    
+                    # Display historical data
+                    display_historical_data(pool['id'], days)
+                
+                # Advanced Analysis Tab
+                with pool_tabs[2]:
+                    st.write("### Risk Assessment")
+                    
+                    # Calculate risk score based on several factors
+                    # This is a simplified risk model and would be more sophisticated in production
+                    volatility = pool.get('volatility', 0.2)  # Default if not available
+                    liquidity = pool['liquidity']
+                    apr = pool['apr']
+                    volume = pool['volume_24h']
+                    
+                    # Risk indicators based on different factors (simplified)
+                    risk_factors = {}
+                    
+                    # APR risk (high APR often means higher risk)
+                    apr_risk = min(apr / 200, 0.95)  # Scale APR risk
+                    risk_factors["APR Risk"] = apr_risk
+                    
+                    # Liquidity risk (lower liquidity means higher risk)
+                    liquidity_risk = max(0, min(1 - (liquidity / 1000000), 0.9))
+                    risk_factors["Liquidity Risk"] = liquidity_risk
+                    
+                    # Volume risk (lower volume means higher risk)
+                    volume_risk = max(0, min(1 - (volume / 100000), 0.9))
+                    risk_factors["Volume Risk"] = volume_risk
+                    
+                    # Volatility risk (higher volatility means higher risk)
+                    volatility_risk = min(volatility * 2, 0.9)
+                    risk_factors["Volatility Risk"] = volatility_risk
+                    
+                    # Overall risk score (weighted average, with more weight on liquidity and volume)
+                    overall_risk = (apr_risk * 0.3 + liquidity_risk * 0.3 + 
+                                   volume_risk * 0.2 + volatility_risk * 0.2)
+                    
+                    # Display risk gauges
+                    risk_cols = st.columns(2)
+                    
+                    with risk_cols[0]:
+                        # Plot the risk factors
+                        risk_df = pd.DataFrame({
+                            'Factor': list(risk_factors.keys()),
+                            'Risk Score': list(risk_factors.values())
+                        })
+                        
+                        fig = px.bar(
+                            risk_df,
+                            x='Factor',
+                            y='Risk Score',
+                            color='Risk Score',
+                            color_continuous_scale=['green', 'yellow', 'red'],
+                            title="Risk Factor Analysis",
+                            labels={'Risk Score': 'Risk Level (0-1)'},
+                            height=300
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                    with risk_cols[1]:
+                        # Create a risk gauge
+                        fig = go.Figure(go.Indicator(
+                            mode = "gauge+number",
+                            value = overall_risk * 100,
+                            domain = {'x': [0, 1], 'y': [0, 1]},
+                            title = {'text': "Overall Risk Score"},
+                            gauge = {
+                                'axis': {'range': [None, 100]},
+                                'bar': {'color': "darkblue"},
+                                'steps': [
+                                    {'range': [0, 33], 'color': "green"},
+                                    {'range': [33, 66], 'color': "yellow"},
+                                    {'range': [66, 100], 'color': "red"}
+                                ],
+                                'threshold': {
+                                    'line': {'color': "red", 'width': 4},
+                                    'thickness': 0.75,
+                                    'value': overall_risk * 100
+                                }
+                            }
+                        ))
+                        
+                        fig.update_layout(height=300)
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Display risk assessment text
+                    risk_percentage = overall_risk * 100
+                    if risk_percentage > 66:
+                        st.error(f"""
+                        **High Risk Pool (Score: {risk_percentage:.1f}%)**
+                        
+                        This pool shows several indicators of higher risk:
+                        - {'High APR volatility' if apr_risk > 0.5 else 'Moderate APR volatility'}
+                        - {'Low liquidity' if liquidity_risk > 0.5 else 'Moderate liquidity'}
+                        - {'Low trading volume' if volume_risk > 0.5 else 'Moderate trading volume'}
+                        - {'High price volatility' if volatility_risk > 0.5 else 'Moderate price volatility'}
+                        
+                        **Recommendation:** Consider limiting exposure to this pool, monitoring frequently, and being prepared for higher potential for losses.
+                        """)
+                    elif risk_percentage > 33:
+                        st.warning(f"""
+                        **Medium Risk Pool (Score: {risk_percentage:.1f}%)**
+                        
+                        This pool shows moderate risk indicators:
+                        - {'Elevated APR volatility' if apr_risk > 0.3 else 'Lower APR volatility'}
+                        - {'Moderate liquidity' if liquidity_risk > 0.3 else 'Good liquidity'}
+                        - {'Moderate trading volume' if volume_risk > 0.3 else 'Good trading volume'}
+                        - {'Moderate price volatility' if volatility_risk > 0.3 else 'Lower price volatility'}
+                        
+                        **Recommendation:** Diversify holdings and maintain regular monitoring of this pool's performance.
+                        """)
+                    else:
+                        st.success(f"""
+                        **Lower Risk Pool (Score: {risk_percentage:.1f}%)**
+                        
+                        This pool shows indicators of lower risk:
+                        - {'Stable APR' if apr_risk < 0.3 else 'Relatively stable APR'}
+                        - {'Strong liquidity' if liquidity_risk < 0.3 else 'Adequate liquidity'}
+                        - {'Good trading volume' if volume_risk < 0.3 else 'Adequate trading volume'}
+                        - {'Lower price volatility' if volatility_risk < 0.3 else 'Acceptable price volatility'}
+                        
+                        **Recommendation:** This pool may be suitable for more conservative positioning, though all DeFi investments carry inherent risks.
+                        """)
+            else:
+                st.info("No pools available to display. Try adjusting your filters.")
     
         # Advanced Filtering Tab
         with tab_advanced:
