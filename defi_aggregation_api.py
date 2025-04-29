@@ -211,33 +211,78 @@ class DefiAggregationAPI:
             # Fallback to known DEXes
             return ["Raydium", "Orca", "Meteora"]
             
-    def get_pools_by_dex(self, dex: str, limit: int = 30) -> List[Dict[str, Any]]:
+    def get_pools_by_dex(self, dex: str, limit: int = 30, offset: int = 0) -> List[Dict[str, Any]]:
         """
-        Get pools for a specific DEX.
+        Get pools for a specific DEX with pagination support.
         
         Args:
             dex: DEX name
-            limit: Maximum number of pools to retrieve
+            limit: Maximum number of pools to retrieve per page
+            offset: Starting offset for pagination
             
         Returns:
             List of pool data
         """
-        # Use the general pool endpoint with source filter
-        return self.get_pools(limit=limit, source=dex)
+        # Use the general pool endpoint with source filter and pagination parameters
+        return self.get_pools(limit=limit, source=dex, offset=offset)
         
-    def get_pools_by_token(self, token: str, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_pools_by_token(self, token: str, limit: int = 20, offset: int = 0) -> List[Dict[str, Any]]:
         """
-        Get pools containing a specific token.
+        Get pools containing a specific token with pagination support.
         
         Args:
             token: Token symbol or address
-            limit: Maximum number of pools to retrieve
+            limit: Maximum number of pools to retrieve per page
+            offset: Starting offset for pagination
             
         Returns:
             List of pool data
         """
-        # Use the general pool endpoint with token filter
-        return self.get_pools(limit=limit, token=token)
+        # Use the general pool endpoint with token filter and pagination
+        return self.get_pools(limit=limit, token=token, offset=offset)
+        
+    def get_all_pools_by_token(self, token: str, max_pools: int = 100) -> List[Dict[str, Any]]:
+        """
+        Get all pools containing a specific token with pagination.
+        
+        Args:
+            token: Token symbol or address
+            max_pools: Maximum number of pools to retrieve
+            
+        Returns:
+            List of all retrieved pools containing the token
+        """
+        all_pools = []
+        offset = 0
+        per_page = 16  # Match API's apparent page size
+        
+        logger.info(f"Fetching up to {max_pools} pools for token {token} with pagination...")
+        
+        while len(all_pools) < max_pools:
+            try:
+                # Get a batch of pools using offset-based pagination
+                pools = self.get_pools_by_token(token=token, limit=per_page, offset=offset)
+                
+                if not pools:
+                    logger.info(f"No more pools found for token {token}")
+                    break
+                
+                all_pools.extend(pools)
+                logger.info(f"Retrieved {len(pools)} pools for token {token} (total so far: {len(all_pools)})")
+                
+                # If we didn't get a full page, we've reached the end
+                if len(pools) < per_page:
+                    break
+                
+                # Increment offset for next page
+                offset += per_page
+                
+            except Exception as e:
+                logger.error(f"Error fetching pools for token {token}: {str(e)}")
+                break
+        
+        logger.info(f"Retrieved a total of {len(all_pools)} pools for token {token}")
+        return all_pools
     
     def get_all_pools(self, max_pools: int = 500, **kwargs) -> List[Dict[str, Any]]:
         """
@@ -252,7 +297,7 @@ class DefiAggregationAPI:
         """
         all_pools = []
         offset = 0
-        per_page = 10  # Smaller batch size to avoid rate limits
+        per_page = 16  # Match API's apparent page size (returns 13 items)
         
         logger.info(f"Fetching up to {max_pools} pools with rate limiting...")
         
@@ -269,11 +314,14 @@ class DefiAggregationAPI:
                 logger.info(f"Retrieved {len(pools)} pools (total so far: {len(all_pools)})")
                 
                 # If we didn't get a full page, we've reached the end
-                if len(pools) < per_page:
+                if len(pools) < 13:  # API seems to consistently return 13 items per page
                     break
                 
                 # Increment offset for next page
-                offset += per_page
+                offset += len(pools)  # Use actual number of returned items
+                
+                # Add a small delay for rate limiting
+                time.sleep(0.1)
                 
             except Exception as e:
                 logger.error(f"Error fetching pools batch: {str(e)}")

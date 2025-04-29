@@ -19,6 +19,11 @@ logger = logging.getLogger(__name__)
 from .collectors import get_defi_collector
 from .cache import get_cache_manager
 
+# Import historical data service
+import sys
+sys.path.append(".")  # Add current directory to path for imports
+from historical_data_service import get_historical_service
+
 # Singleton instance
 _instance = None
 
@@ -305,13 +310,32 @@ class DataService:
         Returns:
             Dictionary with historical data series
         """
-        # TODO: Implement historical data retrieval
-        # This is a placeholder for future implementation
-        return {
+        # Use the historical data service
+        historical_service = get_historical_service()
+        history = historical_service.get_pool_history(pool_id, days)
+        
+        # Extract metric histories
+        liquidity_history = historical_service.get_metric_history(pool_id, "liquidity", days)
+        volume_history = historical_service.get_metric_history(pool_id, "volume_24h", days)
+        apr_history = historical_service.get_metric_history(pool_id, "apr_24h", days)
+        
+        # Format for presentation
+        result = {
             "pool_id": pool_id,
             "days": days,
-            "message": "Historical data not yet implemented"
+            "data_points": len(history),
+            "has_history": len(history) > 0,
+            "history": history,
+            "metrics": {
+                "liquidity": liquidity_history,
+                "volume_24h": volume_history,
+                "apr_24h": apr_history
+            },
+            "first_snapshot": history[0]["snapshot_timestamp"] if history else None,
+            "last_snapshot": history[-1]["snapshot_timestamp"] if history else None
         }
+        
+        return result
     
     def start_scheduled_collection(self) -> bool:
         """

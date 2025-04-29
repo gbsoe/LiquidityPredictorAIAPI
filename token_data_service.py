@@ -1,36 +1,41 @@
 """
-Token Data Service for SolPool Insight
+Token Data Service for SolPool Insight.
 
-This module provides a service for retrieving and managing token data
-using the DeFi API's token endpoints as specified in GET Token Docs.docx.
-
-Key features:
-- Fetch token data from the /tokens endpoint
-- Get specific token details by symbol
-- Cache token data for better performance
-- DEX categorization for tokens
-- Token metadata handling
+This module provides a service for retrieving, caching, and managing token data.
+It supports:
+- Token metadata retrieval from DeFi Aggregation API
+- Token price tracking
+- Token smart caching with TTL
+- Default token data for common tokens
 """
 
 import os
+import time
 import json
 import logging
-import time
-import requests
-from typing import Dict, List, Any, Optional
 from datetime import datetime
+from typing import Dict, Any, Optional, List
+import threading
+
+# Import the DeFi Aggregation API client
+from defi_aggregation_api import DefiAggregationAPI
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger('token_data_service')
+logger = logging.getLogger(__name__)
+
+# Singleton token data service instance
+_instance = None
+_lock = threading.Lock()
 
 class TokenDataService:
     """
-    Service for handling token data operations using the DeFi API.
-    Implements the GET Token endpoint functionality as described in the API docs.
+    Service for retrieving, caching, and managing token data.
+    
+    Features:
+    - Token metadata retrieval
+    - Token price tracking
+    - Smart caching with TTL
+    - Default token data for common tokens
     """
     
     def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
@@ -38,556 +43,442 @@ class TokenDataService:
         Initialize the token data service.
         
         Args:
-            api_key: API key for authentication (defaults to DEFI_API_KEY env var)
-            base_url: Base URL for the API (defaults to standard URL)
+            api_key: API key for the DeFi Aggregation API
+            base_url: Base URL for the DeFi Aggregation API
         """
-        self.api_key = api_key or os.getenv("DEFI_API_KEY")
-        self.base_url = base_url or "https://filotdefiapi.replit.app/api/v1"
-        self.token_cache = {}
-        self.token_cache_timestamp = None
-        self.token_cache_file = "token_cache.json"
-        self.dex_categories = {}
+        # Create API client
+        self.api_client = DefiAggregationAPI(api_key=api_key, base_url=base_url)
         
-        # Load token cache from file if available
-        self._load_token_cache()
+        # Initialize token cache
+        self.token_cache: Dict[str, Dict[str, Any]] = {}
+        self.token_cache_ttl = 3600  # 1 hour TTL for token data
         
-        # If no cache exists, initialize with default token data
-        if not self.token_cache:
-            self._initialize_default_token_data()
+        # Stats tracking
+        self.stats = {
+            "total_requests": 0,
+            "cache_hits": 0,
+            "cache_misses": 0,
+            "api_errors": 0,
+            "last_update": None,
+        }
+        
+        # Initialize default token data
+        self._init_default_tokens()
+        
+        logger.info("Initialized token data service")
     
-    def _load_token_cache(self) -> None:
-        """Load token cache from file if it exists"""
-        try:
-            if os.path.exists(self.token_cache_file):
-                with open(self.token_cache_file, 'r') as f:
-                    cache_data = json.load(f)
-                    self.token_cache = cache_data.get('tokens', {})
-                    self.token_cache_timestamp = cache_data.get('timestamp')
-                    logger.info(f"Loaded token cache with {len(self.token_cache)} tokens from {self.token_cache_timestamp}")
-        except Exception as e:
-            logger.warning(f"Failed to load token cache: {str(e)}")
-            
-    def _initialize_default_token_data(self) -> None:
-        """Initialize default token data for common Solana tokens"""
+    def _init_default_tokens(self):
+        """Initialize default token data for common tokens."""
         logger.info("Initializing default token data")
         
-        default_tokens = [
-            {
+        # Default token data for common tokens
+        default_tokens = {
+            "SOL": {
                 "symbol": "SOL",
                 "name": "Solana",
                 "address": "So11111111111111111111111111111111111111112",
                 "decimals": 9,
-                "price": 143.25,
-                "active": True,
-                "id": 1
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
+                "coingecko_id": "solana",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
             },
-            {
+            "USDC": {
                 "symbol": "USDC",
                 "name": "USD Coin",
                 "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
                 "decimals": 6,
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+                "coingecko_id": "usd-coin",
                 "price": 1.0,
-                "active": True,
-                "id": 2
+                "last_updated": datetime.now().isoformat(),
             },
-            {
-                "symbol": "USDT",
-                "name": "Tether USD",
-                "address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-                "decimals": 6,
-                "price": 1.0,
-                "active": True,
-                "id": 3
-            },
-            {
-                "symbol": "mSOL",
-                "name": "Marinade Staked SOL",
-                "address": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
-                "decimals": 9,
-                "price": 152.87,
-                "active": True,
-                "id": 4
-            },
-            {
-                "symbol": "BTC",
-                "name": "Bitcoin (Sollet)",
-                "address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
-                "decimals": 6,
-                "price": 68245.12,
-                "active": True,
-                "id": 5
-            },
-            {
-                "symbol": "ETH",
-                "name": "Ethereum (Sollet)",
-                "address": "2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk",
-                "decimals": 6,
-                "price": 3102.58,
-                "active": True,
-                "id": 6
-            },
-            {
-                "symbol": "RAY",
-                "name": "Raydium",
-                "address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
-                "decimals": 6,
-                "price": 0.387,
-                "active": True,
-                "id": 7
-            },
-            {
-                "symbol": "ORCA",
-                "name": "Orca",
-                "address": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
-                "decimals": 6,
-                "price": 0.93,
-                "active": True,
-                "id": 8
-            },
-            {
+            "BONK": {
                 "symbol": "BONK",
                 "name": "Bonk",
                 "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
                 "decimals": 5,
-                "price": 0.00002813,
-                "active": True,
-                "id": 9
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263/logo.png",
+                "coingecko_id": "bonk",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
             },
-            {
-                "symbol": "JUP",
-                "name": "Jupiter",
-                "address": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+            "ORCA": {
+                "symbol": "ORCA",
+                "name": "Orca",
+                "address": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
                 "decimals": 6,
-                "price": 0.72,
-                "active": True,
-                "id": 10
-            }
-        ]
-        
-        # Add tokens to cache
-        self.token_cache = {}
-        for token in default_tokens:
-            self.token_cache[token["symbol"].upper()] = token
-            
-        # Set timestamp
-        self.token_cache_timestamp = datetime.now().isoformat()
-        logger.info(f"Initialized default token cache with {len(self.token_cache)} tokens")
-    
-    def _save_token_cache(self) -> None:
-        """Save token cache to file"""
-        try:
-            with open(self.token_cache_file, 'w') as f:
-                json.dump({
-                    'tokens': self.token_cache,
-                    'timestamp': self.token_cache_timestamp
-                }, f, indent=2)
-            logger.info(f"Saved token cache with {len(self.token_cache)} tokens")
-        except Exception as e:
-            logger.warning(f"Failed to save token cache: {str(e)}")
-    
-    def _make_request(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
-        """
-        Make a rate-limited request to the API.
-        
-        Args:
-            endpoint: API endpoint path
-            params: Query parameters
-            
-        Returns:
-            API response data (can be Dict or List depending on endpoint)
-        
-        Raises:
-            ValueError: For various API errors with specific messages
-        """
-        if not self.api_key:
-            logger.warning("No API key provided for token data service")
-        
-        url = f"{self.base_url}/{endpoint}"
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.api_key}" if self.api_key else ""
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE/logo.png",
+                "coingecko_id": "orca",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
+            },
+            "RAY": {
+                "symbol": "RAY",
+                "name": "Raydium",
+                "address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+                "decimals": 6,
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png",
+                "coingecko_id": "raydium",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
+            },
+            "ATLAS": {
+                "symbol": "ATLAS",
+                "name": "Star Atlas",
+                "address": "ATLASXmbPQxBUYbxPsV97usA3fPQYEqzQBUHgiFCUsXx",
+                "decimals": 8,
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/ATLASXmbPQxBUYbxPsV97usA3fPQYEqzQBUHgiFCUsXx/logo.png",
+                "coingecko_id": "star-atlas",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
+            },
+            "UXD": {
+                "symbol": "UXD",
+                "name": "UXD Stablecoin",
+                "address": "7kbnvuGBxxj8AG9qp8Scn56muWGaRaFqxg1FsRp3PaFT",
+                "decimals": 6,
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/7kbnvuGBxxj8AG9qp8Scn56muWGaRaFqxg1FsRp3PaFT/logo.png",
+                "coingecko_id": "uxd-stablecoin",
+                "price": 1.0,
+                "last_updated": datetime.now().isoformat(),
+            },
+            "ETH": {
+                "symbol": "ETH",
+                "name": "Wrapped Ethereum (Sollet)",
+                "address": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
+                "decimals": 8,
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs/logo.png",
+                "coingecko_id": "ethereum",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
+            },
+            "BTC": {
+                "symbol": "BTC",
+                "name": "Wrapped Bitcoin (Sollet)",
+                "address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
+                "decimals": 6,
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E/logo.png",
+                "coingecko_id": "bitcoin",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
+            },
+            "USDT": {
+                "symbol": "USDT",
+                "name": "USDT",
+                "address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+                "decimals": 6,
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.png",
+                "coingecko_id": "tether",
+                "price": 1.0,
+                "last_updated": datetime.now().isoformat(),
+            },
         }
         
-        try:
-            logger.info(f"Making API request to URL: {url}")
-            if params:
-                logger.info(f"With params: {params}")
-                
-            response = requests.get(
-                url, 
-                headers=headers, 
-                params=params,
-                timeout=10  # 10 second timeout
-            )
-            
-            if response.status_code == 200:
-                logger.info(f"Received successful response from API: {url}")
-                
-                # Try to parse as JSON regardless of content type
-                # Some APIs might return JSON with incorrect content type headers
-                try:
-                    data = response.json()
-                    
-                    # Log the structure of the received data
-                    if isinstance(data, list):
-                        logger.info(f"Retrieved {len(data)} tokens")
-                        if data and isinstance(data[0], dict):
-                            logger.info(f"First token sample keys: {list(data[0].keys())}")
-                    elif isinstance(data, dict):
-                        logger.info(f"Retrieved token data with keys: {list(data.keys())}")
-                    
-                    return data
-                except json.JSONDecodeError as e:
-                    # The response is not valid JSON, log error and return None instead of raising exception
-                    content_type = response.headers.get('Content-Type', '')
-                    logger.error(f"Response is not valid JSON (Content-Type: {content_type})")
-                    logger.debug(f"Response text: {response.text[:200]}...")
-                    
-                    # Fall back to default token data instead of raising an exception
-                    # This helps the application continue functioning even when the API returns invalid data
-                    return None
-                    
-            elif response.status_code == 401:
-                logger.error("API authentication failed. Please check your API key.")
-                raise ValueError("API authentication failed. Please check your API key.")
-            elif response.status_code == 403:
-                logger.error("API access forbidden. Your key may not have sufficient permissions.")
-                raise ValueError("API access forbidden. Your key may not have sufficient permissions.")
-            elif response.status_code == 404:
-                logger.error("API endpoint not found. Please check the documentation.")
-                raise ValueError("API endpoint not found. Please check the documentation.")
-            elif response.status_code == 429:
-                logger.error("API rate limit exceeded. Please wait and try again.")
-                raise ValueError("API rate limit exceeded. Please wait and try again.")
-            else:
-                logger.error(f"API error with status code {response.status_code}: {response.text[:100]}")
-                raise ValueError(f"API error with status code {response.status_code}")
-                
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Request error: {str(e)}")
-            raise ValueError(f"API request failed: {str(e)}")
+        # Add default tokens to cache
+        for symbol, token_data in default_tokens.items():
+            self.token_cache[symbol] = token_data
+        
+        logger.info(f"Initialized default token cache with {len(default_tokens)} tokens")
     
-    def get_all_tokens(self, force_refresh: bool = False) -> List[Dict[str, Any]]:
+    def get_token_data(self, token_symbol: str, force_refresh: bool = False) -> Dict[str, Any]:
         """
-        Get all tokens from the API or cache.
+        Get token data by symbol.
         
         Args:
-            force_refresh: Force refresh from API even if cache is fresh
+            token_symbol: Token symbol (e.g., "SOL", "USDC")
+            force_refresh: Force a refresh from the API
             
         Returns:
-            List of token data
+            Token data or an empty dict if not found
         """
-        # Check if we need to refresh the cache
-        # Refresh if cache is empty, older than 1 hour, or forced
-        current_time = datetime.now()
-        cache_age_seconds = (current_time - datetime.fromisoformat(self.token_cache_timestamp)).total_seconds() if self.token_cache_timestamp else float('inf')
+        token_symbol = token_symbol.upper()
         
-        if force_refresh or not self.token_cache or cache_age_seconds > 3600:  # 1 hour cache lifetime
-            try:
-                # Fetch tokens from API
-                tokens = self._make_request("tokens")
-                
-                if tokens and isinstance(tokens, list):
-                    # Reset and rebuild the cache
-                    self.token_cache = {}
-                    for token in tokens:
-                        if 'symbol' in token and token['symbol']:
-                            self.token_cache[token['symbol'].upper()] = token
-                    
-                    # Update timestamp and save cache
-                    self.token_cache_timestamp = current_time.isoformat()
-                    logger.info(f"Updated token cache with {len(self.token_cache)} tokens at {self.token_cache_timestamp}")
-                    self._save_token_cache()
-                    
-                    # Build DEX categories based on tokens
-                    self._build_dex_categories()
-                    
-                    return tokens
-                else:
-                    logger.warning("Received empty or invalid token data from API")
-                    return list(self.token_cache.values()) if self.token_cache else []
-            except Exception as e:
-                logger.error(f"Error fetching tokens: {str(e)}")
-                # Fall back to cached tokens if available
-                return list(self.token_cache.values()) if self.token_cache else []
-        else:
-            # Return cached tokens
-            logger.info(f"Using cached token data ({len(self.token_cache)} tokens, {int(cache_age_seconds)} seconds old)")
-            return list(self.token_cache.values())
-    
-    def get_token_by_symbol(self, symbol: str) -> Optional[Dict[str, Any]]:
-        """
-        Get token data for a specific symbol.
-        Implements the GET Token endpoint as specified in the docs.
+        # Update stats
+        self.stats["total_requests"] += 1
         
-        Args:
-            symbol: Token symbol (e.g., 'SOL', 'RAY')
+        # Check cache first if not forcing refresh
+        if not force_refresh and token_symbol in self.token_cache:
+            token_data = self.token_cache[token_symbol]
+            cache_time = datetime.fromisoformat(token_data.get("last_updated", "2020-01-01T00:00:00"))
             
-        Returns:
-            Token data or None if not found
-        """
-        symbol = symbol.upper()  # Standardize to uppercase
+            # Check if cache is still valid
+            if (datetime.now() - cache_time).total_seconds() < self.token_cache_ttl:
+                self.stats["cache_hits"] += 1
+                logger.info(f"Token {token_symbol} found in cache")
+                return token_data
         
-        # First check the cache
-        if symbol in self.token_cache:
-            logger.info(f"Token {symbol} found in cache")
-            return self.token_cache[symbol]
+        # Cache miss or forced refresh
+        self.stats["cache_misses"] += 1
         
-        # If not in cache, try to fetch from API
         try:
-            # Endpoint format: /tokens/{symbol}
-            token_data = self._make_request(f"tokens/{symbol}")
+            # Try to get token data from API
+            logger.info(f"Making API request to URL: https://filotdefiapi.replit.app/api/v1/tokens/{token_symbol}")
+            token_data = self.api_client._make_request(f"tokens/{token_symbol}")
             
             if token_data:
-                # Handle both list and single object responses
-                token: Dict[str, Any] = {}
+                # Process the token data
+                processed_data = self._process_token_data(token_data)
                 
-                if isinstance(token_data, list) and token_data:
-                    # Ensure the first item is a dictionary
-                    if isinstance(token_data[0], dict):
-                        token = token_data[0]
-                    else:
-                        logger.warning(f"Token data for {symbol} is in unexpected format")
-                        return None
-                elif isinstance(token_data, dict):
-                    token = token_data
-                else:
-                    logger.warning(f"Unexpected token data type for {symbol}: {type(token_data)}")
-                    return None
+                # Update the cache
+                processed_data["last_updated"] = datetime.now().isoformat()
+                self.token_cache[token_symbol] = processed_data
                 
-                # Update cache
-                self.token_cache[symbol] = token
-                logger.info(f"Added {symbol} to token cache")
+                self.stats["last_update"] = datetime.now().isoformat()
                 
-                # Save updated cache
-                self._save_token_cache()
-                
-                return token
-            else:
-                logger.warning(f"Token {symbol} not found in API")
-                
-                # Check if we have a default token with this symbol that we can use
-                # This helps prevent cascading failures when a token lookup fails
-                default_tokens = {
-                    "ATLAS": {
-                        "symbol": "ATLAS",
-                        "name": "Star Atlas",
-                        "address": "ATLASXmbPQxBUYbxPsV97usA3fPQYEqzQBUHgiFCUsXx",
-                        "decimals": 8,
-                        "price": 0.0121,
-                        "active": True,
-                        "id": 11
-                    }
-                }
-                
-                if symbol in default_tokens:
-                    logger.info(f"Using default token data for {symbol}")
-                    # Add to cache
-                    self.token_cache[symbol] = default_tokens[symbol]
-                    return default_tokens[symbol]
-                
-                return None
+                return processed_data
         except Exception as e:
-            logger.error(f"Error fetching token {symbol}: {str(e)}")
-            
-            # Attempt to use default data for known tokens with issues
-            default_tokens = {
-                "ATLAS": {
-                    "symbol": "ATLAS",
-                    "name": "Star Atlas",
-                    "address": "ATLASXmbPQxBUYbxPsV97usA3fPQYEqzQBUHgiFCUsXx",
-                    "decimals": 8,
-                    "price": 0.0121,
-                    "active": True,
-                    "id": 11
-                }
-            }
-            
-            if symbol in default_tokens:
-                logger.info(f"Using default token data for {symbol} after API error")
-                # Add to cache
-                self.token_cache[symbol] = default_tokens[symbol]
-                return default_tokens[symbol]
-                
-            return None
-    
-    def _build_dex_categories(self) -> None:
-        """
-        Build a mapping of DEXes to their associated tokens.
-        This categorizes tokens by the DEXes they're commonly used with.
-        """
-        # Define commonly used tokens by DEX
-        self.dex_categories = {
-            "raydium": [
-                "RAY", "SOL", "USDC", "USDT", "FIDA", "SRM", 
-                "MNGO", "SAMO", "BONK", "DUST", "ORCA"
-            ],
-            "meteora": [
-                "mSOL", "BTC", "ETH", "USDC", "USDT", "SOL",
-                "JTO", "PYTH", "WIF", "JUP"
-            ],
-            "orca": [
-                "SOL", "USDC", "USDT", "ETH", "BTC", "ORCA",
-                "mSOL", "SAMO", "BONK", "whETH"
-            ]
+            logger.warning(f"Token {token_symbol} not found in API")
+            self.stats["api_errors"] += 1
+        
+        # If we get here, API request failed or returned invalid data
+        if token_symbol in self.token_cache:
+            # Use cached data even if expired
+            logger.info(f"Using default token data for {token_symbol}")
+            return self.token_cache[token_symbol]
+        
+        # Return empty dict if token not found
+        return {
+            "symbol": token_symbol,
+            "name": token_symbol,
+            "address": "",
+            "decimals": 0,
+            "logo": "",
+            "price": 0,
+            "last_updated": datetime.now().isoformat(),
         }
-        
-        # Add all tokens from our cache to ensure they appear in at least one DEX
-        for symbol in self.token_cache.keys():
-            # Default to adding unknown tokens to Raydium
-            if not any(symbol in dex_tokens for dex_tokens in self.dex_categories.values()):
-                self.dex_categories["raydium"].append(symbol)
-        
-        # Ensure all token symbols are uppercase
-        for dex, tokens in self.dex_categories.items():
-            self.dex_categories[dex] = [t.upper() for t in tokens]
-        
-        logger.info(f"Built DEX token categories for {len(self.dex_categories)} DEXes")
     
-    def get_token_categories(self) -> Dict[str, List[str]]:
-        """Get the mapping of DEXes to their associated tokens"""
-        if not self.dex_categories:
-            self._build_dex_categories()
-        return self.dex_categories
-    
-    def get_tokens_by_dex(self, dex: str) -> Dict[str, Dict[str, Any]]:
+    def get_token_by_address(self, address: str, force_refresh: bool = False) -> Dict[str, Any]:
         """
-        Get all tokens for a specific DEX.
+        Get token data by address.
         
         Args:
-            dex: DEX name (e.g., 'raydium', 'meteora', 'orca')
+            address: Token address
+            force_refresh: Force a refresh from the API
             
         Returns:
-            Dictionary of token symbols to token data
+            Token data or an empty dict if not found
         """
-        dex = dex.lower()  # Standardize to lowercase
+        # Look in cache first
+        for token_data in self.token_cache.values():
+            if token_data.get("address", "").lower() == address.lower():
+                if not force_refresh:
+                    return token_data
+                break
         
-        # Ensure we have the latest token data
-        self.get_all_tokens()
+        # If not in cache or forcing refresh, try API
+        try:
+            token_data = self.api_client._make_request(f"tokens/address/{address}")
+            
+            if token_data:
+                # Process the token data
+                processed_data = self._process_token_data(token_data)
+                
+                # Update the cache
+                processed_data["last_updated"] = datetime.now().isoformat()
+                symbol = processed_data.get("symbol", "UNKNOWN")
+                self.token_cache[symbol] = processed_data
+                
+                self.stats["last_update"] = datetime.now().isoformat()
+                
+                return processed_data
+        except Exception as e:
+            logger.warning(f"Token with address {address} not found in API: {e}")
+            self.stats["api_errors"] += 1
         
-        # Get tokens for this DEX
-        tokens = {}
-        if dex in self.dex_categories:
-            for symbol in self.dex_categories[dex]:
-                if symbol in self.token_cache:
-                    tokens[symbol] = self.token_cache[symbol]
+        # If we get here, API request failed or returned invalid data
+        # Return a minimal token data structure
+        return {
+            "symbol": "UNKNOWN",
+            "name": "Unknown Token",
+            "address": address,
+            "decimals": 0,
+            "logo": "",
+            "price": 0,
+            "last_updated": datetime.now().isoformat(),
+        }
+    
+    def get_tokens_for_pool(self, pool_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Get detailed token data for a pool.
         
-        logger.info(f"Retrieved {len(tokens)} tokens for {dex}")
+        Args:
+            pool_data: Pool data with token information
+            
+        Returns:
+            List of enriched token data
+        """
+        tokens = []
+        
+        # Check if the pool already has token data in the tokens array
+        if "tokens" in pool_data and isinstance(pool_data["tokens"], list):
+            pool_tokens = pool_data["tokens"]
+            
+            for token_data in pool_tokens:
+                token_symbol = token_data.get("symbol", "")
+                if token_symbol:
+                    # Get detailed token data
+                    detailed_token = self.get_token_data(token_symbol)
+                    
+                    # Merge with pool token data
+                    merged_token = {**token_data, **detailed_token}
+                    
+                    # Ensure price is included
+                    if "price" not in merged_token or not merged_token["price"]:
+                        merged_token["price"] = token_data.get("price", 0)
+                    
+                    tokens.append(merged_token)
+                else:
+                    # If no symbol, see if we can get by address
+                    token_address = token_data.get("address", "")
+                    if token_address:
+                        detailed_token = self.get_token_by_address(token_address)
+                        tokens.append({**token_data, **detailed_token})
+                    else:
+                        # Just use the original token data
+                        tokens.append(token_data)
+        else:
+            # Fallback to legacy token fields
+            token1_symbol = pool_data.get("token1_symbol", "")
+            token2_symbol = pool_data.get("token2_symbol", "")
+            
+            if token1_symbol:
+                token1_data = self.get_token_data(token1_symbol)
+                token1_data["price"] = pool_data.get("token1_price", 0)
+                tokens.append(token1_data)
+            
+            if token2_symbol:
+                token2_data = self.get_token_data(token2_symbol)
+                token2_data["price"] = pool_data.get("token2_price", 0)
+                tokens.append(token2_data)
+        
         return tokens
     
-    def get_token_metadata(self, symbol: str) -> Optional[Dict[str, Any]]:
+    def update_pool_token_data(self, pool_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Get comprehensive token metadata for a specific symbol.
-        Combines token data from the API with additional informational metadata.
+        Update a pool with enhanced token data.
         
         Args:
-            symbol: Token symbol (e.g., 'SOL', 'RAY')
+            pool_data: Pool data to enhance
             
         Returns:
-            Enhanced token metadata or None if token not found
+            Enhanced pool data with detailed token information
         """
-        symbol = symbol.upper()  # Standardize to uppercase
+        enhanced_pool = pool_data.copy()
         
-        # Get base token data
-        token = self.get_token_by_symbol(symbol)
-        if not token:
-            return None
+        # Get enhanced token data
+        tokens = self.get_tokens_for_pool(pool_data)
         
-        # Determine which DEXes use this token
-        dexes = []
-        for dex, tokens in self.dex_categories.items():
-            if symbol in tokens:
-                dexes.append(dex)
+        # Update the pool with enhanced token data
+        enhanced_pool["tokens"] = tokens
         
-        # Add dex information to the token metadata
-        enhanced_metadata = token.copy()
-        enhanced_metadata['dexes'] = dexes
+        # Update legacy token fields for backward compatibility
+        if len(tokens) > 0:
+            enhanced_pool["token1_symbol"] = tokens[0].get("symbol", enhanced_pool.get("token1_symbol", ""))
+            enhanced_pool["token1_address"] = tokens[0].get("address", enhanced_pool.get("token1_address", ""))
+            enhanced_pool["token1_price"] = tokens[0].get("price", enhanced_pool.get("token1_price", 0))
+            enhanced_pool["token1_decimals"] = tokens[0].get("decimals", enhanced_pool.get("token1_decimals", 0))
+            enhanced_pool["token1_logo"] = tokens[0].get("logo", enhanced_pool.get("token1_logo", ""))
         
-        return enhanced_metadata
+        if len(tokens) > 1:
+            enhanced_pool["token2_symbol"] = tokens[1].get("symbol", enhanced_pool.get("token2_symbol", ""))
+            enhanced_pool["token2_address"] = tokens[1].get("address", enhanced_pool.get("token2_address", ""))
+            enhanced_pool["token2_price"] = tokens[1].get("price", enhanced_pool.get("token2_price", 0))
+            enhanced_pool["token2_decimals"] = tokens[1].get("decimals", enhanced_pool.get("token2_decimals", 0))
+            enhanced_pool["token2_logo"] = tokens[1].get("logo", enhanced_pool.get("token2_logo", ""))
+        
+        return enhanced_pool
     
-    def refresh_all_token_data(self) -> bool:
+    def _process_token_data(self, token_data: Any) -> Dict[str, Any]:
         """
-        Force refresh all token data from the API.
-        
-        Returns:
-            True if successful, False otherwise
-        """
-        try:
-            tokens = self.get_all_tokens(force_refresh=True)
-            return bool(tokens)
-        except Exception as e:
-            logger.error(f"Failed to refresh token data: {str(e)}")
-            return False
-    
-    def search_tokens(self, query: str) -> List[Dict[str, Any]]:
-        """
-        Search for tokens by name or symbol.
+        Process token data from the API.
         
         Args:
-            query: Search query
+            token_data: Raw token data from the API
             
         Returns:
-            List of matching tokens
+            Processed token data
         """
-        query = query.lower()  # Case-insensitive search
-        
-        # Ensure we have the latest token data
-        tokens = self.get_all_tokens()
-        
-        # Filter tokens that match the query
-        matching_tokens = []
-        for token in tokens:
-            symbol = token.get('symbol', '').lower()
-            name = token.get('name', '').lower()
+        if isinstance(token_data, dict):
+            # Extract token data from the API response
+            processed = {
+                "symbol": token_data.get("symbol", "UNKNOWN"),
+                "name": token_data.get("name", "Unknown Token"),
+                "address": token_data.get("address", token_data.get("mint", "")),
+                "decimals": token_data.get("decimals", 0),
+                "logo": token_data.get("logoURI", token_data.get("logo", "")),
+                "price": token_data.get("price", 0),
+                "coingecko_id": token_data.get("coingeckoId", ""),
+                "last_updated": datetime.now().isoformat(),
+            }
             
-            if query in symbol or query in name:
-                matching_tokens.append(token)
-        
-        logger.info(f"Found {len(matching_tokens)} tokens matching '{query}'")
-        return matching_tokens
+            # Add any additional fields from the API
+            for key, value in token_data.items():
+                if key not in processed:
+                    processed[key] = value
+            
+            return processed
+        elif isinstance(token_data, list) and len(token_data) > 0:
+            # If API returned a list, use the first item
+            return self._process_token_data(token_data[0])
+        else:
+            # Invalid token data
+            return {
+                "symbol": "UNKNOWN",
+                "name": "Unknown Token",
+                "address": "",
+                "decimals": 0,
+                "logo": "",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
+            }
     
-    def get_token_pools(self, symbol: str, pool_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def get_stats(self) -> Dict[str, Any]:
         """
-        Find all pools that contain a specific token.
+        Get token service statistics.
         
-        Args:
-            symbol: Token symbol
-            pool_data: List of pool data to search
-            
         Returns:
-            List of pools containing the token
+            Dictionary with token service statistics
         """
-        symbol = symbol.upper()  # Standardize to uppercase
+        # Calculate hit ratio
+        total = self.stats["cache_hits"] + self.stats["cache_misses"]
+        hit_ratio = self.stats["cache_hits"] / total if total > 0 else 0
         
-        matching_pools = []
-        for pool in pool_data:
-            # Check in the tokens array first
-            tokens = pool.get('tokens', [])
-            has_token = False
-            
-            for token in tokens:
-                if isinstance(token, dict) and token.get('symbol', '').upper() == symbol:
-                    has_token = True
-                    break
-            
-            # Fallback to token1/token2 fields if necessary
-            if not has_token:
-                token1_symbol = pool.get('token1_symbol', '').upper()
-                token2_symbol = pool.get('token2_symbol', '').upper()
-                has_token = token1_symbol == symbol or token2_symbol == symbol
-            
-            if has_token:
-                matching_pools.append(pool)
+        return {
+            "total_requests": self.stats["total_requests"],
+            "cache_hits": self.stats["cache_hits"],
+            "cache_misses": self.stats["cache_misses"],
+            "api_errors": self.stats["api_errors"],
+            "hit_ratio": hit_ratio,
+            "cache_size": len(self.token_cache),
+            "last_update": self.stats["last_update"],
+        }
+    
+    def clear_cache(self):
+        """Clear the token cache."""
+        logger.info("Clearing token cache")
         
-        logger.info(f"Found {len(matching_pools)} pools containing {symbol}")
-        return matching_pools
+        # Preserve default tokens
+        default_tokens = {}
+        for symbol, token_data in self.token_cache.items():
+            if symbol in ["SOL", "USDC", "USDT", "ETH", "BTC", "BONK", "ORCA", "RAY", "ATLAS", "UXD"]:
+                default_tokens[symbol] = token_data
+        
+        # Reset cache
+        self.token_cache = default_tokens
+        
+        # Reset stats
+        self.stats["cache_hits"] = 0
+        self.stats["cache_misses"] = 0
+        self.stats["api_errors"] = 0
+        self.stats["last_update"] = datetime.now().isoformat()
+        
+        logger.info(f"Token cache cleared. Retained {len(default_tokens)} default tokens.")
 
-# Singleton instance for the token service
-_token_service_instance = None
 
 def get_token_service(api_key: Optional[str] = None, base_url: Optional[str] = None) -> TokenDataService:
     """
-    Get the singleton instance of the token service.
+    Get the singleton token data service instance.
     
     Args:
         api_key: Optional API key
@@ -596,7 +487,10 @@ def get_token_service(api_key: Optional[str] = None, base_url: Optional[str] = N
     Returns:
         TokenDataService instance
     """
-    global _token_service_instance
-    if _token_service_instance is None:
-        _token_service_instance = TokenDataService(api_key, base_url)
-    return _token_service_instance
+    global _instance, _lock
+    
+    with _lock:
+        if _instance is None:
+            _instance = TokenDataService(api_key=api_key, base_url=base_url)
+    
+    return _instance
