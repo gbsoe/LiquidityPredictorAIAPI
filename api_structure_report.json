@@ -1,0 +1,49 @@
+{
+  "response_type": "list",
+  "item_count": 2,
+  "token_info_available": false,
+  "extracted_tokens": {
+    "mSoL": 1,
+    "EPjF": 2,
+    "So11": 1
+  },
+  "extracted_pairs": {
+    "mSoL-EPjF": 1,
+    "So11-EPjF": 1
+  },
+  "dex_distribution": {
+    "meteora": 2
+  },
+  "metrics_summary": {
+    "tvl": {
+      "min": 2000000,
+      "max": 3000000,
+      "avg": 2500000.0
+    },
+    "fee": {
+      "min": 0.003,
+      "max": 0.003,
+      "avg": 0.003
+    },
+    "apy24h": {
+      "min": 11.570175,
+      "max": 11.570175,
+      "avg": 11.570175
+    },
+    "apy7d": {
+      "min": 10.644561,
+      "max": 10.644561,
+      "avg": 10.644561
+    },
+    "apy30d": {
+      "min": 9.834649,
+      "max": 9.834649,
+      "avg": 9.834649
+    },
+    "volumeUsd": {
+      "min": 200000,
+      "max": 300000,
+      "avg": 250000.0
+    }
+  }
+}
