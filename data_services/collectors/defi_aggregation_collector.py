@@ -121,22 +121,65 @@ class DefiAggregationCollector(BaseCollector):
             logger.error(f"Error getting pool {pool_id}: {str(e)}")
             return None
     
-    def get_pools_by_token(self, token: str, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_pools_by_token(self, token: str, limit: int = 20, max_pages: int = 5) -> List[Dict[str, Any]]:
         """
-        Get pools containing a specific token.
+        Get pools containing a specific token with pagination support.
         
         Args:
             token: Token symbol or address
-            limit: Maximum number of pools to retrieve
+            limit: Maximum number of pools to retrieve per page
+            max_pages: Maximum number of pages to fetch
             
         Returns:
             List of pool data
         """
         try:
-            # Use the API client to get pools by token
-            pools = self.api_client.get_pools_by_token(token=token, limit=limit)
-            logger.info(f"Retrieved {len(pools)} pools for token {token}")
-            return pools
+            all_token_pools = []
+            collection_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            # Fetch pools with pagination
+            for page in range(max_pages):
+                # Add a small delay between requests
+                if page > 0:
+                    time.sleep(self.delay_between_requests)
+                
+                # Calculate offset for pagination
+                offset = page * limit
+                
+                # Log pagination information
+                if page > 0:
+                    logger.info(f"Fetching page {page+1} for token {token} (offset: {offset})")
+                
+                # Get pools for this token and page
+                page_pools = self.api_client.get_pools_by_token(
+                    token=token, 
+                    limit=limit, 
+                    offset=offset
+                )
+                
+                if page_pools:
+                    logger.info(f"Retrieved {len(page_pools)} pools for token {token} (page {page+1})")
+                    all_token_pools.extend(page_pools)
+                    
+                    # Add collection metadata to each pool for historical tracking
+                    for pool in page_pools:
+                        pool['collection_timestamp'] = collection_timestamp
+                        pool['collection_source'] = f"token-{token}-API"
+                    
+                    # If we got fewer results than requested, we've reached the end
+                    if len(page_pools) < limit:
+                        logger.info(f"Reached end of results for token {token} at page {page+1}")
+                        break
+                else:
+                    # No more results for this token
+                    if page == 0:
+                        logger.warning(f"No pools found for token {token}")
+                    else:
+                        logger.info(f"No more pools available for token {token} after page {page}")
+                    break
+            
+            logger.info(f"Total: Retrieved {len(all_token_pools)} pools for token {token}")
+            return all_token_pools
         except Exception as e:
             logger.error(f"Error getting pools for token {token}: {str(e)}")
             return []

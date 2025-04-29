@@ -24,6 +24,8 @@ import sys
 # Import our data service modules
 from data_services.initialize import init_services, get_stats
 from data_services.data_service import get_data_service
+from token_data_service import get_token_service
+from historical_data_service import get_historical_service
 
 # Configure logging
 logging.basicConfig(
@@ -98,8 +100,16 @@ def initialize_continuous_data_collection():
         # Get the data service
         data_service = get_data_service()
         
-        # Store data service in session state for future access
+        # Initialize token service
+        token_service = get_token_service()
+        
+        # Initialize historical data service
+        historical_service = get_historical_service()
+        
+        # Store services in session state for future access
         st.session_state["data_service"] = data_service
+        st.session_state["token_service"] = token_service
+        st.session_state["historical_service"] = historical_service
         
         # Start scheduled collection if not already running
         if not data_service.scheduler_running:

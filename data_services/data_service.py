@@ -164,6 +164,14 @@ class DataService:
         # Cache the results
         if all_data:
             self._cache_manager.set("all_pools", all_data)
+            
+            # Store historical data for later analysis
+            try:
+                historical_service = get_historical_service()
+                historical_service.store_pool_snapshot(all_data)
+                logger.info(f"Stored historical snapshot of {len(all_data)} pools")
+            except Exception as e:
+                logger.error(f"Error storing historical data: {str(e)}")
         
         # Log results
         logger.info(
