@@ -360,49 +360,46 @@ def fetch_live_data_from_blockchain():
 
 @handle_exception
 def load_data():
-    """Load pool data with a prioritized strategy: live or cached"""
+    """Load pool data with a prioritized strategy: data service, live API, or cached"""
     
     # Check if data service is initialized
-    if "data_services" not in st.session_state:
+    data_service = st.session_state.get("data_service", None)
+    
+    if data_service is None:
         try:
             # Initialize data services if not already done
-            services = init_services()
-            st.session_state["data_services"] = services
-            logger.info("Initialized data services on demand")
+            init_services()
+            data_service = get_data_service()
+            st.session_state["data_service"] = data_service
+            logger.info("Initialized data service on demand")
         except Exception as e:
-            logger.error(f"Failed to initialize data services on demand: {str(e)}")
+            logger.error(f"Failed to initialize data service on demand: {str(e)}")
             logger.error(traceback.format_exc())
             
             # Fallback to legacy cache file loading
-            st.warning("Could not initialize data services. Using legacy data loading.")
+            st.warning("Could not initialize data service. Using legacy data loading.")
             return _load_data_legacy()
     
-    # Get the data service
-    try:
-        data_service = get_data_service()
-    except Exception as e:
-        logger.error(f"Failed to get data service: {str(e)}")
-        logger.error(traceback.format_exc())
-        
-        # Fallback to legacy cache file loading
-        st.warning("Could not access data service. Using legacy data loading.")
-        return _load_data_legacy()
+    # Check user preferences for data loading
+    use_cached_data = st.session_state.get('use_cached_data', False)
+    try_live_data = st.session_state.get('try_live_data', False)
     
-    # 1. Check if user has requested to use cached data
-    if st.session_state.get('use_cached_data', False):
-        # Reset the flag so it doesn't keep using cached data every refresh
-        st.session_state['use_cached_data'] = False
-        
-        # Get cached pools from the data service
+    # Reset flags to avoid constant retries
+    st.session_state['try_live_data'] = False
+    st.session_state['use_cached_data'] = False
+    
+    # 1. If user requested cached data, prioritize that
+    if use_cached_data:
         try:
-            cached_pools = data_service.get_all_pools(force_refresh=False)
+            with st.spinner("Loading data from cache..."):
+                cached_pools = data_service.get_all_pools(force_refresh=False)
             
             if cached_pools and len(cached_pools) > 0:
-                # Get cache stats
-                cache_stats = st.session_state["data_services"]["cache_manager"].get_stats()
+                # Get system stats
+                stats = get_stats()
                 
                 # Estimate age
-                last_collection_time = data_service.stats.get("last_collection_time")
+                last_collection_time = stats.get("last_collection_time")
                 if last_collection_time:
                     try:
                         last_time = datetime.strptime(last_collection_time, "%Y-%m-%d %H:%M:%S")
@@ -422,7 +419,10 @@ def load_data():
                 # Ensure all required fields are present
                 pools = ensure_all_fields(cached_pools)
                 
-                st.info(f"ℹ️ Using cached data ({age_str}) - Hit ratio: {cache_stats.get('hit_ratio', 0):.2%}")
+                # Display cache information
+                cache_stats = stats.get("cache", {})
+                hit_ratio = cache_stats.get('hit_ratio', 0)
+                st.info(f"ℹ️ Using cached data ({age_str}) - Hit ratio: {hit_ratio:.2%}")
                 st.session_state['data_source'] = f"Cached data ({age_str})"
                 return pools
             else:
@@ -431,53 +431,64 @@ def load_data():
             logger.error(f"Error accessing cached data: {str(e)}")
             st.warning(f"Could not access cached data: {e}")
     
-    # 2. Check if user has requested to force using live data
-    force_refresh = st.session_state.get('try_live_data', False)
-    
-    # Reset flags to avoid constant retries
-    st.session_state['try_live_data'] = False
-    st.session_state['use_defi_api'] = False
-    
-    # 3. Fetch/refresh data from service
-    try:
-        with st.spinner("Collecting data from available sources..."):
-            pools, success = data_service.collect_data(force=force_refresh)
+    # 2. If user requested live data, force a refresh
+    if try_live_data:
+        try:
+            with st.spinner("Collecting fresh data from available sources..."):
+                fresh_pools = data_service.get_all_pools(force_refresh=True)
             
-            if pools and len(pools) > 0:
+            if fresh_pools and len(fresh_pools) > 0:
                 # Ensure all required fields are present
-                pools = ensure_all_fields(pools)
+                pools = ensure_all_fields(fresh_pools)
                 
                 # Show success message
-                if success:
-                    st.success(f"✓ Successfully collected {len(pools)} pools from data service")
-                else:
-                    st.warning(f"⚠️ Retrieved {len(pools)} pools, but with some collection errors")
+                st.success(f"✓ Successfully collected {len(pools)} pools with fresh data")
                 
                 # Update session state
-                collection_time = data_service.stats.get("last_collection_time", 
-                                                       datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-                st.session_state['data_source'] = f"Live data service ({collection_time})"
+                st.session_state['data_source'] = f"Fresh data ({datetime.now().strftime('%Y-%m-%d %H:%M:%S')})"
                 
                 return pools
             else:
                 st.warning("No pools collected from data service")
-                
-                # Check if we should fall back to legacy method
-                if not success:
-                    st.info("Trying legacy data loading methods...")
-                    return _load_data_legacy()
-                else:
-                    st.error("No pool data available")
-                    return []
+        except Exception as e:
+            logger.error(f"Error collecting fresh data: {str(e)}")
+            logger.error(traceback.format_exc())
+            
+            st.warning(f"Error collecting fresh data: {str(e)}")
+    
+    # 3. Default: Smart loading strategy using data service
+    try:
+        with st.spinner("Loading pool data..."):
+            pools = data_service.get_all_pools()
+            
+        if pools and len(pools) > 0:
+            # Ensure all required fields are present
+            pools = ensure_all_fields(pools)
+            
+            # Get system stats
+            stats = get_stats()
+            
+            # Show success message with timing information
+            last_collection_time = stats.get("last_collection_time")
+            if last_collection_time:
+                st.success(f"✓ Successfully loaded {len(pools)} pools (last updated: {last_collection_time})")
+                st.session_state['data_source'] = f"Data service ({last_collection_time})"
+            else:
+                st.success(f"✓ Successfully loaded {len(pools)} pools from data service")
+                st.session_state['data_source'] = "Data service"
+            
+            return pools
+        else:
+            st.warning("No pools available in data service")
     except Exception as e:
-        logger.error(f"Error collecting data from service: {str(e)}")
+        logger.error(f"Error loading data from service: {str(e)}")
         logger.error(traceback.format_exc())
         
-        st.warning(f"Error collecting data: {str(e)}")
-        st.info("Falling back to legacy data loading...")
-        
-        # Try legacy method as fallback
-        return _load_data_legacy()
+        st.warning(f"Error loading data from service: {str(e)}")
+    
+    # 4. Final fallback to legacy method
+    st.info("Falling back to legacy data loading...")
+    return _load_data_legacy()
 
 # Legacy data loading method for fallback
 @handle_exception
