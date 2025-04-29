@@ -873,6 +873,35 @@ def main():
             # Pool data table
             st.subheader("Pool Data")
             
+            # Get watchlists for filtering
+            try:
+                watchlists = db_handler.get_watchlists()
+                if watchlists:
+                    # Allow filtering by watchlist
+                    watchlist_options = ["All Pools"] + [w["name"] for w in watchlists]
+                    selected_watchlist = st.selectbox(
+                        "Filter by Watchlist",
+                        options=watchlist_options,
+                        index=0
+                    )
+                    
+                    # Apply watchlist filter if selected
+                    if selected_watchlist != "All Pools":
+                        # Find the watchlist ID
+                        watchlist_id = next((w["id"] for w in watchlists if w["name"] == selected_watchlist), None)
+                        
+                        if watchlist_id:
+                            # Get the pool IDs in this watchlist
+                            watchlist_pool_ids = db_handler.get_pools_in_watchlist(watchlist_id)
+                            
+                            if watchlist_pool_ids:
+                                # Filter the dataframe
+                                filtered_df = filtered_df[filtered_df["id"].isin(watchlist_pool_ids)]
+                                st.success(f"Showing {len(filtered_df)} pools from watchlist: {selected_watchlist}")
+            except Exception as e:
+                # Silently handle errors with watchlists as this is an optional feature
+                pass
+            
             # Create token information display option
             show_token_details = st.checkbox("Show Detailed Token Information", value=False)
             

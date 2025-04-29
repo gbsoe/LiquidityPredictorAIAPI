@@ -234,6 +234,12 @@ def get_pools(limit=50):
     Returns:
         List of dictionaries containing pool data
     """
+    # Convert None to None type explicitly to satisfy type checking
+    if limit is not None and not isinstance(limit, int):
+        try:
+            limit = int(limit)
+        except (ValueError, TypeError):
+            limit = None
     if not engine:
         print("Database connection not available")
         # Try to fallback to JSON file
@@ -331,6 +337,54 @@ class PoolHistoricalData(Base):
     
     def __repr__(self):
         return f"<PoolHistoricalData(pool_id='{self.pool_id}', timestamp='{self.timestamp}')>"
+        
+# Define Watchlist model for organizing and categorizing pools
+class Watchlist(Base):
+    """SQLAlchemy model for watchlists"""
+    __tablename__ = 'watchlists'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False, unique=True)
+    description = Column(String, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.now)
+    updated_at = Column(DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
+    
+    def __repr__(self):
+        return f"<Watchlist(name='{self.name}')>"
+        
+    def to_dict(self):
+        """Convert model to dictionary"""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at
+        }
+
+# Define WatchlistPool model for pools in watchlists
+class WatchlistPool(Base):
+    """SQLAlchemy model for pools in watchlists"""
+    __tablename__ = 'watchlist_pools'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    watchlist_id = Column(Integer, nullable=False)
+    pool_id = Column(String, nullable=False)
+    added_at = Column(DateTime, nullable=False, default=datetime.now)
+    notes = Column(String, nullable=True)
+    
+    def __repr__(self):
+        return f"<WatchlistPool(watchlist_id={self.watchlist_id}, pool_id='{self.pool_id}')>"
+        
+    def to_dict(self):
+        """Convert model to dictionary"""
+        return {
+            "id": self.id,
+            "watchlist_id": self.watchlist_id,
+            "pool_id": self.pool_id,
+            "added_at": self.added_at,
+            "notes": self.notes
+        }
 
 # Function to store historical pool data for better predictions
 def store_historical_pool_data(historical_records):
@@ -535,6 +589,494 @@ def query_pools(dex=None, category=None, min_liquidity=None, max_liquidity=None,
                                      min_apr, max_apr, search_term, sort_by, limit)
     finally:
         session.close()
+
+# Watchlist management functions
+def create_watchlist(name, description=""):
+    """
+    Create a new watchlist
+    
+    Args:
+        name: Name of the watchlist
+        description: Optional description
+        
+    Returns:
+        Watchlist object if successful, None otherwise
+    """
+    if not engine:
+        print("Database connection not available")
+        return None
+    
+    # Initialize database schema if needed
+    try:
+        Base.metadata.create_all(engine)
+    except Exception as e:
+        print(f"Error ensuring watchlist schema: {e}")
+        return None
+    
+    # Create a session
+    session = Session()
+    
+    try:
+        # Check if watchlist already exists
+        existing = session.query(Watchlist).filter_by(name=name).first()
+        if existing:
+            print(f"Watchlist with name '{name}' already exists")
+            return existing
+        
+        # Create new watchlist
+        watchlist = Watchlist(name=name, description=description)
+        session.add(watchlist)
+        session.commit()
+        
+        print(f"Successfully created watchlist: {name}")
+        return watchlist
+    except Exception as e:
+        session.rollback()
+        print(f"Error creating watchlist: {e}")
+        return None
+    finally:
+        session.close()
+
+def get_watchlists():
+    """
+    Get all watchlists
+    
+    Returns:
+        List of watchlist dictionaries
+    """
+    if not engine:
+        print("Database connection not available")
+        return []
+    
+    # Create a session
+    session = Session()
+    
+    try:
+        watchlists = [w.to_dict() for w in session.query(Watchlist).all()]
+        return watchlists
+    except Exception as e:
+        print(f"Error retrieving watchlists: {e}")
+        return []
+    finally:
+        session.close()
+
+def get_watchlist(watchlist_id):
+    """
+    Get a specific watchlist by ID
+    
+    Args:
+        watchlist_id: ID of the watchlist
+        
+    Returns:
+        Watchlist dictionary if found, None otherwise
+    """
+    if not engine:
+        print("Database connection not available")
+        return None
+    
+    # Create a session
+    session = Session()
+    
+    try:
+        watchlist = session.query(Watchlist).filter_by(id=watchlist_id).first()
+        if watchlist:
+            return watchlist.to_dict()
+        return None
+    except Exception as e:
+        print(f"Error retrieving watchlist: {e}")
+        return None
+    finally:
+        session.close()
+
+def add_pool_to_watchlist(watchlist_id, pool_id, notes=""):
+    """
+    Add a pool to a watchlist
+    
+    Args:
+        watchlist_id: ID of the watchlist
+        pool_id: ID of the pool
+        notes: Optional notes about this pool
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    if not engine:
+        print("Database connection not available")
+        return False
+    
+    # Create a session
+    session = Session()
+    
+    try:
+        # Check if watchlist exists
+        watchlist = session.query(Watchlist).filter_by(id=watchlist_id).first()
+        if not watchlist:
+            print(f"Watchlist with ID {watchlist_id} not found")
+            return False
+        
+        # Check if pool is already in watchlist
+        existing = session.query(WatchlistPool).filter_by(
+            watchlist_id=watchlist_id, pool_id=pool_id).first()
+            
+        if existing:
+            print(f"Pool {pool_id} is already in watchlist {watchlist_id}")
+            return True
+        
+        # Add pool to watchlist
+        watchlist_pool = WatchlistPool(
+            watchlist_id=watchlist_id, pool_id=pool_id, notes=notes)
+        session.add(watchlist_pool)
+        session.commit()
+        
+        print(f"Successfully added pool {pool_id} to watchlist {watchlist_id}")
+        return True
+    except Exception as e:
+        session.rollback()
+        print(f"Error adding pool to watchlist: {e}")
+        return False
+    finally:
+        session.close()
+
+def remove_pool_from_watchlist(watchlist_id, pool_id):
+    """
+    Remove a pool from a watchlist
+    
+    Args:
+        watchlist_id: ID of the watchlist
+        pool_id: ID of the pool
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    if not engine:
+        print("Database connection not available")
+        return False
+    
+    # Create a session
+    session = Session()
+    
+    try:
+        # Find the watchlist pool entry
+        watchlist_pool = session.query(WatchlistPool).filter_by(
+            watchlist_id=watchlist_id, pool_id=pool_id).first()
+            
+        if not watchlist_pool:
+            print(f"Pool {pool_id} not found in watchlist {watchlist_id}")
+            return False
+        
+        # Remove the entry
+        session.delete(watchlist_pool)
+        session.commit()
+        
+        print(f"Successfully removed pool {pool_id} from watchlist {watchlist_id}")
+        return True
+    except Exception as e:
+        session.rollback()
+        print(f"Error removing pool from watchlist: {e}")
+        return False
+    finally:
+        session.close()
+
+def delete_watchlist(watchlist_id):
+    """
+    Delete a watchlist and all its pools
+    
+    Args:
+        watchlist_id: ID of the watchlist
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    if not engine:
+        print("Database connection not available")
+        return False
+    
+    # Create a session
+    session = Session()
+    
+    try:
+        # Delete all pool entries for this watchlist
+        session.query(WatchlistPool).filter_by(watchlist_id=watchlist_id).delete()
+        
+        # Delete the watchlist
+        watchlist = session.query(Watchlist).filter_by(id=watchlist_id).first()
+        if not watchlist:
+            print(f"Watchlist with ID {watchlist_id} not found")
+            return False
+            
+        session.delete(watchlist)
+        session.commit()
+        
+        print(f"Successfully deleted watchlist {watchlist_id}")
+        return True
+    except Exception as e:
+        session.rollback()
+        print(f"Error deleting watchlist: {e}")
+        return False
+    finally:
+        session.close()
+
+def get_pools_in_watchlist(watchlist_id):
+    """
+    Get all pools in a watchlist
+    
+    Args:
+        watchlist_id: ID of the watchlist
+        
+    Returns:
+        List of pool IDs in the watchlist
+    """
+    if not engine:
+        print("Database connection not available")
+        return []
+    
+    # Create a session
+    session = Session()
+    
+    try:
+        pool_entries = session.query(WatchlistPool).filter_by(watchlist_id=watchlist_id).all()
+        return [entry.pool_id for entry in pool_entries]
+    except Exception as e:
+        print(f"Error retrieving pools in watchlist: {e}")
+        return []
+    finally:
+        session.close()
+
+def get_watchlist_details(watchlist_id):
+    """
+    Get detailed information about a watchlist including all its pools
+    
+    Args:
+        watchlist_id: ID of the watchlist
+        
+    Returns:
+        Dictionary with watchlist details and pools
+    """
+    if not engine:
+        print("Database connection not available")
+        return None
+    
+    # Create a session
+    session = Session()
+    
+    try:
+        # Get the watchlist
+        watchlist = session.query(Watchlist).filter_by(id=watchlist_id).first()
+        if not watchlist:
+            print(f"Watchlist with ID {watchlist_id} not found")
+            return None
+            
+        # Get all pool entries for this watchlist
+        pool_entries = session.query(WatchlistPool).filter_by(watchlist_id=watchlist_id).all()
+        pool_ids = [entry.pool_id for entry in pool_entries]
+        
+        # Get the pool data for these IDs
+        pool_data = []
+        for pool_id in pool_ids:
+            pool = session.query(LiquidityPool).filter_by(id=pool_id).first()
+            if pool:
+                pool_data.append(pool.to_dict())
+        
+        # Combine the data
+        return {
+            "watchlist": watchlist.to_dict(),
+            "pools": pool_data
+        }
+    except Exception as e:
+        print(f"Error retrieving watchlist details: {e}")
+        return None
+    finally:
+        session.close()
+
+def import_watchlist_from_json(json_data):
+    """
+    Import a watchlist from JSON data
+    
+    Args:
+        json_data: JSON string or dictionary with watchlist data
+        
+    Returns:
+        ID of the created watchlist if successful, None otherwise
+    """
+    if isinstance(json_data, str):
+        try:
+            watchlist_data = json.loads(json_data)
+        except Exception as e:
+            print(f"Error parsing JSON data: {e}")
+            return None
+    else:
+        watchlist_data = json_data
+    
+    # Validate the data
+    if not isinstance(watchlist_data, dict):
+        print("Invalid watchlist data format: expected dictionary")
+        return None
+        
+    if "name" not in watchlist_data:
+        print("Invalid watchlist data: missing 'name' field")
+        return None
+        
+    if "pools" not in watchlist_data or not isinstance(watchlist_data["pools"], list):
+        print("Invalid watchlist data: missing or invalid 'pools' field")
+        return None
+    
+    # Create the watchlist
+    watchlist = create_watchlist(
+        name=watchlist_data["name"], 
+        description=watchlist_data.get("description", "")
+    )
+    
+    if not watchlist:
+        return None
+    
+    # Add pools to the watchlist
+    for pool_id in watchlist_data["pools"]:
+        add_pool_to_watchlist(
+            watchlist_id=watchlist.id, 
+            pool_id=pool_id,
+            notes=watchlist_data.get("notes", {}).get(pool_id, "")
+        )
+    
+    return watchlist.id
+
+def export_watchlist_to_json(watchlist_id):
+    """
+    Export a watchlist to JSON format
+    
+    Args:
+        watchlist_id: ID of the watchlist
+        
+    Returns:
+        JSON string with watchlist data if successful, None otherwise
+    """
+    details = get_watchlist_details(watchlist_id)
+    if not details:
+        return None
+    
+    # Format the data for export
+    export_data = {
+        "name": details["watchlist"]["name"],
+        "description": details["watchlist"]["description"],
+        "created_at": details["watchlist"]["created_at"].isoformat() if hasattr(details["watchlist"]["created_at"], "isoformat") else details["watchlist"]["created_at"],
+        "pools": [pool["id"] for pool in details["pools"]],
+        "notes": {}
+    }
+    
+    # Add notes if available
+    session = Session()
+    try:
+        pool_entries = session.query(WatchlistPool).filter_by(watchlist_id=watchlist_id).all()
+        for entry in pool_entries:
+            if entry.notes:
+                export_data["notes"][entry.pool_id] = entry.notes
+    except Exception as e:
+        print(f"Error retrieving pool notes: {e}")
+    finally:
+        session.close()
+    
+    return json.dumps(export_data, indent=2)
+
+def backup_watchlists_to_file(filename="watchlists.json"):
+    """
+    Back up all watchlists to a JSON file
+    
+    Args:
+        filename: Output JSON filename
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        watchlists = get_watchlists()
+        
+        export_data = []
+        for watchlist in watchlists:
+            details = get_watchlist_details(watchlist["id"])
+            if details:
+                watchlist_data = {
+                    "name": details["watchlist"]["name"],
+                    "description": details["watchlist"]["description"],
+                    "created_at": details["watchlist"]["created_at"].isoformat() if hasattr(details["watchlist"]["created_at"], "isoformat") else details["watchlist"]["created_at"],
+                    "pools": [pool["id"] for pool in details["pools"]],
+                    "notes": {}
+                }
+                
+                # Add notes if available
+                session = Session()
+                try:
+                    pool_entries = session.query(WatchlistPool).filter_by(watchlist_id=watchlist["id"]).all()
+                    for entry in pool_entries:
+                        if entry.notes:
+                            watchlist_data["notes"][entry.pool_id] = entry.notes
+                except Exception as e:
+                    print(f"Error retrieving pool notes: {e}")
+                finally:
+                    session.close()
+                    
+                export_data.append(watchlist_data)
+        
+        with open(filename, "w") as f:
+            json.dump(export_data, f, indent=2)
+            
+        print(f"Successfully backed up {len(export_data)} watchlists to {filename}")
+        return True
+    except Exception as e:
+        print(f"Error backing up watchlists: {e}")
+        return False
+
+def restore_watchlists_from_file(filename="watchlists.json", replace=False):
+    """
+    Restore watchlists from a JSON file
+    
+    Args:
+        filename: Input JSON filename
+        replace: If True, replace existing watchlists; if False, skip duplicates
+        
+    Returns:
+        Number of watchlists restored
+    """
+    try:
+        if not os.path.exists(filename):
+            print(f"File not found: {filename}")
+            return 0
+            
+        with open(filename, "r") as f:
+            content = f.read()
+            if not content.strip():
+                print(f"Empty file: {filename}")
+                return 0
+                
+            watchlists_data = json.loads(content)
+            
+        count = 0
+        for watchlist_data in watchlists_data:
+            # Check if this watchlist already exists
+            existing = None
+            session = Session()
+            try:
+                existing = session.query(Watchlist).filter_by(name=watchlist_data["name"]).first()
+            except Exception:
+                pass
+            finally:
+                session.close()
+            
+            if existing and not replace:
+                print(f"Skipping existing watchlist: {watchlist_data['name']}")
+                continue
+                
+            if existing and replace:
+                # Delete the existing watchlist
+                delete_watchlist(existing.id)
+            
+            # Import the watchlist
+            if import_watchlist_from_json(watchlist_data):
+                count += 1
+        
+        print(f"Successfully restored {count} watchlists from {filename}")
+        return count
+    except Exception as e:
+        print(f"Error restoring watchlists: {e}")
+        return 0
 
 # Function to filter pools in memory (used as fallback when database is unavailable)
 def filter_pools_in_memory(pools, dex=None, category=None, min_liquidity=None, max_liquidity=None, 
