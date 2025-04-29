@@ -263,10 +263,14 @@ def main():
                 submit = st.form_submit_button("Create Watchlist")
                 
                 if submit and name:
+                    # Create the watchlist and immediately get its ID
                     watchlist = db_handler.create_watchlist(name, description)
                     if watchlist:
+                        # Get the ID from the watchlist dictionary
+                        watchlist_id = watchlist["id"]
+                        # Then immediately store the ID in session state
                         st.success(f"Created watchlist: {name}")
-                        st.session_state["selected_watchlist"] = watchlist.id
+                        st.session_state["selected_watchlist"] = watchlist_id
                         # Force refresh
                         st.rerun()
                     else:

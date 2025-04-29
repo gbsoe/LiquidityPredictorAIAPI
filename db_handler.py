@@ -229,7 +229,7 @@ def get_pools(limit=50):
     Retrieve pool data from database
     
     Args:
-        limit: Maximum number of pools to retrieve (default 50, None for all)
+        limit: Maximum number of pools to retrieve (default 50, 0 for all)
     
     Returns:
         List of dictionaries containing pool data
@@ -600,7 +600,7 @@ def create_watchlist(name, description=""):
         description: Optional description
         
     Returns:
-        Watchlist object if successful, None otherwise
+        Dictionary with watchlist data if successful, None otherwise
     """
     if not engine:
         print("Database connection not available")
@@ -621,15 +621,20 @@ def create_watchlist(name, description=""):
         existing = session.query(Watchlist).filter_by(name=name).first()
         if existing:
             print(f"Watchlist with name '{name}' already exists")
-            return existing
+            # Convert to dictionary before returning
+            result = existing.to_dict()
+            return result
         
         # Create new watchlist
         watchlist = Watchlist(name=name, description=description)
         session.add(watchlist)
         session.commit()
         
+        # Convert to dictionary before returning
+        result = watchlist.to_dict()
+        
         print(f"Successfully created watchlist: {name}")
-        return watchlist
+        return result
     except Exception as e:
         session.rollback()
         print(f"Error creating watchlist: {e}")
@@ -921,23 +926,26 @@ def import_watchlist_from_json(json_data):
         return None
     
     # Create the watchlist
-    watchlist = create_watchlist(
+    watchlist_dict = create_watchlist(
         name=watchlist_data["name"], 
         description=watchlist_data.get("description", "")
     )
     
-    if not watchlist:
+    if not watchlist_dict:
         return None
+    
+    # Get the watchlist ID
+    watchlist_id = watchlist_dict["id"]
     
     # Add pools to the watchlist
     for pool_id in watchlist_data["pools"]:
         add_pool_to_watchlist(
-            watchlist_id=watchlist.id, 
+            watchlist_id=watchlist_id, 
             pool_id=pool_id,
             notes=watchlist_data.get("notes", {}).get(pool_id, "")
         )
     
-    return watchlist.id
+    return watchlist_id
 
 def export_watchlist_to_json(watchlist_id):
     """
@@ -1066,7 +1074,7 @@ def restore_watchlists_from_file(filename="watchlists.json", replace=False):
                 
             if existing and replace:
                 # Delete the existing watchlist
-                delete_watchlist(existing.id)
+                delete_watchlist(existing.to_dict()["id"])
             
             # Import the watchlist
             if import_watchlist_from_json(watchlist_data):
