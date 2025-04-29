@@ -1,6 +1,5 @@
 """
-Test the connection to the DeFi API and retrieve pool data and tokens
-within a 10-second timeframe.
+Enhanced test for DeFi API with improved token extraction
 """
 
 import os
@@ -9,11 +8,46 @@ import time
 from defi_aggregation_api import DefiAggregationAPI
 from typing import Dict, List, Any
 from collections import Counter
+import re
 
-def test_defi_api_connection():
-    """Test connection to the DeFi API and retrieve data within 10 seconds"""
+class EnhancedDefiAPI(DefiAggregationAPI):
+    """Enhanced version of DefiAggregationAPI with better token extraction"""
     
-    print("Starting DeFi API connection test...")
+    def transform_pool_data(self, pool: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Enhanced transform function that extracts token symbols from pool name
+        if the tokens array is empty
+        """
+        # Call the original transform function
+        transformed = super().transform_pool_data(pool)
+        
+        # If token symbols are unknown, try to extract from name
+        if transformed.get('token1_symbol') == 'Unknown' or transformed.get('token2_symbol') == 'Unknown':
+            name = pool.get('name', '')
+            if name and '-' in name:
+                # Extract token symbols from the name
+                parts = name.split('-')
+                if len(parts) >= 2:
+                    # First part is usually token1
+                    token1 = parts[0].strip()
+                    
+                    # Second part might have extra text (like "LP" or DEX name)
+                    # Try to extract just the token symbol
+                    token2_parts = parts[1].split(' ')
+                    token2 = token2_parts[0].strip()
+                    
+                    # Update the transformed data
+                    transformed['token1_symbol'] = token1
+                    transformed['token2_symbol'] = token2
+                    
+                    print(f"Extracted token symbols from name '{name}': {token1} and {token2}")
+        
+        return transformed
+
+def test_enhanced_defi_api():
+    """Test connection to the DeFi API with enhanced token extraction"""
+    
+    print("Starting Enhanced DeFi API test...")
     start_time = time.time()
     max_time = 10  # 10 seconds maximum
     
@@ -29,12 +63,12 @@ def test_defi_api_connection():
     }
     
     try:
-        # Initialize the API client with the API key from environment variables
-        print("Initializing DeFi API client...")
-        defi_api = DefiAggregationAPI()
+        # Initialize the enhanced API client
+        print("Initializing Enhanced DeFi API client...")
+        defi_api = EnhancedDefiAPI()
         
-        # Get a limited number of pools to ensure we stay within the time limit
-        print("Fetching pools from API...")
+        # Get pools with enhanced token extraction
+        print("Fetching pools from API with enhanced token extraction...")
         pools = defi_api.get_transformed_pools(max_pools=20)  # Limit to 20 pools
         
         # Check if we have data and it's still within our time limit
@@ -99,7 +133,7 @@ def test_defi_api_connection():
 def print_results(results):
     """Print the results in a formatted way"""
     print("\n" + "="*50)
-    print("DeFi API CONNECTION TEST RESULTS")
+    print("ENHANCED DeFi API TEST RESULTS")
     print("="*50)
     
     if results["success"]:
@@ -135,6 +169,6 @@ def print_results(results):
     print("\n" + "="*50)
 
 if __name__ == "__main__":
-    print("Running DeFi API connection test...")
-    results = test_defi_api_connection()
+    print("Running Enhanced DeFi API test...")
+    results = test_enhanced_defi_api()
     print_results(results)
