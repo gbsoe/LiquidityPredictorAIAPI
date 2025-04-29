@@ -201,8 +201,7 @@ def main():
                         "Full Address", 
                         width=None,
                         disabled=True,
-                        required=False,
-                        visibility="hidden"
+                        required=False
                     )
                 }
             )
