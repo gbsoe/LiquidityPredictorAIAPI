@@ -49,15 +49,18 @@ class DefiAggregationAPI:
             raise ValueError("API key is required. Set DEFI_API_KEY environment variable or provide api_key parameter.")
         
         # Configure base URL - using the base URL from the documentation
-        self.base_url = base_url or "https://filotdefiapi.replit.app/api/v1"
+        # Allow override during testing/debugging
+        self.base_url = base_url or os.getenv("DEFI_API_URL") or "https://filotdefiapi.replit.app/api/v1"
         logger.info(f"Using API base URL: {self.base_url}")
         
         # Configure request delay for rate limiting (10 req/sec)
         self.request_delay = 0.1  # 100ms delay for 10 requests per second 
         
-        # Set authentication headers - using Bearer token authentication (confirmed by testing)
+        # Set authentication headers - try both header formats to maximize compatibility
+        # Some APIs expect Bearer token, others expect X-API-KEY
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
+            "X-API-KEY": self.api_key,
             "Content-Type": "application/json"
         }
         

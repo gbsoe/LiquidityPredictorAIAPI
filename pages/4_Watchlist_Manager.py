@@ -109,24 +109,65 @@ def display_pool_card(pool: Dict[str, Any]) -> None:
     if not pool:
         return
     
-    # Create a container with styling
+    # Get pool values with fallbacks for incomplete data
+    pool_name = pool.get('name', 'Unknown')
+    pool_dex = pool.get('dex', 'Unknown')
+    pool_id = pool.get('id', 'N/A')
+    pool_liquidity = pool.get('liquidity', 0) 
+    pool_apr = pool.get('apr', 0)
+    pool_volume = pool.get('volume_24h', 0)
+    
+    # For watchlist entries that may have minimal data
+    if pool_name == 'Unknown' and pool_id != 'N/A':
+        pool_name = f"Pool {pool_id[:8]}..."  # Use shortened ID if no name
+    
+    # Create a container with styling and handle potential missing data
     with st.container():
         st.markdown(f"""
         <div class="pool-item">
             <div style="display:flex;justify-content:space-between;align-items:center">
-                <span style="font-weight:bold;font-size:1.1em">{pool['name']}</span>
-                <span>{get_dex_badge(pool['dex'])}</span>
+                <span style="font-weight:bold;font-size:1.1em">{pool_name}</span>
+                <span>{get_dex_badge(pool_dex)}</span>
             </div>
             <div style="display:flex;justify-content:space-between;margin-top:3px">
-                <span>Liquidity: {format_currency(pool['liquidity'])}</span>
-                <span>APR: {format_apr_badge(pool['apr'])}</span>
-                <span>Vol(24h): {format_currency(pool['volume_24h'])}</span>
+                <span>Liquidity: {format_currency(pool_liquidity)}</span>
+                <span>APR: {format_apr_badge(pool_apr)}</span>
+                <span>Vol(24h): {format_currency(pool_volume)}</span>
             </div>
             <div style="font-size:0.8em;margin-top:3px">
-                ID: <code>{pool['id']}</code>
+                ID: <code>{pool_id}</code>
             </div>
         </div>
         """, unsafe_allow_html=True)
+        
+        # If we have a pool ID but minimal data, add a refresh button
+        if pool_id != 'N/A' and (pool_name == f"Pool {pool_id[:8]}..." or pool_liquidity == 0):
+            if st.button(f"🔄 Refresh Pool Data", key=f"refresh_{pool_id}"):
+                with st.spinner("Fetching latest pool data..."):
+                    try:
+                        # Try to fetch fresh data for this pool
+                        from defi_aggregation_api import DefiAggregationAPI
+                        import os
+                        
+                        api_key = os.getenv("DEFI_API_KEY")
+                        if api_key:
+                            api = DefiAggregationAPI(api_key=api_key)
+                            updated_pool = api.get_pool_by_id(pool_id)
+                            
+                            if updated_pool:
+                                st.success(f"Successfully fetched latest data for {updated_pool.get('name', pool_id)}")
+                                # Update in database for future use
+                                db_handler.save_pool_to_database(updated_pool)
+                                # Force refresh the page
+                                st.experimental_rerun()
+                            else:
+                                st.warning(f"Could not fetch updated data for pool {pool_id}")
+                        else:
+                            st.error("API key not available. Cannot fetch pool data.")
+                    except Exception as e:
+                        st.error(f"Error refreshing pool data: {str(e)}")
+                        import traceback
+                        st.code(traceback.format_exc())
 
 def add_batch_pools(watchlist_id: int, pool_ids: List[str]) -> int:
     """

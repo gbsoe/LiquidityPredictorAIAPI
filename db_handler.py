@@ -1233,6 +1233,79 @@ def restore_watchlists_from_file(filename="watchlists.json", replace=False):
         print(f"Error restoring watchlists: {e}")
         return 0
 
+def save_pool_to_database(pool_data: dict) -> bool:
+    """
+    Save a pool to the database. This is useful for adding pools that were fetched directly
+    from the API but not yet in our database, especially for watchlist pools.
+    
+    Args:
+        pool_data: Dictionary with pool data 
+        
+    Returns:
+        bool: True if successful
+    """
+    # Validation
+    if not pool_data or not isinstance(pool_data, dict):
+        return False
+        
+    # Get required pool ID
+    pool_id = pool_data.get('id', None)
+    if not pool_id:
+        return False
+    
+    if not engine:
+        print("Database connection not available")
+        return False
+    
+    # Create a session
+    session = Session()
+    
+    try:
+        # Check if pool already exists
+        existing_pool = session.query(LiquidityPool).filter_by(id=pool_id).first()
+        
+        if existing_pool:
+            # Update the pool with new data
+            for key, value in pool_data.items():
+                if hasattr(existing_pool, key):
+                    setattr(existing_pool, key, value)
+            # Save
+            session.commit()
+            return True
+        else:
+            # Create a new pool
+            new_pool = LiquidityPool(
+                id=pool_data.get('id', ''),
+                name=pool_data.get('name', ''),
+                dex=pool_data.get('dex', 'Unknown'),
+                category=pool_data.get('category', 'Custom'),
+                token1_symbol=pool_data.get('token1_symbol', 'Unknown'),
+                token2_symbol=pool_data.get('token2_symbol', 'Unknown'),
+                token1_address=pool_data.get('token1_address', ''),
+                token2_address=pool_data.get('token2_address', ''),
+                liquidity=pool_data.get('liquidity', 0.0),
+                volume_24h=pool_data.get('volume_24h', 0.0),
+                apr=pool_data.get('apr', 0.0),
+                fee=pool_data.get('fee', 0.0),
+                version=pool_data.get('version', ''),
+                apr_change_24h=pool_data.get('apr_change_24h', 0.0),
+                apr_change_7d=pool_data.get('apr_change_7d', 0.0),
+                tvl_change_24h=pool_data.get('tvl_change_24h', 0.0),
+                tvl_change_7d=pool_data.get('tvl_change_7d', 0.0),
+                prediction_score=pool_data.get('prediction_score', 0.0),
+                apr_change_30d=pool_data.get('apr_change_30d', 0.0),
+                tvl_change_30d=pool_data.get('tvl_change_30d', 0.0)
+            )
+            session.add(new_pool)
+            session.commit()
+            return True
+    except Exception as e:
+        print(f"Error saving pool to database: {e}")
+        session.rollback()
+        return False
+    finally:
+        session.close()
+
 # Function to filter pools in memory (used as fallback when database is unavailable)
 def filter_pools_in_memory(pools, dex=None, category=None, min_liquidity=None, max_liquidity=None, 
                           min_apr=None, max_apr=None, search_term=None, sort_by=None, limit=None):
