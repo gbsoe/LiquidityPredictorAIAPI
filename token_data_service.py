@@ -190,9 +190,21 @@ class TokenDataService:
             force_refresh: Force a refresh from the API
             
         Returns:
-            Token data or an empty dict if not found
+            Token data or fallback data if not found
         """
         token_symbol = token_symbol.upper()
+        
+        # Skip processing for UNKNOWN tokens to reduce API calls for non-existent tokens
+        if token_symbol == "UNKNOWN":
+            return {
+                "symbol": "UNKNOWN",
+                "name": "Unknown Token",
+                "address": "",
+                "decimals": 0,
+                "logo": "",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
+            }
         
         # Update stats
         self.stats["total_requests"] += 1
@@ -205,15 +217,15 @@ class TokenDataService:
             # Check if cache is still valid
             if (datetime.now() - cache_time).total_seconds() < self.token_cache_ttl:
                 self.stats["cache_hits"] += 1
-                logger.info(f"Token {token_symbol} found in cache")
+                logger.debug(f"Token {token_symbol} found in cache")
                 return token_data
         
         # Cache miss or forced refresh
         self.stats["cache_misses"] += 1
         
         try:
-            # Try to get token data from API
-            logger.info(f"Making API request to URL: https://filotdefiapi.replit.app/api/v1/tokens/{token_symbol}")
+            # First try to get the specific token
+            logger.info(f"Making API request for token: {token_symbol}")
             token_data = self.api_client._make_request(f"tokens/{token_symbol}")
             
             if token_data:
@@ -228,16 +240,42 @@ class TokenDataService:
                 
                 return processed_data
         except Exception as e:
+            logger.info(f"Token {token_symbol} not found via direct lookup, trying token list")
+            
+            # If direct token lookup fails, try fetching from the list
+            try:
+                # Get all tokens and find the one we want
+                all_tokens = self.api_client._make_request("tokens")
+                
+                if isinstance(all_tokens, list):
+                    # Find the token in the list
+                    for token in all_tokens:
+                        if token.get("symbol", "").upper() == token_symbol:
+                            # Found the token in the list
+                            processed_data = self._process_token_data(token)
+                            
+                            # Update the cache
+                            processed_data["last_updated"] = datetime.now().isoformat()
+                            self.token_cache[token_symbol] = processed_data
+                            
+                            self.stats["last_update"] = datetime.now().isoformat()
+                            logger.info(f"Found token {token_symbol} in tokens list")
+                            
+                            return processed_data
+            except Exception as list_error:
+                logger.warning(f"Failed to get token {token_symbol} from tokens list: {str(list_error)}")
+            
+            # Both attempts failed
             logger.warning(f"Token {token_symbol} not found in API")
             self.stats["api_errors"] += 1
         
         # If we get here, API request failed or returned invalid data
         if token_symbol in self.token_cache:
             # Use cached data even if expired
-            logger.info(f"Using default token data for {token_symbol}")
+            logger.info(f"Using cached token data for {token_symbol}")
             return self.token_cache[token_symbol]
         
-        # Return empty dict if token not found
+        # Return basic info if token not found
         return {
             "symbol": token_symbol,
             "name": token_symbol,
@@ -257,8 +295,19 @@ class TokenDataService:
             force_refresh: Force a refresh from the API
             
         Returns:
-            Token data or an empty dict if not found
+            Token data or a fallback structure if not found
         """
+        if not address:
+            return {
+                "symbol": "UNKNOWN",
+                "name": "Unknown Token",
+                "address": "",
+                "decimals": 0,
+                "logo": "",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
+            }
+            
         # Look in cache first
         for token_data in self.token_cache.values():
             if token_data.get("address", "").lower() == address.lower():
@@ -266,8 +315,9 @@ class TokenDataService:
                     return token_data
                 break
         
-        # If not in cache or forcing refresh, try API
+        # If not in cache or forcing refresh, try API directly
         try:
+            logger.info(f"Making API request for token by address: {address}")
             token_data = self.api_client._make_request(f"tokens/address/{address}")
             
             if token_data:
@@ -280,14 +330,41 @@ class TokenDataService:
                 self.token_cache[symbol] = processed_data
                 
                 self.stats["last_update"] = datetime.now().isoformat()
+                logger.info(f"Found token with address {address} via direct lookup")
                 
                 return processed_data
         except Exception as e:
-            logger.warning(f"Token with address {address} not found in API: {e}")
+            logger.info(f"Token with address {address} not found via direct lookup, trying token list")
+            
+            # If direct lookup fails, try searching in all tokens
+            try:
+                # Get all tokens and search by address
+                all_tokens = self.api_client._make_request("tokens")
+                
+                if isinstance(all_tokens, list):
+                    for token in all_tokens:
+                        if token.get("address", "").lower() == address.lower():
+                            # Found the token in the list
+                            processed_data = self._process_token_data(token)
+                            
+                            # Update the cache
+                            processed_data["last_updated"] = datetime.now().isoformat()
+                            symbol = processed_data.get("symbol", "UNKNOWN")
+                            self.token_cache[symbol] = processed_data
+                            
+                            self.stats["last_update"] = datetime.now().isoformat()
+                            logger.info(f"Found token with address {address} in tokens list")
+                            
+                            return processed_data
+            except Exception as list_error:
+                logger.warning(f"Failed to get token with address {address} from tokens list: {str(list_error)}")
+            
+            # Both attempts failed
+            logger.warning(f"Token with address {address} not found in API")
             self.stats["api_errors"] += 1
         
         # If we get here, API request failed or returned invalid data
-        # Return a minimal token data structure
+        # Return a minimal token data structure with the address
         return {
             "symbol": "UNKNOWN",
             "name": "Unknown Token",
