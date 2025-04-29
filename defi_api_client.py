@@ -221,13 +221,22 @@ def transform_pool_data(api_pool: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     # Determine category based on token symbols
     category = determine_category(token1_symbol, token2_symbol)
     
-    # Get TVL directly from API
-    tvl = api_pool.get("tvl", 0)
+    # Get metrics from API - this is where TVL and APY are actually stored
+    metrics = api_pool.get("metrics", {})
     
-    # Get APR values from API
-    apr_24h = api_pool.get("apr24h", 0)
-    apr_7d = api_pool.get("apr7d", 0)
-    apr_30d = api_pool.get("apr30d", 0)
+    # Get TVL from metrics
+    tvl = metrics.get("tvl", 0)
+    
+    # Get APR/APY values from metrics (API uses APY nomenclature)
+    # Convert APY to APR for consistency with our app
+    apy_24h = metrics.get("apy24h", 0)
+    apy_7d = metrics.get("apy7d", 0)
+    apy_30d = metrics.get("apy30d", 0)
+    
+    # Simple conversion for display purposes
+    apr_24h = apy_24h
+    apr_7d = apy_7d
+    apr_30d = apy_30d
     
     # Calculate APR changes
     apr_change_24h = 0
@@ -240,11 +249,11 @@ def transform_pool_data(api_pool: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         # Use difference between 7d and 30d APR for weekly change
         apr_change_7d = apr_7d - apr_30d
     
-    # Get volume from API
-    volume_24h = api_pool.get("volumeUsd", 0)
+    # Get volume from API metrics
+    volume_24h = metrics.get("volumeUsd", 0)
     
-    # Get fee percentage
-    fee_rate = api_pool.get("fee", 0) * 100  # Convert to percentage
+    # Get fee percentage from metrics
+    fee_rate = metrics.get("fee", 0) * 100  # Convert to percentage
     
     # Get additional token info
     token1_price = token1.get("price", 0)
@@ -331,17 +340,20 @@ def calculate_prediction_score(pool_data: Dict[str, Any]) -> float:
     # Base score starts at 50
     score = 50.0
     
-    # Add points for higher APR (up to 15 points)
-    apr = pool_data.get("apr24h", 0)  # Use the field name from API docs
-    if apr > 100:
+    # Extract metrics which contain the APY/TVL/volume data
+    metrics = pool_data.get("metrics", {})
+    
+    # Add points for higher APR/APY (up to 15 points)
+    apy = metrics.get("apy24h", 0)  # Use the correct field name from metrics
+    if apy > 100:
         score += 15
-    elif apr > 50:
+    elif apy > 50:
         score += 10
-    elif apr > 20:
+    elif apy > 20:
         score += 5
     
     # Add points for higher TVL (up to 10 points)
-    tvl = pool_data.get("tvl", 0)
+    tvl = metrics.get("tvl", 0)
     if tvl > 1000000:  # $1M+
         score += 10
     elif tvl > 500000:  # $500K+
@@ -350,7 +362,7 @@ def calculate_prediction_score(pool_data: Dict[str, Any]) -> float:
         score += 5
     
     # Add points for higher volume (up to 10 points)
-    volume = pool_data.get("volumeUsd", 0)
+    volume = metrics.get("volumeUsd", 0)
     if volume > 500000:  # $500K+
         score += 10
     elif volume > 100000:  # $100K+
@@ -359,16 +371,16 @@ def calculate_prediction_score(pool_data: Dict[str, Any]) -> float:
         score += 5
     
     # Add points for APR stability or growth (up to 10 points)
-    # Compare apr24h and apr7d from API
-    apr_24h = pool_data.get("apr24h", 0)
-    apr_7d = pool_data.get("apr7d", 0)
+    # Compare apy24h and apy7d from metrics
+    apy_24h = metrics.get("apy24h", 0)
+    apy_7d = metrics.get("apy7d", 0)
     
-    if apr_24h and apr_7d:  # Only compare if both values exist
-        if apr_24h > apr_7d * 1.05:  # 5% increase
+    if apy_24h and apy_7d:  # Only compare if both values exist
+        if apy_24h > apy_7d * 1.05:  # 5% increase
             score += 10  # Strong uptrend
-        elif apr_24h > apr_7d:
+        elif apy_24h > apy_7d:
             score += 7   # Moderate uptrend
-        elif apr_24h > apr_7d * 0.95:
+        elif apy_24h > apy_7d * 0.95:
             score += 5   # Stable
     
     # Add points for having a popular token (up to 5 points)

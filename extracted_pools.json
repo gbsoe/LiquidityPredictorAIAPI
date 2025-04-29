@@ -20,8 +20,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643418",
-    "updated_at": "2025-04-29T02:09:23.643430"
+    "created_at": "2025-04-29T02:20:16.681738",
+    "updated_at": "2025-04-29T02:20:16.681748"
   },
   {
     "id": "SOLUSDC",
@@ -44,8 +44,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643442",
-    "updated_at": "2025-04-29T02:09:23.643445"
+    "created_at": "2025-04-29T02:20:16.681759",
+    "updated_at": "2025-04-29T02:20:16.681761"
   },
   {
     "id": "MSOLUSDCM",
@@ -68,8 +68,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643454",
-    "updated_at": "2025-04-29T02:09:23.643457"
+    "created_at": "2025-04-29T02:20:16.681766",
+    "updated_at": "2025-04-29T02:20:16.681767"
   },
   {
     "id": "BTCUSDCM",
@@ -92,8 +92,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643466",
-    "updated_at": "2025-04-29T02:09:23.643468"
+    "created_at": "2025-04-29T02:20:16.681772",
+    "updated_at": "2025-04-29T02:20:16.681773"
   },
   {
     "id": "SOLUSDCO",
@@ -116,8 +116,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643478",
-    "updated_at": "2025-04-29T02:09:23.643480"
+    "created_at": "2025-04-29T02:20:16.681778",
+    "updated_at": "2025-04-29T02:20:16.681779"
   },
   {
     "id": "ETHUSDCO",
@@ -140,8 +140,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643488",
-    "updated_at": "2025-04-29T02:09:23.643491"
+    "created_at": "2025-04-29T02:20:16.681784",
+    "updated_at": "2025-04-29T02:20:16.681785"
   },
   {
     "id": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
@@ -164,8 +164,8 @@
     "prediction_score": 0,
     "fee": 0.0001,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643541",
-    "updated_at": "2025-04-29T02:09:23.643546"
+    "created_at": "2025-04-29T02:20:16.681789",
+    "updated_at": "2025-04-29T02:20:16.681790"
   },
   {
     "id": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj",
@@ -188,8 +188,8 @@
     "prediction_score": 0,
     "fee": 0.0005,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643556",
-    "updated_at": "2025-04-29T02:09:23.643559"
+    "created_at": "2025-04-29T02:20:16.681794",
+    "updated_at": "2025-04-29T02:20:16.681795"
   },
   {
     "id": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
@@ -212,8 +212,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643568",
-    "updated_at": "2025-04-29T02:09:23.643571"
+    "created_at": "2025-04-29T02:20:16.681799",
+    "updated_at": "2025-04-29T02:20:16.681800"
   },
   {
     "id": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
@@ -236,8 +236,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643579",
-    "updated_at": "2025-04-29T02:09:23.643582"
+    "created_at": "2025-04-29T02:20:16.681804",
+    "updated_at": "2025-04-29T02:20:16.681805"
   },
   {
     "id": "FLKdMRsS7dvj9mMsEBxciUJc3TKJcEmVUbQRf5UnYEpw",
@@ -260,8 +260,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643606",
-    "updated_at": "2025-04-29T02:09:23.643609"
+    "created_at": "2025-04-29T02:20:16.681809",
+    "updated_at": "2025-04-29T02:20:16.681810"
   },
   {
     "id": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
@@ -284,8 +284,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643618",
-    "updated_at": "2025-04-29T02:09:23.643620"
+    "created_at": "2025-04-29T02:20:16.681814",
+    "updated_at": "2025-04-29T02:20:16.681815"
   },
   {
     "id": "Cv3YJJvCZQJKP5G6AHh77GVbewGZUVs4Y1WJ6Yc3HbQj",
@@ -308,8 +308,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643633",
-    "updated_at": "2025-04-29T02:09:23.643635"
+    "created_at": "2025-04-29T02:20:16.681824",
+    "updated_at": "2025-04-29T02:20:16.681825"
   },
   {
     "id": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm",
@@ -332,8 +332,8 @@
     "prediction_score": 0,
     "fee": 0.001,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643642",
-    "updated_at": "2025-04-29T02:09:23.643644"
+    "created_at": "2025-04-29T02:20:16.681830",
+    "updated_at": "2025-04-29T02:20:16.681831"
   },
   {
     "id": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy",
@@ -356,8 +356,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643650",
-    "updated_at": "2025-04-29T02:09:23.643652"
+    "created_at": "2025-04-29T02:20:16.681836",
+    "updated_at": "2025-04-29T02:20:16.681837"
   },
   {
     "id": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw",
@@ -380,8 +380,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643659",
-    "updated_at": "2025-04-29T02:09:23.643662"
+    "created_at": "2025-04-29T02:20:16.681841",
+    "updated_at": "2025-04-29T02:20:16.681842"
   },
   {
     "id": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
@@ -404,8 +404,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643670",
-    "updated_at": "2025-04-29T02:09:23.643673"
+    "created_at": "2025-04-29T02:20:16.681847",
+    "updated_at": "2025-04-29T02:20:16.681848"
   },
   {
     "id": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
@@ -428,8 +428,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643681",
-    "updated_at": "2025-04-29T02:09:23.643683"
+    "created_at": "2025-04-29T02:20:16.681852",
+    "updated_at": "2025-04-29T02:20:16.681853"
   },
   {
     "id": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
@@ -452,8 +452,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643690",
-    "updated_at": "2025-04-29T02:09:23.643693"
+    "created_at": "2025-04-29T02:20:16.681857",
+    "updated_at": "2025-04-29T02:20:16.681858"
   },
   {
     "id": "RAYUSDC",
@@ -476,8 +476,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643701",
-    "updated_at": "2025-04-29T02:09:23.643704"
+    "created_at": "2025-04-29T02:20:16.681864",
+    "updated_at": "2025-04-29T02:20:16.681867"
   },
   {
     "id": "SOLUSDC",
@@ -500,8 +500,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643713",
-    "updated_at": "2025-04-29T02:09:23.643716"
+    "created_at": "2025-04-29T02:20:16.681875",
+    "updated_at": "2025-04-29T02:20:16.681877"
   },
   {
     "id": "MSOLUSDCM",
@@ -524,8 +524,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643723",
-    "updated_at": "2025-04-29T02:09:23.643726"
+    "created_at": "2025-04-29T02:20:16.681886",
+    "updated_at": "2025-04-29T02:20:16.681888"
   },
   {
     "id": "BTCUSDCM",
@@ -548,8 +548,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643758",
-    "updated_at": "2025-04-29T02:09:23.643762"
+    "created_at": "2025-04-29T02:20:16.681893",
+    "updated_at": "2025-04-29T02:20:16.681894"
   },
   {
     "id": "SOLUSDCO",
@@ -572,8 +572,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643772",
-    "updated_at": "2025-04-29T02:09:23.643775"
+    "created_at": "2025-04-29T02:20:16.681899",
+    "updated_at": "2025-04-29T02:20:16.681900"
   },
   {
     "id": "ETHUSDCO",
@@ -596,8 +596,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643782",
-    "updated_at": "2025-04-29T02:09:23.643785"
+    "created_at": "2025-04-29T02:20:16.681905",
+    "updated_at": "2025-04-29T02:20:16.681906"
   },
   {
     "id": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
@@ -620,8 +620,8 @@
     "prediction_score": 0,
     "fee": 0.0001,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643793",
-    "updated_at": "2025-04-29T02:09:23.643795"
+    "created_at": "2025-04-29T02:20:16.681911",
+    "updated_at": "2025-04-29T02:20:16.681912"
   },
   {
     "id": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj",
@@ -644,8 +644,8 @@
     "prediction_score": 0,
     "fee": 0.0005,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643803",
-    "updated_at": "2025-04-29T02:09:23.643805"
+    "created_at": "2025-04-29T02:20:16.681916",
+    "updated_at": "2025-04-29T02:20:16.681917"
   },
   {
     "id": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
@@ -668,8 +668,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643813",
-    "updated_at": "2025-04-29T02:09:23.643815"
+    "created_at": "2025-04-29T02:20:16.681922",
+    "updated_at": "2025-04-29T02:20:16.681923"
   },
   {
     "id": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
@@ -692,8 +692,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643822",
-    "updated_at": "2025-04-29T02:09:23.643824"
+    "created_at": "2025-04-29T02:20:16.681927",
+    "updated_at": "2025-04-29T02:20:16.681929"
   },
   {
     "id": "FLKdMRsS7dvj9mMsEBxciUJc3TKJcEmVUbQRf5UnYEpw",
@@ -716,8 +716,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643846",
-    "updated_at": "2025-04-29T02:09:23.643849"
+    "created_at": "2025-04-29T02:20:16.681933",
+    "updated_at": "2025-04-29T02:20:16.681934"
   },
   {
     "id": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
@@ -740,8 +740,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643858",
-    "updated_at": "2025-04-29T02:09:23.643861"
+    "created_at": "2025-04-29T02:20:16.681939",
+    "updated_at": "2025-04-29T02:20:16.681940"
   },
   {
     "id": "Cv3YJJvCZQJKP5G6AHh77GVbewGZUVs4Y1WJ6Yc3HbQj",
@@ -764,8 +764,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643871",
-    "updated_at": "2025-04-29T02:09:23.643874"
+    "created_at": "2025-04-29T02:20:16.681945",
+    "updated_at": "2025-04-29T02:20:16.681946"
   },
   {
     "id": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm",
@@ -788,8 +788,8 @@
     "prediction_score": 0,
     "fee": 0.001,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643882",
-    "updated_at": "2025-04-29T02:09:23.643884"
+    "created_at": "2025-04-29T02:20:16.681954",
+    "updated_at": "2025-04-29T02:20:16.681956"
   },
   {
     "id": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy",
@@ -812,8 +812,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643894",
-    "updated_at": "2025-04-29T02:09:23.643896"
+    "created_at": "2025-04-29T02:20:16.681965",
+    "updated_at": "2025-04-29T02:20:16.681966"
   },
   {
     "id": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw",
@@ -836,8 +836,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643904",
-    "updated_at": "2025-04-29T02:09:23.643907"
+    "created_at": "2025-04-29T02:20:16.681971",
+    "updated_at": "2025-04-29T02:20:16.681972"
   },
   {
     "id": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
@@ -860,8 +860,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643915",
-    "updated_at": "2025-04-29T02:09:23.643917"
+    "created_at": "2025-04-29T02:20:16.681977",
+    "updated_at": "2025-04-29T02:20:16.681978"
   },
   {
     "id": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
@@ -884,8 +884,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643925",
-    "updated_at": "2025-04-29T02:09:23.643927"
+    "created_at": "2025-04-29T02:20:16.681983",
+    "updated_at": "2025-04-29T02:20:16.681984"
   },
   {
     "id": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
@@ -908,8 +908,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643935",
-    "updated_at": "2025-04-29T02:09:23.643937"
+    "created_at": "2025-04-29T02:20:16.681989",
+    "updated_at": "2025-04-29T02:20:16.681990"
   },
   {
     "id": "RAYUSDC",
@@ -932,8 +932,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643945",
-    "updated_at": "2025-04-29T02:09:23.643948"
+    "created_at": "2025-04-29T02:20:16.681996",
+    "updated_at": "2025-04-29T02:20:16.681997"
   },
   {
     "id": "SOLUSDC",
@@ -956,8 +956,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643956",
-    "updated_at": "2025-04-29T02:09:23.643958"
+    "created_at": "2025-04-29T02:20:16.682002",
+    "updated_at": "2025-04-29T02:20:16.682003"
   },
   {
     "id": "MSOLUSDCM",
@@ -980,8 +980,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643965",
-    "updated_at": "2025-04-29T02:09:23.643968"
+    "created_at": "2025-04-29T02:20:16.682007",
+    "updated_at": "2025-04-29T02:20:16.682009"
   },
   {
     "id": "BTCUSDCM",
@@ -1004,8 +1004,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643976",
-    "updated_at": "2025-04-29T02:09:23.643978"
+    "created_at": "2025-04-29T02:20:16.682013",
+    "updated_at": "2025-04-29T02:20:16.682014"
   },
   {
     "id": "SOLUSDCO",
@@ -1028,8 +1028,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643987",
-    "updated_at": "2025-04-29T02:09:23.643989"
+    "created_at": "2025-04-29T02:20:16.682019",
+    "updated_at": "2025-04-29T02:20:16.682020"
   },
   {
     "id": "ETHUSDCO",
@@ -1052,8 +1052,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.643997",
-    "updated_at": "2025-04-29T02:09:23.643999"
+    "created_at": "2025-04-29T02:20:16.682025",
+    "updated_at": "2025-04-29T02:20:16.682026"
   },
   {
     "id": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
@@ -1076,8 +1076,8 @@
     "prediction_score": 0,
     "fee": 0.0001,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644008",
-    "updated_at": "2025-04-29T02:09:23.644010"
+    "created_at": "2025-04-29T02:20:16.682030",
+    "updated_at": "2025-04-29T02:20:16.682032"
   },
   {
     "id": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj",
@@ -1100,8 +1100,8 @@
     "prediction_score": 0,
     "fee": 0.0005,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644019",
-    "updated_at": "2025-04-29T02:09:23.644022"
+    "created_at": "2025-04-29T02:20:16.682055",
+    "updated_at": "2025-04-29T02:20:16.682056"
   },
   {
     "id": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
@@ -1124,8 +1124,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644030",
-    "updated_at": "2025-04-29T02:09:23.644032"
+    "created_at": "2025-04-29T02:20:16.682062",
+    "updated_at": "2025-04-29T02:20:16.682063"
   },
   {
     "id": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
@@ -1148,8 +1148,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644041",
-    "updated_at": "2025-04-29T02:09:23.644043"
+    "created_at": "2025-04-29T02:20:16.682067",
+    "updated_at": "2025-04-29T02:20:16.682068"
   },
   {
     "id": "FLKdMRsS7dvj9mMsEBxciUJc3TKJcEmVUbQRf5UnYEpw",
@@ -1172,8 +1172,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644051",
-    "updated_at": "2025-04-29T02:09:23.644053"
+    "created_at": "2025-04-29T02:20:16.682072",
+    "updated_at": "2025-04-29T02:20:16.682074"
   },
   {
     "id": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
@@ -1196,8 +1196,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644061",
-    "updated_at": "2025-04-29T02:09:23.644063"
+    "created_at": "2025-04-29T02:20:16.682078",
+    "updated_at": "2025-04-29T02:20:16.682079"
   },
   {
     "id": "Cv3YJJvCZQJKP5G6AHh77GVbewGZUVs4Y1WJ6Yc3HbQj",
@@ -1220,8 +1220,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644072",
-    "updated_at": "2025-04-29T02:09:23.644074"
+    "created_at": "2025-04-29T02:20:16.682084",
+    "updated_at": "2025-04-29T02:20:16.682085"
   },
   {
     "id": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm",
@@ -1244,8 +1244,8 @@
     "prediction_score": 0,
     "fee": 0.001,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644081",
-    "updated_at": "2025-04-29T02:09:23.644083"
+    "created_at": "2025-04-29T02:20:16.682089",
+    "updated_at": "2025-04-29T02:20:16.682091"
   },
   {
     "id": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy",
@@ -1268,8 +1268,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644091",
-    "updated_at": "2025-04-29T02:09:23.644093"
+    "created_at": "2025-04-29T02:20:16.682095",
+    "updated_at": "2025-04-29T02:20:16.682097"
   },
   {
     "id": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw",
@@ -1292,8 +1292,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644106",
-    "updated_at": "2025-04-29T02:09:23.644109"
+    "created_at": "2025-04-29T02:20:16.682101",
+    "updated_at": "2025-04-29T02:20:16.682102"
   },
   {
     "id": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
@@ -1316,8 +1316,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644116",
-    "updated_at": "2025-04-29T02:09:23.644117"
+    "created_at": "2025-04-29T02:20:16.682109",
+    "updated_at": "2025-04-29T02:20:16.682111"
   },
   {
     "id": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
@@ -1340,8 +1340,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644124",
-    "updated_at": "2025-04-29T02:09:23.644126"
+    "created_at": "2025-04-29T02:20:16.682118",
+    "updated_at": "2025-04-29T02:20:16.682120"
   },
   {
     "id": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
@@ -1364,8 +1364,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644134",
-    "updated_at": "2025-04-29T02:09:23.644136"
+    "created_at": "2025-04-29T02:20:16.682124",
+    "updated_at": "2025-04-29T02:20:16.682125"
   },
   {
     "id": "RAYUSDC",
@@ -1388,8 +1388,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644144",
-    "updated_at": "2025-04-29T02:09:23.644146"
+    "created_at": "2025-04-29T02:20:16.682129",
+    "updated_at": "2025-04-29T02:20:16.682131"
   },
   {
     "id": "SOLUSDC",
@@ -1412,8 +1412,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644153",
-    "updated_at": "2025-04-29T02:09:23.644155"
+    "created_at": "2025-04-29T02:20:16.682134",
+    "updated_at": "2025-04-29T02:20:16.682135"
   },
   {
     "id": "MSOLUSDCM",
@@ -1436,8 +1436,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644163",
-    "updated_at": "2025-04-29T02:09:23.644165"
+    "created_at": "2025-04-29T02:20:16.682139",
+    "updated_at": "2025-04-29T02:20:16.682140"
   },
   {
     "id": "BTCUSDCM",
@@ -1460,8 +1460,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644171",
-    "updated_at": "2025-04-29T02:09:23.644174"
+    "created_at": "2025-04-29T02:20:16.682143",
+    "updated_at": "2025-04-29T02:20:16.682144"
   },
   {
     "id": "SOLUSDCO",
@@ -1484,8 +1484,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644181",
-    "updated_at": "2025-04-29T02:09:23.644184"
+    "created_at": "2025-04-29T02:20:16.682148",
+    "updated_at": "2025-04-29T02:20:16.682149"
   },
   {
     "id": "ETHUSDCO",
@@ -1508,8 +1508,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644210",
-    "updated_at": "2025-04-29T02:09:23.644213"
+    "created_at": "2025-04-29T02:20:16.682153",
+    "updated_at": "2025-04-29T02:20:16.682154"
   },
   {
     "id": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
@@ -1532,8 +1532,8 @@
     "prediction_score": 0,
     "fee": 0.0001,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644222",
-    "updated_at": "2025-04-29T02:09:23.644224"
+    "created_at": "2025-04-29T02:20:16.682158",
+    "updated_at": "2025-04-29T02:20:16.682159"
   },
   {
     "id": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj",
@@ -1556,8 +1556,8 @@
     "prediction_score": 0,
     "fee": 0.0005,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644231",
-    "updated_at": "2025-04-29T02:09:23.644233"
+    "created_at": "2025-04-29T02:20:16.682163",
+    "updated_at": "2025-04-29T02:20:16.682164"
   },
   {
     "id": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
@@ -1580,8 +1580,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644239",
-    "updated_at": "2025-04-29T02:09:23.644241"
+    "created_at": "2025-04-29T02:20:16.682167",
+    "updated_at": "2025-04-29T02:20:16.682168"
   },
   {
     "id": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
@@ -1604,8 +1604,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644247",
-    "updated_at": "2025-04-29T02:09:23.644249"
+    "created_at": "2025-04-29T02:20:16.682172",
+    "updated_at": "2025-04-29T02:20:16.682173"
   },
   {
     "id": "FLKdMRsS7dvj9mMsEBxciUJc3TKJcEmVUbQRf5UnYEpw",
@@ -1628,8 +1628,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644255",
-    "updated_at": "2025-04-29T02:09:23.644257"
+    "created_at": "2025-04-29T02:20:16.682177",
+    "updated_at": "2025-04-29T02:20:16.682178"
   },
   {
     "id": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
@@ -1652,8 +1652,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644265",
-    "updated_at": "2025-04-29T02:09:23.644267"
+    "created_at": "2025-04-29T02:20:16.682181",
+    "updated_at": "2025-04-29T02:20:16.682182"
   },
   {
     "id": "Cv3YJJvCZQJKP5G6AHh77GVbewGZUVs4Y1WJ6Yc3HbQj",
@@ -1676,8 +1676,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644276",
-    "updated_at": "2025-04-29T02:09:23.644279"
+    "created_at": "2025-04-29T02:20:16.682187",
+    "updated_at": "2025-04-29T02:20:16.682188"
   },
   {
     "id": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm",
@@ -1700,8 +1700,8 @@
     "prediction_score": 0,
     "fee": 0.001,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644287",
-    "updated_at": "2025-04-29T02:09:23.644289"
+    "created_at": "2025-04-29T02:20:16.682192",
+    "updated_at": "2025-04-29T02:20:16.682194"
   },
   {
     "id": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy",
@@ -1724,8 +1724,8 @@
     "prediction_score": 0,
     "fee": 0.002,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644297",
-    "updated_at": "2025-04-29T02:09:23.644299"
+    "created_at": "2025-04-29T02:20:16.682199",
+    "updated_at": "2025-04-29T02:20:16.682200"
   },
   {
     "id": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw",
@@ -1748,8 +1748,8 @@
     "prediction_score": 0,
     "fee": 0.003,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644306",
-    "updated_at": "2025-04-29T02:09:23.644308"
+    "created_at": "2025-04-29T02:20:16.682204",
+    "updated_at": "2025-04-29T02:20:16.682205"
   },
   {
     "id": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
@@ -1772,8 +1772,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644317",
-    "updated_at": "2025-04-29T02:09:23.644319"
+    "created_at": "2025-04-29T02:20:16.682209",
+    "updated_at": "2025-04-29T02:20:16.682210"
   },
   {
     "id": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
@@ -1796,8 +1796,8 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644327",
-    "updated_at": "2025-04-29T02:09:23.644329"
+    "created_at": "2025-04-29T02:20:16.682214",
+    "updated_at": "2025-04-29T02:20:16.682216"
   },
   {
     "id": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
@@ -1820,7 +1820,7 @@
     "prediction_score": 0,
     "fee": 0.0025,
     "version": "1.0",
-    "created_at": "2025-04-29T02:09:23.644336",
-    "updated_at": "2025-04-29T02:09:23.644338"
+    "created_at": "2025-04-29T02:20:16.682219",
+    "updated_at": "2025-04-29T02:20:16.682220"
   }
 ]
