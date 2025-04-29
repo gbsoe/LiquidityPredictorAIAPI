@@ -33,7 +33,7 @@ try:
     if DATABASE_URL:
         print(f"Attempting to connect to PostgreSQL database...")
         # Make the URL easier to print without exposing credentials
-        display_url = DATABASE_URL.split('@')[0] + '@' + '@'.join(DATABASE_URL.split('@')[1:])
+        display_url = DATABASE_URL.split('@')[0] + '@' + '@'.join(DATABASE_URL.split('@')[1:]) if '@' in DATABASE_URL else 'Invalid URL format'
         print(f"Database URL: {display_url}")
         
         # Create the SQLAlchemy engine with the URL
@@ -48,14 +48,16 @@ try:
         print("DATABASE_URL not found in direct environment - trying alternative methods")
         
         # Try to get from os.environ directly
-        import os
         if 'DATABASE_URL' in os.environ:
             DATABASE_URL = os.environ['DATABASE_URL']
             print("Found DATABASE_URL in os.environ")
-            engine = create_engine(DATABASE_URL)
-            with engine.connect() as conn:
-                conn.execute(sa.text("SELECT 1"))
-            print("Successfully connected to PostgreSQL database")
+            if DATABASE_URL:  # Check if it's not empty
+                engine = create_engine(DATABASE_URL)
+                with engine.connect() as conn:
+                    conn.execute(sa.text("SELECT 1"))
+                print("Successfully connected to PostgreSQL database")
+            else:
+                raise ValueError("DATABASE_URL is empty in environment variables")
         else:
             raise ValueError("DATABASE_URL not found in environment variables")
 except Exception as e:
