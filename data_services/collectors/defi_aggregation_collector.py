@@ -282,12 +282,14 @@ class DefiAggregationCollector(BaseCollector):
                 logger.error(f"Error collecting pools from general endpoint: {str(e)}")
                 raise  # Re-raise the exception
         
+        # Calculate elapsed time
+        elapsed_time = time.time() - start_time
+        
         # Update historical data tracking
         self.last_collection_time = collection_timestamp
-        self._update_historical_data(all_pools, collection_timestamp)
+        self._update_historical_data(all_pools, collection_timestamp, elapsed_time)
         
         # Log collection results
-        elapsed_time = time.time() - start_time
         logger.info(
             f"Pool data collection completed: {len(all_pools)} pools in {elapsed_time:.2f}s "
             f"({len(all_pools) / elapsed_time:.2f} pools/s)"
@@ -295,20 +297,21 @@ class DefiAggregationCollector(BaseCollector):
         
         return all_pools
         
-    def _update_historical_data(self, pools: List[Dict[str, Any]], timestamp: str) -> None:
+    def _update_historical_data(self, pools: List[Dict[str, Any]], timestamp: str, collection_time: float = 0) -> None:
         """
         Update historical data tracking.
         
         Args:
             pools: List of collected pools
             timestamp: Collection timestamp
+            collection_time: Time taken to collect the pools in seconds
         """
         # Create a historical snapshot record
         snapshot = {
             'timestamp': timestamp,
             'pool_count': len(pools),
             'dexes': {},
-            'collection_rate': len(pools) / (time.time() - time.time()) if time.time() != time.time() else 0
+            'collection_rate': len(pools) / collection_time if collection_time > 0 else 0
         }
         
         # Aggregate DEX statistics
