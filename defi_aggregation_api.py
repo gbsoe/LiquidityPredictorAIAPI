@@ -393,24 +393,7 @@ class DefiAggregationAPI:
                     
                     # If we get here, we didn't find it
                     logger.warning(f"Pool {pool_id} not found in API responses")
-                    
-                    # Create a minimal viable placeholder for the pool
-                    # This ensures watchlists can display something when API doesn't have full data
-                    placeholder_pool = {
-                        "id": pool_id,
-                        "poolId": pool_id,
-                        "name": f"Pool {pool_id[:8]}...",
-                        "source": "Unknown",
-                        "tokens": [],
-                        "metrics": {
-                            "tvl": 0,
-                            "fee": 0,
-                            "apy24h": 0
-                        }
-                    }
-                    
-                    logger.info(f"Created placeholder pool data for {pool_id}")
-                    return self.transform_pool_data(placeholder_pool)
+                    return None
                 else:
                     # Some other error occurred
                     raise
@@ -471,62 +454,17 @@ class DefiAggregationAPI:
                                         logger.info(f"Found pool {pool_id} in nested array")
                                         return self.transform_pool_data(item)
                 
-                # Create a minimal placeholder if nothing else worked
-                placeholder_pool = {
-                    "id": pool_id,
-                    "poolId": pool_id,
-                    "name": f"Pool {pool_id[:8]}...",
-                    "source": "Unknown",
-                    "tokens": [],
-                    "metrics": {
-                        "tvl": 0,
-                        "fee": 0,
-                        "apy24h": 0
-                    }
-                }
-                
-                logger.info(f"Created placeholder pool data for {pool_id}")
-                return self.transform_pool_data(placeholder_pool)
+                # No pool found in any nested structure
+                logger.warning(f"Pool {pool_id} not found in any nested response structure")
+                return None
         except ValueError as e:
             logger.error(f"Failed to get pool {pool_id}: {str(e)}")
-            
-            # Provide a fallback placeholder for the watchlist
-            placeholder_pool = {
-                "id": pool_id,
-                "poolId": pool_id,
-                "name": f"Pool {pool_id[:8]}...",
-                "source": "Unknown",
-                "tokens": [],
-                "metrics": {
-                    "tvl": 0,
-                    "fee": 0,
-                    "apy24h": 0
-                }
-            }
-            
-            logger.info(f"Created placeholder pool data after error for {pool_id}")
-            return self.transform_pool_data(placeholder_pool)
+            return None
         except Exception as e:
             logger.error(f"Unexpected error fetching pool {pool_id}: {str(e)}")
-            
-            # Provide a fallback placeholder
-            placeholder_pool = {
-                "id": pool_id,
-                "poolId": pool_id,
-                "name": f"Pool {pool_id[:8]}...",
-                "source": "Unknown",
-                "tokens": [],
-                "metrics": {
-                    "tvl": 0,
-                    "fee": 0,
-                    "apy24h": 0
-                }
-            }
-            
-            logger.info(f"Created placeholder pool data after error for {pool_id}")
-            return self.transform_pool_data(placeholder_pool)
+            return None
     
-    def transform_pool_data(self, pool: Dict[str, Any]) -> Dict[str, Any]:
+    def transform_pool_data(self, pool: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         Transform API pool data to match our application's data model.
         Based on the GET Pool Docs structure with enhanced metrics and tokens.
@@ -711,106 +649,9 @@ class DefiAggregationAPI:
         except Exception as e:
             logger.error(f"Error transforming pool data: {str(e)}")
             logger.debug(f"Problem pool data: {json.dumps(pool)}")
-            # Return a minimal valid record to avoid crashes, but with the same structure
-            # as our comprehensive transformed data for consistency
-            pool_id = pool.get('poolId', 'unknown-id')
-            
-            # Create current timestamps for fallback
-            current_time = datetime.now().isoformat()
-            
-            return {
-                # Core pool identifiers
-                "id": pool_id,
-                "name": pool_id,  # Use pool ID as the name
-                "dex": pool.get('source', 'Unknown'),
-                "category": "Unknown",
-                
-                # Token information (legacy format)
-                "token1_symbol": "Unknown",
-                "token2_symbol": "Unknown",
-                "token1_address": "",
-                "token2_address": "",
-                "token1_price": 0,
-                "token2_price": 0,
-                
-                # Complete token objects (new format)
-                "tokens": [
-                    {
-                        "id": 0,
-                        "symbol": "Unknown",
-                        "name": "Unknown",
-                        "address": "",
-                        "decimals": 0,
-                        "price": 0,
-                        "active": True
-                    },
-                    {
-                        "id": 0,
-                        "symbol": "Unknown",
-                        "name": "Unknown",
-                        "address": "",
-                        "decimals": 0,
-                        "price": 0,
-                        "active": True
-                    }
-                ],
-                
-                # Technical identifiers
-                "poolId": pool.get('poolId', ''),
-                "programId": pool.get('programId', ''),
-                
-                # Core metrics
-                "liquidity": 0,
-                "volume_24h": 0,
-                "apr": 0,
-                "fee": 0,
-                
-                # Time-based APR values
-                "apr_24h": 0,
-                "apr_7d": 0,
-                "apr_30d": 0,
-                
-                # Change metrics
-                "apr_change_24h": 0,
-                "apr_change_7d": 0,
-                "apr_change_30d": 0,
-                "tvl_change_24h": 0,
-                "tvl_change_7d": 0,
-                "tvl_change_30d": 0,
-                
-                # Status and timestamps
-                "active": True,
-                "created_at": current_time,
-                "updated_at": current_time,
-                
-                # Extra data
-                "extra_data": {},
-                "version": "1.0",
-                
-                # Prediction fields
-                "prediction_score": 0,
-                "risk_score": 0,
-                "volatility": 0,
-                
-                # DEX specific fields
-                "dex_specific": {
-                    "ammId": "",
-                    "concentrationBounds": "",
-                    "whirlpoolId": ""
-                },
-                
-                # Original data references (empty for fallback)
-                "metrics_data": {},
-                "api_response": {
-                    "id": "",
-                    "poolId": pool_id,
-                    "programId": "",
-                    "source": pool.get('source', 'Unknown'),
-                    "name": pool_id,
-                    "active": True,
-                    "metrics": {}
-                }
-            }
+            # Instead of creating a synthetic record, return None to indicate transformation failure
+            # This allows the calling code to handle the error appropriately
+            return None
     
     def get_transformed_pools(self, max_pools: int = 500, **kwargs) -> List[Dict[str, Any]]:
         """
@@ -828,7 +669,11 @@ class DefiAggregationAPI:
         
         for pool in pools:
             transformed = self.transform_pool_data(pool)
-            transformed_pools.append(transformed)
+            if transformed is not None:
+                transformed_pools.append(transformed)
+            else:
+                pool_id = pool.get('poolId', pool.get('id', 'unknown'))
+                logger.warning(f"Skipping pool {pool_id} due to transformation failure")
         
         logger.info(f"Transformed {len(transformed_pools)} pools to application format")
         return transformed_pools
