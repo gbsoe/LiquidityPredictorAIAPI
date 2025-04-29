@@ -444,16 +444,24 @@ class DefiAggregationAPI:
             
             for pool in pools:
                 # Create a historical record with timestamp
+                # Calculate price ratio (if available)
+                token1_price = pool.get("token1_price", 0)
+                token2_price = pool.get("token2_price", 0)
+                price_ratio = 0
+                if token1_price and token2_price and token2_price > 0:
+                    price_ratio = token1_price / token2_price
+                
                 historical_record = {
                     "pool_id": pool.get("id", ""),
                     "timestamp": timestamp,
+                    "price_ratio": price_ratio,
                     "liquidity": pool.get("liquidity", 0),
                     "volume_24h": pool.get("volume_24h", 0),
                     "apr_24h": pool.get("apr_24h", 0),
                     "apr_7d": pool.get("apr_7d", 0),
                     "apr_30d": pool.get("apr_30d", 0),
-                    "token1_price": pool.get("token1_price", 0),
-                    "token2_price": pool.get("token2_price", 0)
+                    "token1_price": token1_price,
+                    "token2_price": token2_price
                 }
                 
                 historical_records.append(historical_record)

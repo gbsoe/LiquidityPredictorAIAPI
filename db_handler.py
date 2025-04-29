@@ -319,6 +319,7 @@ class PoolHistoricalData(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     pool_id = Column(String, nullable=False)
     timestamp = Column(String, nullable=False)
+    price_ratio = Column(Float, nullable=False, default=0)
     liquidity = Column(Float, nullable=False, default=0)
     volume_24h = Column(Float, nullable=False, default=0)
     apr_24h = Column(Float, nullable=False, default=0)
@@ -366,6 +367,7 @@ def store_historical_pool_data(historical_records):
                 new_record = PoolHistoricalData(
                     pool_id=record.get("pool_id", ""),
                     timestamp=record.get("timestamp", ""),
+                    price_ratio=record.get("price_ratio", 0),
                     liquidity=record.get("liquidity", 0),
                     volume_24h=record.get("volume_24h", 0),
                     apr_24h=record.get("apr_24h", 0),

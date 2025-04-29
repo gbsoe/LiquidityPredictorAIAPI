@@ -155,6 +155,7 @@ def initialize_schema(db_url):
             id SERIAL PRIMARY KEY,
             pool_id TEXT NOT NULL,
             timestamp TIMESTAMP DEFAULT NOW(),
+            price_ratio FLOAT NOT NULL DEFAULT 0,
             liquidity FLOAT NOT NULL DEFAULT 0,
             volume_24h FLOAT NOT NULL DEFAULT 0,
             apr_24h FLOAT NOT NULL DEFAULT 0,
