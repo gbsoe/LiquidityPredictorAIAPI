@@ -1733,14 +1733,64 @@ def main():
                 "WIF", "PYTH", "MNGO", "SRM", "ATLAS", "POLIS"
             ]
             
-            # Extract tokens from pools
+            # Extract tokens from pools and track token metadata
             pool_tokens = set()
-            if "token1_symbol" in df.columns and "token2_symbol" in df.columns:
+            token_metadata = {}
+            
+            # First check if we have 'tokens' lists in the data (from newer API format)
+            has_token_lists = any('tokens' in row and isinstance(row['tokens'], list) and len(row['tokens']) > 0 for _, row in df.iterrows())
+            
+            if has_token_lists:
+                # Extract from token lists (preferred format from API)
+                for _, row in df.iterrows():
+                    if 'tokens' in row and isinstance(row['tokens'], list):
+                        for token in row['tokens']:
+                            if 'symbol' in token and isinstance(token['symbol'], str) and len(token['symbol']) > 0:
+                                symbol = token['symbol'].upper()
+                                pool_tokens.add(symbol)
+                                # Store metadata keyed by uppercase symbol
+                                if symbol not in token_metadata:
+                                    token_metadata[symbol] = {
+                                        'symbol': symbol,
+                                        'name': token.get('name', 'Unknown'),
+                                        'address': token.get('address', ''),
+                                        'decimals': token.get('decimals', 0),
+                                        'price': token.get('price', 0),
+                                        'active': token.get('active', True)
+                                    }
+            
+            # Fallback to traditional token1/token2 format
+            elif "token1_symbol" in df.columns and "token2_symbol" in df.columns:
                 for _, row in df.iterrows():
                     if isinstance(row["token1_symbol"], str) and len(row["token1_symbol"]) > 0:
-                        pool_tokens.add(row["token1_symbol"].upper())
+                        symbol = row["token1_symbol"].upper()
+                        pool_tokens.add(symbol)
+                        # Store basic metadata
+                        if symbol not in token_metadata:
+                            token_metadata[symbol] = {
+                                'symbol': symbol,
+                                'name': 'Unknown',
+                                'address': row.get('token1_address', ''),
+                                'decimals': 0,
+                                'price': row.get('token1_price', 0),
+                                'active': True
+                            }
                     if isinstance(row["token2_symbol"], str) and len(row["token2_symbol"]) > 0:
-                        pool_tokens.add(row["token2_symbol"].upper())
+                        symbol = row["token2_symbol"].upper() 
+                        pool_tokens.add(symbol)
+                        # Store basic metadata
+                        if symbol not in token_metadata:
+                            token_metadata[symbol] = {
+                                'symbol': symbol,
+                                'name': 'Unknown',
+                                'address': row.get('token2_address', ''),
+                                'decimals': 0,
+                                'price': row.get('token2_price', 0),
+                                'active': True
+                            }
+            
+            # Store the token metadata in session state for later use
+            st.session_state['token_metadata'] = token_metadata
             
             # Combine and deduplicate token lists
             all_tokens = sorted(list(set(popular_tokens) | pool_tokens))
@@ -1807,6 +1857,66 @@ def main():
             
             # Simulate a price chart (since we don't have historical data)
             # In production, you would fetch historical price data from CoinGecko
+            
+            # Display all tokens from our metadata with detailed information
+            st.subheader("All Available Tokens")
+            
+            # Check if we have token metadata
+            if 'token_metadata' in st.session_state and st.session_state['token_metadata']:
+                # Create a DataFrame from the token metadata
+                token_metadata_df = pd.DataFrame([
+                    {
+                        "Symbol": metadata['symbol'],
+                        "Name": metadata['name'],
+                        "Address": metadata['address'][:10] + "..." if len(metadata['address']) > 10 else metadata['address'],
+                        "Decimals": metadata['decimals'],
+                        "Price": f"${metadata['price']:.6f}" if metadata['price'] < 0.01 else f"${metadata['price']:.2f}",
+                        "Active": "✓" if metadata['active'] else "✗",
+                        "Full Address": metadata['address']  # Hidden column for reference
+                    }
+                    for symbol, metadata in st.session_state['token_metadata'].items()
+                ])
+                
+                # Sort by symbol for better readability
+                token_metadata_df = token_metadata_df.sort_values('Symbol')
+                
+                # Add a search field for the token list
+                token_list_search = st.text_input("Search in token list", "")
+                
+                # Filter based on search
+                if token_list_search:
+                    filtered_token_df = token_metadata_df[
+                        token_metadata_df['Symbol'].str.contains(token_list_search, case=False) |
+                        token_metadata_df['Name'].str.contains(token_list_search, case=False)
+                    ]
+                else:
+                    filtered_token_df = token_metadata_df
+                
+                # Show token count
+                st.write(f"Showing {len(filtered_token_df)} of {len(token_metadata_df)} tokens")
+                
+                # Display the dataframe with a copy button for addresses
+                st.dataframe(
+                    filtered_token_df,
+                    use_container_width=True,
+                    column_config={
+                        "Symbol": st.column_config.TextColumn("Symbol", width="small"),
+                        "Name": st.column_config.TextColumn("Name", width="medium"),
+                        "Address": st.column_config.TextColumn("Address", width="medium"),
+                        "Decimals": st.column_config.NumberColumn("Decimals", width="small"),
+                        "Price": st.column_config.TextColumn("Price", width="small"),
+                        "Active": st.column_config.TextColumn("Active", width="small"),
+                        "Full Address": st.column_config.TextColumn(
+                            "Full Address", 
+                            width=None,
+                            disabled=True,
+                            required=False,
+                            visibility="hidden"
+                        )
+                    }
+                )
+            else:
+                st.info("No detailed token metadata available. Try fetching data from the DeFi API for more token information.")
             
             # Create a section to fetch and display token information
             st.subheader("Token Information")
@@ -1892,20 +2002,52 @@ def main():
                         st.write("**Pools Containing This Token**")
                         
                         # Filter pools that contain the selected token
-                        token_pools = df[
-                            (df["token1_symbol"].str.upper() == selected_token.upper()) | 
-                            (df["token2_symbol"].str.upper() == selected_token.upper())
-                        ]
+                        # First check if we can use tokens data or fall back to token1/token2
+                        use_token_lists = any('tokens' in row and isinstance(row['tokens'], list) for _, row in df.iterrows())
+                        
+                        if use_token_lists:
+                            # More precise filtering using tokens lists
+                            token_pools = df[df.apply(
+                                lambda row: any(
+                                    isinstance(token, dict) and 
+                                    'symbol' in token and 
+                                    token['symbol'].upper() == selected_token.upper() 
+                                    for token in row.get('tokens', [])
+                                ),
+                                axis=1
+                            )]
+                        else:
+                            # Fall back to traditional token1/token2 fields
+                            token_pools = df[
+                                (df["token1_symbol"].str.upper() == selected_token.upper()) | 
+                                (df["token2_symbol"].str.upper() == selected_token.upper())
+                            ]
                         
                         if len(token_pools) > 0:
-                            # Show top 5 pools by liquidity
-                            top_pools = token_pools.sort_values("liquidity", ascending=False).head(5)
+                            # Create a cleaner display of pools with more information
+                            pool_data = []
                             
-                            for _, pool in top_pools.iterrows():
-                                st.write(f"- {pool['name']} on {pool['dex']} (APR: {pool['apr']:.2f}%)")
+                            for _, pool in token_pools.iterrows():
+                                pool_data.append({
+                                    "Pool Name": pool['name'],
+                                    "DEX": pool['dex'],
+                                    "Liquidity": format_currency(pool['liquidity']),
+                                    "Volume (24h)": format_currency(pool.get('volume_24h', 0)),
+                                    "APR": format_percentage(pool['apr']),
+                                    "Paired With": pool['token2_symbol'] if pool['token1_symbol'].upper() == selected_token.upper() else pool['token1_symbol']
+                                })
+                            
+                            # Create a DataFrame for better display
+                            pool_df = pd.DataFrame(pool_data)
+                            
+                            # Sort by liquidity for better relevance
+                            pool_df = pool_df.sort_values("Liquidity", key=lambda x: x.str.replace('$', '').str.replace('M', '000000').str.replace('K', '000').astype(float), ascending=False)
+                            
+                            # Show the table
+                            st.dataframe(pool_df, use_container_width=True)
                                 
-                            if len(token_pools) > 5:
-                                st.write(f"...and {len(token_pools) - 5} more pools")
+                            if len(token_pools) > 10:
+                                st.info(f"Showing top pools by liquidity. {len(token_pools)} pools found containing {selected_token}.")
                         else:
                             st.write("No pools found containing this token")
         
