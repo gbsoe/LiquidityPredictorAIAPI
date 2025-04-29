@@ -178,6 +178,121 @@ def get_category_badge(category):
     </span>
     """
 
+def display_historical_data(pool_id, days=30):
+    """
+    Display historical data for a specific pool.
+    
+    Args:
+        pool_id: The pool ID to get history for
+        days: Number of days of history to display
+    """
+    try:
+        # Get the historical service
+        historical_service = st.session_state.get("historical_service")
+        if not historical_service:
+            historical_service = get_historical_service()
+            
+        # Get historical data
+        history = historical_service.get_pool_history(pool_id, days)
+        
+        if not history or len(history) == 0:
+            st.info("No historical data available for this pool yet. Data collection is in progress.")
+            return
+            
+        # Convert to DataFrame for visualization
+        history_df = pd.DataFrame(history)
+        
+        # Make sure timestamp is datetime
+        if 'timestamp' in history_df.columns:
+            history_df['timestamp'] = pd.to_datetime(history_df['timestamp'])
+            history_df = history_df.sort_values('timestamp')
+        
+        # Create tabs for different metrics
+        metric_tabs = st.tabs(["APR", "Liquidity", "Volume", "Token Prices"])
+        
+        # APR History Tab
+        with metric_tabs[0]:
+            if 'apr' in history_df.columns:
+                fig = px.line(
+                    history_df,
+                    x='timestamp',
+                    y='apr',
+                    title=f"APR History (Last {days} Days)",
+                    labels={'timestamp': 'Date', 'apr': 'APR (%)'}
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No APR history data available")
+        
+        # Liquidity History Tab
+        with metric_tabs[1]:
+            if 'liquidity' in history_df.columns:
+                fig = px.line(
+                    history_df,
+                    x='timestamp',
+                    y='liquidity',
+                    title=f"Liquidity History (Last {days} Days)",
+                    labels={'timestamp': 'Date', 'liquidity': 'Liquidity ($)'}
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No liquidity history data available")
+        
+        # Volume History Tab
+        with metric_tabs[2]:
+            if 'volume_24h' in history_df.columns:
+                fig = px.line(
+                    history_df,
+                    x='timestamp',
+                    y='volume_24h',
+                    title=f"Volume History (Last {days} Days)",
+                    labels={'timestamp': 'Date', 'volume_24h': 'Volume ($)'}
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No volume history data available")
+        
+        # Token Prices Tab
+        with metric_tabs[3]:
+            token_cols = [col for col in history_df.columns if 'token' in col and 'price' in col]
+            
+            if token_cols:
+                # Create figure with secondary y-axis
+                fig = make_subplots(specs=[[{"secondary_y": True}]])
+                
+                # Add token price lines
+                for i, col in enumerate(token_cols):
+                    token_name = col.split('_')[0]  # Extract token name from column
+                    
+                    # Add line to plot (alternating primary/secondary axis)
+                    fig.add_trace(
+                        go.Scatter(
+                            x=history_df['timestamp'], 
+                            y=history_df[col],
+                            name=f"{token_name} Price",
+                            line=dict(width=2)
+                        ),
+                        secondary_y=(i % 2 == 1)  # Alternate primary/secondary
+                    )
+                
+                # Set titles and labels
+                fig.update_layout(
+                    title_text=f"Token Prices (Last {days} Days)",
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                )
+                fig.update_xaxes(title_text="Date")
+                fig.update_yaxes(title_text="Price ($)", secondary_y=False)
+                fig.update_yaxes(title_text="Price ($)", secondary_y=True)
+                
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No token price history available")
+                
+    except Exception as e:
+        st.error(f"Error displaying historical data: {str(e)}")
+        logger.error(f"Error in display_historical_data: {str(e)}")
+        logger.error(traceback.format_exc())
+
 def ensure_all_fields(pool_data):
     """
     Ensure all required fields are present in the pool data.
