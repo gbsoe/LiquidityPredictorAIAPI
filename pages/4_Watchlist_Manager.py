@@ -140,9 +140,38 @@ def add_batch_pools(watchlist_id: int, pool_ids: List[str]) -> int:
         Number of pools added
     """
     added = 0
-    for pool_id in pool_ids:
+    
+    # Track IDs that aren't in our database for reporting
+    unknown_pools = []
+    
+    # Create a progress bar
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    for i, pool_id in enumerate(pool_ids):
+        # Update progress
+        progress = (i + 1) / len(pool_ids)
+        progress_bar.progress(progress)
+        status_text.text(f"Processing pool {i+1} of {len(pool_ids)}: {pool_id[:10]}...")
+        
+        # Check if pool exists in our database
+        pool_exists = pool_id in pools_df["id"].values if not pools_df.empty else False
+        
+        if not pool_exists:
+            unknown_pools.append(pool_id)
+            
+        # Add to watchlist (will create placeholder if needed)
         if db_handler.add_pool_to_watchlist(watchlist_id, pool_id):
             added += 1
+    
+    # Clear the progress indicators
+    progress_bar.empty()
+    status_text.empty()
+    
+    # Report on unknown pools
+    if unknown_pools:
+        st.info(f"{len(unknown_pools)} pools were not in the database and added as placeholders. They will be populated with data on next refresh.")
+    
     return added
 
 def get_pool_suggestions(pools_df: pd.DataFrame, max_count: int = 5) -> List[Dict[str, Any]]:
@@ -216,7 +245,7 @@ def migrate_legacy_watchlist():
             return False
         
         # Add the pools
-        added = add_batch_pools(watchlist.id, pool_ids)
+        added = add_batch_pools(watchlist["id"], pool_ids)
         
         st.success(f"Successfully imported {added} pools from legacy watchlist file")
         return True
@@ -429,21 +458,25 @@ def main():
                 add_button = st.button("Add to Watchlist", key="add_single")
                 
                 if add_button and pool_id:
-                    # Verify pool exists
+                    # Try to find the pool in our DataFrame
                     pool_exists = False
+                    pool_info = None
                     if not pools_df.empty:
                         pool_exists = pool_id in pools_df["id"].values
-                    
-                    if pool_exists:
-                        if db_handler.add_pool_to_watchlist(target_watchlist, pool_id):
-                            st.success(f"Added pool {pool_id} to watchlist")
-                            # Show the pool info
+                        if pool_exists:
                             pool_info = pools_df[pools_df["id"] == pool_id].iloc[0].to_dict()
+                    
+                    # Add to watchlist (our enhanced db_handler will create a placeholder if needed)
+                    if db_handler.add_pool_to_watchlist(target_watchlist, pool_id):
+                        st.success(f"Added pool {pool_id} to watchlist")
+                        
+                        # Show the pool info if we have it
+                        if pool_info:
                             display_pool_card(pool_info)
                         else:
-                            st.error(f"Failed to add pool {pool_id} to watchlist")
+                            st.info(f"Pool {pool_id} was added as a placeholder. It will be updated with full details when data is refreshed.")
                     else:
-                        st.error(f"Pool {pool_id} not found in database")
+                        st.error(f"Failed to add pool {pool_id} to watchlist")
             
             # Method 2: Search & Filter
             with method_tab2:

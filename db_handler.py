@@ -759,6 +759,47 @@ def add_pool_to_watchlist(watchlist_id, pool_id, notes=""):
             print(f"Pool {pool_id} is already in watchlist {watchlist_id}")
             return True
         
+        # Check if pool exists in our database
+        pool_exists = session.query(LiquidityPool).filter_by(id=pool_id).first()
+        if not pool_exists:
+            print(f"Pool {pool_id} not found in database")
+            
+            # Attempt to create a skeleton pool entry for tracking
+            try:
+                # Create a basic placeholder pool with default values
+                # This will allow us to track the pool even if we don't have full data yet
+                default_pool = LiquidityPool(
+                    id=pool_id,
+                    name=f"Pool {pool_id[:8]}...",  # Shortened ID as name
+                    dex="Unknown",
+                    category="Custom",
+                    token1_symbol="Unknown",
+                    token2_symbol="Unknown",
+                    token1_address="",
+                    token2_address="",
+                    liquidity=0.0,
+                    volume_24h=0.0,
+                    apr=0.0,
+                    fee=0.0,
+                    version="",
+                    apr_change_24h=0.0,
+                    apr_change_7d=0.0,
+                    tvl_change_24h=0.0,
+                    tvl_change_7d=0.0,
+                    prediction_score=0.0,
+                    apr_change_30d=0.0,
+                    tvl_change_30d=0.0,
+                    created_at=datetime.now().isoformat(),
+                    updated_at=datetime.now().isoformat()
+                )
+                session.add(default_pool)
+                session.commit()
+                print(f"Created placeholder for pool {pool_id} - will be updated on next data refresh")
+            except Exception as e:
+                session.rollback()
+                print(f"Failed to create placeholder pool: {e}")
+                # Continue anyway to add to watchlist
+        
         # Add pool to watchlist
         watchlist_pool = WatchlistPool(
             watchlist_id=watchlist_id, pool_id=pool_id, notes=notes)
