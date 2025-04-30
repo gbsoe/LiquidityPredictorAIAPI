@@ -1,38 +1,38 @@
 {
   "stats": {
-    "total_pools": 36,
+    "total_pools": 65,
     "unique_pools": [
-      "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
-      "Cv3YJJvCZQJKP5G6AHh77GVbewGZUVs4Y1WJ6Yc3HbQj",
-      "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
       "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw",
-      "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
-      "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
-      "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
-      "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy",
+      "Cv3YJJvCZQJKP5G6AHh77GVbewGZUVs4Y1WJ6Yc3HbQj",
       "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
-      "FLKdMRsS7dvj9mMsEBxciUJc3TKJcEmVUbQRf5UnYEpw",
+      "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy",
       "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
+      "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj",
+      "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
+      "FLKdMRsS7dvj9mMsEBxciUJc3TKJcEmVUbQRf5UnYEpw",
+      "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
+      "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
       "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm",
-      "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj"
+      "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
+      "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
     ],
     "total_tokens": 0,
     "unique_tokens": [],
     "dex_counts": {
-      "raydium": 15,
-      "orca": 15,
-      "meteora": 6
+      "raydium": 25,
+      "orca": 25,
+      "meteora": 15
     },
-    "api_calls": 8,
+    "api_calls": 15,
     "errors": 0,
-    "db_writes": 36,
-    "start_time": "2025-04-30T01:45:38.424588",
-    "end_time": "2025-04-30T01:46:42.013354",
-    "elapsed_seconds": 63.588627338409424,
-    "pools_per_second": 0.5661389702346181
+    "db_writes": 65,
+    "start_time": "2025-04-30T02:21:21.165270",
+    "end_time": "2025-04-30T02:22:23.696644",
+    "elapsed_seconds": 62.5311119556427,
+    "pools_per_second": 1.0394825546378998
   },
-  "test_duration": "63.59 seconds",
-  "timestamp": "2025-04-30T01:46:42.013360",
+  "test_duration": "62.53 seconds",
+  "timestamp": "2025-04-30T02:22:23.696655",
   "sample_pools": [
     {
       "id": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
@@ -77,9 +77,9 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "id": 238,
+        "id": 264,
         "poolId": 4,
-        "timestamp": "2025-04-30T01:15:45.524Z",
+        "timestamp": "2025-04-30T02:17:27.021Z",
         "tvl": 5000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -98,9 +98,9 @@
         "name": "4k3D-EPjF LP",
         "active": true,
         "metrics": {
-          "id": 238,
+          "id": 264,
           "poolId": 4,
-          "timestamp": "2025-04-30T01:15:45.524Z",
+          "timestamp": "2025-04-30T02:17:27.021Z",
           "tvl": 5000000,
           "fee": 0.0025,
           "apy24h": 14.665538,
@@ -156,9 +156,9 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "id": 239,
+        "id": 265,
         "poolId": 5,
-        "timestamp": "2025-04-30T01:15:45.529Z",
+        "timestamp": "2025-04-30T02:17:27.022Z",
         "tvl": 6500000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -177,9 +177,9 @@
         "name": "So11-EPjF LP",
         "active": true,
         "metrics": {
-          "id": 239,
+          "id": 265,
           "poolId": 5,
-          "timestamp": "2025-04-30T01:15:45.529Z",
+          "timestamp": "2025-04-30T02:17:27.022Z",
           "tvl": 6500000,
           "fee": 0.0025,
           "apy24h": 14.665538,
@@ -235,9 +235,9 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "id": 240,
+        "id": 267,
         "poolId": 6,
-        "timestamp": "2025-04-30T01:15:45.553Z",
+        "timestamp": "2025-04-30T02:17:27.037Z",
         "tvl": 8000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -256,9 +256,9 @@
         "name": "So11-Es9v LP",
         "active": true,
         "metrics": {
-          "id": 240,
+          "id": 267,
           "poolId": 6,
-          "timestamp": "2025-04-30T01:15:45.553Z",
+          "timestamp": "2025-04-30T02:17:27.037Z",
           "tvl": 8000000,
           "fee": 0.0025,
           "apy24h": 14.665538,
@@ -314,9 +314,9 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "id": 241,
+        "id": 266,
         "poolId": 7,
-        "timestamp": "2025-04-30T01:15:45.557Z",
+        "timestamp": "2025-04-30T02:17:27.036Z",
         "tvl": 9500000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -335,9 +335,9 @@
         "name": "4k3D-So11 LP",
         "active": true,
         "metrics": {
-          "id": 241,
+          "id": 266,
           "poolId": 7,
-          "timestamp": "2025-04-30T01:15:45.557Z",
+          "timestamp": "2025-04-30T02:17:27.036Z",
           "tvl": 9500000,
           "fee": 0.0025,
           "apy24h": 14.665538,
@@ -393,9 +393,9 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "id": 242,
+        "id": 268,
         "poolId": 8,
-        "timestamp": "2025-04-30T01:15:45.561Z",
+        "timestamp": "2025-04-30T02:17:27.043Z",
         "tvl": 11000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -414,9 +414,9 @@
         "name": "9n4n-EPjF LP",
         "active": true,
         "metrics": {
-          "id": 242,
+          "id": 268,
           "poolId": 8,
-          "timestamp": "2025-04-30T01:15:45.561Z",
+          "timestamp": "2025-04-30T02:17:27.043Z",
           "tvl": 11000000,
           "fee": 0.0025,
           "apy24h": 14.665538,
