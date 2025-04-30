@@ -2,30 +2,30 @@
   "stats": {
     "total_pools": 57,
     "unique_pools": [
-      "FLKdMRsS7dvj9mMsEBxciUJc3TKJcEmVUbQRf5UnYEpw",
-      "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm",
-      "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
-      "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
-      "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw",
-      "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
-      "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy",
-      "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+      "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
       "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj",
-      "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
+      "FLKdMRsS7dvj9mMsEBxciUJc3TKJcEmVUbQRf5UnYEpw",
       "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
+      "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
       "Cv3YJJvCZQJKP5G6AHh77GVbewGZUVs4Y1WJ6Yc3HbQj",
-      "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8"
+      "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy",
+      "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw",
+      "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
+      "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
+      "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
+      "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+      "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm"
     ],
     "total_tokens": 114,
     "unique_tokens": [
       "So11",
-      "9n4n",
-      "4k3D",
-      "mSoL",
-      "EPjF",
       "Es9v",
       "7vfC",
-      "DezX"
+      "mSoL",
+      "4k3D",
+      "DezX",
+      "EPjF",
+      "9n4n"
     ],
     "dex_counts": {
       "raydium": 25,
@@ -35,13 +35,13 @@
     "api_calls": 13,
     "errors": 0,
     "db_writes": 57,
-    "start_time": "2025-04-30T03:16:49.799887",
-    "end_time": "2025-04-30T03:17:51.809060",
-    "elapsed_seconds": 62.008952379226685,
-    "pools_per_second": 0.9192221092755518
+    "start_time": "2025-04-30T03:33:08.922377",
+    "end_time": "2025-04-30T03:34:09.973070",
+    "elapsed_seconds": 61.050527572631836,
+    "pools_per_second": 0.9336528653611892
   },
-  "test_duration": "62.01 seconds",
-  "timestamp": "2025-04-30T03:17:51.809071",
+  "test_duration": "61.05 seconds",
+  "timestamp": "2025-04-30T03:34:09.973076",
   "sample_pools": [
     {
       "id": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",

@@ -441,29 +441,62 @@ def update_pool_with_token_prices(pool: dict) -> dict:
     Returns:
         Updated pool dictionary with token prices
     """
-    if not pool or "token1_symbol" not in pool or "token2_symbol" not in pool:
+    if not pool:
         return pool
         
     # Make a copy to avoid modifying the original
     updated_pool = pool.copy()
     
-    # Get token symbols
-    token1 = pool["token1_symbol"]
-    token2 = pool["token2_symbol"]
+    # First check if we have token symbols from the tokens array
+    tokens_array = pool.get("tokens", [])
+    token1 = None
+    token2 = None
+    
+    # Try to get token symbols from tokens array first
+    if len(tokens_array) >= 2:
+        # Extract symbols from tokens array
+        token1 = tokens_array[0].get("symbol")
+        token2 = tokens_array[1].get("symbol")
+        
+        # Log what we found
+        logger.info(f"Found tokens in array: {token1} / {token2}")
+    
+    # Fallback to token1_symbol and token2_symbol fields if needed
+    if not token1 and "token1_symbol" in pool:
+        token1 = pool["token1_symbol"]
+    
+    if not token2 and "token2_symbol" in pool:
+        token2 = pool["token2_symbol"]
+    
+    # Skip if we don't have token symbols
+    if not token1 or not token2:
+        logger.warning(f"Missing token symbols for pool {pool.get('id', 'unknown')}")
+        return updated_pool
+    
+    # Normalize symbols for lookup (uppercase)
+    token1 = token1.upper() if isinstance(token1, str) else token1
+    token2 = token2.upper() if isinstance(token2, str) else token2
     
     # Get current prices
+    logger.info(f"Fetching prices for tokens: {token1} / {token2}")
     prices = get_multiple_prices([token1, token2])
     
     # Add prices to pool data
     if token1 in prices:
         updated_pool["token1_price"] = prices[token1]
+        logger.info(f"Set token1 price for {token1}: {prices[token1]}")
     else:
         updated_pool["token1_price"] = 0.0
         
     if token2 in prices:
         updated_pool["token2_price"] = prices[token2]
+        logger.info(f"Set token2 price for {token2}: {prices[token2]}")
     else:
         updated_pool["token2_price"] = 0.0
+    
+    # Add these token symbols back to ensure they're preserved
+    updated_pool["token1_symbol"] = token1
+    updated_pool["token2_symbol"] = token2
         
     return updated_pool
 
