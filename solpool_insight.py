@@ -10,6 +10,7 @@ import pandas as pd
 import json
 import os
 import random
+import math
 from datetime import datetime, timedelta
 import plotly.express as px
 import plotly.graph_objects as go
@@ -337,7 +338,7 @@ def calculate_prediction_score(pool):
     if tvl > 0:
         # Log scale score for TVL
         # 100k = 10 points, 1M = 15 points, 10M = 20 points, 100M+ = 25 points
-        tvl_score = min(25, 5 * (1 + min(4, max(0, (tvl / 1000000).log10()))))
+        tvl_score = min(25, 5 * (1 + min(4, max(0, math.log10(tvl / 1000000) if tvl >= 1000000 else 0))))
     
     # Factor 3: Volume/TVL ratio (0-25 points)
     activity_score = 0
