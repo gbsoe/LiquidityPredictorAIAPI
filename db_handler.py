@@ -7,6 +7,7 @@ import os
 import json
 import sys
 import sqlite3
+import time
 from datetime import datetime
 try:
     import pandas as pd
@@ -181,27 +182,83 @@ def process_api_pool_data(pool_data):
     Returns:
         Dict with database-compatible fields
     """
-    processed_pool = pool_data.copy()
+    processed_pool = {}
+    
+    # Map important fields from API format to our database format
+    # Ensure our 'id' field is set correctly
+    if 'id' in pool_data:
+        processed_pool['id'] = pool_data['id']
+    elif 'poolId' in pool_data:
+        processed_pool['id'] = pool_data['poolId']
+    else:
+        # If no ID field, generate a fallback ID
+        processed_pool['id'] = f"unknown-{str(time.time())}"
+    
+    # Map other fields
+    # Standard fields
+    processed_pool['name'] = pool_data.get('name', '')
+    processed_pool['dex'] = pool_data.get('source', 'Unknown')
+    processed_pool['category'] = pool_data.get('category', 'Uncategorized')
+    processed_pool['version'] = pool_data.get('version', 'v1')
+    
+    # Extract metrics fields if available
+    metrics = pool_data.get('metrics', {})
+    if metrics and isinstance(metrics, dict):
+        processed_pool['liquidity'] = metrics.get('tvl', 0.0)
+        processed_pool['volume_24h'] = metrics.get('volume24h', 0.0)
+        processed_pool['apr'] = metrics.get('apr', 0.0)
+        processed_pool['fee'] = metrics.get('fee', 0.0)
+        processed_pool['apr_change_24h'] = metrics.get('aprChange24h', 0.0)
+        processed_pool['apr_change_7d'] = metrics.get('aprChange7d', 0.0)
+        processed_pool['tvl_change_24h'] = metrics.get('tvlChange24h', 0.0)
+        processed_pool['tvl_change_7d'] = metrics.get('tvlChange7d', 0.0)
+    else:
+        # Use direct fields or defaults
+        processed_pool['liquidity'] = pool_data.get('liquidity', 0.0)
+        processed_pool['volume_24h'] = pool_data.get('volume_24h', 0.0)
+        processed_pool['apr'] = pool_data.get('apr', 0.0)
+        processed_pool['fee'] = pool_data.get('fee', 0.0)
+        processed_pool['apr_change_24h'] = pool_data.get('apr_change_24h', 0.0)
+        processed_pool['apr_change_7d'] = pool_data.get('apr_change_7d', 0.0)
+        processed_pool['tvl_change_24h'] = pool_data.get('tvl_change_24h', 0.0)
+        processed_pool['tvl_change_7d'] = pool_data.get('tvl_change_7d', 0.0)
+    
+    # Set default values for other required fields
+    processed_pool['apr_change_30d'] = pool_data.get('apr_change_30d', 0.0)
+    processed_pool['tvl_change_30d'] = pool_data.get('tvl_change_30d', 0.0)
+    processed_pool['prediction_score'] = pool_data.get('prediction_score', 0.0)
+    
+    # Default token fields
+    processed_pool['token1_symbol'] = pool_data.get('token1_symbol', 'Unknown')
+    processed_pool['token2_symbol'] = pool_data.get('token2_symbol', 'Unknown')
+    processed_pool['token1_address'] = pool_data.get('token1_address', '')
+    processed_pool['token2_address'] = pool_data.get('token2_address', '')
+    processed_pool['token1_price'] = pool_data.get('token1_price', 0.0)
+    processed_pool['token2_price'] = pool_data.get('token2_price', 0.0)
+    
+    # Timestamps
+    processed_pool['created_at'] = pool_data.get('createdAt', '')
+    processed_pool['updated_at'] = pool_data.get('updatedAt', '')
     
     # Handle tokens array if present
-    if "tokens" in processed_pool and isinstance(processed_pool["tokens"], list):
-        tokens = processed_pool["tokens"]
-        
-        # Remove tokens array to avoid SQLAlchemy errors
-        del processed_pool["tokens"]
+    if "tokens" in pool_data and isinstance(pool_data["tokens"], list):
+        tokens = pool_data["tokens"]
         
         # Process token data
         if len(tokens) > 0:
             # First token
-            processed_pool["token1_symbol"] = tokens[0].get("symbol", processed_pool.get("token1_symbol", "Unknown"))
-            processed_pool["token1_address"] = tokens[0].get("address", processed_pool.get("token1_address", ""))
-            processed_pool["token1_price"] = tokens[0].get("price", processed_pool.get("token1_price", 0.0))
+            processed_pool["token1_symbol"] = tokens[0].get("symbol", processed_pool["token1_symbol"])
+            processed_pool["token1_address"] = tokens[0].get("address", processed_pool["token1_address"])
+            processed_pool["token1_price"] = tokens[0].get("price", processed_pool["token1_price"])
             
             # Second token if available
             if len(tokens) > 1:
-                processed_pool["token2_symbol"] = tokens[1].get("symbol", processed_pool.get("token2_symbol", "Unknown"))
-                processed_pool["token2_address"] = tokens[1].get("address", processed_pool.get("token2_address", ""))
-                processed_pool["token2_price"] = tokens[1].get("price", processed_pool.get("token2_price", 0.0))
+                processed_pool["token2_symbol"] = tokens[1].get("symbol", processed_pool["token2_symbol"])
+                processed_pool["token2_address"] = tokens[1].get("address", processed_pool["token2_address"])
+                processed_pool["token2_price"] = tokens[1].get("price", processed_pool["token2_price"])
+    
+    # For debugging
+    print(f"Processed pool {processed_pool['id']} with token prices: {processed_pool['token1_price']} / {processed_pool['token2_price']}")
     
     return processed_pool
 
