@@ -122,9 +122,71 @@ class TokenPriceService:
         cache_age = datetime.now() - self.last_cache_update
         return cache_age.total_seconds() < CACHE_EXPIRY_SECONDS
     
+    def get_token_price_from_defi_api(self, symbol: str) -> Optional[float]:
+        """
+        Get the current price for a token directly from the DeFi API
+        
+        Args:
+            symbol: Token symbol (e.g., "SOL", "BTC")
+            
+        Returns:
+            Current price in USD, or None if not available
+        """
+        # Skip processing for UNKNOWN tokens to avoid spam warnings
+        if symbol == "UNKNOWN":
+            return None
+            
+        try:
+            # Get the API key from environment
+            api_key = os.getenv("DEFI_API_KEY")
+            if not api_key:
+                logger.warning("No API key found for DeFi API")
+                return None
+                
+            # Fetch price from DeFi API using the GET Token endpoint
+            url = f"https://filotdefiapi.replit.app/api/v1/tokens/{symbol}"
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 429:
+                logger.warning(f"Rate limit exceeded for DeFi API when fetching {symbol}")
+                time.sleep(1)  # Back off for a second
+                return None
+                
+            response.raise_for_status()
+            data = response.json()
+            
+            # The API returns an array of tokens where one might match our symbol
+            if isinstance(data, list) and len(data) > 0:
+                # Find the token that matches our symbol (case-insensitive)
+                for token in data:
+                    if token.get("symbol", "").upper() == symbol.upper():
+                        price = token.get("price", 0)
+                        
+                        # Update cache
+                        self.cached_prices[symbol.upper()] = price
+                        if self.use_cache:
+                            self._save_cache()
+                        
+                        logger.info(f"Retrieved {symbol} price from DeFi API: ${price}")
+                        return price
+                        
+                logger.warning(f"Token {symbol} not found in DeFi API response")
+                return None
+            else:
+                logger.warning(f"Invalid or empty response for token {symbol} from DeFi API")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error fetching price for {symbol} from DeFi API: {e}")
+            return None
+            
     def get_token_price(self, symbol: str) -> Optional[float]:
         """
-        Get the current price for a token
+        Get the current price for a token, trying multiple sources
         
         Args:
             symbol: Token symbol (e.g., "SOL", "BTC")
@@ -139,7 +201,13 @@ class TokenPriceService:
         # Try cache first
         if self._is_cache_valid() and symbol in self.cached_prices:
             return self.cached_prices[symbol]
-        
+            
+        # First try the DeFi API as it's most aligned with our data
+        price = self.get_token_price_from_defi_api(symbol)
+        if price is not None:
+            return price
+            
+        # If DeFi API fails, try CoinGecko as fallback
         # Convert symbol to CoinGecko ID
         coingecko_id = self.token_mapping.get(symbol.upper())
         if not coingecko_id:
@@ -167,19 +235,79 @@ class TokenPriceService:
                 if self.use_cache:
                     self._save_cache()
                 
-                logger.info(f"Retrieved {symbol} price: ${price}")
+                logger.info(f"Retrieved {symbol} price from CoinGecko: ${price}")
                 return price
             else:
                 logger.warning(f"Price data not found for {symbol} (CoinGecko ID: {coingecko_id})")
                 return None
                 
         except Exception as e:
-            logger.error(f"Error fetching price for {symbol}: {e}")
+            logger.error(f"Error fetching price for {symbol} from CoinGecko: {e}")
             return None
     
+    def get_multiple_prices_from_defi_api(self, symbols: List[str]) -> Dict[str, float]:
+        """
+        Get prices for multiple tokens at once from the DeFi API
+        
+        Args:
+            symbols: List of token symbols
+            
+        Returns:
+            Dictionary mapping symbols to prices
+        """
+        result = {}
+        
+        # Get the API key
+        api_key = os.getenv("DEFI_API_KEY")
+        if not api_key:
+            logger.warning("No API key found for DeFi API")
+            return result
+            
+        try:
+            # First try a general token lookup
+            url = "https://filotdefiapi.replit.app/api/v1/tokens"
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 429:
+                logger.warning("Rate limit exceeded for DeFi API when fetching multiple tokens")
+                time.sleep(1)  # Back off for a second
+                return result
+                
+            response.raise_for_status()
+            data = response.json()
+            
+            if isinstance(data, list) and len(data) > 0:
+                # Process all tokens in the list
+                for token in data:
+                    token_symbol = token.get("symbol", "").upper()
+                    if token_symbol in [s.upper() for s in symbols]:
+                        price = token.get("price", 0)
+                        
+                        # Update result and cache
+                        result[token_symbol] = price
+                        self.cached_prices[token_symbol] = price
+                
+                # Save updated cache
+                if self.use_cache:
+                    self._save_cache()
+                    
+                logger.info(f"Retrieved {len(result)} token prices from DeFi API")
+            else:
+                logger.warning("Invalid or empty response from DeFi API")
+                
+            return result
+                
+        except Exception as e:
+            logger.error(f"Error fetching multiple prices from DeFi API: {e}")
+            return result
+            
     def get_multiple_prices(self, symbols: List[str]) -> Dict[str, float]:
         """
-        Get prices for multiple tokens at once
+        Get prices for multiple tokens at once, trying multiple sources
         
         Args:
             symbols: List of token symbols
@@ -191,26 +319,33 @@ class TokenPriceService:
         symbols_to_fetch = []
         result = {}
         
-        for symbol in symbols:
-            symbol = symbol.upper()
-            # Skip UNKNOWN tokens
-            if symbol == "UNKNOWN":
-                continue
-                
-            # Use cache if valid
-            if self._is_cache_valid() and symbol in self.cached_prices:
-                result[symbol] = self.cached_prices[symbol]
-            elif symbol in self.token_mapping:
-                symbols_to_fetch.append(symbol)
-            else:
-                # Only log warning for non-UNKNOWN tokens to reduce noise
-                logger.warning(f"No mapping for token: {symbol}")
+        normalized_symbols = [s.upper() for s in symbols if s != "UNKNOWN"]
+        
+        # Use cache first for all symbols
+        if self._is_cache_valid():
+            for symbol in normalized_symbols:
+                if symbol in self.cached_prices:
+                    result[symbol] = self.cached_prices[symbol]
+                else:
+                    symbols_to_fetch.append(symbol)
+        else:
+            symbols_to_fetch = normalized_symbols
         
         if not symbols_to_fetch:
             return result
+            
+        # First try the DeFi API as the primary source
+        defi_api_prices = self.get_multiple_prices_from_defi_api(symbols_to_fetch)
+        result.update(defi_api_prices)
         
+        # Check which symbols still need prices
+        remaining_symbols = [s for s in symbols_to_fetch if s not in defi_api_prices]
+        
+        if not remaining_symbols:
+            return result
+            
         # Convert symbols to CoinGecko IDs
-        coingecko_ids = [self.token_mapping[s] for s in symbols_to_fetch if s in self.token_mapping]
+        coingecko_ids = [self.token_mapping[s] for s in remaining_symbols if s in self.token_mapping]
         
         if not coingecko_ids:
             return result
@@ -228,7 +363,7 @@ class TokenPriceService:
             data = response.json()
             
             # Process results and update cache
-            for symbol in symbols_to_fetch:
+            for symbol in remaining_symbols:
                 coingecko_id = self.token_mapping.get(symbol)
                 if coingecko_id in data and "usd" in data[coingecko_id]:
                     price = data[coingecko_id]["usd"]
@@ -239,11 +374,11 @@ class TokenPriceService:
             if self.use_cache:
                 self._save_cache()
                 
-            logger.info(f"Retrieved prices for {len(result)} tokens")
+            logger.info(f"Retrieved prices for {len(result)} tokens (including {len(result)-len(defi_api_prices)} from CoinGecko)")
             return result
                 
         except Exception as e:
-            logger.error(f"Error fetching prices: {e}")
+            logger.error(f"Error fetching prices from CoinGecko: {e}")
             return result
     
     def add_token_mapping(self, symbol: str, coingecko_id: str) -> None:
@@ -287,7 +422,10 @@ def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
 
 def update_pool_with_token_prices(pool: dict) -> dict:
     """
-    Update a pool dictionary with current token prices from CoinGecko
+    Update a pool dictionary with current token prices from DeFi API or CoinGecko
+    
+    The system first tries to get prices from the DeFi API (which aligns with the
+    pool data source), and falls back to CoinGecko only if needed.
     
     Args:
         pool: Dictionary containing pool data with token1_symbol and token2_symbol
