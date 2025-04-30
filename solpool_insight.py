@@ -439,7 +439,8 @@ def ensure_all_fields(pool_data):
                 validated_pool["fee"] = metrics.get("fee", 0)
         
         # Make sure we use poolId as the primary id if available
-        if "poolId" in validated_pool and validated_pool.get("id", "") == "Unknown":
+        if "poolId" in validated_pool:
+            # Always use poolId as the primary id since it contains the base58 encoded address
             validated_pool["id"] = validated_pool["poolId"]
     
         # ENHANCED: Properly set DEX name based on source field
@@ -455,11 +456,13 @@ def ensure_all_fields(pool_data):
                 token1 = validated_pool.get("token1_symbol", "").lower()
                 token2 = validated_pool.get("token2_symbol", "").lower()
                 
-                # Category determination logic
-                stablecoin_tokens = ["usdc", "usdt", "dai", "busd", "tusd", "usdh", "frax"]
+                # Map tokens based on the API response data
+                # These mappings reflect the actual token symbols in the API
+                stablecoin_tokens = ["usdc", "usdt", "dai", "busd", "tusd", "usdh", "frax", "epjf"]
                 meme_tokens = ["doge", "bonk", "pepe", "shib", "meme", "samo", "doggo"]
-                defi_tokens = ["sol", "msol", "stsol", "jito", "jet", "orca", "ray", "atlas"]
-                gaming_tokens = ["gari", "game", "star", "atlas", "polis", "cope", "step"]
+                defi_tokens = ["sol", "msol", "stsol", "jito", "jet", "orca", "ray", "4k3d"]
+                gaming_tokens = ["gari", "game", "star", "atlas", "polis", "cope", "step", "es9v"]
+                major_tokens = ["so11", "9n4n", "dezx", "7vfc", "btc", "eth"]
                 
                 # Check for stablecoins first
                 if any(stable in pool_name for stable in stablecoin_tokens) or \
@@ -486,9 +489,10 @@ def ensure_all_fields(pool_data):
                      "defi" in pool_name:
                     validated_pool["category"] = "DeFi"
                 
-                # Default to Major category for recognized tokens
-                elif token1.lower() in ["btc", "eth", "sol", "9n4n", "so11"] or \
-                     token2.lower() in ["btc", "eth", "sol", "9n4n", "so11"]:
+                # Default to Major category for recognized tokens from our major_tokens list
+                elif any(major in token1.lower() for major in major_tokens) or \
+                     any(major in token2.lower() for major in major_tokens) or \
+                     any(major in pool_name.lower() for major in major_tokens):
                     validated_pool["category"] = "Major"
                 
                 # Final fallback to DeFi category
