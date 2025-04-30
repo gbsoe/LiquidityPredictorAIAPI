@@ -602,51 +602,81 @@ class DefiAggregationAPI:
             # Extract token data from the tokens array with improved error handling
             tokens = pool.get('tokens', [])
             
-            # If tokens array is empty, try to fetch from tokens endpoint or extract from pool name
-            if not tokens:
-                # First try to extract from pool name
-                pool_name = pool.get('name', '')
-                token1 = {}
-                token2 = {}
-                
-                # Try to parse token names from the pool name format
-                if pool_name and "-" in pool_name:
-                    name_parts = pool_name.split("-")
-                    if len(name_parts) >= 2:
-                        token1_symbol = name_parts[0].strip()
-                        # Handle cases like "Token1-Token2 LP" by removing "LP" or other suffix
-                        token2_part = name_parts[1].strip()
-                        if " " in token2_part:
-                            token2_symbol = token2_part.split(" ")[0].strip()
-                        else:
-                            token2_symbol = token2_part
-                            
-                        # Try to fetch token data from API
-                        token_map = self.get_token_mapping()
+            # IMPORTANT: The API returns empty tokens arrays but includes token symbols in the pool name
+            # We need to extract the token symbols from the pool name and look them up in the tokens API
+            
+            # Always try to extract from pool name, even if tokens array has values
+            # This ensures we have the best token data possible
+            pool_name = pool.get('name', '')
+            
+            # If pool name has token symbols, parse them
+            if pool_name and "-" in pool_name:
+                name_parts = pool_name.split("-")
+                if len(name_parts) >= 2:
+                    token1_symbol = name_parts[0].strip()
+                    # Handle cases like "Token1-Token2 LP" by removing "LP" or other suffix
+                    token2_part = name_parts[1].strip()
+                    if " " in token2_part:
+                        token2_symbol = token2_part.split(" ")[0].strip()
+                    else:
+                        token2_symbol = token2_part
                         
-                        # Look up token1 
-                        if token1_symbol in token_map:
-                            token1 = token_map[token1_symbol]
-                            logger.info(f"Found token data for {token1_symbol}")
-                        else:
-                            # Create basic token dictionary
-                            token1 = {"symbol": token1_symbol, "address": "", "price": 0}
-                            
-                        # Look up token2
-                        if token2_symbol in token_map:
-                            token2 = token_map[token2_symbol]
-                            logger.info(f"Found token data for {token2_symbol}")
-                        else:
-                            # Create basic token dictionary
-                            token2 = {"symbol": token2_symbol, "address": "", "price": 0}
-                            
-                        # Update tokens array for consistency
-                        tokens = [token1, token2]
-                        logger.info(f"Extracted token symbols from name '{pool_name}': {token1_symbol} and {token2_symbol}")
+                    # Get all token data from the API
+                    all_tokens = self.get_all_tokens()
+                    
+                    # Create a mapping from token symbol to token data
+                    token_map = {}
+                    for token in all_tokens:
+                        symbol = token.get('symbol', '')
+                        if symbol:
+                            token_map[symbol] = token
+                    
+                    # Look up token1 
+                    token1 = {}
+                    if token1_symbol in token_map:
+                        token1 = token_map[token1_symbol].copy()
+                        # Ensure price is a numeric value
+                        if token1.get('price') is None or token1.get('price') == '':
+                            token1['price'] = 0
+                        logger.info(f"Found token data for {token1_symbol}")
+                    else:
+                        # Create basic token dictionary
+                        token1 = {
+                            "id": 0,
+                            "symbol": token1_symbol,
+                            "name": token1_symbol,
+                            "decimals": 6,
+                            "address": "",
+                            "active": True,
+                            "price": 0
+                        }
                         
+                    # Look up token2
+                    token2 = {}
+                    if token2_symbol in token_map:
+                        token2 = token_map[token2_symbol].copy()
+                        # Ensure price is a numeric value
+                        if token2.get('price') is None or token2.get('price') == '':
+                            token2['price'] = 0
+                        logger.info(f"Found token data for {token2_symbol}")
+                    else:
+                        # Create basic token dictionary
+                        token2 = {
+                            "id": 0,
+                            "symbol": token2_symbol,
+                            "name": token2_symbol,
+                            "decimals": 6,
+                            "address": "",
+                            "active": True,
+                            "price": 0
+                        }
+                        
+                    # Always update tokens array with the token data we've found or created
+                    tokens = [token1, token2]
+                    logger.info(f"Using token data from token API for '{pool_name}': {token1.get('symbol')} and {token2.get('symbol')}")
+            
             # If tokens were found/created, use them
             token1 = tokens[0] if len(tokens) > 0 else {}
-            token2 = tokens[1] if len(tokens) > 1 else {}
             
             # Extract metrics from the metrics object with improved handling
             metrics = pool.get('metrics', {})

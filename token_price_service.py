@@ -25,6 +25,7 @@ CACHE_EXPIRY_SECONDS = 3600  # 1 hour
 
 # Default Solana token mapping - CoinGecko uses different IDs
 DEFAULT_TOKEN_MAPPING = {
+    # Standard tokens
     "SOL": "solana",
     "BTC": "bitcoin",
     "ETH": "ethereum",
@@ -53,17 +54,24 @@ DEFAULT_TOKEN_MAPPING = {
     "USDH": "usdh",
     "MSOL": "marinade-staked-sol",
     "mSOL": "marinade-staked-sol",
-    "So11": "solana",
-    "Es9v": "usd-coin",
-    "9n4n": "raydium",
-    "4k3D": "raydium",
-    "EPjF": "usd-coin",
-    "DezX": "ethereum",
+    
+    # API-specific symbols (important: these match actual token symbols in the API!)
+    "So11": "solana",        # Solana
+    "Es9v": "usd-coin",      # USDC variant
+    "9n4n": "bitcoin",       # BTC variant
+    "4k3D": "raydium",       # RAY
+    "EPjF": "usd-coin",      # USDC
+    "DezX": "ethereum",      # ETH
+    "7vfC": "ethereum",      # ETH variant
+    
     # Common abbreviated token addresses
     "So11111111111111111111111111111111111111112": "solana",
     "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "usd-coin",
     "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R": "raydium",
     "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So": "marinade-staked-sol",
+    "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E": "bitcoin",
+    "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs": "ethereum",
+    "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263": "ethereum",
 }
 
 class TokenPriceService:
