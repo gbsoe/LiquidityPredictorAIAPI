@@ -61,9 +61,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 526,
+      "id": 537,
       "poolId": 4,
-      "timestamp": "2025-04-30T07:02:48.030Z",
+      "timestamp": "2025-04-30T07:40:11.321Z",
       "tvl": 5000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -82,9 +82,9 @@
       "name": "4k3D-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 526,
+        "id": 537,
         "poolId": 4,
-        "timestamp": "2025-04-30T07:02:48.030Z",
+        "timestamp": "2025-04-30T07:40:11.321Z",
         "tvl": 5000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -159,9 +159,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 530,
+      "id": 538,
       "poolId": 5,
-      "timestamp": "2025-04-30T07:02:48.033Z",
+      "timestamp": "2025-04-30T07:40:11.322Z",
       "tvl": 6500000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -180,9 +180,9 @@
       "name": "So11-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 530,
+        "id": 538,
         "poolId": 5,
-        "timestamp": "2025-04-30T07:02:48.033Z",
+        "timestamp": "2025-04-30T07:40:11.322Z",
         "tvl": 6500000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -257,9 +257,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 527,
+      "id": 540,
       "poolId": 6,
-      "timestamp": "2025-04-30T07:02:48.031Z",
+      "timestamp": "2025-04-30T07:40:11.332Z",
       "tvl": 8000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -278,9 +278,9 @@
       "name": "So11-Es9v LP",
       "active": true,
       "metrics": {
-        "id": 527,
+        "id": 540,
         "poolId": 6,
-        "timestamp": "2025-04-30T07:02:48.031Z",
+        "timestamp": "2025-04-30T07:40:11.332Z",
         "tvl": 8000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -355,9 +355,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 528,
+      "id": 539,
       "poolId": 7,
-      "timestamp": "2025-04-30T07:02:48.032Z",
+      "timestamp": "2025-04-30T07:40:11.332Z",
       "tvl": 9500000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -376,9 +376,9 @@
       "name": "4k3D-So11 LP",
       "active": true,
       "metrics": {
-        "id": 528,
+        "id": 539,
         "poolId": 7,
-        "timestamp": "2025-04-30T07:02:48.032Z",
+        "timestamp": "2025-04-30T07:40:11.332Z",
         "tvl": 9500000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -453,9 +453,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 524,
+      "id": 541,
       "poolId": 8,
-      "timestamp": "2025-04-30T07:02:48.029Z",
+      "timestamp": "2025-04-30T07:40:11.334Z",
       "tvl": 11000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -474,9 +474,9 @@
       "name": "9n4n-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 524,
+        "id": 541,
         "poolId": 8,
-        "timestamp": "2025-04-30T07:02:48.029Z",
+        "timestamp": "2025-04-30T07:40:11.334Z",
         "tvl": 11000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -552,9 +552,9 @@
       "whirlpoolId": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj"
     },
     "metrics_data": {
-      "id": 531,
+      "id": 543,
       "poolId": 9,
-      "timestamp": "2025-04-30T07:02:48.034Z",
+      "timestamp": "2025-04-30T07:40:11.349Z",
       "tvl": 5000000,
       "fee": 0.0005,
       "apy24h": 2.2140894,
@@ -574,9 +574,9 @@
       "name": "7vfC-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 531,
+        "id": 543,
         "poolId": 9,
-        "timestamp": "2025-04-30T07:02:48.034Z",
+        "timestamp": "2025-04-30T07:40:11.349Z",
         "tvl": 5000000,
         "fee": 0.0005,
         "apy24h": 2.2140894,
@@ -653,9 +653,9 @@
       "whirlpoolId": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ"
     },
     "metrics_data": {
-      "id": 529,
+      "id": 542,
       "poolId": 10,
-      "timestamp": "2025-04-30T07:02:48.033Z",
+      "timestamp": "2025-04-30T07:40:11.347Z",
       "tvl": 3000000,
       "fee": 0.0001,
       "apy24h": 0.438958,
@@ -675,9 +675,9 @@
       "name": "So11-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 529,
+        "id": 542,
         "poolId": 10,
-        "timestamp": "2025-04-30T07:02:48.033Z",
+        "timestamp": "2025-04-30T07:40:11.347Z",
         "tvl": 3000000,
         "fee": 0.0001,
         "apy24h": 0.438958,
@@ -754,9 +754,9 @@
       "whirlpoolId": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm"
     },
     "metrics_data": {
-      "id": 525,
+      "id": 544,
       "poolId": 11,
-      "timestamp": "2025-04-30T07:02:48.030Z",
+      "timestamp": "2025-04-30T07:40:11.356Z",
       "tvl": 7000000,
       "fee": 0.001,
       "apy24h": 4.477063,
@@ -776,9 +776,9 @@
       "name": "So11-Es9v Orca LP",
       "active": true,
       "metrics": {
-        "id": 525,
+        "id": 544,
         "poolId": 11,
-        "timestamp": "2025-04-30T07:02:48.030Z",
+        "timestamp": "2025-04-30T07:40:11.356Z",
         "tvl": 7000000,
         "fee": 0.001,
         "apy24h": 4.477063,
@@ -855,9 +855,9 @@
       "whirlpoolId": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy"
     },
     "metrics_data": {
-      "id": 533,
+      "id": 545,
       "poolId": 12,
-      "timestamp": "2025-04-30T07:02:49.832Z",
+      "timestamp": "2025-04-30T07:40:11.357Z",
       "tvl": 9000000,
       "fee": 0.002,
       "apy24h": 9.153995,
@@ -877,9 +877,9 @@
       "name": "9n4n-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 533,
+        "id": 545,
         "poolId": 12,
-        "timestamp": "2025-04-30T07:02:49.832Z",
+        "timestamp": "2025-04-30T07:40:11.357Z",
         "tvl": 9000000,
         "fee": 0.002,
         "apy24h": 9.153995,
@@ -956,9 +956,9 @@
       "whirlpoolId": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw"
     },
     "metrics_data": {
-      "id": 532,
+      "id": 546,
       "poolId": 13,
-      "timestamp": "2025-04-30T07:02:49.830Z",
+      "timestamp": "2025-04-30T07:40:11.383Z",
       "tvl": 11000000,
       "fee": 0.003,
       "apy24h": 14.039689,
@@ -978,9 +978,9 @@
       "name": "DezX-So11 Orca LP",
       "active": true,
       "metrics": {
-        "id": 532,
+        "id": 546,
         "poolId": 13,
-        "timestamp": "2025-04-30T07:02:49.830Z",
+        "timestamp": "2025-04-30T07:40:11.383Z",
         "tvl": 11000000,
         "fee": 0.003,
         "apy24h": 14.039689,
@@ -1057,9 +1057,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 522,
+      "id": 534,
       "poolId": 1,
-      "timestamp": "2025-04-30T07:02:44.328Z",
+      "timestamp": "2025-04-30T07:40:11.306Z",
       "tvl": 2000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -1079,9 +1079,9 @@
       "name": "mSoL-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 522,
+        "id": 534,
         "poolId": 1,
-        "timestamp": "2025-04-30T07:02:44.328Z",
+        "timestamp": "2025-04-30T07:40:11.306Z",
         "tvl": 2000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -1158,9 +1158,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 521,
+      "id": 535,
       "poolId": 2,
-      "timestamp": "2025-04-30T07:02:44.327Z",
+      "timestamp": "2025-04-30T07:40:11.308Z",
       "tvl": 3000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -1180,9 +1180,9 @@
       "name": "So11-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 521,
+        "id": 535,
         "poolId": 2,
-        "timestamp": "2025-04-30T07:02:44.327Z",
+        "timestamp": "2025-04-30T07:40:11.308Z",
         "tvl": 3000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -1259,9 +1259,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 523,
+      "id": 536,
       "poolId": 3,
-      "timestamp": "2025-04-30T07:02:48.029Z",
+      "timestamp": "2025-04-30T07:40:11.320Z",
       "tvl": 4000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -1281,9 +1281,9 @@
       "name": "9n4n-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 523,
+        "id": 536,
         "poolId": 3,
-        "timestamp": "2025-04-30T07:02:48.029Z",
+        "timestamp": "2025-04-30T07:40:11.320Z",
         "tvl": 4000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -1359,9 +1359,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 526,
+      "id": 537,
       "poolId": 4,
-      "timestamp": "2025-04-30T07:02:48.030Z",
+      "timestamp": "2025-04-30T07:40:11.321Z",
       "tvl": 5000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -1380,9 +1380,9 @@
       "name": "4k3D-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 526,
+        "id": 537,
         "poolId": 4,
-        "timestamp": "2025-04-30T07:02:48.030Z",
+        "timestamp": "2025-04-30T07:40:11.321Z",
         "tvl": 5000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -1457,9 +1457,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 530,
+      "id": 538,
       "poolId": 5,
-      "timestamp": "2025-04-30T07:02:48.033Z",
+      "timestamp": "2025-04-30T07:40:11.322Z",
       "tvl": 6500000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -1478,9 +1478,9 @@
       "name": "So11-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 530,
+        "id": 538,
         "poolId": 5,
-        "timestamp": "2025-04-30T07:02:48.033Z",
+        "timestamp": "2025-04-30T07:40:11.322Z",
         "tvl": 6500000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -1555,9 +1555,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 527,
+      "id": 540,
       "poolId": 6,
-      "timestamp": "2025-04-30T07:02:48.031Z",
+      "timestamp": "2025-04-30T07:40:11.332Z",
       "tvl": 8000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -1576,9 +1576,9 @@
       "name": "So11-Es9v LP",
       "active": true,
       "metrics": {
-        "id": 527,
+        "id": 540,
         "poolId": 6,
-        "timestamp": "2025-04-30T07:02:48.031Z",
+        "timestamp": "2025-04-30T07:40:11.332Z",
         "tvl": 8000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -1653,9 +1653,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 528,
+      "id": 539,
       "poolId": 7,
-      "timestamp": "2025-04-30T07:02:48.032Z",
+      "timestamp": "2025-04-30T07:40:11.332Z",
       "tvl": 9500000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -1674,9 +1674,9 @@
       "name": "4k3D-So11 LP",
       "active": true,
       "metrics": {
-        "id": 528,
+        "id": 539,
         "poolId": 7,
-        "timestamp": "2025-04-30T07:02:48.032Z",
+        "timestamp": "2025-04-30T07:40:11.332Z",
         "tvl": 9500000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -1751,9 +1751,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 524,
+      "id": 541,
       "poolId": 8,
-      "timestamp": "2025-04-30T07:02:48.029Z",
+      "timestamp": "2025-04-30T07:40:11.334Z",
       "tvl": 11000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -1772,9 +1772,9 @@
       "name": "9n4n-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 524,
+        "id": 541,
         "poolId": 8,
-        "timestamp": "2025-04-30T07:02:48.029Z",
+        "timestamp": "2025-04-30T07:40:11.334Z",
         "tvl": 11000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -1850,9 +1850,9 @@
       "whirlpoolId": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj"
     },
     "metrics_data": {
-      "id": 531,
+      "id": 543,
       "poolId": 9,
-      "timestamp": "2025-04-30T07:02:48.034Z",
+      "timestamp": "2025-04-30T07:40:11.349Z",
       "tvl": 5000000,
       "fee": 0.0005,
       "apy24h": 2.2140894,
@@ -1872,9 +1872,9 @@
       "name": "7vfC-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 531,
+        "id": 543,
         "poolId": 9,
-        "timestamp": "2025-04-30T07:02:48.034Z",
+        "timestamp": "2025-04-30T07:40:11.349Z",
         "tvl": 5000000,
         "fee": 0.0005,
         "apy24h": 2.2140894,
@@ -1951,9 +1951,9 @@
       "whirlpoolId": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ"
     },
     "metrics_data": {
-      "id": 529,
+      "id": 542,
       "poolId": 10,
-      "timestamp": "2025-04-30T07:02:48.033Z",
+      "timestamp": "2025-04-30T07:40:11.347Z",
       "tvl": 3000000,
       "fee": 0.0001,
       "apy24h": 0.438958,
@@ -1973,9 +1973,9 @@
       "name": "So11-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 529,
+        "id": 542,
         "poolId": 10,
-        "timestamp": "2025-04-30T07:02:48.033Z",
+        "timestamp": "2025-04-30T07:40:11.347Z",
         "tvl": 3000000,
         "fee": 0.0001,
         "apy24h": 0.438958,
@@ -2052,9 +2052,9 @@
       "whirlpoolId": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm"
     },
     "metrics_data": {
-      "id": 525,
+      "id": 544,
       "poolId": 11,
-      "timestamp": "2025-04-30T07:02:48.030Z",
+      "timestamp": "2025-04-30T07:40:11.356Z",
       "tvl": 7000000,
       "fee": 0.001,
       "apy24h": 4.477063,
@@ -2074,9 +2074,9 @@
       "name": "So11-Es9v Orca LP",
       "active": true,
       "metrics": {
-        "id": 525,
+        "id": 544,
         "poolId": 11,
-        "timestamp": "2025-04-30T07:02:48.030Z",
+        "timestamp": "2025-04-30T07:40:11.356Z",
         "tvl": 7000000,
         "fee": 0.001,
         "apy24h": 4.477063,
@@ -2153,9 +2153,9 @@
       "whirlpoolId": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy"
     },
     "metrics_data": {
-      "id": 533,
+      "id": 545,
       "poolId": 12,
-      "timestamp": "2025-04-30T07:02:49.832Z",
+      "timestamp": "2025-04-30T07:40:11.357Z",
       "tvl": 9000000,
       "fee": 0.002,
       "apy24h": 9.153995,
@@ -2175,9 +2175,9 @@
       "name": "9n4n-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 533,
+        "id": 545,
         "poolId": 12,
-        "timestamp": "2025-04-30T07:02:49.832Z",
+        "timestamp": "2025-04-30T07:40:11.357Z",
         "tvl": 9000000,
         "fee": 0.002,
         "apy24h": 9.153995,
@@ -2254,9 +2254,9 @@
       "whirlpoolId": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw"
     },
     "metrics_data": {
-      "id": 532,
+      "id": 546,
       "poolId": 13,
-      "timestamp": "2025-04-30T07:02:49.830Z",
+      "timestamp": "2025-04-30T07:40:11.383Z",
       "tvl": 11000000,
       "fee": 0.003,
       "apy24h": 14.039689,
@@ -2276,9 +2276,9 @@
       "name": "DezX-So11 Orca LP",
       "active": true,
       "metrics": {
-        "id": 532,
+        "id": 546,
         "poolId": 13,
-        "timestamp": "2025-04-30T07:02:49.830Z",
+        "timestamp": "2025-04-30T07:40:11.383Z",
         "tvl": 11000000,
         "fee": 0.003,
         "apy24h": 14.039689,
@@ -2355,9 +2355,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 522,
+      "id": 534,
       "poolId": 1,
-      "timestamp": "2025-04-30T07:02:44.328Z",
+      "timestamp": "2025-04-30T07:40:11.306Z",
       "tvl": 2000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -2377,9 +2377,9 @@
       "name": "mSoL-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 522,
+        "id": 534,
         "poolId": 1,
-        "timestamp": "2025-04-30T07:02:44.328Z",
+        "timestamp": "2025-04-30T07:40:11.306Z",
         "tvl": 2000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -2456,9 +2456,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 521,
+      "id": 535,
       "poolId": 2,
-      "timestamp": "2025-04-30T07:02:44.327Z",
+      "timestamp": "2025-04-30T07:40:11.308Z",
       "tvl": 3000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -2478,9 +2478,9 @@
       "name": "So11-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 521,
+        "id": 535,
         "poolId": 2,
-        "timestamp": "2025-04-30T07:02:44.327Z",
+        "timestamp": "2025-04-30T07:40:11.308Z",
         "tvl": 3000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -2557,9 +2557,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 523,
+      "id": 536,
       "poolId": 3,
-      "timestamp": "2025-04-30T07:02:48.029Z",
+      "timestamp": "2025-04-30T07:40:11.320Z",
       "tvl": 4000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -2579,9 +2579,9 @@
       "name": "9n4n-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 523,
+        "id": 536,
         "poolId": 3,
-        "timestamp": "2025-04-30T07:02:48.029Z",
+        "timestamp": "2025-04-30T07:40:11.320Z",
         "tvl": 4000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -2657,9 +2657,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 526,
+      "id": 537,
       "poolId": 4,
-      "timestamp": "2025-04-30T07:02:48.030Z",
+      "timestamp": "2025-04-30T07:40:11.321Z",
       "tvl": 5000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -2678,9 +2678,9 @@
       "name": "4k3D-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 526,
+        "id": 537,
         "poolId": 4,
-        "timestamp": "2025-04-30T07:02:48.030Z",
+        "timestamp": "2025-04-30T07:40:11.321Z",
         "tvl": 5000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -2755,9 +2755,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 530,
+      "id": 538,
       "poolId": 5,
-      "timestamp": "2025-04-30T07:02:48.033Z",
+      "timestamp": "2025-04-30T07:40:11.322Z",
       "tvl": 6500000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -2776,9 +2776,9 @@
       "name": "So11-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 530,
+        "id": 538,
         "poolId": 5,
-        "timestamp": "2025-04-30T07:02:48.033Z",
+        "timestamp": "2025-04-30T07:40:11.322Z",
         "tvl": 6500000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -2853,9 +2853,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 527,
+      "id": 540,
       "poolId": 6,
-      "timestamp": "2025-04-30T07:02:48.031Z",
+      "timestamp": "2025-04-30T07:40:11.332Z",
       "tvl": 8000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -2874,9 +2874,9 @@
       "name": "So11-Es9v LP",
       "active": true,
       "metrics": {
-        "id": 527,
+        "id": 540,
         "poolId": 6,
-        "timestamp": "2025-04-30T07:02:48.031Z",
+        "timestamp": "2025-04-30T07:40:11.332Z",
         "tvl": 8000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -2951,9 +2951,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 528,
+      "id": 539,
       "poolId": 7,
-      "timestamp": "2025-04-30T07:02:48.032Z",
+      "timestamp": "2025-04-30T07:40:11.332Z",
       "tvl": 9500000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -2972,9 +2972,9 @@
       "name": "4k3D-So11 LP",
       "active": true,
       "metrics": {
-        "id": 528,
+        "id": 539,
         "poolId": 7,
-        "timestamp": "2025-04-30T07:02:48.032Z",
+        "timestamp": "2025-04-30T07:40:11.332Z",
         "tvl": 9500000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -3049,9 +3049,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 524,
+      "id": 541,
       "poolId": 8,
-      "timestamp": "2025-04-30T07:02:48.029Z",
+      "timestamp": "2025-04-30T07:40:11.334Z",
       "tvl": 11000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -3070,9 +3070,9 @@
       "name": "9n4n-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 524,
+        "id": 541,
         "poolId": 8,
-        "timestamp": "2025-04-30T07:02:48.029Z",
+        "timestamp": "2025-04-30T07:40:11.334Z",
         "tvl": 11000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -3148,9 +3148,9 @@
       "whirlpoolId": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj"
     },
     "metrics_data": {
-      "id": 531,
+      "id": 543,
       "poolId": 9,
-      "timestamp": "2025-04-30T07:02:48.034Z",
+      "timestamp": "2025-04-30T07:40:11.349Z",
       "tvl": 5000000,
       "fee": 0.0005,
       "apy24h": 2.2140894,
@@ -3170,9 +3170,9 @@
       "name": "7vfC-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 531,
+        "id": 543,
         "poolId": 9,
-        "timestamp": "2025-04-30T07:02:48.034Z",
+        "timestamp": "2025-04-30T07:40:11.349Z",
         "tvl": 5000000,
         "fee": 0.0005,
         "apy24h": 2.2140894,
@@ -3249,9 +3249,9 @@
       "whirlpoolId": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ"
     },
     "metrics_data": {
-      "id": 529,
+      "id": 542,
       "poolId": 10,
-      "timestamp": "2025-04-30T07:02:48.033Z",
+      "timestamp": "2025-04-30T07:40:11.347Z",
       "tvl": 3000000,
       "fee": 0.0001,
       "apy24h": 0.438958,
@@ -3271,9 +3271,9 @@
       "name": "So11-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 529,
+        "id": 542,
         "poolId": 10,
-        "timestamp": "2025-04-30T07:02:48.033Z",
+        "timestamp": "2025-04-30T07:40:11.347Z",
         "tvl": 3000000,
         "fee": 0.0001,
         "apy24h": 0.438958,
@@ -3350,9 +3350,9 @@
       "whirlpoolId": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm"
     },
     "metrics_data": {
-      "id": 525,
+      "id": 544,
       "poolId": 11,
-      "timestamp": "2025-04-30T07:02:48.030Z",
+      "timestamp": "2025-04-30T07:40:11.356Z",
       "tvl": 7000000,
       "fee": 0.001,
       "apy24h": 4.477063,
@@ -3372,9 +3372,9 @@
       "name": "So11-Es9v Orca LP",
       "active": true,
       "metrics": {
-        "id": 525,
+        "id": 544,
         "poolId": 11,
-        "timestamp": "2025-04-30T07:02:48.030Z",
+        "timestamp": "2025-04-30T07:40:11.356Z",
         "tvl": 7000000,
         "fee": 0.001,
         "apy24h": 4.477063,
@@ -3451,9 +3451,9 @@
       "whirlpoolId": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy"
     },
     "metrics_data": {
-      "id": 533,
+      "id": 545,
       "poolId": 12,
-      "timestamp": "2025-04-30T07:02:49.832Z",
+      "timestamp": "2025-04-30T07:40:11.357Z",
       "tvl": 9000000,
       "fee": 0.002,
       "apy24h": 9.153995,
@@ -3473,9 +3473,9 @@
       "name": "9n4n-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 533,
+        "id": 545,
         "poolId": 12,
-        "timestamp": "2025-04-30T07:02:49.832Z",
+        "timestamp": "2025-04-30T07:40:11.357Z",
         "tvl": 9000000,
         "fee": 0.002,
         "apy24h": 9.153995,
@@ -3552,9 +3552,9 @@
       "whirlpoolId": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw"
     },
     "metrics_data": {
-      "id": 532,
+      "id": 546,
       "poolId": 13,
-      "timestamp": "2025-04-30T07:02:49.830Z",
+      "timestamp": "2025-04-30T07:40:11.383Z",
       "tvl": 11000000,
       "fee": 0.003,
       "apy24h": 14.039689,
@@ -3574,9 +3574,9 @@
       "name": "DezX-So11 Orca LP",
       "active": true,
       "metrics": {
-        "id": 532,
+        "id": 546,
         "poolId": 13,
-        "timestamp": "2025-04-30T07:02:49.830Z",
+        "timestamp": "2025-04-30T07:40:11.383Z",
         "tvl": 11000000,
         "fee": 0.003,
         "apy24h": 14.039689,
@@ -3653,9 +3653,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 522,
+      "id": 534,
       "poolId": 1,
-      "timestamp": "2025-04-30T07:02:44.328Z",
+      "timestamp": "2025-04-30T07:40:11.306Z",
       "tvl": 2000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -3675,9 +3675,9 @@
       "name": "mSoL-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 522,
+        "id": 534,
         "poolId": 1,
-        "timestamp": "2025-04-30T07:02:44.328Z",
+        "timestamp": "2025-04-30T07:40:11.306Z",
         "tvl": 2000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -3754,9 +3754,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 521,
+      "id": 535,
       "poolId": 2,
-      "timestamp": "2025-04-30T07:02:44.327Z",
+      "timestamp": "2025-04-30T07:40:11.308Z",
       "tvl": 3000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -3776,9 +3776,9 @@
       "name": "So11-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 521,
+        "id": 535,
         "poolId": 2,
-        "timestamp": "2025-04-30T07:02:44.327Z",
+        "timestamp": "2025-04-30T07:40:11.308Z",
         "tvl": 3000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -3855,9 +3855,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 523,
+      "id": 536,
       "poolId": 3,
-      "timestamp": "2025-04-30T07:02:48.029Z",
+      "timestamp": "2025-04-30T07:40:11.320Z",
       "tvl": 4000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -3877,9 +3877,9 @@
       "name": "9n4n-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 523,
+        "id": 536,
         "poolId": 3,
-        "timestamp": "2025-04-30T07:02:48.029Z",
+        "timestamp": "2025-04-30T07:40:11.320Z",
         "tvl": 4000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -3955,9 +3955,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 526,
+      "id": 537,
       "poolId": 4,
-      "timestamp": "2025-04-30T07:02:48.030Z",
+      "timestamp": "2025-04-30T07:40:11.321Z",
       "tvl": 5000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -3976,9 +3976,9 @@
       "name": "4k3D-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 526,
+        "id": 537,
         "poolId": 4,
-        "timestamp": "2025-04-30T07:02:48.030Z",
+        "timestamp": "2025-04-30T07:40:11.321Z",
         "tvl": 5000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -4053,9 +4053,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 530,
+      "id": 538,
       "poolId": 5,
-      "timestamp": "2025-04-30T07:02:48.033Z",
+      "timestamp": "2025-04-30T07:40:11.322Z",
       "tvl": 6500000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -4074,9 +4074,9 @@
       "name": "So11-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 530,
+        "id": 538,
         "poolId": 5,
-        "timestamp": "2025-04-30T07:02:48.033Z",
+        "timestamp": "2025-04-30T07:40:11.322Z",
         "tvl": 6500000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -4151,9 +4151,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 527,
+      "id": 540,
       "poolId": 6,
-      "timestamp": "2025-04-30T07:02:48.031Z",
+      "timestamp": "2025-04-30T07:40:11.332Z",
       "tvl": 8000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -4172,9 +4172,9 @@
       "name": "So11-Es9v LP",
       "active": true,
       "metrics": {
-        "id": 527,
+        "id": 540,
         "poolId": 6,
-        "timestamp": "2025-04-30T07:02:48.031Z",
+        "timestamp": "2025-04-30T07:40:11.332Z",
         "tvl": 8000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -4249,9 +4249,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 528,
+      "id": 539,
       "poolId": 7,
-      "timestamp": "2025-04-30T07:02:48.032Z",
+      "timestamp": "2025-04-30T07:40:11.332Z",
       "tvl": 9500000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -4270,9 +4270,9 @@
       "name": "4k3D-So11 LP",
       "active": true,
       "metrics": {
-        "id": 528,
+        "id": 539,
         "poolId": 7,
-        "timestamp": "2025-04-30T07:02:48.032Z",
+        "timestamp": "2025-04-30T07:40:11.332Z",
         "tvl": 9500000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -4347,9 +4347,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 524,
+      "id": 541,
       "poolId": 8,
-      "timestamp": "2025-04-30T07:02:48.029Z",
+      "timestamp": "2025-04-30T07:40:11.334Z",
       "tvl": 11000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -4368,9 +4368,9 @@
       "name": "9n4n-EPjF LP",
       "active": true,
       "metrics": {
-        "id": 524,
+        "id": 541,
         "poolId": 8,
-        "timestamp": "2025-04-30T07:02:48.029Z",
+        "timestamp": "2025-04-30T07:40:11.334Z",
         "tvl": 11000000,
         "fee": 0.0025,
         "apy24h": 14.665538,
@@ -4446,9 +4446,9 @@
       "whirlpoolId": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj"
     },
     "metrics_data": {
-      "id": 531,
+      "id": 543,
       "poolId": 9,
-      "timestamp": "2025-04-30T07:02:48.034Z",
+      "timestamp": "2025-04-30T07:40:11.349Z",
       "tvl": 5000000,
       "fee": 0.0005,
       "apy24h": 2.2140894,
@@ -4468,9 +4468,9 @@
       "name": "7vfC-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 531,
+        "id": 543,
         "poolId": 9,
-        "timestamp": "2025-04-30T07:02:48.034Z",
+        "timestamp": "2025-04-30T07:40:11.349Z",
         "tvl": 5000000,
         "fee": 0.0005,
         "apy24h": 2.2140894,
@@ -4547,9 +4547,9 @@
       "whirlpoolId": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ"
     },
     "metrics_data": {
-      "id": 529,
+      "id": 542,
       "poolId": 10,
-      "timestamp": "2025-04-30T07:02:48.033Z",
+      "timestamp": "2025-04-30T07:40:11.347Z",
       "tvl": 3000000,
       "fee": 0.0001,
       "apy24h": 0.438958,
@@ -4569,9 +4569,9 @@
       "name": "So11-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 529,
+        "id": 542,
         "poolId": 10,
-        "timestamp": "2025-04-30T07:02:48.033Z",
+        "timestamp": "2025-04-30T07:40:11.347Z",
         "tvl": 3000000,
         "fee": 0.0001,
         "apy24h": 0.438958,
@@ -4648,9 +4648,9 @@
       "whirlpoolId": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm"
     },
     "metrics_data": {
-      "id": 525,
+      "id": 544,
       "poolId": 11,
-      "timestamp": "2025-04-30T07:02:48.030Z",
+      "timestamp": "2025-04-30T07:40:11.356Z",
       "tvl": 7000000,
       "fee": 0.001,
       "apy24h": 4.477063,
@@ -4670,9 +4670,9 @@
       "name": "So11-Es9v Orca LP",
       "active": true,
       "metrics": {
-        "id": 525,
+        "id": 544,
         "poolId": 11,
-        "timestamp": "2025-04-30T07:02:48.030Z",
+        "timestamp": "2025-04-30T07:40:11.356Z",
         "tvl": 7000000,
         "fee": 0.001,
         "apy24h": 4.477063,
@@ -4749,9 +4749,9 @@
       "whirlpoolId": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy"
     },
     "metrics_data": {
-      "id": 533,
+      "id": 545,
       "poolId": 12,
-      "timestamp": "2025-04-30T07:02:49.832Z",
+      "timestamp": "2025-04-30T07:40:11.357Z",
       "tvl": 9000000,
       "fee": 0.002,
       "apy24h": 9.153995,
@@ -4771,9 +4771,9 @@
       "name": "9n4n-EPjF Orca LP",
       "active": true,
       "metrics": {
-        "id": 533,
+        "id": 545,
         "poolId": 12,
-        "timestamp": "2025-04-30T07:02:49.832Z",
+        "timestamp": "2025-04-30T07:40:11.357Z",
         "tvl": 9000000,
         "fee": 0.002,
         "apy24h": 9.153995,
@@ -4850,9 +4850,9 @@
       "whirlpoolId": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw"
     },
     "metrics_data": {
-      "id": 532,
+      "id": 546,
       "poolId": 13,
-      "timestamp": "2025-04-30T07:02:49.830Z",
+      "timestamp": "2025-04-30T07:40:11.383Z",
       "tvl": 11000000,
       "fee": 0.003,
       "apy24h": 14.039689,
@@ -4872,9 +4872,9 @@
       "name": "DezX-So11 Orca LP",
       "active": true,
       "metrics": {
-        "id": 532,
+        "id": 546,
         "poolId": 13,
-        "timestamp": "2025-04-30T07:02:49.830Z",
+        "timestamp": "2025-04-30T07:40:11.383Z",
         "tvl": 11000000,
         "fee": 0.003,
         "apy24h": 14.039689,
@@ -4951,9 +4951,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 522,
+      "id": 534,
       "poolId": 1,
-      "timestamp": "2025-04-30T07:02:44.328Z",
+      "timestamp": "2025-04-30T07:40:11.306Z",
       "tvl": 2000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -4973,9 +4973,9 @@
       "name": "mSoL-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 522,
+        "id": 534,
         "poolId": 1,
-        "timestamp": "2025-04-30T07:02:44.328Z",
+        "timestamp": "2025-04-30T07:40:11.306Z",
         "tvl": 2000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -5052,9 +5052,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 521,
+      "id": 535,
       "poolId": 2,
-      "timestamp": "2025-04-30T07:02:44.327Z",
+      "timestamp": "2025-04-30T07:40:11.308Z",
       "tvl": 3000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -5074,9 +5074,9 @@
       "name": "So11-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 521,
+        "id": 535,
         "poolId": 2,
-        "timestamp": "2025-04-30T07:02:44.327Z",
+        "timestamp": "2025-04-30T07:40:11.308Z",
         "tvl": 3000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -5153,9 +5153,9 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 523,
+      "id": 536,
       "poolId": 3,
-      "timestamp": "2025-04-30T07:02:48.029Z",
+      "timestamp": "2025-04-30T07:40:11.320Z",
       "tvl": 4000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -5175,9 +5175,9 @@
       "name": "9n4n-EPjF Meteora LP",
       "active": true,
       "metrics": {
-        "id": 523,
+        "id": 536,
         "poolId": 3,
-        "timestamp": "2025-04-30T07:02:48.029Z",
+        "timestamp": "2025-04-30T07:40:11.320Z",
         "tvl": 4000000,
         "fee": 0.003,
         "apy24h": 11.570175,
@@ -5187,496 +5187,6 @@
         "extraData": {
           "bins": "120",
           "concentrationBounds": "medium"
-        }
-      }
-    }
-  },
-  {
-    "id": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
-    "name": "4k3D-EPjF LP",
-    "dex": "raydium",
-    "category": "DeFi",
-    "token1_symbol": "4K3D",
-    "token2_symbol": "EPJF",
-    "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
-    "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 0,
-    "token2_price": 0,
-    "tokens": [
-      {
-        "id": 5,
-        "symbol": "4k3D",
-        "name": "4k3D",
-        "decimals": 6,
-        "address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
-        "active": true,
-        "price": 0
-      },
-      {
-        "id": 2,
-        "symbol": "EPjF",
-        "name": "EPjF",
-        "decimals": 6,
-        "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "active": true,
-        "price": 0
-      }
-    ],
-    "poolId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
-    "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 5000000,
-    "volume_24h": 750000,
-    "apr": 14.665538,
-    "fee": 0.0025,
-    "apr_24h": 14.665538,
-    "apr_7d": 13.198984,
-    "apr_30d": 12.465708,
-    "apr_change_24h": 0,
-    "apr_change_7d": -10.000001363741312,
-    "apr_change_30d": -5.5555488210304675,
-    "tvl_change_24h": 0,
-    "tvl_change_7d": 0,
-    "tvl_change_30d": 0,
-    "active": true,
-    "created_at": "2025-04-29T13:34:45.768Z",
-    "updated_at": "2025-04-29T13:34:45.768Z",
-    "extra_data": {
-      "ammId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8"
-    },
-    "version": "1.0",
-    "prediction_score": 0,
-    "risk_score": 0,
-    "volatility": 0,
-    "dex_specific": {
-      "ammId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
-      "concentrationBounds": "",
-      "whirlpoolId": ""
-    },
-    "metrics_data": {
-      "id": 526,
-      "poolId": 4,
-      "timestamp": "2025-04-30T07:02:48.030Z",
-      "tvl": 5000000,
-      "fee": 0.0025,
-      "apy24h": 14.665538,
-      "apy7d": 13.198984,
-      "apy30d": 12.465708,
-      "volumeUsd": 750000,
-      "extraData": {
-        "ammId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8"
-      }
-    },
-    "api_response": {
-      "id": 4,
-      "poolId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
-      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-      "source": "raydium",
-      "name": "4k3D-EPjF LP",
-      "active": true,
-      "metrics": {
-        "id": 526,
-        "poolId": 4,
-        "timestamp": "2025-04-30T07:02:48.030Z",
-        "tvl": 5000000,
-        "fee": 0.0025,
-        "apy24h": 14.665538,
-        "apy7d": 13.198984,
-        "apy30d": 12.465708,
-        "volumeUsd": 750000,
-        "extraData": {
-          "ammId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8"
-        }
-      }
-    }
-  },
-  {
-    "id": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
-    "name": "So11-EPjF LP",
-    "dex": "raydium",
-    "category": "DeFi",
-    "token1_symbol": "SO11",
-    "token2_symbol": "EPJF",
-    "token1_address": "So11111111111111111111111111111111111111112",
-    "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 0,
-    "token2_price": 0,
-    "tokens": [
-      {
-        "id": 4,
-        "symbol": "So11",
-        "name": "So11",
-        "decimals": 6,
-        "address": "So11111111111111111111111111111111111111112",
-        "active": true,
-        "price": 0
-      },
-      {
-        "id": 2,
-        "symbol": "EPjF",
-        "name": "EPjF",
-        "decimals": 6,
-        "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "active": true,
-        "price": 0
-      }
-    ],
-    "poolId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
-    "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 6500000,
-    "volume_24h": 975000,
-    "apr": 14.665538,
-    "fee": 0.0025,
-    "apr_24h": 14.665538,
-    "apr_7d": 13.198984,
-    "apr_30d": 12.465708,
-    "apr_change_24h": 0,
-    "apr_change_7d": -10.000001363741312,
-    "apr_change_30d": -5.5555488210304675,
-    "tvl_change_24h": 0,
-    "tvl_change_7d": 0,
-    "tvl_change_30d": 0,
-    "active": true,
-    "created_at": "2025-04-29T13:34:45.801Z",
-    "updated_at": "2025-04-29T13:34:45.801Z",
-    "extra_data": {
-      "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
-    },
-    "version": "1.0",
-    "prediction_score": 0,
-    "risk_score": 0,
-    "volatility": 0,
-    "dex_specific": {
-      "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
-      "concentrationBounds": "",
-      "whirlpoolId": ""
-    },
-    "metrics_data": {
-      "id": 530,
-      "poolId": 5,
-      "timestamp": "2025-04-30T07:02:48.033Z",
-      "tvl": 6500000,
-      "fee": 0.0025,
-      "apy24h": 14.665538,
-      "apy7d": 13.198984,
-      "apy30d": 12.465708,
-      "volumeUsd": 975000,
-      "extraData": {
-        "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
-      }
-    },
-    "api_response": {
-      "id": 5,
-      "poolId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
-      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-      "source": "raydium",
-      "name": "So11-EPjF LP",
-      "active": true,
-      "metrics": {
-        "id": 530,
-        "poolId": 5,
-        "timestamp": "2025-04-30T07:02:48.033Z",
-        "tvl": 6500000,
-        "fee": 0.0025,
-        "apy24h": 14.665538,
-        "apy7d": 13.198984,
-        "apy30d": 12.465708,
-        "volumeUsd": 975000,
-        "extraData": {
-          "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
-        }
-      }
-    }
-  },
-  {
-    "id": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
-    "name": "So11-Es9v LP",
-    "dex": "raydium",
-    "category": "DeFi",
-    "token1_symbol": "SO11",
-    "token2_symbol": "ES9V",
-    "token1_address": "So11111111111111111111111111111111111111112",
-    "token2_address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    "token1_price": 0,
-    "token2_price": 0,
-    "tokens": [
-      {
-        "id": 4,
-        "symbol": "So11",
-        "name": "So11",
-        "decimals": 6,
-        "address": "So11111111111111111111111111111111111111112",
-        "active": true,
-        "price": 0
-      },
-      {
-        "id": 8,
-        "symbol": "Es9v",
-        "name": "Es9v",
-        "decimals": 6,
-        "address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-        "active": true,
-        "price": 0
-      }
-    ],
-    "poolId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
-    "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 8000000,
-    "volume_24h": 1200000,
-    "apr": 14.665538,
-    "fee": 0.0025,
-    "apr_24h": 14.665538,
-    "apr_7d": 13.198984,
-    "apr_30d": 12.465708,
-    "apr_change_24h": 0,
-    "apr_change_7d": -10.000001363741312,
-    "apr_change_30d": -5.5555488210304675,
-    "tvl_change_24h": 0,
-    "tvl_change_7d": 0,
-    "tvl_change_30d": 0,
-    "active": true,
-    "created_at": "2025-04-29T13:34:45.968Z",
-    "updated_at": "2025-04-29T13:34:45.968Z",
-    "extra_data": {
-      "ammId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg"
-    },
-    "version": "1.0",
-    "prediction_score": 0,
-    "risk_score": 0,
-    "volatility": 0,
-    "dex_specific": {
-      "ammId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
-      "concentrationBounds": "",
-      "whirlpoolId": ""
-    },
-    "metrics_data": {
-      "id": 527,
-      "poolId": 6,
-      "timestamp": "2025-04-30T07:02:48.031Z",
-      "tvl": 8000000,
-      "fee": 0.0025,
-      "apy24h": 14.665538,
-      "apy7d": 13.198984,
-      "apy30d": 12.465708,
-      "volumeUsd": 1200000,
-      "extraData": {
-        "ammId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg"
-      }
-    },
-    "api_response": {
-      "id": 6,
-      "poolId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
-      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-      "source": "raydium",
-      "name": "So11-Es9v LP",
-      "active": true,
-      "metrics": {
-        "id": 527,
-        "poolId": 6,
-        "timestamp": "2025-04-30T07:02:48.031Z",
-        "tvl": 8000000,
-        "fee": 0.0025,
-        "apy24h": 14.665538,
-        "apy7d": 13.198984,
-        "apy30d": 12.465708,
-        "volumeUsd": 1200000,
-        "extraData": {
-          "ammId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg"
-        }
-      }
-    }
-  },
-  {
-    "id": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
-    "name": "4k3D-So11 LP",
-    "dex": "raydium",
-    "category": "DeFi",
-    "token1_symbol": "4K3D",
-    "token2_symbol": "SO11",
-    "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
-    "token2_address": "So11111111111111111111111111111111111111112",
-    "token1_price": 0,
-    "token2_price": 0,
-    "tokens": [
-      {
-        "id": 5,
-        "symbol": "4k3D",
-        "name": "4k3D",
-        "decimals": 6,
-        "address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
-        "active": true,
-        "price": 0
-      },
-      {
-        "id": 4,
-        "symbol": "So11",
-        "name": "So11",
-        "decimals": 6,
-        "address": "So11111111111111111111111111111111111111112",
-        "active": true,
-        "price": 0
-      }
-    ],
-    "poolId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
-    "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 9500000,
-    "volume_24h": 1425000,
-    "apr": 14.665538,
-    "fee": 0.0025,
-    "apr_24h": 14.665538,
-    "apr_7d": 13.198984,
-    "apr_30d": 12.465708,
-    "apr_change_24h": 0,
-    "apr_change_7d": -10.000001363741312,
-    "apr_change_30d": -5.5555488210304675,
-    "tvl_change_24h": 0,
-    "tvl_change_7d": 0,
-    "tvl_change_30d": 0,
-    "active": true,
-    "created_at": "2025-04-29T13:34:46.004Z",
-    "updated_at": "2025-04-29T13:34:46.004Z",
-    "extra_data": {
-      "ammId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA"
-    },
-    "version": "1.0",
-    "prediction_score": 0,
-    "risk_score": 0,
-    "volatility": 0,
-    "dex_specific": {
-      "ammId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
-      "concentrationBounds": "",
-      "whirlpoolId": ""
-    },
-    "metrics_data": {
-      "id": 528,
-      "poolId": 7,
-      "timestamp": "2025-04-30T07:02:48.032Z",
-      "tvl": 9500000,
-      "fee": 0.0025,
-      "apy24h": 14.665538,
-      "apy7d": 13.198984,
-      "apy30d": 12.465708,
-      "volumeUsd": 1425000,
-      "extraData": {
-        "ammId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA"
-      }
-    },
-    "api_response": {
-      "id": 7,
-      "poolId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
-      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-      "source": "raydium",
-      "name": "4k3D-So11 LP",
-      "active": true,
-      "metrics": {
-        "id": 528,
-        "poolId": 7,
-        "timestamp": "2025-04-30T07:02:48.032Z",
-        "tvl": 9500000,
-        "fee": 0.0025,
-        "apy24h": 14.665538,
-        "apy7d": 13.198984,
-        "apy30d": 12.465708,
-        "volumeUsd": 1425000,
-        "extraData": {
-          "ammId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA"
-        }
-      }
-    }
-  },
-  {
-    "id": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
-    "name": "9n4n-EPjF LP",
-    "dex": "raydium",
-    "category": "DeFi",
-    "token1_symbol": "9N4N",
-    "token2_symbol": "EPJF",
-    "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
-    "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 0,
-    "token2_price": 0,
-    "tokens": [
-      {
-        "id": 3,
-        "symbol": "9n4n",
-        "name": "9n4n",
-        "decimals": 6,
-        "address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
-        "active": true,
-        "price": 0
-      },
-      {
-        "id": 2,
-        "symbol": "EPjF",
-        "name": "EPjF",
-        "decimals": 6,
-        "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-        "active": true,
-        "price": 0
-      }
-    ],
-    "poolId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
-    "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 11000000,
-    "volume_24h": 1650000,
-    "apr": 14.665538,
-    "fee": 0.0025,
-    "apr_24h": 14.665538,
-    "apr_7d": 13.198984,
-    "apr_30d": 12.465708,
-    "apr_change_24h": 0,
-    "apr_change_7d": -10.000001363741312,
-    "apr_change_30d": -5.5555488210304675,
-    "tvl_change_24h": 0,
-    "tvl_change_7d": 0,
-    "tvl_change_30d": 0,
-    "active": true,
-    "created_at": "2025-04-29T13:34:46.040Z",
-    "updated_at": "2025-04-29T13:34:46.040Z",
-    "extra_data": {
-      "ammId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut"
-    },
-    "version": "1.0",
-    "prediction_score": 0,
-    "risk_score": 0,
-    "volatility": 0,
-    "dex_specific": {
-      "ammId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
-      "concentrationBounds": "",
-      "whirlpoolId": ""
-    },
-    "metrics_data": {
-      "id": 524,
-      "poolId": 8,
-      "timestamp": "2025-04-30T07:02:48.029Z",
-      "tvl": 11000000,
-      "fee": 0.0025,
-      "apy24h": 14.665538,
-      "apy7d": 13.198984,
-      "apy30d": 12.465708,
-      "volumeUsd": 1650000,
-      "extraData": {
-        "ammId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut"
-      }
-    },
-    "api_response": {
-      "id": 8,
-      "poolId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
-      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-      "source": "raydium",
-      "name": "9n4n-EPjF LP",
-      "active": true,
-      "metrics": {
-        "id": 524,
-        "poolId": 8,
-        "timestamp": "2025-04-30T07:02:48.029Z",
-        "tvl": 11000000,
-        "fee": 0.0025,
-        "apy24h": 14.665538,
-        "apy7d": 13.198984,
-        "apy30d": 12.465708,
-        "volumeUsd": 1650000,
-        "extraData": {
-          "ammId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut"
         }
       }
     }

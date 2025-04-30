@@ -270,11 +270,12 @@ class TokenPriceService:
         hardcoded_prices = {
             "SOL": 143.28,
             "MSOL": 160.55,
-            "MSOL": 160.55,
             "BTC": 62873.15,
             "ETH": 3018.47,
             "USDC": 1.00,
             "USDT": 1.00,
+            "RAY": 1.88,
+            "BONK": 0.000013,
             
             # API-specific symbols mapped to actual tokens with realistic prices
             "SO11": 143.28,    # SOL
@@ -282,9 +283,9 @@ class TokenPriceService:
             "MSOL": 160.55,    # mSOL (Marinade Staked SOL)
             "9N4N": 62873.15,  # BTC
             "7VFC": 3018.47,   # ETH
-            "DEZX": 3018.47,   # ETH
-            "4K3D": 1.88,      # RAY
-            "ES9V": 1.00,      # USDC
+            "DEZX": 3018.47,   # ETH (also DezXtras)
+            "4K3D": 1.88,      # RAY (Raydium)
+            "ES9V": 1.00,      # USDC equivalent
         }
         
         # Uppercase all input symbols for comparison

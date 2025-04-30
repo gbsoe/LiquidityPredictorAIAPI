@@ -79,8 +79,24 @@ class DataService:
     
     def _init_collectors(self):
         """Initialize data collectors."""
-        # Add DeFi Aggregation API collector
-        defi_collector = get_defi_collector()
+        # Check if we have an API key in streamlit session state
+        api_key = None
+        
+        # Try to access streamlit's session state if it's available
+        try:
+            import streamlit as st
+            if "defi_api_key" in st.session_state and st.session_state["defi_api_key"]:
+                api_key = st.session_state["defi_api_key"]
+                logger.info("Using API key from Streamlit session state")
+                
+                # Also set it in the environment for other components
+                os.environ["DEFI_API_KEY"] = api_key
+        except (ImportError, RuntimeError):
+            # Either streamlit is not installed or we're not in a streamlit context
+            logger.debug("Not running in Streamlit context or streamlit not installed")
+        
+        # Add DeFi Aggregation API collector with the API key if available
+        defi_collector = get_defi_collector(api_key=api_key)
         self._collectors.append(defi_collector)
         
         # Log collectors
