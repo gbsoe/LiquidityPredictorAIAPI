@@ -328,10 +328,17 @@ def ensure_all_fields(pool_data):
         # Make a copy of the pool data to not modify the original
         validated_pool = pool.copy()
         
-        # Add any missing required fields with default values
+        # Debug token data
+        token1_symbol = validated_pool.get("token1_symbol", None)
+        token2_symbol = validated_pool.get("token2_symbol", None)
+        
+        # Add any missing required fields with default values, but never overwrite tokens
         for field in required_fields:
             if field not in validated_pool:
-                if field in ["id", "name", "dex", "category", "token1_symbol", "token2_symbol", "token1_address", "token2_address", "version"]:
+                if field in ["id", "name", "dex", "category", "version"]:
+                    validated_pool[field] = "Unknown"
+                elif field in ["token1_symbol", "token2_symbol", "token1_address", "token2_address"]:
+                    # Only set to Unknown if not present - preserve extracted token data
                     validated_pool[field] = "Unknown"
                 else:
                     validated_pool[field] = 0.0
@@ -341,13 +348,31 @@ def ensure_all_fields(pool_data):
             if field not in validated_pool:
                 validated_pool[field] = default_value
         
+        # Get tokens and array from the pool data directly
+        tokens_array = validated_pool.get("tokens", [])
+        
+        # If we have tokens in the array, ensure token1_symbol and token2_symbol are set from them
+        if len(tokens_array) >= 2:
+            if tokens_array[0].get("symbol") and tokens_array[0].get("symbol") != "Unknown":
+                validated_pool["token1_symbol"] = tokens_array[0].get("symbol")
+                
+            if tokens_array[1].get("symbol") and tokens_array[1].get("symbol") != "Unknown":
+                validated_pool["token2_symbol"] = tokens_array[1].get("symbol")
+                
+            # Also set addresses if available
+            if tokens_array[0].get("address"):
+                validated_pool["token1_address"] = tokens_array[0].get("address")
+                
+            if tokens_array[1].get("address"):
+                validated_pool["token2_address"] = tokens_array[1].get("address")
+        
         # Get token prices from CoinGecko if not already present
         if validated_pool.get("token1_price", 0) == 0 or validated_pool.get("token2_price", 0) == 0:
             try:
                 from token_price_service import update_pool_with_token_prices
                 validated_pool = update_pool_with_token_prices(validated_pool)
             except Exception as e:
-                st.warning(f"Could not get token prices: {e}")
+                logger.error(f"Could not get token prices: {e}")
         
         validated_pools.append(validated_pool)
     
@@ -512,7 +537,7 @@ def load_data():
     
     # Check user preferences for data loading
     use_cached_data = st.session_state.get('use_cached_data', False)
-    try_live_data = st.session_state.get('try_live_data', False)
+    try_live_data = st.session_state.get('try_live_data', True)  # Force fresh data by default
     
     # Reset flags to avoid constant retries
     st.session_state['try_live_data'] = False
@@ -561,7 +586,7 @@ def load_data():
             logger.error(f"Error accessing cached data: {str(e)}")
             st.warning(f"Could not access cached data: {e}")
     
-    # 2. If user requested live data, force a refresh
+    # 2. If user requested live data or if we have token display issues, force a refresh
     if try_live_data:
         try:
             with st.spinner("Collecting fresh data from available sources..."):
@@ -588,8 +613,9 @@ def load_data():
     
     # 3. Default: Smart loading strategy using data service
     try:
-        with st.spinner("Loading pool data..."):
-            pools = data_service.get_all_pools()
+        # Force refresh to get updated token symbols
+        with st.spinner("Loading pool data with updated token information..."):
+            pools = data_service.get_all_pools(force_refresh=True)
             
         if pools and len(pools) > 0:
             # Ensure all required fields are present
