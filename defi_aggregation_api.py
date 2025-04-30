@@ -481,6 +481,32 @@ class DefiAggregationAPI:
             token1 = tokens[0] if len(tokens) > 0 else {}
             token2 = tokens[1] if len(tokens) > 1 else {}
             
+            # If tokens array is empty, try to extract token info from the pool name
+            # Example pool name: "4k3D-EPjF LP" -> token1 = "4k3D", token2 = "EPjF"
+            if not tokens and "name" in pool:
+                pool_name = pool.get('name', '')
+                
+                # Try to parse token names from the pool name format
+                if pool_name and "-" in pool_name:
+                    name_parts = pool_name.split("-")
+                    if len(name_parts) >= 2:
+                        token1_symbol = name_parts[0].strip()
+                        # Handle cases like "Token1-Token2 LP" by removing "LP" or other suffix
+                        token2_part = name_parts[1].strip()
+                        if " " in token2_part:
+                            token2_symbol = token2_part.split(" ")[0].strip()
+                        else:
+                            token2_symbol = token2_part
+                            
+                        # Create token dictionaries manually
+                        token1 = {"symbol": token1_symbol, "address": "", "price": 0}
+                        token2 = {"symbol": token2_symbol, "address": "", "price": 0}
+                        
+                        # Update tokens array for consistency
+                        tokens = [token1, token2]
+                        
+                        logger.info(f"Extracted token symbols from name '{pool_name}': {token1_symbol} and {token2_symbol}")
+            
             # Extract metrics from the metrics object with improved handling
             metrics = pool.get('metrics', {})
             
