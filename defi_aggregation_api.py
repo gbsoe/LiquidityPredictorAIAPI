@@ -464,6 +464,56 @@ class DefiAggregationAPI:
             logger.error(f"Unexpected error fetching pool {pool_id}: {str(e)}")
             return None
     
+    def get_all_tokens(self) -> List[Dict[str, Any]]:
+        """
+        Get all available tokens from the API.
+        
+        Returns:
+            List of token data with details
+        """
+        try:
+            result = self._make_request("tokens")
+            
+            if isinstance(result, list):
+                logger.info(f"Retrieved {len(result)} tokens from API")
+                return result
+            elif isinstance(result, dict) and "tokens" in result:
+                logger.info(f"Retrieved {len(result.get('tokens', []))} tokens from API dictionary")
+                return result.get("tokens", [])
+            else:
+                logger.warning(f"Unexpected token API response format: {type(result)}")
+                return []
+        except Exception as e:
+            logger.error(f"Failed to get tokens: {str(e)}")
+            return []
+            
+    def get_token_mapping(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Get a mapping of token symbols to token data.
+        
+        Returns:
+            Dictionary mapping token symbols to token data
+        """
+        tokens = self.get_all_tokens()
+        token_map = {}
+        
+        # Create mappings by symbol and address
+        for token in tokens:
+            symbol = token.get('symbol', '')
+            address = token.get('address', '')
+            
+            if symbol:
+                token_map[symbol.upper()] = token
+                
+            if address:
+                token_map[address] = token
+                # Also map the first 4 characters of the address as some APIs use abbreviated addresses
+                if len(address) >= 4:
+                    token_map[address[:4]] = token
+                
+        logger.info(f"Created token mapping with {len(token_map)} entries")
+        return token_map
+            
     def transform_pool_data(self, pool: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         Transform API pool data to match our application's data model.
@@ -478,13 +528,13 @@ class DefiAggregationAPI:
         try:
             # Extract token data from the tokens array with improved error handling
             tokens = pool.get('tokens', [])
-            token1 = tokens[0] if len(tokens) > 0 else {}
-            token2 = tokens[1] if len(tokens) > 1 else {}
             
-            # If tokens array is empty, try to extract token info from the pool name
-            # Example pool name: "4k3D-EPjF LP" -> token1 = "4k3D", token2 = "EPjF"
-            if not tokens and "name" in pool:
+            # If tokens array is empty, try to fetch from tokens endpoint or extract from pool name
+            if not tokens:
+                # First try to extract from pool name
                 pool_name = pool.get('name', '')
+                token1 = {}
+                token2 = {}
                 
                 # Try to parse token names from the pool name format
                 if pool_name and "-" in pool_name:
@@ -498,14 +548,32 @@ class DefiAggregationAPI:
                         else:
                             token2_symbol = token2_part
                             
-                        # Create token dictionaries manually
-                        token1 = {"symbol": token1_symbol, "address": "", "price": 0}
-                        token2 = {"symbol": token2_symbol, "address": "", "price": 0}
+                        # Try to fetch token data from API
+                        token_map = self.get_token_mapping()
                         
+                        # Look up token1 
+                        if token1_symbol in token_map:
+                            token1 = token_map[token1_symbol]
+                            logger.info(f"Found token data for {token1_symbol}")
+                        else:
+                            # Create basic token dictionary
+                            token1 = {"symbol": token1_symbol, "address": "", "price": 0}
+                            
+                        # Look up token2
+                        if token2_symbol in token_map:
+                            token2 = token_map[token2_symbol]
+                            logger.info(f"Found token data for {token2_symbol}")
+                        else:
+                            # Create basic token dictionary
+                            token2 = {"symbol": token2_symbol, "address": "", "price": 0}
+                            
                         # Update tokens array for consistency
                         tokens = [token1, token2]
-                        
                         logger.info(f"Extracted token symbols from name '{pool_name}': {token1_symbol} and {token2_symbol}")
+                        
+            # If tokens were found/created, use them
+            token1 = tokens[0] if len(tokens) > 0 else {}
+            token2 = tokens[1] if len(tokens) > 1 else {}
             
             # Extract metrics from the metrics object with improved handling
             metrics = pool.get('metrics', {})

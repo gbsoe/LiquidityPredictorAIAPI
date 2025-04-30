@@ -1,3 +1,12 @@
+GET List Pool
+
+curl -X GET \
+  "https://filotdefiapi.replit.app/api/v1/pools" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+
+Result
+
 [
   {
     "id": 1,
@@ -273,9 +282,9 @@
     "createdAt": "2025-04-28T06:01:28.318Z",
     "updatedAt": "2025-04-28T06:01:28.318Z",
     "metrics": {
-      "id": 991,
+      "id": 1008,
       "poolId": 7,
-      "timestamp": "2025-04-29T02:52:37.664Z",
+      "timestamp": "2025-04-29T03:57:37.287Z",
       "tvl": 3000000,
       "fee": 0.0001,
       "apy24h": 0.438958,
@@ -318,9 +327,9 @@
     "createdAt": "2025-04-28T06:01:28.418Z",
     "updatedAt": "2025-04-28T06:01:28.418Z",
     "metrics": {
-      "id": 999,
+      "id": 1009,
       "poolId": 8,
-      "timestamp": "2025-04-29T02:52:37.741Z",
+      "timestamp": "2025-04-29T03:57:37.288Z",
       "tvl": 5000000,
       "fee": 0.0005,
       "apy24h": 2.2140894,
@@ -363,9 +372,9 @@
     "createdAt": "2025-04-28T06:01:28.473Z",
     "updatedAt": "2025-04-28T06:01:28.473Z",
     "metrics": {
-      "id": 993,
+      "id": 1007,
       "poolId": 11,
-      "timestamp": "2025-04-29T02:52:37.679Z",
+      "timestamp": "2025-04-29T03:57:37.253Z",
       "tvl": 5000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -407,9 +416,9 @@
     "createdAt": "2025-04-28T06:01:28.472Z",
     "updatedAt": "2025-04-28T06:01:28.472Z",
     "metrics": {
-      "id": 989,
+      "id": 1002,
       "poolId": 9,
-      "timestamp": "2025-04-29T02:52:37.638Z",
+      "timestamp": "2025-04-29T03:57:37.210Z",
       "tvl": 2000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -452,9 +461,9 @@
     "createdAt": "2025-04-28T06:01:28.473Z",
     "updatedAt": "2025-04-28T06:01:28.473Z",
     "metrics": {
-      "id": 990,
+      "id": 1003,
       "poolId": 10,
-      "timestamp": "2025-04-29T02:52:37.653Z",
+      "timestamp": "2025-04-29T03:57:37.227Z",
       "tvl": 3000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -497,9 +506,9 @@
     "createdAt": "2025-04-28T06:01:28.499Z",
     "updatedAt": "2025-04-28T06:01:28.499Z",
     "metrics": {
-      "id": 995,
+      "id": 1004,
       "poolId": 12,
-      "timestamp": "2025-04-29T02:52:37.686Z",
+      "timestamp": "2025-04-29T03:57:37.251Z",
       "tvl": 6500000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -541,9 +550,9 @@
     "createdAt": "2025-04-28T06:09:29.901Z",
     "updatedAt": "2025-04-28T06:09:29.901Z",
     "metrics": {
-      "id": 998,
+      "id": 1013,
       "poolId": 13,
-      "timestamp": "2025-04-29T02:52:37.733Z",
+      "timestamp": "2025-04-29T03:57:37.309Z",
       "tvl": 4000000,
       "fee": 0.003,
       "apy24h": 11.570175,
@@ -567,9 +576,9 @@
     "createdAt": "2025-04-28T06:09:30.359Z",
     "updatedAt": "2025-04-28T06:09:30.359Z",
     "metrics": {
-      "id": 1000,
+      "id": 1012,
       "poolId": 14,
-      "timestamp": "2025-04-29T02:52:37.752Z",
+      "timestamp": "2025-04-29T03:57:37.289Z",
       "tvl": 7000000,
       "fee": 0.001,
       "apy24h": 4.477063,
@@ -593,9 +602,9 @@
     "createdAt": "2025-04-28T06:09:30.386Z",
     "updatedAt": "2025-04-28T06:09:30.386Z",
     "metrics": {
-      "id": 992,
+      "id": 1010,
       "poolId": 15,
-      "timestamp": "2025-04-29T02:52:37.668Z",
+      "timestamp": "2025-04-29T03:57:37.288Z",
       "tvl": 9000000,
       "fee": 0.002,
       "apy24h": 9.153995,
@@ -619,9 +628,9 @@
     "createdAt": "2025-04-28T06:09:30.420Z",
     "updatedAt": "2025-04-28T06:09:30.420Z",
     "metrics": {
-      "id": 1001,
+      "id": 1011,
       "poolId": 16,
-      "timestamp": "2025-04-29T02:52:37.753Z",
+      "timestamp": "2025-04-29T03:57:37.289Z",
       "tvl": 11000000,
       "fee": 0.003,
       "apy24h": 14.039689,
@@ -645,9 +654,9 @@
     "createdAt": "2025-04-28T06:09:30.470Z",
     "updatedAt": "2025-04-28T06:09:30.470Z",
     "metrics": {
-      "id": 994,
+      "id": 1014,
       "poolId": 17,
-      "timestamp": "2025-04-29T02:52:37.686Z",
+      "timestamp": "2025-04-29T03:57:37.331Z",
       "tvl": 8000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -670,9 +679,9 @@
     "createdAt": "2025-04-28T06:09:30.494Z",
     "updatedAt": "2025-04-28T06:09:30.494Z",
     "metrics": {
-      "id": 996,
+      "id": 1005,
       "poolId": 18,
-      "timestamp": "2025-04-29T02:52:37.689Z",
+      "timestamp": "2025-04-29T03:57:37.251Z",
       "tvl": 9500000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -695,9 +704,9 @@
     "createdAt": "2025-04-28T06:09:30.513Z",
     "updatedAt": "2025-04-28T06:09:30.513Z",
     "metrics": {
-      "id": 997,
+      "id": 1006,
       "poolId": 19,
-      "timestamp": "2025-04-29T02:52:37.693Z",
+      "timestamp": "2025-04-29T03:57:37.251Z",
       "tvl": 11000000,
       "fee": 0.0025,
       "apy24h": 14.665538,
@@ -711,3 +720,66 @@
     "tokens": []
   }
 ]
+
+
+Pool Mapping
+
+Here’s the updated mapped data with **APY 7D** and **APY 30D** included:
+
+---
+
+ **1. Raydium Pool Data**  
+**Program ID:** `675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8`  
+**Key Field:** `ammId` (in `extraData`)  
+**Mapped Results:**
+
+| Pool ID                 | Name            | Token Pair  | TVL         | 24H APY  | 7D APY  | 30D APY | Fee    | AMM ID                              |
+|-------------------------|-----------------|-------------|-------------|----------|---------|---------|--------|-------------------------------------|
+| RAYUSDC                 | RAY-USDC LP     | RAY/USDC    | $5,234,790  | 12.45%   | 11.87%  | 10.92%  | 0.25%  | `AydkTnZeQCGWuvXjT83hXr6KuC55mUEjXqj` |
+| SOLUSDC                 | SOL-USDC LP     | SOL/USDC    | $15,789,456 | 8.32%    | 7.95%   | 7.45%   | 0.25%  | `58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBk` |
+| 7UF3m8hDGZ6bNnHzaT2YHr | RAY-USDC LP     | RAY/USDC    | $5,000,000  | 14.67%   | 13.20%  | 12.47%  | 0.25%  | `7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6` |
+| 58oQChx4yWmvKdwLLZzBi4 | SOL-USDC LP     | SOL/USDC    | $6,500,000  | 14.67%   | 13.20%  | 12.47%  | 0.25%  | `58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBk` |
+| 6UmmUiYoBjSrhakAobJw8B | So11-Es9v LP    | (No tokens) | $8,000,000  | 14.67%   | 13.20%  | 12.47%  | 0.25%  | `6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBt`  |
+| AVs9TA4nWDzfPJE9gGVNJMV | 4k3D-So11 LP    | (No tokens) | $9,500,000  | 14.67%   | 13.20%  | 12.47%  | 0.25%  | `AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGaz`  |
+| DVa7Qmb5ct9RCpaU7UTpSaf | 9n4n-EPjF LP    | (No tokens) | $11,000,000 | 14.67%   | 13.20%  | 12.47%  | 0.25%  | `DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU` |
+
+---
+
+ **2. Meteora Pool Data**  
+**Program ID:** `Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS`  
+**Key Fields:** `concentrationBounds` or `bins` (in `extraData`)  
+**Mapped Results:**
+
+| Pool ID                 | Name               | Token Pair   | TVL        | 24H APY  | 7D APY   | 30D APY | Fee    | Parameters                          |
+|-------------------------|--------------------|--------------|------------|----------|----------|---------|--------|-------------------------------------|
+| MSOLUSDCM               | mSOL-USDC LP       | mSOL/USDC    | $3,456,789 | 14.75%   | 13.92%   | 12.86%  | 0.30%  | `concentrationBounds: narrow`       |
+| BTCUSDCM                | BTC-USDC LP        | BTC/USDC     | $7,896,543 | 9.54%    | 8.87%    | 8.23%   | 0.25%  | `concentrationBounds: wide`         |
+| 8sLbNZoA1cfnvMJLPfp98ZL | mSOL-USDC LP       | mSOL/USDC    | $2,000,000 | 11.57%   | 10.64%   | 9.83%   | 0.30%  | `bins: 120, concentrationBounds: medium` |
+| FLKdMRsS7dvj9mMsEBxciUJ | BTC-USDC LP        | BTC/USDC     | $3,000,000 | 11.57%   | 10.64%   | 9.83%   | 0.30%  | `bins: 120, concentrationBounds: medium` |
+| Cv3YJJvCZQJKP5G6AHh77GV | 9n4n-EPjF LP       | (No tokens)  | $4,000,000 | 11.57%   | 10.64%   | 9.83%   | 0.30%  | `bins: 120, concentrationBounds: medium` |
+
+---
+
+ **3. Orca Pool Data**  
+**Program ID:** `whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc`  
+**Key Field:** `whirlpoolId` (in `extraData`)  
+**Mapped Results:**
+
+| Pool ID                 | Name               | Token Pair   | TVL         | 24H APY  | 7D APY   | 30D APY | Fee    | Whirlpool ID                      |
+|-------------------------|--------------------|--------------|-------------|----------|----------|---------|--------|-----------------------------------|
+| SOLUSDCO                | SOL-USDC LP        | SOL/USDC     | $8,765,432  | 11.23%   | 10.78%   | 9.95%   | 0.20%  | `HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6` |
+| ETHUSDCO                | ETH-USDC LP        | ETH/USDC     | $6,543,211  | 10.45%   | 9.87%    | 9.12%   | 0.20%  | `EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAf` |
+| HJPjoWUrhoZzkNfRpHuieeF | SOL-USDC LP        | SOL/USDC     | $3,000,000  | 0.44%    | 0.42%    | 0.40%   | 0.01%  | `HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6` |
+| EoTcMgcDRTJVZDMZWBoU6rh | ETH-USDC LP        | ETH/USDC     | $5,000,000  | 2.21%    | 2.10%    | 1.99%   | 0.05%  | `EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAf` |
+| 7qbRF6YsyGuLUVs6Y1q64bd | So11-Es9v LP       | (No tokens)  | $7,000,000  | 4.48%    | 4.25%    | 4.03%   | 0.10%  | `7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1` |
+| 7FHzquT9yCMzD5hVQm8PzD4 | 9n4n-EPjF LP       | (No tokens)  | $9,000,000  | 9.15%    | 8.70%    | 8.24%   | 0.20%  | `7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv` |
+| 3kTA1SQ9gL7oXy7pMqJ3MtU | DezX-So11 LP       | (No tokens)  | $11,000,000 | 14.04%   | 13.34%   | 12.64%  | 0.30%  | `3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjh` |
+
+---
+
+ **Notes**  
+- **APY Values**: Rounded to 2 decimal places for readability.  
+- **Empty Token Pairs**: Pools with missing `tokens` data (IDs 13-19) may need manual verification.  
+- **APY Trends**: Use 7D/30D APY to assess yield stability over time (e.g., Orca’s low-fee pools show lower but stable APYs).  
+
+Let me know if you need additional filters (e.g., sorting by TVL or APY)!
