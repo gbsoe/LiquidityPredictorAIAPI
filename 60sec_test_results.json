@@ -1,0 +1,433 @@
+{
+  "stats": {
+    "total_pools": 36,
+    "unique_pools": [
+      "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy",
+      "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
+      "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
+      "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+      "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
+      "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm",
+      "FLKdMRsS7dvj9mMsEBxciUJc3TKJcEmVUbQRf5UnYEpw",
+      "Cv3YJJvCZQJKP5G6AHh77GVbewGZUVs4Y1WJ6Yc3HbQj",
+      "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj",
+      "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
+      "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
+      "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw",
+      "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"
+    ],
+    "total_tokens": 0,
+    "unique_tokens": [],
+    "dex_counts": {
+      "raydium": 15,
+      "orca": 15,
+      "meteora": 6
+    },
+    "api_calls": 8,
+    "errors": 0,
+    "db_writes": 0,
+    "start_time": "2025-04-30T00:15:46.693536",
+    "end_time": "2025-04-30T00:16:49.858702",
+    "elapsed_seconds": 63.16504144668579,
+    "pools_per_second": 0.5699355082413056
+  },
+  "test_duration": "63.17 seconds",
+  "timestamp": "2025-04-30T00:16:49.858708",
+  "sample_pools": [
+    {
+      "id": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
+      "name": "4k3D-EPjF LP",
+      "dex": "raydium",
+      "category": "DeFi",
+      "token1_symbol": "Unknown",
+      "token2_symbol": "Unknown",
+      "token1_address": "",
+      "token2_address": "",
+      "token1_price": 0.0,
+      "token2_price": 0.0,
+      "tokens": [],
+      "poolId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "liquidity": 5000000,
+      "volume_24h": 750000,
+      "apr": 14.665538,
+      "fee": 0.0025,
+      "apr_24h": 14.665538,
+      "apr_7d": 13.198984,
+      "apr_30d": 12.465708,
+      "apr_change_24h": 0,
+      "apr_change_7d": -10.000001363741312,
+      "apr_change_30d": -5.5555488210304675,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-04-29T13:34:45.768Z",
+      "updated_at": "2025-04-29T13:34:45.768Z",
+      "extra_data": {
+        "ammId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8"
+      },
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "id": 212,
+        "poolId": 4,
+        "timestamp": "2025-04-29T22:16:38.728Z",
+        "tvl": 5000000,
+        "fee": 0.0025,
+        "apy24h": 14.665538,
+        "apy7d": 13.198984,
+        "apy30d": 12.465708,
+        "volumeUsd": 750000,
+        "extraData": {
+          "ammId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8"
+        }
+      },
+      "api_response": {
+        "id": 4,
+        "poolId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
+        "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+        "source": "raydium",
+        "name": "4k3D-EPjF LP",
+        "active": true,
+        "metrics": {
+          "id": 212,
+          "poolId": 4,
+          "timestamp": "2025-04-29T22:16:38.728Z",
+          "tvl": 5000000,
+          "fee": 0.0025,
+          "apy24h": 14.665538,
+          "apy7d": 13.198984,
+          "apy30d": 12.465708,
+          "volumeUsd": 750000,
+          "extraData": {
+            "ammId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8"
+          }
+        }
+      }
+    },
+    {
+      "id": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+      "name": "So11-EPjF LP",
+      "dex": "raydium",
+      "category": "DeFi",
+      "token1_symbol": "Unknown",
+      "token2_symbol": "Unknown",
+      "token1_address": "",
+      "token2_address": "",
+      "token1_price": 0.0,
+      "token2_price": 0.0,
+      "tokens": [],
+      "poolId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "liquidity": 6500000,
+      "volume_24h": 975000,
+      "apr": 14.665538,
+      "fee": 0.0025,
+      "apr_24h": 14.665538,
+      "apr_7d": 13.198984,
+      "apr_30d": 12.465708,
+      "apr_change_24h": 0,
+      "apr_change_7d": -10.000001363741312,
+      "apr_change_30d": -5.5555488210304675,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-04-29T13:34:45.801Z",
+      "updated_at": "2025-04-29T13:34:45.801Z",
+      "extra_data": {
+        "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
+      },
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "id": 213,
+        "poolId": 5,
+        "timestamp": "2025-04-29T22:16:38.729Z",
+        "tvl": 6500000,
+        "fee": 0.0025,
+        "apy24h": 14.665538,
+        "apy7d": 13.198984,
+        "apy30d": 12.465708,
+        "volumeUsd": 975000,
+        "extraData": {
+          "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
+        }
+      },
+      "api_response": {
+        "id": 5,
+        "poolId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+        "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+        "source": "raydium",
+        "name": "So11-EPjF LP",
+        "active": true,
+        "metrics": {
+          "id": 213,
+          "poolId": 5,
+          "timestamp": "2025-04-29T22:16:38.729Z",
+          "tvl": 6500000,
+          "fee": 0.0025,
+          "apy24h": 14.665538,
+          "apy7d": 13.198984,
+          "apy30d": 12.465708,
+          "volumeUsd": 975000,
+          "extraData": {
+            "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
+          }
+        }
+      }
+    },
+    {
+      "id": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
+      "name": "So11-Es9v LP",
+      "dex": "raydium",
+      "category": "DeFi",
+      "token1_symbol": "Unknown",
+      "token2_symbol": "Unknown",
+      "token1_address": "",
+      "token2_address": "",
+      "token1_price": 0.0,
+      "token2_price": 0.0,
+      "tokens": [],
+      "poolId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "liquidity": 8000000,
+      "volume_24h": 1200000,
+      "apr": 14.665538,
+      "fee": 0.0025,
+      "apr_24h": 14.665538,
+      "apr_7d": 13.198984,
+      "apr_30d": 12.465708,
+      "apr_change_24h": 0,
+      "apr_change_7d": -10.000001363741312,
+      "apr_change_30d": -5.5555488210304675,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-04-29T13:34:45.968Z",
+      "updated_at": "2025-04-29T13:34:45.968Z",
+      "extra_data": {
+        "ammId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg"
+      },
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "id": 214,
+        "poolId": 6,
+        "timestamp": "2025-04-29T22:16:38.747Z",
+        "tvl": 8000000,
+        "fee": 0.0025,
+        "apy24h": 14.665538,
+        "apy7d": 13.198984,
+        "apy30d": 12.465708,
+        "volumeUsd": 1200000,
+        "extraData": {
+          "ammId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg"
+        }
+      },
+      "api_response": {
+        "id": 6,
+        "poolId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
+        "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+        "source": "raydium",
+        "name": "So11-Es9v LP",
+        "active": true,
+        "metrics": {
+          "id": 214,
+          "poolId": 6,
+          "timestamp": "2025-04-29T22:16:38.747Z",
+          "tvl": 8000000,
+          "fee": 0.0025,
+          "apy24h": 14.665538,
+          "apy7d": 13.198984,
+          "apy30d": 12.465708,
+          "volumeUsd": 1200000,
+          "extraData": {
+            "ammId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg"
+          }
+        }
+      }
+    },
+    {
+      "id": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
+      "name": "4k3D-So11 LP",
+      "dex": "raydium",
+      "category": "DeFi",
+      "token1_symbol": "Unknown",
+      "token2_symbol": "Unknown",
+      "token1_address": "",
+      "token2_address": "",
+      "token1_price": 0.0,
+      "token2_price": 0.0,
+      "tokens": [],
+      "poolId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "liquidity": 9500000,
+      "volume_24h": 1425000,
+      "apr": 14.665538,
+      "fee": 0.0025,
+      "apr_24h": 14.665538,
+      "apr_7d": 13.198984,
+      "apr_30d": 12.465708,
+      "apr_change_24h": 0,
+      "apr_change_7d": -10.000001363741312,
+      "apr_change_30d": -5.5555488210304675,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-04-29T13:34:46.004Z",
+      "updated_at": "2025-04-29T13:34:46.004Z",
+      "extra_data": {
+        "ammId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA"
+      },
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "id": 215,
+        "poolId": 7,
+        "timestamp": "2025-04-29T22:16:38.750Z",
+        "tvl": 9500000,
+        "fee": 0.0025,
+        "apy24h": 14.665538,
+        "apy7d": 13.198984,
+        "apy30d": 12.465708,
+        "volumeUsd": 1425000,
+        "extraData": {
+          "ammId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA"
+        }
+      },
+      "api_response": {
+        "id": 7,
+        "poolId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
+        "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+        "source": "raydium",
+        "name": "4k3D-So11 LP",
+        "active": true,
+        "metrics": {
+          "id": 215,
+          "poolId": 7,
+          "timestamp": "2025-04-29T22:16:38.750Z",
+          "tvl": 9500000,
+          "fee": 0.0025,
+          "apy24h": 14.665538,
+          "apy7d": 13.198984,
+          "apy30d": 12.465708,
+          "volumeUsd": 1425000,
+          "extraData": {
+            "ammId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA"
+          }
+        }
+      }
+    },
+    {
+      "id": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
+      "name": "9n4n-EPjF LP",
+      "dex": "raydium",
+      "category": "DeFi",
+      "token1_symbol": "Unknown",
+      "token2_symbol": "Unknown",
+      "token1_address": "",
+      "token2_address": "",
+      "token1_price": 0.0,
+      "token2_price": 0.0,
+      "tokens": [],
+      "poolId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "liquidity": 11000000,
+      "volume_24h": 1650000,
+      "apr": 14.665538,
+      "fee": 0.0025,
+      "apr_24h": 14.665538,
+      "apr_7d": 13.198984,
+      "apr_30d": 12.465708,
+      "apr_change_24h": 0,
+      "apr_change_7d": -10.000001363741312,
+      "apr_change_30d": -5.5555488210304675,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-04-29T13:34:46.040Z",
+      "updated_at": "2025-04-29T13:34:46.040Z",
+      "extra_data": {
+        "ammId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut"
+      },
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "id": 216,
+        "poolId": 8,
+        "timestamp": "2025-04-29T22:16:38.751Z",
+        "tvl": 11000000,
+        "fee": 0.0025,
+        "apy24h": 14.665538,
+        "apy7d": 13.198984,
+        "apy30d": 12.465708,
+        "volumeUsd": 1650000,
+        "extraData": {
+          "ammId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut"
+        }
+      },
+      "api_response": {
+        "id": 8,
+        "poolId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
+        "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+        "source": "raydium",
+        "name": "9n4n-EPjF LP",
+        "active": true,
+        "metrics": {
+          "id": 216,
+          "poolId": 8,
+          "timestamp": "2025-04-29T22:16:38.751Z",
+          "tvl": 11000000,
+          "fee": 0.0025,
+          "apy24h": 14.665538,
+          "apy7d": 13.198984,
+          "apy30d": 12.465708,
+          "volumeUsd": 1650000,
+          "extraData": {
+            "ammId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut"
+          }
+        }
+      }
+    }
+  ]
+}

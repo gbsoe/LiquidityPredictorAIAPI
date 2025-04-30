@@ -107,6 +107,8 @@ class LiquidityPool(Base):
     token2_symbol = Column(String, nullable=False)
     token1_address = Column(String, nullable=False)
     token2_address = Column(String, nullable=False)
+    token1_price = Column(Float, nullable=False, default=0.0)  # Added for token price service
+    token2_price = Column(Float, nullable=False, default=0.0)  # Added for token price service
     liquidity = Column(Float, nullable=False)
     volume_24h = Column(Float, nullable=False)
     apr = Column(Float, nullable=False)
@@ -133,6 +135,8 @@ class LiquidityPool(Base):
             "token2_symbol": self.token2_symbol,
             "token1_address": self.token1_address,
             "token2_address": self.token2_address,
+            "token1_price": self.token1_price,  # Added to match schema update
+            "token2_price": self.token2_price,  # Added to match schema update
             "liquidity": self.liquidity,
             "volume_24h": self.volume_24h,
             "apr": self.apr,
