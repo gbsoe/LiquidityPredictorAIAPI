@@ -375,6 +375,19 @@ class TokenDataService:
             "last_updated": datetime.now().isoformat(),
         }
     
+    def get_token_metadata(self, symbol: str) -> Dict[str, Any]:
+        """
+        Get token metadata by symbol.
+        
+        Args:
+            symbol: Token symbol (e.g., "SOL", "USDC")
+            
+        Returns:
+            Token metadata dictionary with symbol, name, address, etc.
+        """
+        # This method uses get_token_data for consistency
+        return self.get_token_data(token_symbol=symbol)
+    
     def get_tokens_for_pool(self, pool_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
         Get detailed token data for a pool.

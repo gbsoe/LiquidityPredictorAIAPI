@@ -170,6 +170,41 @@ def init_db():
         return False
 
 # Function to store data in database
+def process_api_pool_data(pool_data):
+    """
+    Process a pool from the API format to our database model format.
+    Handles the tokens array and extracts token prices.
+    
+    Args:
+        pool_data: Dict containing pool data from the API
+        
+    Returns:
+        Dict with database-compatible fields
+    """
+    processed_pool = pool_data.copy()
+    
+    # Handle tokens array if present
+    if "tokens" in processed_pool and isinstance(processed_pool["tokens"], list):
+        tokens = processed_pool["tokens"]
+        
+        # Remove tokens array to avoid SQLAlchemy errors
+        del processed_pool["tokens"]
+        
+        # Process token data
+        if len(tokens) > 0:
+            # First token
+            processed_pool["token1_symbol"] = tokens[0].get("symbol", processed_pool.get("token1_symbol", "Unknown"))
+            processed_pool["token1_address"] = tokens[0].get("address", processed_pool.get("token1_address", ""))
+            processed_pool["token1_price"] = tokens[0].get("price", processed_pool.get("token1_price", 0.0))
+            
+            # Second token if available
+            if len(tokens) > 1:
+                processed_pool["token2_symbol"] = tokens[1].get("symbol", processed_pool.get("token2_symbol", "Unknown"))
+                processed_pool["token2_address"] = tokens[1].get("address", processed_pool.get("token2_address", ""))
+                processed_pool["token2_price"] = tokens[1].get("price", processed_pool.get("token2_price", 0.0))
+    
+    return processed_pool
+
 def store_pools(pool_data, replace=True):
     """
     Store pool data in the database
@@ -201,6 +236,9 @@ def store_pools(pool_data, replace=True):
     try:
         for pool in pool_data:
             try:
+                # Process the pool data to handle tokens array and extract token prices
+                processed_pool = process_api_pool_data(pool)
+                
                 # Ensure all required fields are present
                 required_fields = [
                     "id", "name", "dex", "category", "token1_symbol", "token2_symbol",
@@ -210,23 +248,23 @@ def store_pools(pool_data, replace=True):
                 ]
                 
                 # Check for missing fields
-                missing_fields = [field for field in required_fields if field not in pool]
+                missing_fields = [field for field in required_fields if field not in processed_pool]
                 if missing_fields:
-                    print(f"Skipping pool {pool.get('id', 'unknown')}: Missing fields: {missing_fields}")
+                    print(f"Skipping pool {processed_pool.get('id', 'unknown')}: Missing fields: {missing_fields}")
                     continue
                 
                 # Check if this pool already exists
-                existing = session.query(LiquidityPool).filter_by(id=pool["id"]).first()
+                existing = session.query(LiquidityPool).filter_by(id=processed_pool["id"]).first()
                 
                 if existing and replace:
                     # Update existing entry
-                    for key, value in pool.items():
+                    for key, value in processed_pool.items():
                         if hasattr(existing, key):
                             setattr(existing, key, value)
                     count += 1
                 elif not existing:
                     # Create new entry
-                    new_pool = LiquidityPool(**pool)
+                    new_pool = LiquidityPool(**processed_pool)
                     session.add(new_pool)
                     count += 1
             except Exception as e:
@@ -1322,6 +1360,9 @@ def save_pool_to_database(pool_data: dict) -> bool:
         print("Database connection not available")
         return False
     
+    # Process the pool data to handle tokens array
+    processed_pool = process_api_pool_data(pool_data)
+    
     # Create a session
     session = Session()
     
@@ -1331,7 +1372,7 @@ def save_pool_to_database(pool_data: dict) -> bool:
         
         if existing_pool:
             # Update the pool with new data
-            for key, value in pool_data.items():
+            for key, value in processed_pool.items():
                 if hasattr(existing_pool, key):
                     setattr(existing_pool, key, value)
             # Save
@@ -1340,26 +1381,28 @@ def save_pool_to_database(pool_data: dict) -> bool:
         else:
             # Create a new pool
             new_pool = LiquidityPool(
-                id=pool_data.get('id', ''),
-                name=pool_data.get('name', ''),
-                dex=pool_data.get('dex', 'Unknown'),
-                category=pool_data.get('category', 'Custom'),
-                token1_symbol=pool_data.get('token1_symbol', 'Unknown'),
-                token2_symbol=pool_data.get('token2_symbol', 'Unknown'),
-                token1_address=pool_data.get('token1_address', ''),
-                token2_address=pool_data.get('token2_address', ''),
-                liquidity=pool_data.get('liquidity', 0.0),
-                volume_24h=pool_data.get('volume_24h', 0.0),
-                apr=pool_data.get('apr', 0.0),
-                fee=pool_data.get('fee', 0.0),
-                version=pool_data.get('version', ''),
-                apr_change_24h=pool_data.get('apr_change_24h', 0.0),
-                apr_change_7d=pool_data.get('apr_change_7d', 0.0),
-                tvl_change_24h=pool_data.get('tvl_change_24h', 0.0),
-                tvl_change_7d=pool_data.get('tvl_change_7d', 0.0),
-                prediction_score=pool_data.get('prediction_score', 0.0),
-                apr_change_30d=pool_data.get('apr_change_30d', 0.0),
-                tvl_change_30d=pool_data.get('tvl_change_30d', 0.0)
+                id=processed_pool.get('id', ''),
+                name=processed_pool.get('name', ''),
+                dex=processed_pool.get('dex', 'Unknown'),
+                category=processed_pool.get('category', 'Custom'),
+                token1_symbol=processed_pool.get('token1_symbol', 'Unknown'),
+                token2_symbol=processed_pool.get('token2_symbol', 'Unknown'),
+                token1_address=processed_pool.get('token1_address', ''),
+                token2_address=processed_pool.get('token2_address', ''),
+                token1_price=processed_pool.get('token1_price', 0.0),
+                token2_price=processed_pool.get('token2_price', 0.0),
+                liquidity=processed_pool.get('liquidity', 0.0),
+                volume_24h=processed_pool.get('volume_24h', 0.0),
+                apr=processed_pool.get('apr', 0.0),
+                fee=processed_pool.get('fee', 0.0),
+                version=processed_pool.get('version', ''),
+                apr_change_24h=processed_pool.get('apr_change_24h', 0.0),
+                apr_change_7d=processed_pool.get('apr_change_7d', 0.0),
+                tvl_change_24h=processed_pool.get('tvl_change_24h', 0.0),
+                tvl_change_7d=processed_pool.get('tvl_change_7d', 0.0),
+                prediction_score=processed_pool.get('prediction_score', 0.0),
+                apr_change_30d=processed_pool.get('apr_change_30d', 0.0),
+                tvl_change_30d=processed_pool.get('tvl_change_30d', 0.0)
             )
             session.add(new_pool)
             session.commit()
