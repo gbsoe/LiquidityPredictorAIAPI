@@ -8,8 +8,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 1.88,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 5,
@@ -106,8 +106,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -204,8 +204,8 @@
     "token2_symbol": "ES9V",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -302,8 +302,8 @@
     "token2_symbol": "SO11",
     "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
     "token2_address": "So11111111111111111111111111111111111111112",
-    "token1_price": 1.88,
-    "token2_price": 143.28,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 5,
@@ -400,8 +400,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -498,8 +498,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 3018.47,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 12,
@@ -599,8 +599,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -700,8 +700,8 @@
     "token2_symbol": "ES9V",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -801,8 +801,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -902,8 +902,8 @@
     "token2_symbol": "SO11",
     "token1_address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
     "token2_address": "So11111111111111111111111111111111111111112",
-    "token1_price": 3018.47,
-    "token2_price": 143.28,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 14,
@@ -1003,8 +1003,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 160.55,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 1,
@@ -1104,8 +1104,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -1205,8 +1205,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -1306,8 +1306,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 1.88,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 5,
@@ -1404,8 +1404,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -1502,8 +1502,8 @@
     "token2_symbol": "ES9V",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -1600,8 +1600,8 @@
     "token2_symbol": "SO11",
     "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
     "token2_address": "So11111111111111111111111111111111111111112",
-    "token1_price": 1.88,
-    "token2_price": 143.28,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 5,
@@ -1698,8 +1698,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -1796,8 +1796,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 3018.47,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 12,
@@ -1897,8 +1897,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -1998,8 +1998,8 @@
     "token2_symbol": "ES9V",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -2099,8 +2099,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -2200,8 +2200,8 @@
     "token2_symbol": "SO11",
     "token1_address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
     "token2_address": "So11111111111111111111111111111111111111112",
-    "token1_price": 3018.47,
-    "token2_price": 143.28,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 14,
@@ -2301,8 +2301,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 160.55,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 1,
@@ -2402,8 +2402,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -2503,8 +2503,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -2604,8 +2604,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 1.88,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 5,
@@ -2702,8 +2702,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -2800,8 +2800,8 @@
     "token2_symbol": "ES9V",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -2898,8 +2898,8 @@
     "token2_symbol": "SO11",
     "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
     "token2_address": "So11111111111111111111111111111111111111112",
-    "token1_price": 1.88,
-    "token2_price": 143.28,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 5,
@@ -2996,8 +2996,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -3094,8 +3094,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 3018.47,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 12,
@@ -3195,8 +3195,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -3296,8 +3296,8 @@
     "token2_symbol": "ES9V",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -3397,8 +3397,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -3498,8 +3498,8 @@
     "token2_symbol": "SO11",
     "token1_address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
     "token2_address": "So11111111111111111111111111111111111111112",
-    "token1_price": 3018.47,
-    "token2_price": 143.28,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 14,
@@ -3599,8 +3599,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 160.55,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 1,
@@ -3700,8 +3700,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -3801,8 +3801,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -3902,8 +3902,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 1.88,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 5,
@@ -4000,8 +4000,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -4098,8 +4098,8 @@
     "token2_symbol": "ES9V",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -4196,8 +4196,8 @@
     "token2_symbol": "SO11",
     "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
     "token2_address": "So11111111111111111111111111111111111111112",
-    "token1_price": 1.88,
-    "token2_price": 143.28,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 5,
@@ -4294,8 +4294,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -4392,8 +4392,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 3018.47,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 12,
@@ -4493,8 +4493,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -4594,8 +4594,8 @@
     "token2_symbol": "ES9V",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -4695,8 +4695,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -4796,8 +4796,8 @@
     "token2_symbol": "SO11",
     "token1_address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
     "token2_address": "So11111111111111111111111111111111111111112",
-    "token1_price": 3018.47,
-    "token2_price": 143.28,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 14,
@@ -4897,8 +4897,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 160.55,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 1,
@@ -4998,8 +4998,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -5099,8 +5099,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,
@@ -5200,8 +5200,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 1.88,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 5,
@@ -5298,8 +5298,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -5396,8 +5396,8 @@
     "token2_symbol": "ES9V",
     "token1_address": "So11111111111111111111111111111111111111112",
     "token2_address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-    "token1_price": 143.28,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 4,
@@ -5494,8 +5494,8 @@
     "token2_symbol": "SO11",
     "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
     "token2_address": "So11111111111111111111111111111111111111112",
-    "token1_price": 1.88,
-    "token2_price": 143.28,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 5,
@@ -5592,8 +5592,8 @@
     "token2_symbol": "EPJF",
     "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
     "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "token1_price": 62873.15,
-    "token2_price": 1.0,
+    "token1_price": 0,
+    "token2_price": 0,
     "tokens": [
       {
         "id": 3,

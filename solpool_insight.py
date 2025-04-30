@@ -297,6 +297,10 @@ def ensure_all_fields(pool_data):
     """
     Ensure all required fields are present in the pool data.
     This is important when loading data from the cached file that might be missing fields.
+    
+    This function also extracts token data from pool names when the tokens array is empty,
+    sets the correct DEX name based on the 'source' field, and ensures TVL and APR values 
+    are properly pulled from the metrics object.
     """
     required_fields = [
         "id", "name", "dex", "category", "token1_symbol", "token2_symbol", 
@@ -328,9 +332,76 @@ def ensure_all_fields(pool_data):
         # Make a copy of the pool data to not modify the original
         validated_pool = pool.copy()
         
-        # Debug token data
-        token1_symbol = validated_pool.get("token1_symbol", None)
-        token2_symbol = validated_pool.get("token2_symbol", None)
+        # ENHANCED: Make sure we properly capture pool metrics from the metrics object
+        metrics = validated_pool.get("metrics", {})
+        if metrics and isinstance(metrics, dict):
+            # Update liquidity/TVL data
+            if metrics.get("tvl") and validated_pool.get("liquidity", 0) == 0:
+                validated_pool["liquidity"] = metrics.get("tvl", 0)
+            
+            # Update APR data
+            if metrics.get("apy24h") and validated_pool.get("apr", 0) == 0:
+                validated_pool["apr"] = metrics.get("apy24h", 0)
+                validated_pool["apr_24h"] = metrics.get("apy24h", 0)
+                validated_pool["apr_7d"] = metrics.get("apy7d", 0)
+                validated_pool["apr_30d"] = metrics.get("apy30d", 0)
+            
+            # Update volume data
+            if metrics.get("volumeUsd") and validated_pool.get("volume_24h", 0) == 0:
+                validated_pool["volume_24h"] = metrics.get("volumeUsd", 0)
+            
+            # Update fee data
+            if metrics.get("fee") and validated_pool.get("fee", 0) == 0:
+                validated_pool["fee"] = metrics.get("fee", 0)
+        
+        # ENHANCED: Properly set DEX name based on source field
+        source = validated_pool.get("source", "").lower()
+        if source and validated_pool.get("dex", "") == "Unknown":
+            # Capitalize the first letter
+            validated_pool["dex"] = source.capitalize()
+            
+            # Set proper category based on the DEX
+            if validated_pool.get("category", "") == "Unknown":
+                # Check pool name for category clues
+                pool_name = validated_pool.get("name", "").lower()
+                
+                if "stable" in pool_name:
+                    validated_pool["category"] = "Stablecoin"
+                elif "defi" in pool_name:
+                    validated_pool["category"] = "DeFi"
+                elif any(meme in pool_name for meme in ["doge", "bonk", "pepe", "shib", "meme"]):
+                    validated_pool["category"] = "Meme"
+                else:
+                    validated_pool["category"] = "DeFi"  # Default category
+        
+        # ENHANCED: Process token data from pool name if tokens array is empty
+        pool_name = validated_pool.get("name", "")
+        tokens_array = validated_pool.get("tokens", [])
+        
+        # If tokens array is empty but we have a name with a hyphen
+        if len(tokens_array) == 0 and pool_name and "-" in pool_name:
+            # Parse token symbols from name
+            name_parts = pool_name.split("-")
+            if len(name_parts) >= 2:
+                token1_symbol = name_parts[0].strip()
+                
+                # Handle cases like "Token1-Token2 LP" by removing "LP" or other suffix
+                token2_part = name_parts[1].strip()
+                if " " in token2_part:
+                    token2_symbol = token2_part.split(" ")[0].strip()
+                else:
+                    token2_symbol = token2_part
+                
+                # Update the token symbols
+                if token1_symbol:
+                    validated_pool["token1_symbol"] = token1_symbol
+                
+                if token2_symbol:
+                    validated_pool["token2_symbol"] = token2_symbol
+                
+                # Now try to fill in token metadata
+                from token_price_service import update_pool_with_token_prices
+                validated_pool = update_pool_with_token_prices(validated_pool)
         
         # Add any missing required fields with default values, but never overwrite tokens
         for field in required_fields:
@@ -348,9 +419,6 @@ def ensure_all_fields(pool_data):
             if field not in validated_pool:
                 validated_pool[field] = default_value
         
-        # Get tokens and array from the pool data directly
-        tokens_array = validated_pool.get("tokens", [])
-        
         # If we have tokens in the array, ensure token1_symbol and token2_symbol are set from them
         if len(tokens_array) >= 2:
             if tokens_array[0].get("symbol") and tokens_array[0].get("symbol") != "Unknown":
@@ -366,7 +434,7 @@ def ensure_all_fields(pool_data):
             if tokens_array[1].get("address"):
                 validated_pool["token2_address"] = tokens_array[1].get("address")
         
-        # Get token prices from CoinGecko if not already present
+        # Get token prices if not already present
         if validated_pool.get("token1_price", 0) == 0 or validated_pool.get("token2_price", 0) == 0:
             try:
                 from token_price_service import update_pool_with_token_prices
