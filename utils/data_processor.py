@@ -70,24 +70,33 @@ def get_token_prices(db, token_symbols, days=7):
         import sys
         import os
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from token_price_service import get_multiple_prices
+        from token_price_service import get_token_price
         
-        # Get prices from CoinGecko
-        cg_prices = get_multiple_prices(token_symbols)
-        
-        if cg_prices and any(cg_prices.values()):
-            # Convert to DataFrame format expected by the app
-            price_data = []
-            for token, price in cg_prices.items():
-                if price > 0:
+        # Get prices with source information from token price service
+        price_data = []
+        for token in token_symbols:
+            price_result = get_token_price(token, return_source=True)
+            
+            if isinstance(price_result, tuple) and len(price_result) == 2:
+                price, source = price_result
+                if price and price > 0:
                     price_data.append({
                         'token_symbol': token,
-                        'price_usd': price,
+                        'price_usd': float(price),
+                        'price_source': source,
                         'timestamp': pd.Timestamp.now()
                     })
-            
-            if price_data:
-                return pd.DataFrame(price_data)
+            elif price_result and float(price_result) > 0:
+                # Handle case when only price is returned
+                price_data.append({
+                    'token_symbol': token,
+                    'price_usd': float(price_result),
+                    'price_source': 'unknown',
+                    'timestamp': pd.Timestamp.now()
+                })
+        
+        if price_data:
+            return pd.DataFrame(price_data)
     except Exception as e:
         logger.warning(f"Could not get prices from CoinGecko: {str(e)}")
     

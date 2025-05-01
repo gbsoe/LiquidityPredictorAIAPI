@@ -484,13 +484,15 @@ def get_token_price(symbol: str, return_source: bool = False) -> Union[float, Tu
     result = price_service.get_token_price(symbol, return_source)
     if return_source:
         # Result is a tuple (price, source)
-        if result[0] is None:
-            return (0.0, result[1])
+        if isinstance(result, tuple):
+            price, source = result
+            return (float(price) if price is not None else 0.0, source)
         else:
-            return result
+            # Handle unexpected return format
+            return (0.0, "none")
     else:
         # Result is just the price
-        return result if result is not None else 0.0
+        return float(result) if result is not None else 0.0
 
 def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
     """Convenience function to get multiple token prices"""
@@ -550,13 +552,23 @@ def update_pool_with_token_prices(pool: dict) -> dict:
     
     # Get token1 price with source
     token1_result = price_service.get_token_price(token1, return_source=True)
-    token1_price = token1_result[0] if token1_result[0] is not None else 0.0
-    token1_source = token1_result[1]
+    if isinstance(token1_result, tuple) and len(token1_result) == 2:
+        token1_price = float(token1_result[0]) if token1_result[0] is not None else 0.0
+        token1_source = token1_result[1]
+    else:
+        # Handle case where result is not a tuple
+        token1_price = float(token1_result) if token1_result is not None else 0.0
+        token1_source = "none"
     
     # Get token2 price with source
     token2_result = price_service.get_token_price(token2, return_source=True)
-    token2_price = token2_result[0] if token2_result[0] is not None else 0.0
-    token2_source = token2_result[1]
+    if isinstance(token2_result, tuple) and len(token2_result) == 2:
+        token2_price = float(token2_result[0]) if token2_result[0] is not None else 0.0
+        token2_source = token2_result[1]
+    else:
+        # Handle case where result is not a tuple
+        token2_price = float(token2_result) if token2_result is not None else 0.0
+        token2_source = "none"
     
     # Add prices and sources to pool data
     updated_pool["token1_price"] = token1_price
