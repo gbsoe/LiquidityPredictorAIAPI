@@ -665,6 +665,55 @@ class TokenDataService:
                    ["BONK", "MSOL", "UXD"]]
         
         return []
+        
+    def get_tokens_by_dex(self, dex_name: str) -> Dict[str, Dict[str, Any]]:
+        """
+        Get tokens used by a specific DEX.
+        
+        Args:
+            dex_name: Name of the DEX
+            
+        Returns:
+            Dictionary mapping token symbols to token data
+        """
+        logger.info(f"Getting tokens for DEX: {dex_name}")
+        
+        try:
+            # Get categories from token_categories
+            categories = self.get_token_categories()
+            
+            # Get tokens for the requested DEX
+            dex_tokens = categories.get(dex_name, [])
+            
+            # Convert to dictionary keyed by symbol
+            result = {}
+            for token in dex_tokens:
+                symbol = token.get("symbol", "").upper()
+                if symbol:
+                    result[symbol] = token
+                    
+            if not result:
+                logger.warning(f"No tokens found for DEX: {dex_name}, using defaults")
+                # If no tokens found, use defaults
+                default_tokens = self._get_default_tokens_for_dex(dex_name)
+                for token in default_tokens:
+                    symbol = token.get("symbol", "").upper()
+                    if symbol:
+                        result[symbol] = token
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error getting tokens by DEX {dex_name}: {str(e)}")
+            # Return default tokens in case of error
+            default_tokens = self._get_default_tokens_for_dex(dex_name)
+            result = {}
+            for token in default_tokens:
+                symbol = token.get("symbol", "").upper()
+                if symbol:
+                    result[symbol] = token
+                    
+            return result
     
     def get_stats(self) -> Dict[str, Any]:
         """
