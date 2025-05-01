@@ -17,14 +17,18 @@ from datetime import datetime
 from typing import Dict, Any, Optional, List
 import threading
 
+# Configure logging
+logger = logging.getLogger(__name__)
+
 # Import the DeFi Aggregation API client
 from defi_aggregation_api import DefiAggregationAPI
 
 # Import the CoinGecko API client
-from coingecko_api import coingecko_api
-
-# Configure logging
-logger = logging.getLogger(__name__)
+try:
+    from coingecko_api import CoinGeckoAPI, coingecko_api
+except ImportError:
+    logger.error("Unable to import CoinGeckoAPI - continuing without CoinGecko integration")
+    coingecko_api = None
 
 # Singleton token data service instance
 _instance = None
@@ -514,27 +518,33 @@ class TokenDataService:
             symbol = processed.get("symbol", "").upper()
             if symbol and symbol != "UNKNOWN" and processed.get("price", 0) == 0:
                 try:
-                    # Try with CoinGecko ID first if available
-                    coingecko_id = processed.get("coingecko_id")
-                    price = None
-                    
-                    if coingecko_id:
-                        # Use the ID directly if available
-                        result = coingecko_api.get_price([coingecko_id], "usd")
-                        if result and coingecko_id in result:
-                            price = result[coingecko_id].get("usd", 0)
-                            logger.info(f"Retrieved price for {symbol} using coingecko_id {coingecko_id}: {price}")
-                    
-                    # If no price or no coingecko_id, try by symbol
-                    if not price or price == 0:
-                        logger.info(f"Fetching price for {symbol} from CoinGecko by symbol")
-                        price = coingecko_api.get_token_price_by_symbol(symbol)
-                    
-                    # If still no price, try by address
-                    if (not price or price == 0) and processed.get("address"):
-                        address = processed.get("address")
-                        logger.info(f"Fetching price for {symbol} from CoinGecko by address: {address}")
-                        price = coingecko_api.get_token_price_by_address(address)
+                    # Skip CoinGecko if API client is not available
+                    if coingecko_api is None:
+                        logger.warning(f"CoinGecko API not available, skipping price lookup for {symbol}")
+                        price = None
+                    else:
+                        # Try with CoinGecko ID first if available
+                        coingecko_id = processed.get("coingecko_id")
+                        price = None
+                        
+                        if coingecko_id:
+                            # Use the ID directly if available
+                            result = coingecko_api.get_price([coingecko_id], "usd")
+                            if result and coingecko_id in result:
+                                price = result[coingecko_id].get("usd", 0)
+                                logger.info(f"Retrieved price for {symbol} using coingecko_id {coingecko_id}: {price}")
+                        
+                        # If no price or no coingecko_id, try by symbol
+                        if not price or price == 0:
+                            logger.info(f"Fetching price for {symbol} from CoinGecko by symbol")
+                            price = coingecko_api.get_token_price_by_symbol(symbol)
+                        
+                        # If still no price, try by address
+                        if (not price or price == 0) and processed.get("address"):
+                            address = processed.get("address")
+                            if address and isinstance(address, str):
+                                logger.info(f"Fetching price for {symbol} from CoinGecko by address: {address}")
+                                price = coingecko_api.get_token_price_by_address(address)
                     
                     # Update price if found
                     if price is not None and price > 0:
