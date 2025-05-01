@@ -70,7 +70,7 @@ def create_liquidity_volume_chart(df):
     return fig
 
 def create_token_price_chart(df, token1, token2):
-    """Create a dual-axis chart for token prices"""
+    """Create a dual-axis chart for token prices with source attribution"""
     # Create figure with secondary y-axis
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     
@@ -78,12 +78,23 @@ def create_token_price_chart(df, token1, token2):
     token1_data = df[df['token_symbol'] == token1]
     token2_data = df[df['token_symbol'] == token2]
     
-    # Add traces
+    # Get price sources if available
+    token1_source = "unknown"
+    token2_source = "unknown"
+    
+    if 'price_source' in df.columns:
+        if not token1_data.empty and 'price_source' in token1_data.columns:
+            token1_source = token1_data['price_source'].iloc[0] if not token1_data['price_source'].empty else "unknown"
+        
+        if not token2_data.empty and 'price_source' in token2_data.columns:
+            token2_source = token2_data['price_source'].iloc[0] if not token2_data['price_source'].empty else "unknown"
+    
+    # Add traces with source information in the name
     fig.add_trace(
         go.Scatter(
             x=token1_data['timestamp'],
             y=token1_data['price_usd'],
-            name=f"{token1} Price",
+            name=f"{token1} Price (via {token1_source})",
             line=dict(color='blue', width=2)
         ),
         secondary_y=False,
@@ -93,16 +104,26 @@ def create_token_price_chart(df, token1, token2):
         go.Scatter(
             x=token2_data['timestamp'],
             y=token2_data['price_usd'],
-            name=f"{token2} Price",
+            name=f"{token2} Price (via {token2_source})",
             line=dict(color='green', width=2)
         ),
         secondary_y=True,
     )
     
-    # Add figure title
+    # Add figure title with source attribution
     fig.update_layout(
-        title_text=f"{token1} and {token2} Price History",
-        height=400
+        title_text=f"{token1} and {token2} Price History with Source Attribution",
+        height=400,
+        legend_title_text="Price Data Sources"
+    )
+    
+    # Add annotation for data sources
+    fig.add_annotation(
+        text=f"Data sources: {token1} via {token1_source}, {token2} via {token2_source}",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.15,
+        showarrow=False,
+        font=dict(size=10)
     )
     
     # Set axes titles

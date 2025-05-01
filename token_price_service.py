@@ -482,17 +482,29 @@ price_service = TokenPriceService()
 def get_token_price(symbol: str, return_source: bool = False) -> Union[float, Tuple[float, str]]:
     """Convenience function to get a token price"""
     result = price_service.get_token_price(symbol, return_source)
+    
+    # Handle return_source=True case (tuple return)
     if return_source:
-        # Result is a tuple (price, source)
-        if isinstance(result, tuple):
+        # Result should be a tuple (price, source)
+        if isinstance(result, tuple) and len(result) == 2:
             price, source = result
-            return (float(price) if price is not None else 0.0, source)
+            # Ensure price is a float
+            try:
+                price_float = 0.0 if price is None else float(price)
+                return (price_float, source)
+            except (ValueError, TypeError):
+                return (0.0, source)
         else:
             # Handle unexpected return format
             return (0.0, "none")
+    
+    # Handle return_source=False case (float return)
     else:
-        # Result is just the price
-        return float(result) if result is not None else 0.0
+        # Result should be just the price
+        try:
+            return 0.0 if result is None else float(result)
+        except (ValueError, TypeError):
+            return 0.0
 
 def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
     """Convenience function to get multiple token prices"""
