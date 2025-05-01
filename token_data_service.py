@@ -505,6 +505,7 @@ class TokenDataService:
                 "decimals": token_data.get("decimals", 0),
                 "logo": token_data.get("logoURI", token_data.get("logo", "")),
                 "price": token_data.get("price", 0),
+                "price_source": token_data.get("price_source", "defi_api"),
                 "coingecko_id": token_data.get("coingeckoId", ""),
                 "last_updated": datetime.now().isoformat(),
             }
