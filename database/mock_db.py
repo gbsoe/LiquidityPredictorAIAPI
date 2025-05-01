@@ -14,9 +14,15 @@ class MockDBManager:
     def __init__(self):
         """Initialize the mock DB manager and load data from JSON file"""
         self.logger = logging.getLogger("mock_db")
-        self.data_file = "extracted_pools.json"
+        # Try 60sec test data first, fall back to extracted_pools.json
+        self.data_file = "60sec_test_all_pools.json"
         self.pools = []
         self.load_data()
+        
+        # If no pools were loaded, try the legacy file
+        if not self.pools:
+            self.data_file = "extracted_pools.json"
+            self.load_data()
     
     def load_data(self):
         """Load data from the JSON file"""

@@ -32,8 +32,8 @@
     ],
     "poolId": "FkiATpmxzNLFdADcTV9yo65X7XF5jJPbRn9jBVHmL4BZ",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 19737664,
-    "volume_24h": 2960649.5,
+    "liquidity": 19817710,
+    "volume_24h": 2972656.5,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -61,15 +61,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45081,
+      "id": 46021,
       "poolId": 1,
-      "timestamp": "2025-05-01T12:49:15.632Z",
-      "tvl": 19737664,
+      "timestamp": "2025-05-01T13:07:03.839Z",
+      "tvl": 19817710,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2960649.5,
+      "volumeUsd": 2972656.5,
       "extraData": {
         "ammId": "FkiATpmxzNLFdADcTV9yo65X7XF5jJPbRn9jBVHmL4BZ"
       }
@@ -82,15 +82,15 @@
       "name": "HPsQ-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45081,
+        "id": 46021,
         "poolId": 1,
-        "timestamp": "2025-05-01T12:49:15.632Z",
-        "tvl": 19737664,
+        "timestamp": "2025-05-01T13:07:03.839Z",
+        "tvl": 19817710,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2960649.5,
+        "volumeUsd": 2972656.5,
         "extraData": {
           "ammId": "FkiATpmxzNLFdADcTV9yo65X7XF5jJPbRn9jBVHmL4BZ"
         }
@@ -130,8 +130,8 @@
     ],
     "poolId": "GpHY4DEMNz7x6AJEXHVTvBZRVLf18fhJYDkNHw21qKs9",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 19258012,
-    "volume_24h": 2888701.8,
+    "liquidity": 19363692,
+    "volume_24h": 2904553.8,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -159,15 +159,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45080,
+      "id": 45964,
       "poolId": 2,
-      "timestamp": "2025-05-01T12:49:15.631Z",
-      "tvl": 19258012,
+      "timestamp": "2025-05-01T13:06:23.115Z",
+      "tvl": 19363692,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2888701.8,
+      "volumeUsd": 2904553.8,
       "extraData": {
         "ammId": "GpHY4DEMNz7x6AJEXHVTvBZRVLf18fhJYDkNHw21qKs9"
       }
@@ -180,15 +180,15 @@
       "name": "JUPy-SOL Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45080,
+        "id": 45964,
         "poolId": 2,
-        "timestamp": "2025-05-01T12:49:15.631Z",
-        "tvl": 19258012,
+        "timestamp": "2025-05-01T13:06:23.115Z",
+        "tvl": 19363692,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2888701.8,
+        "volumeUsd": 2904553.8,
         "extraData": {
           "ammId": "GpHY4DEMNz7x6AJEXHVTvBZRVLf18fhJYDkNHw21qKs9"
         }
@@ -228,8 +228,8 @@
     ],
     "poolId": "BCYwJcHhvBVJFxgdEsqGhP9Rm2SSQ5ciGgtX9qHJBNCi",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 18441318,
-    "volume_24h": 2766197.8,
+    "liquidity": 19269960,
+    "volume_24h": 2890494,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -257,15 +257,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45083,
+      "id": 46024,
       "poolId": 3,
-      "timestamp": "2025-05-01T12:49:15.633Z",
-      "tvl": 18441318,
+      "timestamp": "2025-05-01T13:07:03.842Z",
+      "tvl": 19269960,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2766197.8,
+      "volumeUsd": 2890494,
       "extraData": {
         "ammId": "BCYwJcHhvBVJFxgdEsqGhP9Rm2SSQ5ciGgtX9qHJBNCi"
       }
@@ -278,15 +278,15 @@
       "name": "JUPy-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45083,
+        "id": 46024,
         "poolId": 3,
-        "timestamp": "2025-05-01T12:49:15.633Z",
-        "tvl": 18441318,
+        "timestamp": "2025-05-01T13:07:03.842Z",
+        "tvl": 19269960,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2766197.8,
+        "volumeUsd": 2890494,
         "extraData": {
           "ammId": "BCYwJcHhvBVJFxgdEsqGhP9Rm2SSQ5ciGgtX9qHJBNCi"
         }
@@ -326,8 +326,8 @@
     ],
     "poolId": "HSWJ3Uc7WtWTQFSQoHyKSVVJ8a9xBe6cKK6a7CfFRLUq",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 18694656,
-    "volume_24h": 2804198.5,
+    "liquidity": 18239630,
+    "volume_24h": 2735944.5,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -355,15 +355,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45029,
+      "id": 46022,
       "poolId": 4,
-      "timestamp": "2025-05-01T12:48:20.620Z",
-      "tvl": 18694656,
+      "timestamp": "2025-05-01T13:07:03.841Z",
+      "tvl": 18239630,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2804198.5,
+      "volumeUsd": 2735944.5,
       "extraData": {
         "ammId": "HSWJ3Uc7WtWTQFSQoHyKSVVJ8a9xBe6cKK6a7CfFRLUq"
       }
@@ -376,15 +376,15 @@
       "name": "BTC-SOL Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45029,
+        "id": 46022,
         "poolId": 4,
-        "timestamp": "2025-05-01T12:48:20.620Z",
-        "tvl": 18694656,
+        "timestamp": "2025-05-01T13:07:03.841Z",
+        "tvl": 18239630,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2804198.5,
+        "volumeUsd": 2735944.5,
         "extraData": {
           "ammId": "HSWJ3Uc7WtWTQFSQoHyKSVVJ8a9xBe6cKK6a7CfFRLUq"
         }
@@ -424,8 +424,8 @@
     ],
     "poolId": "GfAU2bJFM5HA5hXtLCste5RYJb7Qw5ZAMySzjY3Nvek5",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 17632938,
-    "volume_24h": 2644940.8,
+    "liquidity": 17567068,
+    "volume_24h": 2635060.2,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -453,15 +453,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45025,
+      "id": 45966,
       "poolId": 5,
-      "timestamp": "2025-05-01T12:48:20.617Z",
-      "tvl": 17632938,
+      "timestamp": "2025-05-01T13:06:23.116Z",
+      "tvl": 17567068,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2644940.8,
+      "volumeUsd": 2635060.2,
       "extraData": {
         "ammId": "GfAU2bJFM5HA5hXtLCste5RYJb7Qw5ZAMySzjY3Nvek5"
       }
@@ -474,15 +474,15 @@
       "name": "RAY-USDT Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45025,
+        "id": 45966,
         "poolId": 5,
-        "timestamp": "2025-05-01T12:48:20.617Z",
-        "tvl": 17632938,
+        "timestamp": "2025-05-01T13:06:23.116Z",
+        "tvl": 17567068,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2644940.8,
+        "volumeUsd": 2635060.2,
         "extraData": {
           "ammId": "GfAU2bJFM5HA5hXtLCste5RYJb7Qw5ZAMySzjY3Nvek5"
         }
@@ -522,8 +522,8 @@
     ],
     "poolId": "HjB8zKe5WuA1VkMf9S8VKEtfXZ3nagqMUxK3FgbSEBoN",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 17191666,
-    "volume_24h": 2578749.8,
+    "liquidity": 17313550,
+    "volume_24h": 2597032.5,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -551,15 +551,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45028,
+      "id": 45915,
       "poolId": 6,
-      "timestamp": "2025-05-01T12:48:20.619Z",
-      "tvl": 17191666,
+      "timestamp": "2025-05-01T13:05:24.819Z",
+      "tvl": 17313550,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2578749.8,
+      "volumeUsd": 2597032.5,
       "extraData": {
         "ammId": "HjB8zKe5WuA1VkMf9S8VKEtfXZ3nagqMUxK3FgbSEBoN"
       }
@@ -572,15 +572,15 @@
       "name": "ETH-MSOL Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45028,
+        "id": 45915,
         "poolId": 6,
-        "timestamp": "2025-05-01T12:48:20.619Z",
-        "tvl": 17191666,
+        "timestamp": "2025-05-01T13:05:24.819Z",
+        "tvl": 17313550,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2578749.8,
+        "volumeUsd": 2597032.5,
         "extraData": {
           "ammId": "HjB8zKe5WuA1VkMf9S8VKEtfXZ3nagqMUxK3FgbSEBoN"
         }
@@ -620,8 +620,8 @@
     ],
     "poolId": "8baqungKPDskwWbNwXHJn9WmNbXB2cjfYA5mHnEue3jw",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 16371916,
-    "volume_24h": 2455787.5,
+    "liquidity": 16115985,
+    "volume_24h": 2417397.8,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -649,15 +649,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45084,
+      "id": 46023,
       "poolId": 7,
-      "timestamp": "2025-05-01T12:49:15.634Z",
-      "tvl": 16371916,
+      "timestamp": "2025-05-01T13:07:03.842Z",
+      "tvl": 16115985,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2455787.5,
+      "volumeUsd": 2417397.8,
       "extraData": {
         "ammId": "8baqungKPDskwWbNwXHJn9WmNbXB2cjfYA5mHnEue3jw"
       }
@@ -670,15 +670,15 @@
       "name": "BTC-MSOL Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45084,
+        "id": 46023,
         "poolId": 7,
-        "timestamp": "2025-05-01T12:49:15.634Z",
-        "tvl": 16371916,
+        "timestamp": "2025-05-01T13:07:03.842Z",
+        "tvl": 16115985,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2455787.5,
+        "volumeUsd": 2417397.8,
         "extraData": {
           "ammId": "8baqungKPDskwWbNwXHJn9WmNbXB2cjfYA5mHnEue3jw"
         }
@@ -718,8 +718,8 @@
     ],
     "poolId": "4abxpwLHZZbKn4d2AVNbS7fT1v3TV4JvyZxUbjnzRdqS",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 15892003,
-    "volume_24h": 2383800.5,
+    "liquidity": 15808732,
+    "volume_24h": 2371309.8,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -747,15 +747,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 44973,
+      "id": 46025,
       "poolId": 8,
-      "timestamp": "2025-05-01T12:47:25.719Z",
-      "tvl": 15892003,
+      "timestamp": "2025-05-01T13:07:03.843Z",
+      "tvl": 15808732,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2383800.5,
+      "volumeUsd": 2371309.8,
       "extraData": {
         "ammId": "4abxpwLHZZbKn4d2AVNbS7fT1v3TV4JvyZxUbjnzRdqS"
       }
@@ -768,15 +768,15 @@
       "name": "poLi-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 44973,
+        "id": 46025,
         "poolId": 8,
-        "timestamp": "2025-05-01T12:47:25.719Z",
-        "tvl": 15892003,
+        "timestamp": "2025-05-01T13:07:03.843Z",
+        "tvl": 15808732,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2383800.5,
+        "volumeUsd": 2371309.8,
         "extraData": {
           "ammId": "4abxpwLHZZbKn4d2AVNbS7fT1v3TV4JvyZxUbjnzRdqS"
         }
@@ -816,8 +816,8 @@
     ],
     "poolId": "FoqP7RKLbVDsAsbKPKMnvZZSP8qFzLQAqt6xumWDyAJt",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 14832832,
-    "volume_24h": 2224924.8,
+    "liquidity": 14727650,
+    "volume_24h": 2209147.5,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -845,15 +845,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45085,
+      "id": 46027,
       "poolId": 9,
-      "timestamp": "2025-05-01T12:49:15.635Z",
-      "tvl": 14832832,
+      "timestamp": "2025-05-01T13:07:03.862Z",
+      "tvl": 14727650,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2224924.8,
+      "volumeUsd": 2209147.5,
       "extraData": {
         "ammId": "FoqP7RKLbVDsAsbKPKMnvZZSP8qFzLQAqt6xumWDyAJt"
       }
@@ -866,15 +866,15 @@
       "name": "ETH-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45085,
+        "id": 46027,
         "poolId": 9,
-        "timestamp": "2025-05-01T12:49:15.635Z",
-        "tvl": 14832832,
+        "timestamp": "2025-05-01T13:07:03.862Z",
+        "tvl": 14727650,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2224924.8,
+        "volumeUsd": 2209147.5,
         "extraData": {
           "ammId": "FoqP7RKLbVDsAsbKPKMnvZZSP8qFzLQAqt6xumWDyAJt"
         }
@@ -914,8 +914,8 @@
     ],
     "poolId": "4VgYz8E7rkMUJgHBY9PX1LdgSZ1PNQKX4SUB2B359yPs",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 15039494,
-    "volume_24h": 2255924,
+    "liquidity": 15110710,
+    "volume_24h": 2266606.5,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -943,15 +943,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45082,
+      "id": 46026,
       "poolId": 10,
-      "timestamp": "2025-05-01T12:49:15.633Z",
-      "tvl": 15039494,
+      "timestamp": "2025-05-01T13:07:03.844Z",
+      "tvl": 15110710,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2255924,
+      "volumeUsd": 2266606.5,
       "extraData": {
         "ammId": "4VgYz8E7rkMUJgHBY9PX1LdgSZ1PNQKX4SUB2B359yPs"
       }
@@ -964,15 +964,15 @@
       "name": "ATLA-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45082,
+        "id": 46026,
         "poolId": 10,
-        "timestamp": "2025-05-01T12:49:15.633Z",
-        "tvl": 15039494,
+        "timestamp": "2025-05-01T13:07:03.844Z",
+        "tvl": 15110710,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2255924,
+        "volumeUsd": 2266606.5,
         "extraData": {
           "ammId": "4VgYz8E7rkMUJgHBY9PX1LdgSZ1PNQKX4SUB2B359yPs"
         }
@@ -1012,8 +1012,8 @@
     ],
     "poolId": "DtAJhWHGCx4Eue8qYXd78XxzGQRa6R9BmAQUBKDSwjtJ",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 14782385,
-    "volume_24h": 2217357.8,
+    "liquidity": 13964277,
+    "volume_24h": 2094641.6,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -1041,15 +1041,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45086,
+      "id": 46028,
       "poolId": 11,
-      "timestamp": "2025-05-01T12:49:15.655Z",
-      "tvl": 14782385,
+      "timestamp": "2025-05-01T13:07:03.864Z",
+      "tvl": 13964277,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2217357.8,
+      "volumeUsd": 2094641.6,
       "extraData": {
         "ammId": "DtAJhWHGCx4Eue8qYXd78XxzGQRa6R9BmAQUBKDSwjtJ"
       }
@@ -1062,15 +1062,15 @@
       "name": "SOL-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45086,
+        "id": 46028,
         "poolId": 11,
-        "timestamp": "2025-05-01T12:49:15.655Z",
-        "tvl": 14782385,
+        "timestamp": "2025-05-01T13:07:03.864Z",
+        "tvl": 13964277,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2217357.8,
+        "volumeUsd": 2094641.6,
         "extraData": {
           "ammId": "DtAJhWHGCx4Eue8qYXd78XxzGQRa6R9BmAQUBKDSwjtJ"
         }
@@ -1110,8 +1110,8 @@
     ],
     "poolId": "JCKa82HNdEyaqXBAWzQpWfVfYpvKbmSJGKLfDy5kNQCd",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 13501543,
-    "volume_24h": 2025231.4,
+    "liquidity": 13782456,
+    "volume_24h": 2067368.4,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -1139,15 +1139,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45027,
+      "id": 46029,
       "poolId": 12,
-      "timestamp": "2025-05-01T12:48:20.619Z",
-      "tvl": 13501543,
+      "timestamp": "2025-05-01T13:07:03.869Z",
+      "tvl": 13782456,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 2025231.4,
+      "volumeUsd": 2067368.4,
       "extraData": {
         "ammId": "JCKa82HNdEyaqXBAWzQpWfVfYpvKbmSJGKLfDy5kNQCd"
       }
@@ -1160,15 +1160,15 @@
       "name": "7i5K-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45027,
+        "id": 46029,
         "poolId": 12,
-        "timestamp": "2025-05-01T12:48:20.619Z",
-        "tvl": 13501543,
+        "timestamp": "2025-05-01T13:07:03.869Z",
+        "tvl": 13782456,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 2025231.4,
+        "volumeUsd": 2067368.4,
         "extraData": {
           "ammId": "JCKa82HNdEyaqXBAWzQpWfVfYpvKbmSJGKLfDy5kNQCd"
         }
@@ -1208,8 +1208,8 @@
     ],
     "poolId": "2QdhepnKRTLjjSqPL1PtKNwqrUkoLee5Gqs8bvZhRdMv",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 12646635,
-    "volume_24h": 1896995.2,
+    "liquidity": 12309276,
+    "volume_24h": 1846391.4,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -1237,15 +1237,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45088,
+      "id": 45971,
       "poolId": 13,
-      "timestamp": "2025-05-01T12:49:15.658Z",
-      "tvl": 12646635,
+      "timestamp": "2025-05-01T13:06:24.719Z",
+      "tvl": 12309276,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1896995.2,
+      "volumeUsd": 1846391.4,
       "extraData": {
         "ammId": "2QdhepnKRTLjjSqPL1PtKNwqrUkoLee5Gqs8bvZhRdMv"
       }
@@ -1258,15 +1258,15 @@
       "name": "ORCA-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45088,
+        "id": 45971,
         "poolId": 13,
-        "timestamp": "2025-05-01T12:49:15.658Z",
-        "tvl": 12646635,
+        "timestamp": "2025-05-01T13:06:24.719Z",
+        "tvl": 12309276,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1896995.2,
+        "volumeUsd": 1846391.4,
         "extraData": {
           "ammId": "2QdhepnKRTLjjSqPL1PtKNwqrUkoLee5Gqs8bvZhRdMv"
         }
@@ -1306,8 +1306,8 @@
     ],
     "poolId": "5U4pM4YqxQBVQZHmjEUV3JJKWGGQDdkJPYsB2JHJTKh4",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 13007487,
-    "volume_24h": 1951123.1,
+    "liquidity": 13422601,
+    "volume_24h": 2013390.1,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -1335,15 +1335,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45087,
+      "id": 46031,
       "poolId": 14,
-      "timestamp": "2025-05-01T12:49:15.657Z",
-      "tvl": 13007487,
+      "timestamp": "2025-05-01T13:07:03.874Z",
+      "tvl": 13422601,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1951123.1,
+      "volumeUsd": 2013390.1,
       "extraData": {
         "ammId": "5U4pM4YqxQBVQZHmjEUV3JJKWGGQDdkJPYsB2JHJTKh4"
       }
@@ -1356,15 +1356,15 @@
       "name": "Mang-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45087,
+        "id": 46031,
         "poolId": 14,
-        "timestamp": "2025-05-01T12:49:15.657Z",
-        "tvl": 13007487,
+        "timestamp": "2025-05-01T13:07:03.874Z",
+        "tvl": 13422601,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1951123.1,
+        "volumeUsd": 2013390.1,
         "extraData": {
           "ammId": "5U4pM4YqxQBVQZHmjEUV3JJKWGGQDdkJPYsB2JHJTKh4"
         }
@@ -1404,8 +1404,8 @@
     ],
     "poolId": "92bcELQgkYHQmARjXUTGD7GxYKQXRQQBNoWF2jLBnNQu",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 11783529,
-    "volume_24h": 1767529.2,
+    "liquidity": 12257206,
+    "volume_24h": 1838580.9,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -1433,15 +1433,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45089,
+      "id": 45977,
       "poolId": 15,
-      "timestamp": "2025-05-01T12:49:15.663Z",
-      "tvl": 11783529,
+      "timestamp": "2025-05-01T13:06:25.018Z",
+      "tvl": 12257206,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1767529.2,
+      "volumeUsd": 1838580.9,
       "extraData": {
         "ammId": "92bcELQgkYHQmARjXUTGD7GxYKQXRQQBNoWF2jLBnNQu"
       }
@@ -1454,15 +1454,15 @@
       "name": "STSOL-SOL Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45089,
+        "id": 45977,
         "poolId": 15,
-        "timestamp": "2025-05-01T12:49:15.663Z",
-        "tvl": 11783529,
+        "timestamp": "2025-05-01T13:06:25.018Z",
+        "tvl": 12257206,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1767529.2,
+        "volumeUsd": 1838580.9,
         "extraData": {
           "ammId": "92bcELQgkYHQmARjXUTGD7GxYKQXRQQBNoWF2jLBnNQu"
         }
@@ -1502,8 +1502,8 @@
     ],
     "poolId": "6VK1ksrmYGMBWUUZfygGF8tHRGpNxQEWv8pfvzQHdyyc",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 11270592,
-    "volume_24h": 1690588.9,
+    "liquidity": 12044166,
+    "volume_24h": 1806624.9,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -1531,15 +1531,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45043,
+      "id": 46034,
       "poolId": 16,
-      "timestamp": "2025-05-01T12:48:21.316Z",
-      "tvl": 11270592,
+      "timestamp": "2025-05-01T13:07:03.875Z",
+      "tvl": 12044166,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1690588.9,
+      "volumeUsd": 1806624.9,
       "extraData": {
         "ammId": "6VK1ksrmYGMBWUUZfygGF8tHRGpNxQEWv8pfvzQHdyyc"
       }
@@ -1552,15 +1552,15 @@
       "name": "bSo1-SOL Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45043,
+        "id": 46034,
         "poolId": 16,
-        "timestamp": "2025-05-01T12:48:21.316Z",
-        "tvl": 11270592,
+        "timestamp": "2025-05-01T13:07:03.875Z",
+        "tvl": 12044166,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1690588.9,
+        "volumeUsd": 1806624.9,
         "extraData": {
           "ammId": "6VK1ksrmYGMBWUUZfygGF8tHRGpNxQEWv8pfvzQHdyyc"
         }
@@ -1600,8 +1600,8 @@
     ],
     "poolId": "9Y8pqQgJK7CjbxnVXnSoXwrXvs3jGfU1vMYJUeJxVS9U",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 10938142,
-    "volume_24h": 1640721.4,
+    "liquidity": 11075955,
+    "volume_24h": 1661393.2,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -1629,15 +1629,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45090,
+      "id": 46030,
       "poolId": 17,
-      "timestamp": "2025-05-01T12:49:15.663Z",
-      "tvl": 10938142,
+      "timestamp": "2025-05-01T13:07:03.874Z",
+      "tvl": 11075955,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1640721.4,
+      "volumeUsd": 1661393.2,
       "extraData": {
         "ammId": "9Y8pqQgJK7CjbxnVXnSoXwrXvs3jGfU1vMYJUeJxVS9U"
       }
@@ -1650,15 +1650,15 @@
       "name": "MSOL-SOL Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45090,
+        "id": 46030,
         "poolId": 17,
-        "timestamp": "2025-05-01T12:49:15.663Z",
-        "tvl": 10938142,
+        "timestamp": "2025-05-01T13:07:03.874Z",
+        "tvl": 11075955,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1640721.4,
+        "volumeUsd": 1661393.2,
         "extraData": {
           "ammId": "9Y8pqQgJK7CjbxnVXnSoXwrXvs3jGfU1vMYJUeJxVS9U"
         }
@@ -1698,8 +1698,8 @@
     ],
     "poolId": "G8qcfeFqxwbCYE4jz8KBStLcbNVWEgASW9V8fGgXeYF9",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 10904980,
-    "volume_24h": 1635747,
+    "liquidity": 10161448,
+    "volume_24h": 1524217.1,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -1727,15 +1727,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45091,
+      "id": 46033,
       "poolId": 18,
-      "timestamp": "2025-05-01T12:49:15.663Z",
-      "tvl": 10904980,
+      "timestamp": "2025-05-01T13:07:03.875Z",
+      "tvl": 10161448,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1635747,
+      "volumeUsd": 1524217.1,
       "extraData": {
         "ammId": "G8qcfeFqxwbCYE4jz8KBStLcbNVWEgASW9V8fGgXeYF9"
       }
@@ -1748,15 +1748,15 @@
       "name": "J1to-SOL Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45091,
+        "id": 46033,
         "poolId": 18,
-        "timestamp": "2025-05-01T12:49:15.663Z",
-        "tvl": 10904980,
+        "timestamp": "2025-05-01T13:07:03.875Z",
+        "tvl": 10161448,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1635747,
+        "volumeUsd": 1524217.1,
         "extraData": {
           "ammId": "G8qcfeFqxwbCYE4jz8KBStLcbNVWEgASW9V8fGgXeYF9"
         }
@@ -1796,8 +1796,8 @@
     ],
     "poolId": "Ek8uoHjADzbNk7RhSpeZxW9GF6qWbRGnqxspubEDdFv9",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 9810957,
-    "volume_24h": 1471643.5,
+    "liquidity": 10051862,
+    "volume_24h": 1507779.2,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -1825,15 +1825,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45092,
+      "id": 46032,
       "poolId": 19,
-      "timestamp": "2025-05-01T12:49:15.664Z",
-      "tvl": 9810957,
+      "timestamp": "2025-05-01T13:07:03.875Z",
+      "tvl": 10051862,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1471643.5,
+      "volumeUsd": 1507779.2,
       "extraData": {
         "ammId": "Ek8uoHjADzbNk7RhSpeZxW9GF6qWbRGnqxspubEDdFv9"
       }
@@ -1846,15 +1846,15 @@
       "name": "BONK-SOL Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45092,
+        "id": 46032,
         "poolId": 19,
-        "timestamp": "2025-05-01T12:49:15.664Z",
-        "tvl": 9810957,
+        "timestamp": "2025-05-01T13:07:03.875Z",
+        "tvl": 10051862,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1471643.5,
+        "volumeUsd": 1507779.2,
         "extraData": {
           "ammId": "Ek8uoHjADzbNk7RhSpeZxW9GF6qWbRGnqxspubEDdFv9"
         }
@@ -1894,8 +1894,8 @@
     ],
     "poolId": "8qNqTaKKbdJPycEpg8TJYif7GB3zGQkbxWy2K7aUQxBY",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 8510329,
-    "volume_24h": 1276549.4,
+    "liquidity": 8639028,
+    "volume_24h": 1295854.2,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -1923,15 +1923,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45094,
+      "id": 46036,
       "poolId": 20,
-      "timestamp": "2025-05-01T12:49:15.671Z",
-      "tvl": 8510329,
+      "timestamp": "2025-05-01T13:07:03.877Z",
+      "tvl": 8639028,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1276549.4,
+      "volumeUsd": 1295854.2,
       "extraData": {
         "ammId": "8qNqTaKKbdJPycEpg8TJYif7GB3zGQkbxWy2K7aUQxBY"
       }
@@ -1944,15 +1944,15 @@
       "name": "USDT-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45094,
+        "id": 46036,
         "poolId": 20,
-        "timestamp": "2025-05-01T12:49:15.671Z",
-        "tvl": 8510329,
+        "timestamp": "2025-05-01T13:07:03.877Z",
+        "tvl": 8639028,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1276549.4,
+        "volumeUsd": 1295854.2,
         "extraData": {
           "ammId": "8qNqTaKKbdJPycEpg8TJYif7GB3zGQkbxWy2K7aUQxBY"
         }
@@ -1992,8 +1992,8 @@
     ],
     "poolId": "EJMUFKsm5xwqoEYmxRJeSuYjLsGY5dZA8hQCE8cYFhLY",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 9325873,
-    "volume_24h": 1398881,
+    "liquidity": 9517609,
+    "volume_24h": 1427641.4,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -2021,15 +2021,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 44980,
+      "id": 46035,
       "poolId": 21,
-      "timestamp": "2025-05-01T12:47:26.820Z",
-      "tvl": 9325873,
+      "timestamp": "2025-05-01T13:07:03.875Z",
+      "tvl": 9517609,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1398881,
+      "volumeUsd": 1427641.4,
       "extraData": {
         "ammId": "EJMUFKsm5xwqoEYmxRJeSuYjLsGY5dZA8hQCE8cYFhLY"
       }
@@ -2042,15 +2042,15 @@
       "name": "USDC-9vMJ Raydium LP",
       "active": true,
       "metrics": {
-        "id": 44980,
+        "id": 46035,
         "poolId": 21,
-        "timestamp": "2025-05-01T12:47:26.820Z",
-        "tvl": 9325873,
+        "timestamp": "2025-05-01T13:07:03.875Z",
+        "tvl": 9517609,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1398881,
+        "volumeUsd": 1427641.4,
         "extraData": {
           "ammId": "EJMUFKsm5xwqoEYmxRJeSuYjLsGY5dZA8hQCE8cYFhLY"
         }
@@ -2090,8 +2090,8 @@
     ],
     "poolId": "CQLJ5Lk6KcFMUnXFVhQ6KqZ9892kHeU1qEqS5K8ND9aE",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 8603722,
-    "volume_24h": 1290558.4,
+    "liquidity": 8240409,
+    "volume_24h": 1236061.4,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -2119,15 +2119,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45035,
+      "id": 46037,
       "poolId": 22,
-      "timestamp": "2025-05-01T12:48:21.316Z",
-      "tvl": 8603722,
+      "timestamp": "2025-05-01T13:07:03.894Z",
+      "tvl": 8240409,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1290558.4,
+      "volumeUsd": 1236061.4,
       "extraData": {
         "ammId": "CQLJ5Lk6KcFMUnXFVhQ6KqZ9892kHeU1qEqS5K8ND9aE"
       }
@@ -2140,15 +2140,15 @@
       "name": "USDC-USDT Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45035,
+        "id": 46037,
         "poolId": 22,
-        "timestamp": "2025-05-01T12:48:21.316Z",
-        "tvl": 8603722,
+        "timestamp": "2025-05-01T13:07:03.894Z",
+        "tvl": 8240409,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1290558.4,
+        "volumeUsd": 1236061.4,
         "extraData": {
           "ammId": "CQLJ5Lk6KcFMUnXFVhQ6KqZ9892kHeU1qEqS5K8ND9aE"
         }
@@ -2188,8 +2188,8 @@
     ],
     "poolId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 7322736,
-    "volume_24h": 1098410.4,
+    "liquidity": 7865278.5,
+    "volume_24h": 1179791.8,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -2217,15 +2217,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45093,
+      "id": 46038,
       "poolId": 23,
-      "timestamp": "2025-05-01T12:49:15.670Z",
-      "tvl": 7322736,
+      "timestamp": "2025-05-01T13:07:03.898Z",
+      "tvl": 7865278.5,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1098410.4,
+      "volumeUsd": 1179791.8,
       "extraData": {
         "ammId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut"
       }
@@ -2238,15 +2238,15 @@
       "name": "BTC-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45093,
+        "id": 46038,
         "poolId": 23,
-        "timestamp": "2025-05-01T12:49:15.670Z",
-        "tvl": 7322736,
+        "timestamp": "2025-05-01T13:07:03.898Z",
+        "tvl": 7865278.5,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1098410.4,
+        "volumeUsd": 1179791.8,
         "extraData": {
           "ammId": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut"
         }
@@ -2286,8 +2286,8 @@
     ],
     "poolId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 6288477.5,
-    "volume_24h": 943271.6,
+    "liquidity": 6442548.5,
+    "volume_24h": 966382.3,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -2315,15 +2315,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45098,
+      "id": 46040,
       "poolId": 24,
-      "timestamp": "2025-05-01T12:49:15.687Z",
-      "tvl": 6288477.5,
+      "timestamp": "2025-05-01T13:07:03.904Z",
+      "tvl": 6442548.5,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 943271.6,
+      "volumeUsd": 966382.3,
       "extraData": {
         "ammId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg"
       }
@@ -2336,15 +2336,15 @@
       "name": "SOL-USDT Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45098,
+        "id": 46040,
         "poolId": 24,
-        "timestamp": "2025-05-01T12:49:15.687Z",
-        "tvl": 6288477.5,
+        "timestamp": "2025-05-01T13:07:03.904Z",
+        "tvl": 6442548.5,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 943271.6,
+        "volumeUsd": 966382.3,
         "extraData": {
           "ammId": "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg"
         }
@@ -2384,8 +2384,8 @@
     ],
     "poolId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 7519553,
-    "volume_24h": 1127932.9,
+    "liquidity": 6809480,
+    "volume_24h": 1021422,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -2413,15 +2413,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45095,
+      "id": 46039,
       "poolId": 25,
-      "timestamp": "2025-05-01T12:49:15.670Z",
-      "tvl": 7519553,
+      "timestamp": "2025-05-01T13:07:03.902Z",
+      "tvl": 6809480,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 1127932.9,
+      "volumeUsd": 1021422,
       "extraData": {
         "ammId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA"
       }
@@ -2434,15 +2434,15 @@
       "name": "RAY-SOL Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45095,
+        "id": 46039,
         "poolId": 25,
-        "timestamp": "2025-05-01T12:49:15.670Z",
-        "tvl": 7519553,
+        "timestamp": "2025-05-01T13:07:03.902Z",
+        "tvl": 6809480,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 1127932.9,
+        "volumeUsd": 1021422,
         "extraData": {
           "ammId": "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA"
         }
@@ -2482,8 +2482,8 @@
     ],
     "poolId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 6508221.5,
-    "volume_24h": 976233.2,
+    "liquidity": 6316018.5,
+    "volume_24h": 947402.75,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -2511,15 +2511,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45096,
+      "id": 46041,
       "poolId": 26,
-      "timestamp": "2025-05-01T12:49:15.685Z",
-      "tvl": 6508221.5,
+      "timestamp": "2025-05-01T13:07:03.905Z",
+      "tvl": 6316018.5,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 976233.2,
+      "volumeUsd": 947402.75,
       "extraData": {
         "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
       }
@@ -2532,15 +2532,15 @@
       "name": "SOL-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45096,
+        "id": 46041,
         "poolId": 26,
-        "timestamp": "2025-05-01T12:49:15.685Z",
-        "tvl": 6508221.5,
+        "timestamp": "2025-05-01T13:07:03.905Z",
+        "tvl": 6316018.5,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 976233.2,
+        "volumeUsd": 947402.75,
         "extraData": {
           "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"
         }
@@ -2580,8 +2580,8 @@
     ],
     "poolId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
     "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
-    "liquidity": 5989423,
-    "volume_24h": 898413.44,
+    "liquidity": 5568144,
+    "volume_24h": 835221.6,
     "apr": 14.665538,
     "fee": 0.0025,
     "apr_24h": 14.665538,
@@ -2609,15 +2609,15 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "id": 45097,
+      "id": 46042,
       "poolId": 27,
-      "timestamp": "2025-05-01T12:49:15.687Z",
-      "tvl": 5989423,
+      "timestamp": "2025-05-01T13:07:03.905Z",
+      "tvl": 5568144,
       "fee": 0.0025,
       "apy24h": 14.665538,
       "apy7d": 13.198984,
       "apy30d": 12.465708,
-      "volumeUsd": 898413.44,
+      "volumeUsd": 835221.6,
       "extraData": {
         "ammId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8"
       }
@@ -2630,15 +2630,15 @@
       "name": "RAY-USDC Raydium LP",
       "active": true,
       "metrics": {
-        "id": 45097,
+        "id": 46042,
         "poolId": 27,
-        "timestamp": "2025-05-01T12:49:15.687Z",
-        "tvl": 5989423,
+        "timestamp": "2025-05-01T13:07:03.905Z",
+        "tvl": 5568144,
         "fee": 0.0025,
         "apy24h": 14.665538,
         "apy7d": 13.198984,
         "apy30d": 12.465708,
-        "volumeUsd": 898413.44,
+        "volumeUsd": 835221.6,
         "extraData": {
           "ammId": "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8"
         }
@@ -2678,16 +2678,16 @@
     ],
     "poolId": "Bcu9CFZyEjwuaFzRY2zuASN8P4HqL7QvYZFsXEKifA7c",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 13405111,
-    "volume_24h": 1608613.2,
-    "apr": 9.153995,
-    "fee": 0.002,
-    "apr_24h": 9.153995,
-    "apr_7d": 8.696295,
-    "apr_30d": 8.238595,
+    "liquidity": 14058681,
+    "volume_24h": 1687041.8,
+    "apr": 2.2140894,
+    "fee": 0.0005,
+    "apr_24h": 2.2140894,
+    "apr_7d": 2.103385,
+    "apr_30d": 1.9926804,
     "apr_change_24h": 0,
-    "apr_change_7d": -5.000002731048038,
-    "apr_change_30d": -5.263160920828918,
+    "apr_change_7d": -4.999996838429395,
+    "apr_change_30d": -5.263163900094363,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
@@ -2708,15 +2708,15 @@
       "whirlpoolId": "Bcu9CFZyEjwuaFzRY2zuASN8P4HqL7QvYZFsXEKifA7c"
     },
     "metrics_data": {
-      "id": 45115,
+      "id": 46054,
       "poolId": 44,
-      "timestamp": "2025-05-01T12:49:15.736Z",
-      "tvl": 13405111,
-      "fee": 0.002,
-      "apy24h": 9.153995,
-      "apy7d": 8.696295,
-      "apy30d": 8.238595,
-      "volumeUsd": 1608613.2,
+      "timestamp": "2025-05-01T13:07:03.938Z",
+      "tvl": 14058681,
+      "fee": 0.0005,
+      "apy24h": 2.2140894,
+      "apy7d": 2.103385,
+      "apy30d": 1.9926804,
+      "volumeUsd": 1687041.8,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "Bcu9CFZyEjwuaFzRY2zuASN8P4HqL7QvYZFsXEKifA7c"
@@ -2730,15 +2730,15 @@
       "name": "HPsQ-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45115,
+        "id": 46054,
         "poolId": 44,
-        "timestamp": "2025-05-01T12:49:15.736Z",
-        "tvl": 13405111,
-        "fee": 0.002,
-        "apy24h": 9.153995,
-        "apy7d": 8.696295,
-        "apy30d": 8.238595,
-        "volumeUsd": 1608613.2,
+        "timestamp": "2025-05-01T13:07:03.938Z",
+        "tvl": 14058681,
+        "fee": 0.0005,
+        "apy24h": 2.2140894,
+        "apy7d": 2.103385,
+        "apy30d": 1.9926804,
+        "volumeUsd": 1687041.8,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "Bcu9CFZyEjwuaFzRY2zuASN8P4HqL7QvYZFsXEKifA7c"
@@ -2779,8 +2779,8 @@
     ],
     "poolId": "DLBBqB22uJsrpvne7AXVUbn5cDxviGk9pBhm6HpFH2VQ",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 12371281,
-    "volume_24h": 1484553.8,
+    "liquidity": 12288467,
+    "volume_24h": 1474616,
     "apr": 0.438958,
     "fee": 0.0001,
     "apr_24h": 0.438958,
@@ -2809,15 +2809,15 @@
       "whirlpoolId": "DLBBqB22uJsrpvne7AXVUbn5cDxviGk9pBhm6HpFH2VQ"
     },
     "metrics_data": {
-      "id": 45116,
+      "id": 46056,
       "poolId": 45,
-      "timestamp": "2025-05-01T12:49:15.742Z",
-      "tvl": 12371281,
+      "timestamp": "2025-05-01T13:07:03.960Z",
+      "tvl": 12288467,
       "fee": 0.0001,
       "apy24h": 0.438958,
       "apy7d": 0.41701007,
       "apy30d": 0.39506218,
-      "volumeUsd": 1484553.8,
+      "volumeUsd": 1474616,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "DLBBqB22uJsrpvne7AXVUbn5cDxviGk9pBhm6HpFH2VQ"
@@ -2831,15 +2831,15 @@
       "name": "bSo1-SOL Orca LP",
       "active": true,
       "metrics": {
-        "id": 45116,
+        "id": 46056,
         "poolId": 45,
-        "timestamp": "2025-05-01T12:49:15.742Z",
-        "tvl": 12371281,
+        "timestamp": "2025-05-01T13:07:03.960Z",
+        "tvl": 12288467,
         "fee": 0.0001,
         "apy24h": 0.438958,
         "apy7d": 0.41701007,
         "apy30d": 0.39506218,
-        "volumeUsd": 1484553.8,
+        "volumeUsd": 1474616,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "DLBBqB22uJsrpvne7AXVUbn5cDxviGk9pBhm6HpFH2VQ"
@@ -2880,8 +2880,8 @@
     ],
     "poolId": "CWKHXjNZLjJ3fHHNVLvQH6Ls9TpKHzgMa4PUXJ9EZ4zC",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 11709888,
-    "volume_24h": 1405186.6,
+    "liquidity": 11461154,
+    "volume_24h": 1375338.5,
     "apr": 2.2140894,
     "fee": 0.0005,
     "apr_24h": 2.2140894,
@@ -2910,15 +2910,15 @@
       "whirlpoolId": "CWKHXjNZLjJ3fHHNVLvQH6Ls9TpKHzgMa4PUXJ9EZ4zC"
     },
     "metrics_data": {
-      "id": 45117,
+      "id": 45997,
       "poolId": 46,
-      "timestamp": "2025-05-01T12:49:15.743Z",
-      "tvl": 11709888,
+      "timestamp": "2025-05-01T13:06:25.917Z",
+      "tvl": 11461154,
       "fee": 0.0005,
       "apy24h": 2.2140894,
       "apy7d": 2.103385,
       "apy30d": 1.9926804,
-      "volumeUsd": 1405186.6,
+      "volumeUsd": 1375338.5,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "CWKHXjNZLjJ3fHHNVLvQH6Ls9TpKHzgMa4PUXJ9EZ4zC"
@@ -2932,15 +2932,15 @@
       "name": "J1to-SOL Orca LP",
       "active": true,
       "metrics": {
-        "id": 45117,
+        "id": 45997,
         "poolId": 46,
-        "timestamp": "2025-05-01T12:49:15.743Z",
-        "tvl": 11709888,
+        "timestamp": "2025-05-01T13:06:25.917Z",
+        "tvl": 11461154,
         "fee": 0.0005,
         "apy24h": 2.2140894,
         "apy7d": 2.103385,
         "apy30d": 1.9926804,
-        "volumeUsd": 1405186.6,
+        "volumeUsd": 1375338.5,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "CWKHXjNZLjJ3fHHNVLvQH6Ls9TpKHzgMa4PUXJ9EZ4zC"
@@ -2981,8 +2981,8 @@
     ],
     "poolId": "9R6fj4MpzwcN3EwsGYzQF69PC5wUf9Fw6jE5oYVV5aTm",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 10009745,
-    "volume_24h": 1201169.4,
+    "liquidity": 10580610,
+    "volume_24h": 1269673.2,
     "apr": 9.153995,
     "fee": 0.002,
     "apr_24h": 9.153995,
@@ -3011,15 +3011,15 @@
       "whirlpoolId": "9R6fj4MpzwcN3EwsGYzQF69PC5wUf9Fw6jE5oYVV5aTm"
     },
     "metrics_data": {
-      "id": 45120,
+      "id": 46059,
       "poolId": 47,
-      "timestamp": "2025-05-01T12:49:15.754Z",
-      "tvl": 10009745,
+      "timestamp": "2025-05-01T13:07:03.963Z",
+      "tvl": 10580610,
       "fee": 0.002,
       "apy24h": 9.153995,
       "apy7d": 8.696295,
       "apy30d": 8.238595,
-      "volumeUsd": 1201169.4,
+      "volumeUsd": 1269673.2,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "9R6fj4MpzwcN3EwsGYzQF69PC5wUf9Fw6jE5oYVV5aTm"
@@ -3033,15 +3033,15 @@
       "name": "6DAZ-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45120,
+        "id": 46059,
         "poolId": 47,
-        "timestamp": "2025-05-01T12:49:15.754Z",
-        "tvl": 10009745,
+        "timestamp": "2025-05-01T13:07:03.963Z",
+        "tvl": 10580610,
         "fee": 0.002,
         "apy24h": 9.153995,
         "apy7d": 8.696295,
         "apy30d": 8.238595,
-        "volumeUsd": 1201169.4,
+        "volumeUsd": 1269673.2,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "9R6fj4MpzwcN3EwsGYzQF69PC5wUf9Fw6jE5oYVV5aTm"
@@ -3082,8 +3082,8 @@
     ],
     "poolId": "9Y4yyUom7EiAf1BdTTXdJ2JGvJ2cVMWMLfFjB3fKdJnR",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 9667791,
-    "volume_24h": 1160134.9,
+    "liquidity": 9577995,
+    "volume_24h": 1149359.4,
     "apr": 14.039689,
     "fee": 0.003,
     "apr_24h": 14.039689,
@@ -3112,15 +3112,15 @@
       "whirlpoolId": "9Y4yyUom7EiAf1BdTTXdJ2JGvJ2cVMWMLfFjB3fKdJnR"
     },
     "metrics_data": {
-      "id": 45119,
+      "id": 46062,
       "poolId": 48,
-      "timestamp": "2025-05-01T12:49:15.754Z",
-      "tvl": 9667791,
+      "timestamp": "2025-05-01T13:07:03.966Z",
+      "tvl": 9577995,
       "fee": 0.003,
       "apy24h": 14.039689,
       "apy7d": 13.337705,
       "apy30d": 12.63572,
-      "volumeUsd": 1160134.9,
+      "volumeUsd": 1149359.4,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "9Y4yyUom7EiAf1BdTTXdJ2JGvJ2cVMWMLfFjB3fKdJnR"
@@ -3134,15 +3134,15 @@
       "name": "7i5K-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45119,
+        "id": 46062,
         "poolId": 48,
-        "timestamp": "2025-05-01T12:49:15.754Z",
-        "tvl": 9667791,
+        "timestamp": "2025-05-01T13:07:03.966Z",
+        "tvl": 9577995,
         "fee": 0.003,
         "apy24h": 14.039689,
         "apy7d": 13.337705,
         "apy30d": 12.63572,
-        "volumeUsd": 1160134.9,
+        "volumeUsd": 1149359.4,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "9Y4yyUom7EiAf1BdTTXdJ2JGvJ2cVMWMLfFjB3fKdJnR"
@@ -3183,8 +3183,8 @@
     ],
     "poolId": "DZVP8j8XWzJ6VJ2Eruy9C7nkPEdY1RzgH5Y76YSNgLJi",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 7570960,
-    "volume_24h": 908515.2,
+    "liquidity": 7168202.5,
+    "volume_24h": 860184.3,
     "apr": 9.153995,
     "fee": 0.002,
     "apr_24h": 9.153995,
@@ -3213,15 +3213,15 @@
       "whirlpoolId": "DZVP8j8XWzJ6VJ2Eruy9C7nkPEdY1RzgH5Y76YSNgLJi"
     },
     "metrics_data": {
-      "id": 45124,
+      "id": 46064,
       "poolId": 52,
-      "timestamp": "2025-05-01T12:49:15.760Z",
-      "tvl": 7570960,
+      "timestamp": "2025-05-01T13:07:03.968Z",
+      "tvl": 7168202.5,
       "fee": 0.002,
       "apy24h": 9.153995,
       "apy7d": 8.696295,
       "apy30d": 8.238595,
-      "volumeUsd": 908515.2,
+      "volumeUsd": 860184.3,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "DZVP8j8XWzJ6VJ2Eruy9C7nkPEdY1RzgH5Y76YSNgLJi"
@@ -3235,15 +3235,15 @@
       "name": "FwZ2-SOL Orca LP",
       "active": true,
       "metrics": {
-        "id": 45124,
+        "id": 46064,
         "poolId": 52,
-        "timestamp": "2025-05-01T12:49:15.760Z",
-        "tvl": 7570960,
+        "timestamp": "2025-05-01T13:07:03.968Z",
+        "tvl": 7168202.5,
         "fee": 0.002,
         "apy24h": 9.153995,
         "apy7d": 8.696295,
         "apy30d": 8.238595,
-        "volumeUsd": 908515.2,
+        "volumeUsd": 860184.3,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "DZVP8j8XWzJ6VJ2Eruy9C7nkPEdY1RzgH5Y76YSNgLJi"
@@ -3284,8 +3284,8 @@
     ],
     "poolId": "J8r2dynpYQuD7G7WNV1uwV5rNyNbZNt9Jd6iF2yhwezx",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 5158196,
-    "volume_24h": 618983.5,
+    "liquidity": 4927165,
+    "volume_24h": 591259.8,
     "apr": 9.153995,
     "fee": 0.002,
     "apr_24h": 9.153995,
@@ -3314,15 +3314,15 @@
       "whirlpoolId": "J8r2dynpYQuD7G7WNV1uwV5rNyNbZNt9Jd6iF2yhwezx"
     },
     "metrics_data": {
-      "id": 45128,
+      "id": 46014,
       "poolId": 60,
-      "timestamp": "2025-05-01T12:49:15.773Z",
-      "tvl": 5158196,
+      "timestamp": "2025-05-01T13:06:26.416Z",
+      "tvl": 4927165,
       "fee": 0.002,
       "apy24h": 9.153995,
       "apy7d": 8.696295,
       "apy30d": 8.238595,
-      "volumeUsd": 618983.5,
+      "volumeUsd": 591259.8,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "J8r2dynpYQuD7G7WNV1uwV5rNyNbZNt9Jd6iF2yhwezx"
@@ -3336,15 +3336,15 @@
       "name": "USDH-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45128,
+        "id": 46014,
         "poolId": 60,
-        "timestamp": "2025-05-01T12:49:15.773Z",
-        "tvl": 5158196,
+        "timestamp": "2025-05-01T13:06:26.416Z",
+        "tvl": 4927165,
         "fee": 0.002,
         "apy24h": 9.153995,
         "apy7d": 8.696295,
         "apy30d": 8.238595,
-        "volumeUsd": 618983.5,
+        "volumeUsd": 591259.8,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "J8r2dynpYQuD7G7WNV1uwV5rNyNbZNt9Jd6iF2yhwezx"
@@ -3385,8 +3385,8 @@
     ],
     "poolId": "GBijunwrnnxAEm8iiC4cxg/T6xM9Bj3F8/RX/SkuQDQ=",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 8910846,
-    "volume_24h": 1069301.5,
+    "liquidity": 9546269,
+    "volume_24h": 1145552.4,
     "apr": 0.438958,
     "fee": 0.0001,
     "apr_24h": 0.438958,
@@ -3415,15 +3415,15 @@
       "whirlpoolId": "GBijunwrnnxAEm8iiC4cxg/T6xM9Bj3F8/RX/SkuQDQ="
     },
     "metrics_data": {
-      "id": 45121,
+      "id": 46063,
       "poolId": 49,
-      "timestamp": "2025-05-01T12:49:15.758Z",
-      "tvl": 8910846,
+      "timestamp": "2025-05-01T13:07:03.967Z",
+      "tvl": 9546269,
       "fee": 0.0001,
       "apy24h": 0.438958,
       "apy7d": 0.41701007,
       "apy30d": 0.39506218,
-      "volumeUsd": 1069301.5,
+      "volumeUsd": 1145552.4,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "GBijunwrnnxAEm8iiC4cxg/T6xM9Bj3F8/RX/SkuQDQ="
@@ -3437,15 +3437,15 @@
       "name": "Mang-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45121,
+        "id": 46063,
         "poolId": 49,
-        "timestamp": "2025-05-01T12:49:15.758Z",
-        "tvl": 8910846,
+        "timestamp": "2025-05-01T13:07:03.967Z",
+        "tvl": 9546269,
         "fee": 0.0001,
         "apy24h": 0.438958,
         "apy7d": 0.41701007,
         "apy30d": 0.39506218,
-        "volumeUsd": 1069301.5,
+        "volumeUsd": 1145552.4,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "GBijunwrnnxAEm8iiC4cxg/T6xM9Bj3F8/RX/SkuQDQ="
@@ -3486,8 +3486,8 @@
     ],
     "poolId": "D9Ui6Z7PzHnXmmRbQNbqzBrNNLmveHe7UqNZ7Ex7APwB",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 14652140,
-    "volume_24h": 1758256.8,
+    "liquidity": 14614063,
+    "volume_24h": 1753687.5,
     "apr": 0.438958,
     "fee": 0.0001,
     "apr_24h": 0.438958,
@@ -3516,15 +3516,15 @@
       "whirlpoolId": "D9Ui6Z7PzHnXmmRbQNbqzBrNNLmveHe7UqNZ7Ex7APwB"
     },
     "metrics_data": {
-      "id": 45111,
+      "id": 45939,
       "poolId": 50,
-      "timestamp": "2025-05-01T12:49:15.726Z",
-      "tvl": 14652140,
+      "timestamp": "2025-05-01T13:05:26.017Z",
+      "tvl": 14614063,
       "fee": 0.0001,
       "apy24h": 0.438958,
       "apy7d": 0.41701007,
       "apy30d": 0.39506218,
-      "volumeUsd": 1758256.8,
+      "volumeUsd": 1753687.5,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "D9Ui6Z7PzHnXmmRbQNbqzBrNNLmveHe7UqNZ7Ex7APwB"
@@ -3538,15 +3538,15 @@
       "name": "JUPy-SOL Orca LP",
       "active": true,
       "metrics": {
-        "id": 45111,
+        "id": 45939,
         "poolId": 50,
-        "timestamp": "2025-05-01T12:49:15.726Z",
-        "tvl": 14652140,
+        "timestamp": "2025-05-01T13:05:26.017Z",
+        "tvl": 14614063,
         "fee": 0.0001,
         "apy24h": 0.438958,
         "apy7d": 0.41701007,
         "apy30d": 0.39506218,
-        "volumeUsd": 1758256.8,
+        "volumeUsd": 1753687.5,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "D9Ui6Z7PzHnXmmRbQNbqzBrNNLmveHe7UqNZ7Ex7APwB"
@@ -3587,8 +3587,8 @@
     ],
     "poolId": "42NpASPGhvym1V1TfUKGYaQAqHX39tgNgkkEMmC79JxV",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 7331159,
-    "volume_24h": 879739.06,
+    "liquidity": 6724647,
+    "volume_24h": 806957.6,
     "apr": 14.039689,
     "fee": 0.003,
     "apr_24h": 14.039689,
@@ -3617,15 +3617,15 @@
       "whirlpoolId": "42NpASPGhvym1V1TfUKGYaQAqHX39tgNgkkEMmC79JxV"
     },
     "metrics_data": {
-      "id": 45125,
+      "id": 46065,
       "poolId": 53,
-      "timestamp": "2025-05-01T12:49:15.766Z",
-      "tvl": 7331159,
+      "timestamp": "2025-05-01T13:07:03.977Z",
+      "tvl": 6724647,
       "fee": 0.003,
       "apy24h": 14.039689,
       "apy7d": 13.337705,
       "apy30d": 12.63572,
-      "volumeUsd": 879739.06,
+      "volumeUsd": 806957.6,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "42NpASPGhvym1V1TfUKGYaQAqHX39tgNgkkEMmC79JxV"
@@ -3639,15 +3639,15 @@
       "name": "MSOL-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45125,
+        "id": 46065,
         "poolId": 53,
-        "timestamp": "2025-05-01T12:49:15.766Z",
-        "tvl": 7331159,
+        "timestamp": "2025-05-01T13:07:03.977Z",
+        "tvl": 6724647,
         "fee": 0.003,
         "apy24h": 14.039689,
         "apy7d": 13.337705,
         "apy30d": 12.63572,
-        "volumeUsd": 879739.06,
+        "volumeUsd": 806957.6,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "42NpASPGhvym1V1TfUKGYaQAqHX39tgNgkkEMmC79JxV"
@@ -3688,8 +3688,8 @@
     ],
     "poolId": "AXtXBw8BwBQCnJwt9pzdWiLBbLJ4KJ6pa1h39MGgKQQ9",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 6238898,
-    "volume_24h": 748667.75,
+    "liquidity": 5811934,
+    "volume_24h": 697432.1,
     "apr": 2.2140894,
     "fee": 0.0005,
     "apr_24h": 2.2140894,
@@ -3718,15 +3718,15 @@
       "whirlpoolId": "AXtXBw8BwBQCnJwt9pzdWiLBbLJ4KJ6pa1h39MGgKQQ9"
     },
     "metrics_data": {
-      "id": 45070,
+      "id": 46068,
       "poolId": 57,
-      "timestamp": "2025-05-01T12:48:23.216Z",
-      "tvl": 6238898,
+      "timestamp": "2025-05-01T13:07:03.993Z",
+      "tvl": 5811934,
       "fee": 0.0005,
       "apy24h": 2.2140894,
       "apy7d": 2.103385,
       "apy30d": 1.9926804,
-      "volumeUsd": 748667.75,
+      "volumeUsd": 697432.1,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "AXtXBw8BwBQCnJwt9pzdWiLBbLJ4KJ6pa1h39MGgKQQ9"
@@ -3740,15 +3740,15 @@
       "name": "MSOL-SOL Orca LP",
       "active": true,
       "metrics": {
-        "id": 45070,
+        "id": 46068,
         "poolId": 57,
-        "timestamp": "2025-05-01T12:48:23.216Z",
-        "tvl": 6238898,
+        "timestamp": "2025-05-01T13:07:03.993Z",
+        "tvl": 5811934,
         "fee": 0.0005,
         "apy24h": 2.2140894,
         "apy7d": 2.103385,
         "apy30d": 1.9926804,
-        "volumeUsd": 748667.75,
+        "volumeUsd": 697432.1,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "AXtXBw8BwBQCnJwt9pzdWiLBbLJ4KJ6pa1h39MGgKQQ9"
@@ -3789,8 +3789,8 @@
     ],
     "poolId": "4fuUiYxTQ6QCrdSq9ouBYXTwJwYqQpZNxKAGzFa7nLZZ",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 4495151.5,
-    "volume_24h": 539418.2,
+    "liquidity": 4278833.5,
+    "volume_24h": 513460,
     "apr": 14.039689,
     "fee": 0.003,
     "apr_24h": 14.039689,
@@ -3819,15 +3819,15 @@
       "whirlpoolId": "4fuUiYxTQ6QCrdSq9ouBYXTwJwYqQpZNxKAGzFa7nLZZ"
     },
     "metrics_data": {
-      "id": 45130,
+      "id": 46069,
       "poolId": 59,
-      "timestamp": "2025-05-01T12:49:15.785Z",
-      "tvl": 4495151.5,
+      "timestamp": "2025-05-01T13:07:03.993Z",
+      "tvl": 4278833.5,
       "fee": 0.003,
       "apy24h": 14.039689,
       "apy7d": 13.337705,
       "apy30d": 12.63572,
-      "volumeUsd": 539418.2,
+      "volumeUsd": 513460,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "4fuUiYxTQ6QCrdSq9ouBYXTwJwYqQpZNxKAGzFa7nLZZ"
@@ -3841,15 +3841,15 @@
       "name": "USDC-USDT Orca LP",
       "active": true,
       "metrics": {
-        "id": 45130,
+        "id": 46069,
         "poolId": 59,
-        "timestamp": "2025-05-01T12:49:15.785Z",
-        "tvl": 4495151.5,
+        "timestamp": "2025-05-01T13:07:03.993Z",
+        "tvl": 4278833.5,
         "fee": 0.003,
         "apy24h": 14.039689,
         "apy7d": 13.337705,
         "apy30d": 12.63572,
-        "volumeUsd": 539418.2,
+        "volumeUsd": 513460,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "4fuUiYxTQ6QCrdSq9ouBYXTwJwYqQpZNxKAGzFa7nLZZ"
@@ -3890,16 +3890,16 @@
     ],
     "poolId": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 1640009,
-    "volume_24h": 196801.08,
-    "apr": 14.039689,
-    "fee": 0.003,
-    "apr_24h": 14.039689,
-    "apr_7d": 13.337705,
-    "apr_30d": 12.63572,
+    "liquidity": 1941871.9,
+    "volume_24h": 233024.62,
+    "apr": 9.153995,
+    "fee": 0.002,
+    "apr_24h": 9.153995,
+    "apr_7d": 8.696295,
+    "apr_30d": 8.238595,
     "apr_change_24h": 0,
-    "apr_change_7d": -4.9999967948007935,
-    "apr_change_30d": -5.263161840811447,
+    "apr_change_7d": -5.000002731048038,
+    "apr_change_30d": -5.263160920828918,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
@@ -3920,15 +3920,15 @@
       "whirlpoolId": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj"
     },
     "metrics_data": {
-      "id": 45134,
+      "id": 46073,
       "poolId": 64,
-      "timestamp": "2025-05-01T12:49:15.790Z",
-      "tvl": 1640009,
-      "fee": 0.003,
-      "apy24h": 14.039689,
-      "apy7d": 13.337705,
-      "apy30d": 12.63572,
-      "volumeUsd": 196801.08,
+      "timestamp": "2025-05-01T13:07:03.998Z",
+      "tvl": 1941871.9,
+      "fee": 0.002,
+      "apy24h": 9.153995,
+      "apy7d": 8.696295,
+      "apy30d": 8.238595,
+      "volumeUsd": 233024.62,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj"
@@ -3942,15 +3942,15 @@
       "name": "ETH-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45134,
+        "id": 46073,
         "poolId": 64,
-        "timestamp": "2025-05-01T12:49:15.790Z",
-        "tvl": 1640009,
-        "fee": 0.003,
-        "apy24h": 14.039689,
-        "apy7d": 13.337705,
-        "apy30d": 12.63572,
-        "volumeUsd": 196801.08,
+        "timestamp": "2025-05-01T13:07:03.998Z",
+        "tvl": 1941871.9,
+        "fee": 0.002,
+        "apy24h": 9.153995,
+        "apy7d": 8.696295,
+        "apy30d": 8.238595,
+        "volumeUsd": 233024.62,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj"
@@ -3991,8 +3991,8 @@
     ],
     "poolId": "5dPzZyyWfHQpdBJJPDsz6QD1SrHRPDT27fT1N9MqR5yn",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 8341617.5,
-    "volume_24h": 1000994.06,
+    "liquidity": 8751848,
+    "volume_24h": 1050221.8,
     "apr": 2.2140894,
     "fee": 0.0005,
     "apr_24h": 2.2140894,
@@ -4021,15 +4021,15 @@
       "whirlpoolId": "5dPzZyyWfHQpdBJJPDsz6QD1SrHRPDT27fT1N9MqR5yn"
     },
     "metrics_data": {
-      "id": 45122,
+      "id": 46061,
       "poolId": 51,
-      "timestamp": "2025-05-01T12:49:15.758Z",
-      "tvl": 8341617.5,
+      "timestamp": "2025-05-01T13:07:03.966Z",
+      "tvl": 8751848,
       "fee": 0.0005,
       "apy24h": 2.2140894,
       "apy7d": 2.103385,
       "apy30d": 1.9926804,
-      "volumeUsd": 1000994.06,
+      "volumeUsd": 1050221.8,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "5dPzZyyWfHQpdBJJPDsz6QD1SrHRPDT27fT1N9MqR5yn"
@@ -4043,15 +4043,15 @@
       "name": "ORCA-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45122,
+        "id": 46061,
         "poolId": 51,
-        "timestamp": "2025-05-01T12:49:15.758Z",
-        "tvl": 8341617.5,
+        "timestamp": "2025-05-01T13:07:03.966Z",
+        "tvl": 8751848,
         "fee": 0.0005,
         "apy24h": 2.2140894,
         "apy7d": 2.103385,
         "apy30d": 1.9926804,
-        "volumeUsd": 1000994.06,
+        "volumeUsd": 1050221.8,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "5dPzZyyWfHQpdBJJPDsz6QD1SrHRPDT27fT1N9MqR5yn"
@@ -4092,16 +4092,16 @@
     ],
     "poolId": "7TeVBs2xnXaBTicd3tWGBJLcGYawHJemX7g5yLUswunV",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 14549593,
-    "volume_24h": 1745951.2,
-    "apr": 2.2140894,
-    "fee": 0.0005,
-    "apr_24h": 2.2140894,
-    "apr_7d": 2.103385,
-    "apr_30d": 1.9926804,
+    "liquidity": 13935112,
+    "volume_24h": 1672213.5,
+    "apr": 4.477063,
+    "fee": 0.001,
+    "apr_24h": 4.477063,
+    "apr_7d": 4.25321,
+    "apr_30d": 4.029357,
     "apr_change_24h": 0,
-    "apr_change_7d": -4.999996838429395,
-    "apr_change_30d": -5.263163900094363,
+    "apr_change_7d": -4.999996649589252,
+    "apr_change_30d": -5.263154182370493,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
@@ -4122,15 +4122,15 @@
       "whirlpoolId": "7TeVBs2xnXaBTicd3tWGBJLcGYawHJemX7g5yLUswunV"
     },
     "metrics_data": {
-      "id": 45113,
+      "id": 46055,
       "poolId": 54,
-      "timestamp": "2025-05-01T12:49:15.729Z",
-      "tvl": 14549593,
-      "fee": 0.0005,
-      "apy24h": 2.2140894,
-      "apy7d": 2.103385,
-      "apy30d": 1.9926804,
-      "volumeUsd": 1745951.2,
+      "timestamp": "2025-05-01T13:07:03.943Z",
+      "tvl": 13935112,
+      "fee": 0.001,
+      "apy24h": 4.477063,
+      "apy7d": 4.25321,
+      "apy30d": 4.029357,
+      "volumeUsd": 1672213.5,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "7TeVBs2xnXaBTicd3tWGBJLcGYawHJemX7g5yLUswunV"
@@ -4144,15 +4144,15 @@
       "name": "JUPy-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45113,
+        "id": 46055,
         "poolId": 54,
-        "timestamp": "2025-05-01T12:49:15.729Z",
-        "tvl": 14549593,
-        "fee": 0.0005,
-        "apy24h": 2.2140894,
-        "apy7d": 2.103385,
-        "apy30d": 1.9926804,
-        "volumeUsd": 1745951.2,
+        "timestamp": "2025-05-01T13:07:03.943Z",
+        "tvl": 13935112,
+        "fee": 0.001,
+        "apy24h": 4.477063,
+        "apy7d": 4.25321,
+        "apy30d": 4.029357,
+        "volumeUsd": 1672213.5,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "7TeVBs2xnXaBTicd3tWGBJLcGYawHJemX7g5yLUswunV"
@@ -4193,16 +4193,16 @@
     ],
     "poolId": "8HwVQDrkfWRFM8CeVSHwHpZMC25qKwjB4EJ83m5RT6J1",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 13533005,
-    "volume_24h": 1623960.6,
-    "apr": 4.477063,
-    "fee": 0.001,
-    "apr_24h": 4.477063,
-    "apr_7d": 4.25321,
-    "apr_30d": 4.029357,
+    "liquidity": 13507161,
+    "volume_24h": 1620859.2,
+    "apr": 9.153995,
+    "fee": 0.002,
+    "apr_24h": 9.153995,
+    "apr_7d": 8.696295,
+    "apr_30d": 8.238595,
     "apr_change_24h": 0,
-    "apr_change_7d": -4.999996649589252,
-    "apr_change_30d": -5.263154182370493,
+    "apr_change_7d": -5.000002731048038,
+    "apr_change_30d": -5.263160920828918,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
@@ -4223,15 +4223,15 @@
       "whirlpoolId": "8HwVQDrkfWRFM8CeVSHwHpZMC25qKwjB4EJ83m5RT6J1"
     },
     "metrics_data": {
-      "id": 45114,
+      "id": 45998,
       "poolId": 55,
-      "timestamp": "2025-05-01T12:49:15.730Z",
-      "tvl": 13533005,
-      "fee": 0.001,
-      "apy24h": 4.477063,
-      "apy7d": 4.25321,
-      "apy30d": 4.029357,
-      "volumeUsd": 1623960.6,
+      "timestamp": "2025-05-01T13:06:25.917Z",
+      "tvl": 13507161,
+      "fee": 0.002,
+      "apy24h": 9.153995,
+      "apy7d": 8.696295,
+      "apy30d": 8.238595,
+      "volumeUsd": 1620859.2,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "8HwVQDrkfWRFM8CeVSHwHpZMC25qKwjB4EJ83m5RT6J1"
@@ -4245,15 +4245,15 @@
       "name": "MpLU-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45114,
+        "id": 45998,
         "poolId": 55,
-        "timestamp": "2025-05-01T12:49:15.730Z",
-        "tvl": 13533005,
-        "fee": 0.001,
-        "apy24h": 4.477063,
-        "apy7d": 4.25321,
-        "apy30d": 4.029357,
-        "volumeUsd": 1623960.6,
+        "timestamp": "2025-05-01T13:06:25.917Z",
+        "tvl": 13507161,
+        "fee": 0.002,
+        "apy24h": 9.153995,
+        "apy7d": 8.696295,
+        "apy30d": 8.238595,
+        "volumeUsd": 1620859.2,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "8HwVQDrkfWRFM8CeVSHwHpZMC25qKwjB4EJ83m5RT6J1"
@@ -4294,8 +4294,8 @@
     ],
     "poolId": "GHuoeq9UnFBXHsx8Kep7P7VT3UMpk8D1EJw4n4ggbKpL",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 12342312,
-    "volume_24h": 1481077.5,
+    "liquidity": 12928552,
+    "volume_24h": 1551426.2,
     "apr": 14.039689,
     "fee": 0.003,
     "apr_24h": 14.039689,
@@ -4324,15 +4324,15 @@
       "whirlpoolId": "GHuoeq9UnFBXHsx8Kep7P7VT3UMpk8D1EJw4n4ggbKpL"
     },
     "metrics_data": {
-      "id": 45064,
+      "id": 46057,
       "poolId": 56,
-      "timestamp": "2025-05-01T12:48:23.016Z",
-      "tvl": 12342312,
+      "timestamp": "2025-05-01T13:07:03.962Z",
+      "tvl": 12928552,
       "fee": 0.003,
       "apy24h": 14.039689,
       "apy7d": 13.337705,
       "apy30d": 12.63572,
-      "volumeUsd": 1481077.5,
+      "volumeUsd": 1551426.2,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "GHuoeq9UnFBXHsx8Kep7P7VT3UMpk8D1EJw4n4ggbKpL"
@@ -4346,15 +4346,15 @@
       "name": "USDC-USDH Orca LP",
       "active": true,
       "metrics": {
-        "id": 45064,
+        "id": 46057,
         "poolId": 56,
-        "timestamp": "2025-05-01T12:48:23.016Z",
-        "tvl": 12342312,
+        "timestamp": "2025-05-01T13:07:03.962Z",
+        "tvl": 12928552,
         "fee": 0.003,
         "apy24h": 14.039689,
         "apy7d": 13.337705,
         "apy30d": 12.63572,
-        "volumeUsd": 1481077.5,
+        "volumeUsd": 1551426.2,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "GHuoeq9UnFBXHsx8Kep7P7VT3UMpk8D1EJw4n4ggbKpL"
@@ -4395,8 +4395,8 @@
     ],
     "poolId": "F2Dfg4Z5xoVy7qxUmX7aAyNPCLn4xQS4WFgK4V6yTRMd",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 5248401.5,
-    "volume_24h": 629808.2,
+    "liquidity": 5137157,
+    "volume_24h": 616458.9,
     "apr": 4.477063,
     "fee": 0.001,
     "apr_24h": 4.477063,
@@ -4425,15 +4425,15 @@
       "whirlpoolId": "F2Dfg4Z5xoVy7qxUmX7aAyNPCLn4xQS4WFgK4V6yTRMd"
     },
     "metrics_data": {
-      "id": 45127,
+      "id": 46067,
       "poolId": 58,
-      "timestamp": "2025-05-01T12:49:15.772Z",
-      "tvl": 5248401.5,
+      "timestamp": "2025-05-01T13:07:03.992Z",
+      "tvl": 5137157,
       "fee": 0.001,
       "apy24h": 4.477063,
       "apy7d": 4.25321,
       "apy30d": 4.029357,
-      "volumeUsd": 629808.2,
+      "volumeUsd": 616458.9,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "F2Dfg4Z5xoVy7qxUmX7aAyNPCLn4xQS4WFgK4V6yTRMd"
@@ -4447,15 +4447,15 @@
       "name": "7kbn-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45127,
+        "id": 46067,
         "poolId": 58,
-        "timestamp": "2025-05-01T12:49:15.772Z",
-        "tvl": 5248401.5,
+        "timestamp": "2025-05-01T13:07:03.992Z",
+        "tvl": 5137157,
         "fee": 0.001,
         "apy24h": 4.477063,
         "apy7d": 4.25321,
         "apy30d": 4.029357,
-        "volumeUsd": 629808.2,
+        "volumeUsd": 616458.9,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "F2Dfg4Z5xoVy7qxUmX7aAyNPCLn4xQS4WFgK4V6yTRMd"
@@ -4496,8 +4496,8 @@
     ],
     "poolId": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 3802585.5,
-    "volume_24h": 456310.25,
+    "liquidity": 3295404,
+    "volume_24h": 395448.47,
     "apr": 0.438958,
     "fee": 0.0001,
     "apr_24h": 0.438958,
@@ -4526,15 +4526,15 @@
       "whirlpoolId": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw"
     },
     "metrics_data": {
-      "id": 45129,
+      "id": 46071,
       "poolId": 61,
-      "timestamp": "2025-05-01T12:49:15.784Z",
-      "tvl": 3802585.5,
+      "timestamp": "2025-05-01T13:07:03.995Z",
+      "tvl": 3295404,
       "fee": 0.0001,
       "apy24h": 0.438958,
       "apy7d": 0.41701007,
       "apy30d": 0.39506218,
-      "volumeUsd": 456310.25,
+      "volumeUsd": 395448.47,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw"
@@ -4548,15 +4548,15 @@
       "name": "BONK-SOL Orca LP",
       "active": true,
       "metrics": {
-        "id": 45129,
+        "id": 46071,
         "poolId": 61,
-        "timestamp": "2025-05-01T12:49:15.784Z",
-        "tvl": 3802585.5,
+        "timestamp": "2025-05-01T13:07:03.995Z",
+        "tvl": 3295404,
         "fee": 0.0001,
         "apy24h": 0.438958,
         "apy7d": 0.41701007,
         "apy30d": 0.39506218,
-        "volumeUsd": 456310.25,
+        "volumeUsd": 395448.47,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw"
@@ -4597,8 +4597,8 @@
     ],
     "poolId": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 3274089.5,
-    "volume_24h": 392890.72,
+    "liquidity": 2682737.8,
+    "volume_24h": 321928.53,
     "apr": 2.2140894,
     "fee": 0.0005,
     "apr_24h": 2.2140894,
@@ -4627,15 +4627,15 @@
       "whirlpoolId": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy"
     },
     "metrics_data": {
-      "id": 45131,
+      "id": 46070,
       "poolId": 62,
-      "timestamp": "2025-05-01T12:49:15.786Z",
-      "tvl": 3274089.5,
+      "timestamp": "2025-05-01T13:07:03.995Z",
+      "tvl": 2682737.8,
       "fee": 0.0005,
       "apy24h": 2.2140894,
       "apy7d": 2.103385,
       "apy30d": 1.9926804,
-      "volumeUsd": 392890.72,
+      "volumeUsd": 321928.53,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy"
@@ -4649,15 +4649,15 @@
       "name": "BTC-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45131,
+        "id": 46070,
         "poolId": 62,
-        "timestamp": "2025-05-01T12:49:15.786Z",
-        "tvl": 3274089.5,
+        "timestamp": "2025-05-01T13:07:03.995Z",
+        "tvl": 2682737.8,
         "fee": 0.0005,
         "apy24h": 2.2140894,
         "apy7d": 2.103385,
         "apy30d": 1.9926804,
-        "volumeUsd": 392890.72,
+        "volumeUsd": 321928.53,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy"
@@ -4698,8 +4698,8 @@
     ],
     "poolId": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 2666491.8,
-    "volume_24h": 319979.03,
+    "liquidity": 2339426.2,
+    "volume_24h": 280731.16,
     "apr": 4.477063,
     "fee": 0.001,
     "apr_24h": 4.477063,
@@ -4728,15 +4728,15 @@
       "whirlpoolId": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm"
     },
     "metrics_data": {
-      "id": 45133,
+      "id": 46072,
       "poolId": 63,
-      "timestamp": "2025-05-01T12:49:15.788Z",
-      "tvl": 2666491.8,
+      "timestamp": "2025-05-01T13:07:03.996Z",
+      "tvl": 2339426.2,
       "fee": 0.001,
       "apy24h": 4.477063,
       "apy7d": 4.25321,
       "apy30d": 4.029357,
-      "volumeUsd": 319979.03,
+      "volumeUsd": 280731.16,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm"
@@ -4750,15 +4750,15 @@
       "name": "SOL-USDT Orca LP",
       "active": true,
       "metrics": {
-        "id": 45133,
+        "id": 46072,
         "poolId": 63,
-        "timestamp": "2025-05-01T12:49:15.788Z",
-        "tvl": 2666491.8,
+        "timestamp": "2025-05-01T13:07:03.996Z",
+        "tvl": 2339426.2,
         "fee": 0.001,
         "apy24h": 4.477063,
         "apy7d": 4.25321,
         "apy30d": 4.029357,
-        "volumeUsd": 319979.03,
+        "volumeUsd": 280731.16,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm"
@@ -4799,16 +4799,16 @@
     ],
     "poolId": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 1666733.5,
-    "volume_24h": 200008.02,
-    "apr": 9.153995,
-    "fee": 0.002,
-    "apr_24h": 9.153995,
-    "apr_7d": 8.696295,
-    "apr_30d": 8.238595,
+    "liquidity": 1057889,
+    "volume_24h": 126946.68,
+    "apr": 14.039689,
+    "fee": 0.003,
+    "apr_24h": 14.039689,
+    "apr_7d": 13.337705,
+    "apr_30d": 12.63572,
     "apr_change_24h": 0,
-    "apr_change_7d": -5.000002731048038,
-    "apr_change_30d": -5.263160920828918,
+    "apr_change_7d": -4.9999967948007935,
+    "apr_change_30d": -5.263161840811447,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
@@ -4829,15 +4829,15 @@
       "whirlpoolId": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ"
     },
     "metrics_data": {
-      "id": 45132,
+      "id": 46074,
       "poolId": 65,
-      "timestamp": "2025-05-01T12:49:15.788Z",
-      "tvl": 1666733.5,
-      "fee": 0.002,
-      "apy24h": 9.153995,
-      "apy7d": 8.696295,
-      "apy30d": 8.238595,
-      "volumeUsd": 200008.02,
+      "timestamp": "2025-05-01T13:07:04.000Z",
+      "tvl": 1057889,
+      "fee": 0.003,
+      "apy24h": 14.039689,
+      "apy7d": 13.337705,
+      "apy30d": 12.63572,
+      "volumeUsd": 126946.68,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ"
@@ -4851,15 +4851,15 @@
       "name": "SOL-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45132,
+        "id": 46074,
         "poolId": 65,
-        "timestamp": "2025-05-01T12:49:15.788Z",
-        "tvl": 1666733.5,
-        "fee": 0.002,
-        "apy24h": 9.153995,
-        "apy7d": 8.696295,
-        "apy30d": 8.238595,
-        "volumeUsd": 200008.02,
+        "timestamp": "2025-05-01T13:07:04.000Z",
+        "tvl": 1057889,
+        "fee": 0.003,
+        "apy24h": 14.039689,
+        "apy7d": 13.337705,
+        "apy30d": 12.63572,
+        "volumeUsd": 126946.68,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ"
@@ -4900,8 +4900,8 @@
     ],
     "poolId": "BJAqRBXh1jXAQzKbQhnMgjVzJboBJ2vhLrBAj6fKuFEp",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 11130622,
-    "volume_24h": 1335674.6,
+    "liquidity": 10649271,
+    "volume_24h": 1277912.5,
     "apr": 4.477063,
     "fee": 0.001,
     "apr_24h": 4.477063,
@@ -4930,15 +4930,15 @@
       "whirlpoolId": "BJAqRBXh1jXAQzKbQhnMgjVzJboBJ2vhLrBAj6fKuFEp"
     },
     "metrics_data": {
-      "id": 45118,
+      "id": 46058,
       "poolId": 66,
-      "timestamp": "2025-05-01T12:49:15.746Z",
-      "tvl": 11130622,
+      "timestamp": "2025-05-01T13:07:03.962Z",
+      "tvl": 10649271,
       "fee": 0.001,
       "apy24h": 4.477063,
       "apy7d": 4.25321,
       "apy30d": 4.029357,
-      "volumeUsd": 1335674.6,
+      "volumeUsd": 1277912.5,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "BJAqRBXh1jXAQzKbQhnMgjVzJboBJ2vhLrBAj6fKuFEp"
@@ -4952,15 +4952,15 @@
       "name": "RAY-USDC Orca LP",
       "active": true,
       "metrics": {
-        "id": 45118,
+        "id": 46058,
         "poolId": 66,
-        "timestamp": "2025-05-01T12:49:15.746Z",
-        "tvl": 11130622,
+        "timestamp": "2025-05-01T13:07:03.962Z",
+        "tvl": 10649271,
         "fee": 0.001,
         "apy24h": 4.477063,
         "apy7d": 4.25321,
         "apy30d": 4.029357,
-        "volumeUsd": 1335674.6,
+        "volumeUsd": 1277912.5,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "BJAqRBXh1jXAQzKbQhnMgjVzJboBJ2vhLrBAj6fKuFEp"
@@ -5001,8 +5001,8 @@
     ],
     "poolId": "8QaXeHBrShJTdtN1rWCccBxpSVK6DGZ7VdCFxmZx9fFT",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 7828275,
-    "volume_24h": 939393,
+    "liquidity": 8067623,
+    "volume_24h": 968114.8,
     "apr": 4.477063,
     "fee": 0.001,
     "apr_24h": 4.477063,
@@ -5031,15 +5031,15 @@
       "whirlpoolId": "8QaXeHBrShJTdtN1rWCccBxpSVK6DGZ7VdCFxmZx9fFT"
     },
     "metrics_data": {
-      "id": 45123,
+      "id": 46060,
       "poolId": 67,
-      "timestamp": "2025-05-01T12:49:15.758Z",
-      "tvl": 7828275,
+      "timestamp": "2025-05-01T13:07:03.966Z",
+      "tvl": 8067623,
       "fee": 0.001,
       "apy24h": 4.477063,
       "apy7d": 4.25321,
       "apy30d": 4.029357,
-      "volumeUsd": 939393,
+      "volumeUsd": 968114.8,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "8QaXeHBrShJTdtN1rWCccBxpSVK6DGZ7VdCFxmZx9fFT"
@@ -5053,15 +5053,15 @@
       "name": "JSoL-SOL Orca LP",
       "active": true,
       "metrics": {
-        "id": 45123,
+        "id": 46060,
         "poolId": 67,
-        "timestamp": "2025-05-01T12:49:15.758Z",
-        "tvl": 7828275,
+        "timestamp": "2025-05-01T13:07:03.966Z",
+        "tvl": 8067623,
         "fee": 0.001,
         "apy24h": 4.477063,
         "apy7d": 4.25321,
         "apy30d": 4.029357,
-        "volumeUsd": 939393,
+        "volumeUsd": 968114.8,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "8QaXeHBrShJTdtN1rWCccBxpSVK6DGZ7VdCFxmZx9fFT"
@@ -5102,8 +5102,8 @@
     ],
     "poolId": "9vqYJjDUFecLL2xPUC4Rc7hyCtZ6iJ4mDiVZX7aFXoAe",
     "programId": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
-    "liquidity": 6730637,
-    "volume_24h": 807676.44,
+    "liquidity": 6053878,
+    "volume_24h": 726465.4,
     "apr": 0.438958,
     "fee": 0.0001,
     "apr_24h": 0.438958,
@@ -5132,15 +5132,15 @@
       "whirlpoolId": "9vqYJjDUFecLL2xPUC4Rc7hyCtZ6iJ4mDiVZX7aFXoAe"
     },
     "metrics_data": {
-      "id": 45126,
+      "id": 46066,
       "poolId": 68,
-      "timestamp": "2025-05-01T12:49:15.770Z",
-      "tvl": 6730637,
+      "timestamp": "2025-05-01T13:07:03.991Z",
+      "tvl": 6053878,
       "fee": 0.0001,
       "apy24h": 0.438958,
       "apy7d": 0.41701007,
       "apy30d": 0.39506218,
-      "volumeUsd": 807676.44,
+      "volumeUsd": 726465.4,
       "extraData": {
         "tickSpacing": "64",
         "whirlpoolId": "9vqYJjDUFecLL2xPUC4Rc7hyCtZ6iJ4mDiVZX7aFXoAe"
@@ -5154,15 +5154,15 @@
       "name": "STSOL-SOL Orca LP",
       "active": true,
       "metrics": {
-        "id": 45126,
+        "id": 46066,
         "poolId": 68,
-        "timestamp": "2025-05-01T12:49:15.770Z",
-        "tvl": 6730637,
+        "timestamp": "2025-05-01T13:07:03.991Z",
+        "tvl": 6053878,
         "fee": 0.0001,
         "apy24h": 0.438958,
         "apy7d": 0.41701007,
         "apy30d": 0.39506218,
-        "volumeUsd": 807676.44,
+        "volumeUsd": 726465.4,
         "extraData": {
           "tickSpacing": "64",
           "whirlpoolId": "9vqYJjDUFecLL2xPUC4Rc7hyCtZ6iJ4mDiVZX7aFXoAe"

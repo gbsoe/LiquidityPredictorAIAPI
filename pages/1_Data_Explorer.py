@@ -48,6 +48,12 @@ if not get_defi_api_key():
 
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_pool_list():
+    # Check for API key
+    api_key = get_defi_api_key()
+    if not api_key:
+        st.sidebar.warning("⚠️ API key not configured. Using cached data from previous API tests.")
+    
+    # Try to get pool list
     return get_pool_list(db)
 
 try:
