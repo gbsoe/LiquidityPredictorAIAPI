@@ -420,7 +420,11 @@ def main():
                 with col2:
                     st.write("### Token Economics")
                     price = token_metadata.get('price', 0)
+                    price_source = token_metadata.get('price_source', 'defi_api') if price > 0 else "none"
+                    
+                    # Display price with source indicator
                     st.write(f"**Current Price:** {format_price(price)}")
+                    st.write(f"**Price Source:** {price_source.capitalize()}")
                     
                     # Active status
                     active = token_metadata.get('active', False)
@@ -431,7 +435,10 @@ def main():
                     st.write(f"**Token ID:** {token_id}")
                     
                     # Note about data source
-                    st.info(f"Data sourced directly from the DeFi API `/tokens` endpoint.")
+                    if price_source == 'coingecko':
+                        st.info(f"Price data provided by CoinGecko API when not available in the DeFi API.")
+                    else:
+                        st.info(f"Data sourced directly from the DeFi API `/tokens` endpoint.")
             else:
                 st.warning(f"No detailed metadata available for {selected_token}.")
     
@@ -458,7 +465,11 @@ def main():
         - **Orca**: Tokens like SOL, ETH, USDC
         
         **Price Data:**
-        Token prices are obtained directly from the API for consistent data integration.
+        Token prices are obtained from multiple reliable sources:
+        - **DeFi API**: Primary source for token prices
+        - **CoinGecko**: Secondary source when prices are not available in the DeFi API
+        
+        Each token's price source is clearly labeled to provide transparency about data origin.
         """)
 
 if __name__ == "__main__":
