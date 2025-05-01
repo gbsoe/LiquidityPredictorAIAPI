@@ -20,6 +20,9 @@ import threading
 # Import the DeFi Aggregation API client
 from defi_aggregation_api import DefiAggregationAPI
 
+# Import the CoinGecko API client
+from coingecko_api import coingecko_api
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -506,6 +509,41 @@ class TokenDataService:
             for key, value in token_data.items():
                 if key not in processed:
                     processed[key] = value
+            
+            # Get token price from CoinGecko if price is 0 or missing
+            symbol = processed.get("symbol", "").upper()
+            if symbol and symbol != "UNKNOWN" and processed.get("price", 0) == 0:
+                try:
+                    # Try with CoinGecko ID first if available
+                    coingecko_id = processed.get("coingecko_id")
+                    price = None
+                    
+                    if coingecko_id:
+                        # Use the ID directly if available
+                        result = coingecko_api.get_price([coingecko_id], "usd")
+                        if result and coingecko_id in result:
+                            price = result[coingecko_id].get("usd", 0)
+                            logger.info(f"Retrieved price for {symbol} using coingecko_id {coingecko_id}: {price}")
+                    
+                    # If no price or no coingecko_id, try by symbol
+                    if not price or price == 0:
+                        logger.info(f"Fetching price for {symbol} from CoinGecko by symbol")
+                        price = coingecko_api.get_token_price_by_symbol(symbol)
+                    
+                    # If still no price, try by address
+                    if (not price or price == 0) and processed.get("address"):
+                        address = processed.get("address")
+                        logger.info(f"Fetching price for {symbol} from CoinGecko by address: {address}")
+                        price = coingecko_api.get_token_price_by_address(address)
+                    
+                    # Update price if found
+                    if price is not None and price > 0:
+                        processed["price"] = price
+                        processed["price_source"] = "coingecko"
+                        logger.info(f"Updated price for {symbol} from CoinGecko: {price}")
+                
+                except Exception as e:
+                    logger.warning(f"Error getting price from CoinGecko for {symbol}: {str(e)}")
             
             return processed
         elif isinstance(token_data, list) and len(token_data) > 0:
