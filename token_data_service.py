@@ -523,6 +523,46 @@ class TokenDataService:
                 "last_updated": datetime.now().isoformat(),
             }
     
+    def get_all_tokens(self) -> List[Dict[str, Any]]:
+        """
+        Fetch all tokens from the API.
+        
+        Returns:
+            A list of token data dictionaries.
+        """
+        try:
+            # Track request stats
+            self.stats["total_requests"] += 1
+            self.stats["last_update"] = datetime.now().isoformat()
+            
+            # Make API request to get all tokens
+            all_tokens = self.api_client._make_request("tokens")
+            
+            if not all_tokens or not isinstance(all_tokens, list):
+                logger.warning("Empty or invalid response when fetching all tokens")
+                return list(self.token_cache.values())  # Return cached tokens as fallback
+            
+            # Process each token and add to the cache
+            for token in all_tokens:
+                symbol = token.get("symbol", "").upper()
+                if symbol:
+                    self.token_cache[symbol] = {
+                        **token,
+                        "last_updated": datetime.now().isoformat()
+                    }
+            
+            # Return all tokens from the API
+            return all_tokens
+            
+        except Exception as e:
+            logger.error(f"Error fetching all tokens: {str(e)}")
+            self.stats["api_errors"] += 1
+            
+            # Return cached tokens as fallback
+            if self.token_cache:
+                return list(self.token_cache.values())
+            return []
+    
     def get_stats(self) -> Dict[str, Any]:
         """
         Get token service statistics.
