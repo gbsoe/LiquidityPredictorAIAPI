@@ -42,6 +42,9 @@ import db_handler
 from token_price_service import get_token_price, get_multiple_prices
 from token_data_service import get_token_service
 
+# Import API key manager
+from api_key_manager import get_defi_api_key, set_defi_api_key, render_api_key_form
+
 # Import DeFi Aggregation API
 try:
     from defi_aggregation_api import DefiAggregationAPI
