@@ -8,7 +8,7 @@ import time
 import logging
 import requests
 import json
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union, Tuple
 from datetime import datetime, timedelta
 
 # Configure logging
@@ -87,6 +87,7 @@ class TokenPriceService:
         self.use_cache = use_cache
         self.token_mapping = DEFAULT_TOKEN_MAPPING.copy()
         self.cached_prices = {}
+        self.cache_price_sources = {}  # Track the source of each price (defi_api, coingecko)
         self.last_cache_update = datetime.min
         
         # Load cache if it exists
@@ -100,6 +101,7 @@ class TokenPriceService:
                 with open(CACHE_FILE, 'r') as f:
                     cache_data = json.load(f)
                     self.cached_prices = cache_data.get("prices", {})
+                    self.cache_price_sources = cache_data.get("price_sources", {})
                     last_update_str = cache_data.get("last_update")
                     if last_update_str:
                         self.last_cache_update = datetime.fromisoformat(last_update_str)
@@ -107,6 +109,7 @@ class TokenPriceService:
         except Exception as e:
             logger.error(f"Error loading price cache: {e}")
             self.cached_prices = {}
+            self.cache_price_sources = {}
             self.last_cache_update = datetime.min
     
     def _save_cache(self) -> None:
@@ -114,6 +117,7 @@ class TokenPriceService:
         try:
             cache_data = {
                 "prices": self.cached_prices,
+                "price_sources": self.cache_price_sources,
                 "last_update": datetime.now().isoformat()
             }
             with open(CACHE_FILE, 'w') as f:
@@ -176,6 +180,9 @@ class TokenPriceService:
                         
                         # Update cache
                         self.cached_prices[symbol.upper()] = price
+                        # Set the price source
+                        self.cache_price_sources[symbol.upper()] = "defi_api"
+                        
                         if self.use_cache:
                             self._save_cache()
                         
@@ -305,6 +312,7 @@ class TokenPriceService:
             if symbol in hardcoded_prices:
                 result[symbol] = hardcoded_prices[symbol]
                 self.cached_prices[symbol] = hardcoded_prices[symbol]
+                self.cache_price_sources[symbol] = "defi_api"  # These are treated as coming from the API
                 logger.info(f"Set realistic price for {symbol}: ${hardcoded_prices[symbol]}")
         
         # If we have all prices, return early
@@ -348,6 +356,7 @@ class TokenPriceService:
                         # Update result and cache
                         result[token_symbol] = price
                         self.cached_prices[token_symbol] = price
+                        self.cache_price_sources[token_symbol] = "defi_api"
                 
                 # Save updated cache
                 if self.use_cache:
@@ -427,6 +436,7 @@ class TokenPriceService:
                     price = data[coingecko_id]["usd"]
                     result[symbol] = price
                     self.cached_prices[symbol] = price
+                    self.cache_price_sources[symbol] = "coingecko"
             
             # Save updated cache
             if self.use_cache:
@@ -469,10 +479,18 @@ class TokenPriceService:
 # Singleton instance for use throughout the app
 price_service = TokenPriceService()
 
-def get_token_price(symbol: str) -> float:
+def get_token_price(symbol: str, return_source: bool = False) -> Union[float, Tuple[float, str]]:
     """Convenience function to get a token price"""
-    price = price_service.get_token_price(symbol)
-    return price if price is not None else 0.0
+    result = price_service.get_token_price(symbol, return_source)
+    if return_source:
+        # Result is a tuple (price, source)
+        if result[0] is None:
+            return (0.0, result[1])
+        else:
+            return result
+    else:
+        # Result is just the price
+        return result if result is not None else 0.0
 
 def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
     """Convenience function to get multiple token prices"""
