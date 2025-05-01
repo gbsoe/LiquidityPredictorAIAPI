@@ -192,28 +192,32 @@ class TokenPriceService:
             logger.error(f"Error fetching price for {symbol} from DeFi API: {e}")
             return None
             
-    def get_token_price(self, symbol: str) -> Optional[float]:
+    def get_token_price(self, symbol: str, return_source: bool = False) -> Union[Optional[float], Tuple[Optional[float], str]]:
         """
         Get the current price for a token, trying multiple sources
         
         Args:
             symbol: Token symbol (e.g., "SOL", "BTC")
+            return_source: Whether to return the price source along with the price
             
         Returns:
-            Current price in USD, or None if not available
+            If return_source is False: Current price in USD, or None if not available
+            If return_source is True: Tuple of (price, source) where source is "defi_api", "coingecko", or "none"
         """
         # Skip processing for UNKNOWN tokens to avoid spam warnings
         if symbol == "UNKNOWN":
-            return None
+            return (None, "none") if return_source else None
             
         # Try cache first
         if self._is_cache_valid() and symbol in self.cached_prices:
-            return self.cached_prices[symbol]
+            # If we're using the cache, we need to check the source from cache_price_sources
+            cache_source = self.cache_price_sources.get(symbol, "none") if hasattr(self, 'cache_price_sources') else "none"
+            return (self.cached_prices[symbol], cache_source) if return_source else self.cached_prices[symbol]
             
         # First try the DeFi API as it's most aligned with our data
         price = self.get_token_price_from_defi_api(symbol)
         if price is not None:
-            return price
+            return (price, "defi_api") if return_source else price
             
         # If DeFi API fails, try CoinGecko as fallback
         # Convert symbol to CoinGecko ID
@@ -240,11 +244,16 @@ class TokenPriceService:
                 
                 # Update cache
                 self.cached_prices[symbol.upper()] = price
+                # Store the price source in another cache dictionary
+                if not hasattr(self, 'cache_price_sources'):
+                    self.cache_price_sources = {}
+                self.cache_price_sources[symbol.upper()] = "coingecko"
+                
                 if self.use_cache:
                     self._save_cache()
                 
                 logger.info(f"Retrieved {symbol} price from CoinGecko: ${price}")
-                return price
+                return (price, "coingecko") if return_source else price
             else:
                 logger.warning(f"Price data not found for {symbol} (CoinGecko ID: {coingecko_id})")
                 return None
