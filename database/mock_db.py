@@ -174,15 +174,15 @@ class MockDBManager:
                 prediction_value = min(1.0, max(0.0, vol_factor))
                 predicted_apr = pool.get('apr', 0)
             else:  # performance
-                # Performance class: 1 (high), 2 (medium), 3 (low)
+                # Performance class: high, medium, low
                 # Base on APR (higher APR = better performance)
                 apr = pool.get('apr', 0)
                 if apr > 20:
-                    prediction_value = 1
+                    prediction_value = 'high'
                 elif apr > 10:
-                    prediction_value = 2
+                    prediction_value = 'medium'
                 else:
-                    prediction_value = 3
+                    prediction_value = 'low'
                 predicted_apr = apr
             
             predictions.append({
@@ -195,7 +195,7 @@ class MockDBManager:
                 'current_apr': pool.get('apr', 0),
                 'predicted_apr': predicted_apr,
                 'risk_score': random.uniform(0.1, 0.9) if category != "risk" else prediction_value,
-                'performance_class': random.choice([1, 2, 3]) if category != "performance" else prediction_value,
+                'performance_class': random.choice(['high', 'medium', 'low']) if category != "performance" else prediction_value,
                 'prediction_timestamp': datetime.now().isoformat(),
                 'prediction_value': prediction_value
             })
@@ -244,16 +244,16 @@ class MockDBManager:
                     for _ in range(len(dates))
                 ]
                 
-                # Performance class (1=high, 2=medium, 3=low)
+                # Performance class (high, medium, low)
                 # Base on predicted APR
                 perf_class_series = []
                 for apr in predicted_apr_series:
                     if apr > 20:
-                        perf_class_series.append(1)
+                        perf_class_series.append('high')
                     elif apr > 10:
-                        perf_class_series.append(2)
+                        perf_class_series.append('medium')
                     else:
-                        perf_class_series.append(3)
+                        perf_class_series.append('low')
                 
                 # Risk score (0-1, lower is better)
                 risk_score_series = [
