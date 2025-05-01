@@ -563,6 +563,109 @@ class TokenDataService:
                 return list(self.token_cache.values())
             return []
     
+    def get_token_categories(self) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Get token categorization by DEX or platform.
+        
+        Returns:
+            Dictionary with DEX names as keys and lists of tokens as values
+        """
+        try:
+            # Get all tokens
+            tokens = self.get_all_tokens()
+            
+            # Get supported DEXes from the DeFi Aggregation API
+            dexes = self.api_client._make_request("dexes")
+            
+            # Define default categories if API doesn't return them
+            if not dexes or not isinstance(dexes, list):
+                dexes = [
+                    {"name": "Raydium", "id": "raydium"},
+                    {"name": "Orca", "id": "orca"},
+                    {"name": "Meteora", "id": "meteora"}
+                ]
+            
+            # Initialize categories
+            categories = {dex.get("id", "unknown"): [] for dex in dexes}
+            categories["other"] = []  # For tokens not in specific DEX
+            
+            # Get pools to map tokens to DEXes
+            try:
+                all_pools = []
+                # Try to fetch pools from each DEX
+                for dex in dexes:
+                    dex_id = dex.get("id", "")
+                    if dex_id:
+                        pools = self.api_client._make_request(
+                            f"pools?source={dex_id}&limit=100"
+                        )
+                        if pools and isinstance(pools, list):
+                            all_pools.extend(pools)
+            except Exception as e:
+                logger.error(f"Error fetching pools for token categorization: {str(e)}")
+                all_pools = []
+            
+            # Create a mapping of tokens to DEXes
+            token_to_dex_map = {}
+            for pool in all_pools:
+                dex = pool.get("source", "other")
+                # Extract token info (handle different API formats)
+                tokens_in_pool = []
+                if "token1_symbol" in pool:
+                    tokens_in_pool.append(pool.get("token1_symbol", "").upper())
+                    tokens_in_pool.append(pool.get("token2_symbol", "").upper())
+                elif "tokens" in pool and isinstance(pool["tokens"], list):
+                    tokens_in_pool = [t.get("symbol", "").upper() for t in pool["tokens"] 
+                                    if "symbol" in t]
+                
+                # Update token-to-dex mapping
+                for token_symbol in tokens_in_pool:
+                    if token_symbol:
+                        if token_symbol not in token_to_dex_map:
+                            token_to_dex_map[token_symbol] = set()
+                        token_to_dex_map[token_symbol].add(dex)
+            
+            # Categorize tokens by DEX
+            for token in tokens:
+                symbol = token.get("symbol", "").upper()
+                if symbol in token_to_dex_map:
+                    # Add token to each DEX category it belongs to
+                    for dex in token_to_dex_map[symbol]:
+                        if dex in categories:
+                            categories[dex].append(token)
+                else:
+                    # Add to other category if not found in any DEX
+                    categories["other"].append(token)
+            
+            return categories
+            
+        except Exception as e:
+            logger.error(f"Error categorizing tokens: {str(e)}")
+            # Return minimal default categories
+            return {
+                "raydium": self._get_default_tokens_for_dex("raydium"),
+                "orca": self._get_default_tokens_for_dex("orca"),
+                "meteora": self._get_default_tokens_for_dex("meteora"),
+                "other": []
+            }
+    
+    def _get_default_tokens_for_dex(self, dex_name: str) -> List[Dict[str, Any]]:
+        """Helper to get default tokens for a DEX when API fails"""
+        common_tokens = list(self.token_cache.values())
+        
+        # For demo purposes, distribute tokens across DEXes
+        if dex_name == "raydium":
+            return [t for t in common_tokens if t.get("symbol", "").upper() in 
+                   ["SOL", "USDC", "RAY", "ATLAS"]]
+        elif dex_name == "orca":
+            return [t for t in common_tokens if t.get("symbol", "").upper() in 
+                   ["ORCA", "USDT", "BTC", "ETH"]]
+        elif dex_name == "meteora":
+            return [t for t in common_tokens if t.get("symbol", "").upper() in 
+                   ["BONK", "MSOL", "UXD"]]
+        
+        return []
+    
     def get_stats(self) -> Dict[str, Any]:
         """
         Get token service statistics.
