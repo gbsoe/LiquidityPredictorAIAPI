@@ -8,12 +8,12 @@
     "api_calls": 122,
     "errors": 0,
     "db_writes": 0,
-    "start_time": "2025-05-01T11:53:50.343071",
-    "end_time": "2025-05-01T11:54:50.443876",
-    "elapsed_seconds": 60.100709438323975,
+    "start_time": "2025-05-01T12:10:59.975801",
+    "end_time": "2025-05-01T12:12:00.254120",
+    "elapsed_seconds": 60.27824282646179,
     "pools_per_second": 0.0
   },
-  "test_duration": "60.10 seconds",
-  "timestamp": "2025-05-01T11:54:50.443885",
+  "test_duration": "60.28 seconds",
+  "timestamp": "2025-05-01T12:12:00.254128",
   "sample_pools": []
 }
