@@ -109,6 +109,7 @@ def main():
                 "Address": format_address(t.get("address", "")),
                 "Decimals": t.get("decimals", 0),
                 "Price": format_price(float(t.get("price", 0))),
+                "Price Source": t.get("price_source", "defi_api") if t.get("price", 0) > 0 else "none",
                 "Active": "✓" if t.get("active", False) else "✗",
                 "ID": t.get("id", 0),
                 "Full Address": t.get("address", "")  # Hidden column for reference
@@ -141,6 +142,11 @@ def main():
                 "Address": st.column_config.TextColumn("Address", width="medium"),
                 "Decimals": st.column_config.NumberColumn("Decimals", width="small"),
                 "Price": st.column_config.TextColumn("Price", width="small"),
+                "Price Source": st.column_config.TextColumn(
+                    "Price Source", 
+                    width="small",
+                    help="Source of the token price data: defi_api, coingecko, or none"
+                ),
                 "Active": st.column_config.TextColumn("Active", width="small"),
                 "ID": st.column_config.NumberColumn("ID", width="small"),
                 "Full Address": st.column_config.TextColumn(
@@ -179,6 +185,7 @@ def main():
                     "Address": format_address(token.get("address", "")),
                     "Decimals": token.get("decimals", 0),
                     "Price": format_price(float(token.get("price", 0))),
+                    "Price Source": token.get("price_source", "defi_api") if token.get("price", 0) > 0 else "none",
                     "Active": "✓" if token.get("active", False) else "✗",
                     "Full Address": token.get("address", "")  # Hidden column for reference
                 }
@@ -195,6 +202,11 @@ def main():
                     "Address": st.column_config.TextColumn("Address", width="medium"),
                     "Decimals": st.column_config.NumberColumn("Decimals", width="small"),
                     "Price": st.column_config.TextColumn("Price", width="small"),
+                    "Price Source": st.column_config.TextColumn(
+                        "Price Source", 
+                        width="small",
+                        help="Source of the token price data: defi_api, coingecko, or none"
+                    ),
                     "Active": st.column_config.TextColumn("Active", width="small"),
                     "Full Address": st.column_config.TextColumn(
                         "Full Address", 
