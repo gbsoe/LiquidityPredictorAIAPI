@@ -1156,21 +1156,52 @@ def main():
                     options=["Prediction Score", "APR", "Liquidity", "Volume", "APR Change 24h", "TVL Change 24h"]
                 )
             
-            # Apply filters
+            # Apply filters with error handling
             filtered_df = df.copy()
             
             if search_term:
-                filtered_df = filtered_df[
-                    filtered_df["token1_symbol"].str.contains(search_term, case=False) | 
-                    filtered_df["token2_symbol"].str.contains(search_term, case=False) |
-                    filtered_df["name"].str.contains(search_term, case=False)
-                ]
+                try:
+                    # Handle case when token columns might be missing
+                    search_condition = []
+                    
+                    if "token1_symbol" in filtered_df.columns:
+                        search_condition.append(filtered_df["token1_symbol"].str.contains(search_term, case=False, na=False))
+                    
+                    if "token2_symbol" in filtered_df.columns:
+                        search_condition.append(filtered_df["token2_symbol"].str.contains(search_term, case=False, na=False))
+                    
+                    if "name" in filtered_df.columns:
+                        search_condition.append(filtered_df["name"].str.contains(search_term, case=False, na=False))
+                    
+                    # Apply combined filter if we have any valid conditions
+                    if search_condition:
+                        filtered_df = filtered_df[pd.concat(search_condition, axis=1).any(axis=1)]
+                except Exception as e:
+                    st.warning(f"Search error: {str(e)}. Try a different search term.")
+                    logger.error(f"Search error: {str(e)}")
+                    # Continue with unfiltered data
             
+            # Apply DEX filter with error handling
             if dex_filter != "All":
-                filtered_df = filtered_df[filtered_df["dex"] == dex_filter]
+                try:
+                    if "dex" in filtered_df.columns:
+                        filtered_df = filtered_df[filtered_df["dex"] == dex_filter]
+                    else:
+                        st.warning("DEX filter cannot be applied - 'dex' column not found in data")
+                except Exception as e:
+                    st.warning(f"Error applying DEX filter: {str(e)}")
+                    logger.error(f"DEX filter error: {str(e)}")
             
+            # Apply category filter with error handling
             if category_filter != "All":
-                filtered_df = filtered_df[filtered_df["category"] == category_filter]
+                try:
+                    if "category" in filtered_df.columns:
+                        filtered_df = filtered_df[filtered_df["category"] == category_filter]
+                    else:
+                        st.warning("Category filter cannot be applied - 'category' column not found in data")
+                except Exception as e:
+                    st.warning(f"Error applying category filter: {str(e)}")
+                    logger.error(f"Category filter error: {str(e)}")
             
             # Apply sorting
             sort_column_map = {
@@ -1182,13 +1213,28 @@ def main():
                 "TVL Change 24h": "tvl_change_24h"
             }
             
-            sort_column = sort_column_map.get(sort_by, "prediction_score")
-            filtered_df = filtered_df.sort_values(sort_column, ascending=False)
+            # Apply sorting with error handling
+            try:
+                sort_column = sort_column_map.get(sort_by, "prediction_score")
+                
+                # Make sure the sort column exists in the data
+                if sort_column in filtered_df.columns:
+                    filtered_df = filtered_df.sort_values(sort_column, ascending=False)
+                else:
+                    # Fall back to sorting by name if the column doesn't exist
+                    logger.warning(f"Sort column '{sort_column}' not found in data. Sorting by name instead.")
+                    if "name" in filtered_df.columns:
+                        filtered_df = filtered_df.sort_values("name")
+                    st.warning(f"Cannot sort by {sort_by} - column not available in current data")
+            except Exception as e:
+                logger.error(f"Error during sorting: {str(e)}")
+                st.warning(f"Sorting error: {str(e)}")
             
             # Show summary statistics
             st.subheader("Summary Statistics")
             metrics_col1, metrics_col2, metrics_col3, metrics_col4 = st.columns(4)
             
+            # Add summary statistics with error handling
             with metrics_col1:
                 st.metric(
                     "Total Pools", 
@@ -1196,26 +1242,56 @@ def main():
                     f"{len(filtered_df) - len(df):,}" if len(filtered_df) != len(df) else None
                 )
             
+            # Calculate Total Liquidity with error handling
             with metrics_col2:
-                total_tvl = filtered_df["liquidity"].sum()
-                st.metric(
-                    "Total Liquidity", 
-                    format_currency(total_tvl)
-                )
+                try:
+                    if "liquidity" in filtered_df.columns:
+                        # Handle potential NaN or non-numeric values
+                        numeric_liquidity = pd.to_numeric(filtered_df["liquidity"], errors="coerce")
+                        total_tvl = numeric_liquidity.sum()
+                        st.metric(
+                            "Total Liquidity", 
+                            format_currency(total_tvl)
+                        )
+                    else:
+                        st.metric("Total Liquidity", "N/A")
+                except Exception as e:
+                    logger.error(f"Error calculating total liquidity: {str(e)}")
+                    st.metric("Total Liquidity", "Error")
             
+            # Calculate Average APR with error handling
             with metrics_col3:
-                avg_apr = filtered_df["apr"].mean()
-                st.metric(
-                    "Average APR", 
-                    format_percentage(avg_apr)
-                )
+                try:
+                    if "apr" in filtered_df.columns:
+                        # Handle potential NaN or non-numeric values
+                        numeric_apr = pd.to_numeric(filtered_df["apr"], errors="coerce")
+                        avg_apr = numeric_apr.mean()
+                        st.metric(
+                            "Average APR", 
+                            format_percentage(avg_apr)
+                        )
+                    else:
+                        st.metric("Average APR", "N/A")
+                except Exception as e:
+                    logger.error(f"Error calculating average APR: {str(e)}")
+                    st.metric("Average APR", "Error")
             
+            # Calculate Average Prediction Score with error handling
             with metrics_col4:
-                avg_prediction = filtered_df["prediction_score"].mean()
-                st.metric(
-                    "Avg Prediction Score", 
-                    f"{avg_prediction:.1f}/100"
-                )
+                try:
+                    if "prediction_score" in filtered_df.columns:
+                        # Handle potential NaN or non-numeric values
+                        numeric_pred = pd.to_numeric(filtered_df["prediction_score"], errors="coerce")
+                        avg_prediction = numeric_pred.mean()
+                        st.metric(
+                            "Avg Prediction Score", 
+                            f"{avg_prediction:.1f}/100"
+                        )
+                    else:
+                        st.metric("Avg Prediction Score", "N/A")
+                except Exception as e:
+                    logger.error(f"Error calculating prediction score: {str(e)}")
+                    st.metric("Avg Prediction Score", "Error")
             
             # Display data source
             data_source = st.session_state.get('data_source', 'Unknown data source')
@@ -1320,30 +1396,82 @@ def main():
             st.write(f"Showing pools {start_idx+1}-{end_idx} of {len(filtered_df)}")
             
             for _, row in filtered_df.iloc[start_idx:end_idx].iterrows():
-                # Format all values correctly
-                category_text = row["category"]  # Just use plain text instead of HTML badge
-                pool_name = row["name"]
-                dex_name = row["dex"]
-                liquidity_val = format_currency(row["liquidity"])
-                volume_val = format_currency(row["volume_24h"])
-                apr_val = format_percentage(row["apr"])
-                apr_change_24h_val = f"{get_trend_icon(row['apr_change_24h'])} {format_percentage(row['apr_change_24h'])}"
-                apr_change_7d_val = f"{get_trend_icon(row['apr_change_7d'])} {format_percentage(row['apr_change_7d'])}"
-                pred_score = row["prediction_score"]
-                pred_icon = "🟢" if pred_score > 75 else "🟡" if pred_score > 50 else "🔴"
-                pred_text = f"{pred_icon} {pred_score:.1f}"
-                
-                # Prepare token data if available
-                token1_symbol = row.get("token1_symbol", "Unknown")
-                token2_symbol = row.get("token2_symbol", "Unknown")
-                token1_address = row.get("token1_address", "")
-                token2_address = row.get("token2_address", "")
-                token1_price = row.get("token1_price", 0)
-                token2_price = row.get("token2_price", 0)
-                
-                # Format token addresses for display (truncated)
-                token1_addr_display = f"{token1_address[:6]}...{token1_address[-4:]}" if len(token1_address) > 10 else token1_address
-                token2_addr_display = f"{token2_address[:6]}...{token2_address[-4:]}" if len(token2_address) > 10 else token2_address
+                try:
+                    # Format all values with error handling to ensure robust display
+                    # Use get() method with defaults for all fields to handle missing data gracefully
+                    
+                    # Basic pool information
+                    category_text = row.get("category", "Unknown")  # Default to Unknown if missing
+                    pool_name = row.get("name", "Unnamed Pool")
+                    dex_name = row.get("dex", "Unknown DEX")
+                    
+                    # Financial metrics with safe fallbacks
+                    try:
+                        liquidity_val = format_currency(row.get("liquidity", 0))
+                    except Exception:
+                        liquidity_val = "N/A"
+                        
+                    try:
+                        volume_val = format_currency(row.get("volume_24h", 0))
+                    except Exception:
+                        volume_val = "N/A"
+                    
+                    try:
+                        apr_val = format_percentage(row.get("apr", 0))
+                    except Exception:
+                        apr_val = "N/A"
+                    
+                    # APR changes with trend icons
+                    try:
+                        apr_change_24h = row.get('apr_change_24h', 0)
+                        apr_change_24h_val = f"{get_trend_icon(apr_change_24h)} {format_percentage(apr_change_24h)}"
+                    except Exception:
+                        apr_change_24h_val = "N/A"
+                    
+                    try:
+                        apr_change_7d = row.get('apr_change_7d', 0)
+                        apr_change_7d_val = f"{get_trend_icon(apr_change_7d)} {format_percentage(apr_change_7d)}"
+                    except Exception:
+                        apr_change_7d_val = "N/A"
+                    
+                    # Prediction score with color indicators
+                    try:
+                        pred_score = row.get("prediction_score", 0)
+                        pred_icon = "🟢" if pred_score > 75 else "🟡" if pred_score > 50 else "🔴"
+                        pred_text = f"{pred_icon} {pred_score:.1f}"
+                    except Exception:
+                        pred_text = "N/A"
+                        
+                    # Prepare token data if available
+                    token1_symbol = row.get("token1_symbol", "Unknown")
+                    token2_symbol = row.get("token2_symbol", "Unknown")
+                    token1_address = row.get("token1_address", "")
+                    token2_address = row.get("token2_address", "")
+                    token1_price = row.get("token1_price", 0)
+                    token2_price = row.get("token2_price", 0)
+                    
+                    # Format token addresses for display (truncated)
+                    token1_addr_display = f"{token1_address[:6]}...{token1_address[-4:]}" if len(token1_address) > 10 else token1_address
+                    token2_addr_display = f"{token2_address[:6]}...{token2_address[-4:]}" if len(token2_address) > 10 else token2_address
+                        
+                except Exception as e:
+                    # If any overall error occurs, log it and use default values
+                    logger.error(f"Error processing row: {str(e)}")
+                    category_text = "Unknown"
+                    pool_name = "Error: Data Processing Failed"
+                    dex_name = "Unknown"
+                    liquidity_val = "Error"
+                    volume_val = "Error"
+                    apr_val = "Error"
+                    apr_change_24h_val = "Error"
+                    apr_change_7d_val = "Error"
+                    pred_text = "Error"
+                    token1_symbol = "Error"
+                    token2_symbol = "Error"
+                    token1_addr_display = ""
+                    token2_addr_display = ""
+                    token1_price = 0
+                    token2_price = 0
                 
                 # Create standard table entry
                 table_entry = {

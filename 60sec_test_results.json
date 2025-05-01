@@ -1,19 +1,592 @@
 {
   "stats": {
-    "total_pools": 0,
-    "unique_pools": [],
-    "total_tokens": 0,
-    "unique_tokens": [],
-    "dex_counts": {},
-    "api_calls": 122,
+    "total_pools": 52,
+    "unique_pools": [
+      "4fuUiYxTQ6QCrdSq9ouBYXTwJwYqQpZNxKAGzFa7nLZZ",
+      "DZVP8j8XWzJ6VJ2Eruy9C7nkPEdY1RzgH5Y76YSNgLJi",
+      "D9Ui6Z7PzHnXmmRbQNbqzBrNNLmveHe7UqNZ7Ex7APwB",
+      "8baqungKPDskwWbNwXHJn9WmNbXB2cjfYA5mHnEue3jw",
+      "AXtXBw8BwBQCnJwt9pzdWiLBbLJ4KJ6pa1h39MGgKQQ9",
+      "FoqP7RKLbVDsAsbKPKMnvZZSP8qFzLQAqt6xumWDyAJt",
+      "42NpASPGhvym1V1TfUKGYaQAqHX39tgNgkkEMmC79JxV",
+      "9Y8pqQgJK7CjbxnVXnSoXwrXvs3jGfU1vMYJUeJxVS9U",
+      "7UF3m8hDGZ6bNnHzaT2YHrhp7A7n9qFfBj6QEpHPv5S8",
+      "4VgYz8E7rkMUJgHBY9PX1LdgSZ1PNQKX4SUB2B359yPs",
+      "GpHY4DEMNz7x6AJEXHVTvBZRVLf18fhJYDkNHw21qKs9",
+      "2QdhepnKRTLjjSqPL1PtKNwqrUkoLee5Gqs8bvZhRdMv",
+      "HjB8zKe5WuA1VkMf9S8VKEtfXZ3nagqMUxK3FgbSEBoN",
+      "9R6fj4MpzwcN3EwsGYzQF69PC5wUf9Fw6jE5oYVV5aTm",
+      "EJMUFKsm5xwqoEYmxRJeSuYjLsGY5dZA8hQCE8cYFhLY",
+      "J8r2dynpYQuD7G7WNV1uwV5rNyNbZNt9Jd6iF2yhwezx",
+      "GBijunwrnnxAEm8iiC4cxg/T6xM9Bj3F8/RX/SkuQDQ=",
+      "HSWJ3Uc7WtWTQFSQoHyKSVVJ8a9xBe6cKK6a7CfFRLUq",
+      "CQLJ5Lk6KcFMUnXFVhQ6KqZ9892kHeU1qEqS5K8ND9aE",
+      "GHuoeq9UnFBXHsx8Kep7P7VT3UMpk8D1EJw4n4ggbKpL",
+      "7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm",
+      "8HwVQDrkfWRFM8CeVSHwHpZMC25qKwjB4EJ83m5RT6J1",
+      "9vqYJjDUFecLL2xPUC4Rc7hyCtZ6iJ4mDiVZX7aFXoAe",
+      "3kTA1SQ9gL7oXy7pMqJ3MtU28cQQjPCYjhwBpRKVLVJw",
+      "9Y4yyUom7EiAf1BdTTXdJ2JGvJ2cVMWMLfFjB3fKdJnR",
+      "BCYwJcHhvBVJFxgdEsqGhP9Rm2SSQ5ciGgtX9qHJBNCi",
+      "F2Dfg4Z5xoVy7qxUmX7aAyNPCLn4xQS4WFgK4V6yTRMd",
+      "7TeVBs2xnXaBTicd3tWGBJLcGYawHJemX7g5yLUswunV",
+      "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut",
+      "5U4pM4YqxQBVQZHmjEUV3JJKWGGQDdkJPYsB2JHJTKh4",
+      "G8qcfeFqxwbCYE4jz8KBStLcbNVWEgASW9V8fGgXeYF9",
+      "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+      "AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA",
+      "CWKHXjNZLjJ3fHHNVLvQH6Ls9TpKHzgMa4PUXJ9EZ4zC",
+      "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
+      "8QaXeHBrShJTdtN1rWCccBxpSVK6DGZ7VdCFxmZx9fFT",
+      "6VK1ksrmYGMBWUUZfygGF8tHRGpNxQEWv8pfvzQHdyyc",
+      "JCKa82HNdEyaqXBAWzQpWfVfYpvKbmSJGKLfDy5kNQCd",
+      "DLBBqB22uJsrpvne7AXVUbn5cDxviGk9pBhm6HpFH2VQ",
+      "GfAU2bJFM5HA5hXtLCste5RYJb7Qw5ZAMySzjY3Nvek5",
+      "4abxpwLHZZbKn4d2AVNbS7fT1v3TV4JvyZxUbjnzRdqS",
+      "92bcELQgkYHQmARjXUTGD7GxYKQXRQQBNoWF2jLBnNQu",
+      "8qNqTaKKbdJPycEpg8TJYif7GB3zGQkbxWy2K7aUQxBY",
+      "Bcu9CFZyEjwuaFzRY2zuASN8P4HqL7QvYZFsXEKifA7c",
+      "Ek8uoHjADzbNk7RhSpeZxW9GF6qWbRGnqxspubEDdFv9",
+      "FkiATpmxzNLFdADcTV9yo65X7XF5jJPbRn9jBVHmL4BZ",
+      "5dPzZyyWfHQpdBJJPDsz6QD1SrHRPDT27fT1N9MqR5yn",
+      "DtAJhWHGCx4Eue8qYXd78XxzGQRa6R9BmAQUBKDSwjtJ",
+      "7FHzquT9yCMzD5hVQm8PzD46LuAnRZXGBv91o3YJ3xxy",
+      "EoTcMgcDRTJVZDMZWBoU6rhYHZfkNTVEAfz3uUJRcYGj",
+      "6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg",
+      "BJAqRBXh1jXAQzKbQhnMgjVzJboBJ2vhLrBAj6fKuFEp"
+    ],
+    "total_tokens": 104,
+    "unique_tokens": [
+      "BONK",
+      "FWZ2",
+      "USDC",
+      "ORCA",
+      "MPLU",
+      "9VMJ",
+      "USDH",
+      "J1TO",
+      "JSOL",
+      "SOL",
+      "JUPY",
+      "MANG",
+      "MSOL",
+      "BTC",
+      "7I5K",
+      "6DAZ",
+      "RAY",
+      "7KBN",
+      "POLI",
+      "STSOL",
+      "ATLA",
+      "HPSQ",
+      "BSO1",
+      "ETH",
+      "USDT"
+    ],
+    "dex_counts": {
+      "raydium": 27,
+      "orca": 25
+    },
+    "api_calls": 2,
     "errors": 0,
-    "db_writes": 0,
-    "start_time": "2025-05-01T12:10:59.975801",
-    "end_time": "2025-05-01T12:12:00.254120",
-    "elapsed_seconds": 60.27824282646179,
-    "pools_per_second": 0.0
+    "db_writes": 52,
+    "start_time": "2025-05-01T12:13:29.194891",
+    "end_time": "2025-05-01T12:14:44.313784",
+    "elapsed_seconds": 75.11872625350952,
+    "pools_per_second": 0.6922375097856585
   },
-  "test_duration": "60.28 seconds",
-  "timestamp": "2025-05-01T12:12:00.254128",
-  "sample_pools": []
+  "test_duration": "75.12 seconds",
+  "timestamp": "2025-05-01T12:14:44.313793",
+  "sample_pools": [
+    {
+      "id": "FkiATpmxzNLFdADcTV9yo65X7XF5jJPbRn9jBVHmL4BZ",
+      "name": "HPsQ-USDC Raydium LP",
+      "dex": "raydium",
+      "category": "Stablecoin",
+      "token1_symbol": "HPSQ",
+      "token2_symbol": "USDC",
+      "token1_address": "HPsQMvLYM98Yd6xeKYGXWP8QyDVvnkPQJTuQZK2hzoF9",
+      "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "token1_price": 0,
+      "token2_price": 1.0,
+      "tokens": [
+        {
+          "id": 1,
+          "symbol": "HPsQ",
+          "name": "HPsQ",
+          "decimals": 6,
+          "address": "HPsQMvLYM98Yd6xeKYGXWP8QyDVvnkPQJTuQZK2hzoF9",
+          "active": true,
+          "price": 0
+        },
+        {
+          "id": 2,
+          "symbol": "USDC",
+          "name": "USDC",
+          "decimals": 6,
+          "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "active": true,
+          "price": 0
+        }
+      ],
+      "poolId": "FkiATpmxzNLFdADcTV9yo65X7XF5jJPbRn9jBVHmL4BZ",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "liquidity": 20072116,
+      "volume_24h": 3010817.2,
+      "apr": 14.665538,
+      "fee": 0.0025,
+      "apr_24h": 14.665538,
+      "apr_7d": 13.198984,
+      "apr_30d": 12.465708,
+      "apr_change_24h": 0,
+      "apr_change_7d": -10.000001363741312,
+      "apr_change_30d": -5.5555488210304675,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-05-01T01:26:52.584Z",
+      "updated_at": "2025-05-01T01:26:52.584Z",
+      "extra_data": {
+        "ammId": "FkiATpmxzNLFdADcTV9yo65X7XF5jJPbRn9jBVHmL4BZ"
+      },
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "FkiATpmxzNLFdADcTV9yo65X7XF5jJPbRn9jBVHmL4BZ",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "id": 43040,
+        "poolId": 1,
+        "timestamp": "2025-05-01T12:11:01.199Z",
+        "tvl": 20072116,
+        "fee": 0.0025,
+        "apy24h": 14.665538,
+        "apy7d": 13.198984,
+        "apy30d": 12.465708,
+        "volumeUsd": 3010817.2,
+        "extraData": {
+          "ammId": "FkiATpmxzNLFdADcTV9yo65X7XF5jJPbRn9jBVHmL4BZ"
+        }
+      },
+      "api_response": {
+        "id": 1,
+        "poolId": "FkiATpmxzNLFdADcTV9yo65X7XF5jJPbRn9jBVHmL4BZ",
+        "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+        "source": "raydium",
+        "name": "HPsQ-USDC Raydium LP",
+        "active": true,
+        "metrics": {
+          "id": 43040,
+          "poolId": 1,
+          "timestamp": "2025-05-01T12:11:01.199Z",
+          "tvl": 20072116,
+          "fee": 0.0025,
+          "apy24h": 14.665538,
+          "apy7d": 13.198984,
+          "apy30d": 12.465708,
+          "volumeUsd": 3010817.2,
+          "extraData": {
+            "ammId": "FkiATpmxzNLFdADcTV9yo65X7XF5jJPbRn9jBVHmL4BZ"
+          }
+        }
+      }
+    },
+    {
+      "id": "GpHY4DEMNz7x6AJEXHVTvBZRVLf18fhJYDkNHw21qKs9",
+      "name": "JUPy-SOL Raydium LP",
+      "dex": "raydium",
+      "category": "Major",
+      "token1_symbol": "JUPY",
+      "token2_symbol": "SOL",
+      "token1_address": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+      "token2_address": "So11111111111111111111111111111111111111112",
+      "token1_price": 0,
+      "token2_price": 143.28,
+      "tokens": [
+        {
+          "id": 3,
+          "symbol": "JUPy",
+          "name": "JUPy",
+          "decimals": 6,
+          "address": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+          "active": true,
+          "price": 0
+        },
+        {
+          "id": 4,
+          "symbol": "SOL",
+          "name": "SOL",
+          "decimals": 6,
+          "address": "So11111111111111111111111111111111111111112",
+          "active": true,
+          "price": 0
+        }
+      ],
+      "poolId": "GpHY4DEMNz7x6AJEXHVTvBZRVLf18fhJYDkNHw21qKs9",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "liquidity": 19667528,
+      "volume_24h": 2950129.2,
+      "apr": 14.665538,
+      "fee": 0.0025,
+      "apr_24h": 14.665538,
+      "apr_7d": 13.198984,
+      "apr_30d": 12.465708,
+      "apr_change_24h": 0,
+      "apr_change_7d": -10.000001363741312,
+      "apr_change_30d": -5.5555488210304675,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-05-01T01:26:52.599Z",
+      "updated_at": "2025-05-01T01:26:52.599Z",
+      "extra_data": {
+        "ammId": "GpHY4DEMNz7x6AJEXHVTvBZRVLf18fhJYDkNHw21qKs9"
+      },
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "GpHY4DEMNz7x6AJEXHVTvBZRVLf18fhJYDkNHw21qKs9",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "id": 43092,
+        "poolId": 2,
+        "timestamp": "2025-05-01T12:11:59.143Z",
+        "tvl": 19667528,
+        "fee": 0.0025,
+        "apy24h": 14.665538,
+        "apy7d": 13.198984,
+        "apy30d": 12.465708,
+        "volumeUsd": 2950129.2,
+        "extraData": {
+          "ammId": "GpHY4DEMNz7x6AJEXHVTvBZRVLf18fhJYDkNHw21qKs9"
+        }
+      },
+      "api_response": {
+        "id": 2,
+        "poolId": "GpHY4DEMNz7x6AJEXHVTvBZRVLf18fhJYDkNHw21qKs9",
+        "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+        "source": "raydium",
+        "name": "JUPy-SOL Raydium LP",
+        "active": true,
+        "metrics": {
+          "id": 43092,
+          "poolId": 2,
+          "timestamp": "2025-05-01T12:11:59.143Z",
+          "tvl": 19667528,
+          "fee": 0.0025,
+          "apy24h": 14.665538,
+          "apy7d": 13.198984,
+          "apy30d": 12.465708,
+          "volumeUsd": 2950129.2,
+          "extraData": {
+            "ammId": "GpHY4DEMNz7x6AJEXHVTvBZRVLf18fhJYDkNHw21qKs9"
+          }
+        }
+      }
+    },
+    {
+      "id": "BCYwJcHhvBVJFxgdEsqGhP9Rm2SSQ5ciGgtX9qHJBNCi",
+      "name": "JUPy-USDC Raydium LP",
+      "dex": "raydium",
+      "category": "Stablecoin",
+      "token1_symbol": "JUPY",
+      "token2_symbol": "USDC",
+      "token1_address": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+      "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "token1_price": 0,
+      "token2_price": 1.0,
+      "tokens": [
+        {
+          "id": 3,
+          "symbol": "JUPy",
+          "name": "JUPy",
+          "decimals": 6,
+          "address": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+          "active": true,
+          "price": 0
+        },
+        {
+          "id": 2,
+          "symbol": "USDC",
+          "name": "USDC",
+          "decimals": 6,
+          "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "active": true,
+          "price": 0
+        }
+      ],
+      "poolId": "BCYwJcHhvBVJFxgdEsqGhP9Rm2SSQ5ciGgtX9qHJBNCi",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "liquidity": 18427824,
+      "volume_24h": 2764173.8,
+      "apr": 14.665538,
+      "fee": 0.0025,
+      "apr_24h": 14.665538,
+      "apr_7d": 13.198984,
+      "apr_30d": 12.465708,
+      "apr_change_24h": 0,
+      "apr_change_7d": -10.000001363741312,
+      "apr_change_30d": -5.5555488210304675,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-05-01T01:26:52.631Z",
+      "updated_at": "2025-05-01T01:26:52.631Z",
+      "extra_data": {
+        "ammId": "BCYwJcHhvBVJFxgdEsqGhP9Rm2SSQ5ciGgtX9qHJBNCi"
+      },
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "BCYwJcHhvBVJFxgdEsqGhP9Rm2SSQ5ciGgtX9qHJBNCi",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "id": 43041,
+        "poolId": 3,
+        "timestamp": "2025-05-01T12:11:01.204Z",
+        "tvl": 18427824,
+        "fee": 0.0025,
+        "apy24h": 14.665538,
+        "apy7d": 13.198984,
+        "apy30d": 12.465708,
+        "volumeUsd": 2764173.8,
+        "extraData": {
+          "ammId": "BCYwJcHhvBVJFxgdEsqGhP9Rm2SSQ5ciGgtX9qHJBNCi"
+        }
+      },
+      "api_response": {
+        "id": 3,
+        "poolId": "BCYwJcHhvBVJFxgdEsqGhP9Rm2SSQ5ciGgtX9qHJBNCi",
+        "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+        "source": "raydium",
+        "name": "JUPy-USDC Raydium LP",
+        "active": true,
+        "metrics": {
+          "id": 43041,
+          "poolId": 3,
+          "timestamp": "2025-05-01T12:11:01.204Z",
+          "tvl": 18427824,
+          "fee": 0.0025,
+          "apy24h": 14.665538,
+          "apy7d": 13.198984,
+          "apy30d": 12.465708,
+          "volumeUsd": 2764173.8,
+          "extraData": {
+            "ammId": "BCYwJcHhvBVJFxgdEsqGhP9Rm2SSQ5ciGgtX9qHJBNCi"
+          }
+        }
+      }
+    },
+    {
+      "id": "HSWJ3Uc7WtWTQFSQoHyKSVVJ8a9xBe6cKK6a7CfFRLUq",
+      "name": "BTC-SOL Raydium LP",
+      "dex": "raydium",
+      "category": "Major",
+      "token1_symbol": "BTC",
+      "token2_symbol": "SOL",
+      "token1_address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
+      "token2_address": "So11111111111111111111111111111111111111112",
+      "token1_price": 62873.15,
+      "token2_price": 143.28,
+      "tokens": [
+        {
+          "id": 5,
+          "symbol": "BTC",
+          "name": "BTC",
+          "decimals": 6,
+          "address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
+          "active": true,
+          "price": 0
+        },
+        {
+          "id": 4,
+          "symbol": "SOL",
+          "name": "SOL",
+          "decimals": 6,
+          "address": "So11111111111111111111111111111111111111112",
+          "active": true,
+          "price": 0
+        }
+      ],
+      "poolId": "HSWJ3Uc7WtWTQFSQoHyKSVVJ8a9xBe6cKK6a7CfFRLUq",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "liquidity": 18408086,
+      "volume_24h": 2761213,
+      "apr": 14.665538,
+      "fee": 0.0025,
+      "apr_24h": 14.665538,
+      "apr_7d": 13.198984,
+      "apr_30d": 12.465708,
+      "apr_change_24h": 0,
+      "apr_change_7d": -10.000001363741312,
+      "apr_change_30d": -5.5555488210304675,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-05-01T01:26:52.637Z",
+      "updated_at": "2025-05-01T01:26:52.637Z",
+      "extra_data": {
+        "ammId": "HSWJ3Uc7WtWTQFSQoHyKSVVJ8a9xBe6cKK6a7CfFRLUq"
+      },
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "HSWJ3Uc7WtWTQFSQoHyKSVVJ8a9xBe6cKK6a7CfFRLUq",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "id": 43042,
+        "poolId": 4,
+        "timestamp": "2025-05-01T12:11:01.211Z",
+        "tvl": 18408086,
+        "fee": 0.0025,
+        "apy24h": 14.665538,
+        "apy7d": 13.198984,
+        "apy30d": 12.465708,
+        "volumeUsd": 2761213,
+        "extraData": {
+          "ammId": "HSWJ3Uc7WtWTQFSQoHyKSVVJ8a9xBe6cKK6a7CfFRLUq"
+        }
+      },
+      "api_response": {
+        "id": 4,
+        "poolId": "HSWJ3Uc7WtWTQFSQoHyKSVVJ8a9xBe6cKK6a7CfFRLUq",
+        "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+        "source": "raydium",
+        "name": "BTC-SOL Raydium LP",
+        "active": true,
+        "metrics": {
+          "id": 43042,
+          "poolId": 4,
+          "timestamp": "2025-05-01T12:11:01.211Z",
+          "tvl": 18408086,
+          "fee": 0.0025,
+          "apy24h": 14.665538,
+          "apy7d": 13.198984,
+          "apy30d": 12.465708,
+          "volumeUsd": 2761213,
+          "extraData": {
+            "ammId": "HSWJ3Uc7WtWTQFSQoHyKSVVJ8a9xBe6cKK6a7CfFRLUq"
+          }
+        }
+      }
+    },
+    {
+      "id": "GfAU2bJFM5HA5hXtLCste5RYJb7Qw5ZAMySzjY3Nvek5",
+      "name": "RAY-USDT Raydium LP",
+      "dex": "raydium",
+      "category": "Stablecoin",
+      "token1_symbol": "RAY",
+      "token2_symbol": "USDT",
+      "token1_address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+      "token2_address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+      "token1_price": 1.88,
+      "token2_price": 1.0,
+      "tokens": [
+        {
+          "id": 6,
+          "symbol": "RAY",
+          "name": "RAY",
+          "decimals": 6,
+          "address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+          "active": true,
+          "price": 0
+        },
+        {
+          "id": 7,
+          "symbol": "USDT",
+          "name": "USDT",
+          "decimals": 6,
+          "address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+          "active": true,
+          "price": 0
+        }
+      ],
+      "poolId": "GfAU2bJFM5HA5hXtLCste5RYJb7Qw5ZAMySzjY3Nvek5",
+      "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+      "liquidity": 18195904,
+      "volume_24h": 2729385.5,
+      "apr": 14.665538,
+      "fee": 0.0025,
+      "apr_24h": 14.665538,
+      "apr_7d": 13.198984,
+      "apr_30d": 12.465708,
+      "apr_change_24h": 0,
+      "apr_change_7d": -10.000001363741312,
+      "apr_change_30d": -5.5555488210304675,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-05-01T01:26:52.650Z",
+      "updated_at": "2025-05-01T01:26:52.650Z",
+      "extra_data": {
+        "ammId": "GfAU2bJFM5HA5hXtLCste5RYJb7Qw5ZAMySzjY3Nvek5"
+      },
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "GfAU2bJFM5HA5hXtLCste5RYJb7Qw5ZAMySzjY3Nvek5",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "id": 43043,
+        "poolId": 5,
+        "timestamp": "2025-05-01T12:11:01.211Z",
+        "tvl": 18195904,
+        "fee": 0.0025,
+        "apy24h": 14.665538,
+        "apy7d": 13.198984,
+        "apy30d": 12.465708,
+        "volumeUsd": 2729385.5,
+        "extraData": {
+          "ammId": "GfAU2bJFM5HA5hXtLCste5RYJb7Qw5ZAMySzjY3Nvek5"
+        }
+      },
+      "api_response": {
+        "id": 5,
+        "poolId": "GfAU2bJFM5HA5hXtLCste5RYJb7Qw5ZAMySzjY3Nvek5",
+        "programId": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+        "source": "raydium",
+        "name": "RAY-USDT Raydium LP",
+        "active": true,
+        "metrics": {
+          "id": 43043,
+          "poolId": 5,
+          "timestamp": "2025-05-01T12:11:01.211Z",
+          "tvl": 18195904,
+          "fee": 0.0025,
+          "apy24h": 14.665538,
+          "apy7d": 13.198984,
+          "apy30d": 12.465708,
+          "volumeUsd": 2729385.5,
+          "extraData": {
+            "ammId": "GfAU2bJFM5HA5hXtLCste5RYJb7Qw5ZAMySzjY3Nvek5"
+          }
+        }
+      }
+    }
+  ]
 }
