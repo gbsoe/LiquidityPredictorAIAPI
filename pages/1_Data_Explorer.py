@@ -12,6 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.visualization import create_metrics_chart, create_liquidity_volume_chart, create_token_price_chart, create_pool_comparison_chart
 from utils.data_processor import get_pool_list, get_pool_metrics, get_pool_details, get_token_prices
 from database.db_operations import DBManager
+from api_key_manager import get_defi_api_key, render_api_key_form
 
 # Page configuration
 st.set_page_config(
@@ -37,6 +38,13 @@ st.image("https://images.unsplash.com/photo-1542744173-05336fcc7ad4",
 
 # Sidebar for pool selection
 st.sidebar.header("Pool Selection")
+
+# Add API key form
+render_api_key_form()
+
+# Show a warning if API key is missing
+if not get_defi_api_key():
+    st.sidebar.warning("⚠️ API key missing. Set your API key to access pool data.")
 
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_pool_list():
@@ -166,7 +174,17 @@ try:
         else:
             st.error(f"Error loading details for pool: {selected_pool_id}")
     else:
-        st.warning("No pools available. The system may be collecting initial data.")
+        # Check if API key is set
+        defi_api_key = get_defi_api_key()
+        if not defi_api_key:
+            st.error("No pools available - API key required.")
+            st.info("Please configure your DeFi API key using the form in the sidebar to access authentic pool data.")
+            
+            # Add a button to quickly scroll to the API key form
+            if st.button("Configure API Key"):
+                st.info("Please look at the API Key Configuration section in the sidebar.")
+        else:
+            st.warning("No pools available. The system may be collecting initial data.")
 except Exception as e:
     st.error(f"Error loading pool data: {str(e)}")
 
@@ -229,7 +247,12 @@ try:
         else:
             st.info("Select pools to compare.")
     else:
-        st.warning("No pools available for comparison.")
+        # Check if API key is set
+        defi_api_key = get_defi_api_key()
+        if not defi_api_key:
+            st.warning("No pools available for comparison - API key needed.")
+        else:
+            st.warning("No pools available for comparison.")
 except Exception as e:
     st.error(f"Error in pool comparison: {str(e)}")
 

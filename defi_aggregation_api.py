@@ -45,8 +45,12 @@ class DefiAggregationAPI:
         """
         # Use provided API key or get from environment
         self.api_key = api_key or os.getenv("DEFI_API_KEY")
+        
+        # Warn about missing API key but don't raise exception to avoid breaking the app
         if not self.api_key:
-            raise ValueError("API key is required. Set DEFI_API_KEY environment variable or provide api_key parameter.")
+            logger.warning("No DeFi API key provided. API calls may fail. Please configure API key via the UI or set the DEFI_API_KEY environment variable.")
+            # Use a placeholder value that will be detected later for proper error handling
+            self.api_key = "API_KEY_MISSING"
         
         # Configure base URL - using the base URL from the documentation
         # Allow override during testing/debugging

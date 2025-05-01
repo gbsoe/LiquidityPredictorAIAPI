@@ -817,6 +817,16 @@ def load_data():
     
     # 3. Default: Smart loading strategy using data service
     try:
+        # Check if we have a DeFi API key
+        defi_api_key = get_defi_api_key()
+        
+        if not defi_api_key:
+            st.warning("⚠️ API key is missing. Please configure your DeFi API key to access authentic pool data.")
+            st.info("Configure your API key in the sidebar under API Key Configuration")
+            
+            # Try to continue with potentially limited functionality
+            logger.warning("Attempting to load pool data with missing API key")
+        
         # Force refresh to get updated token symbols
         with st.spinner("Loading pool data with updated token information..."):
             pools = data_service.get_all_pools(force_refresh=True)
@@ -839,7 +849,10 @@ def load_data():
             
             return pools
         else:
-            st.warning("No pools available in data service")
+            if not defi_api_key:
+                st.error("No pools available. Please configure your DeFi API key in the sidebar.")
+            else:
+                st.warning("No pools available in data service. The API may be experiencing issues.")
     except Exception as e:
         logger.error(f"Error loading data from service: {str(e)}")
         logger.error(traceback.format_exc())
@@ -927,47 +940,18 @@ def main():
         # Add data management section with clear data options
         st.sidebar.header("Data Management")
         
-        # API Key Configuration Section
-        st.sidebar.markdown("### 🔑 API Key Configuration")
+        # Render API key configuration form
+        render_api_key_form()
         
-        # Get current DeFi API key from environment or session state
-        current_api_key = os.getenv("DEFI_API_KEY", "")
-        if not current_api_key and "defi_api_key" in st.session_state:
-            current_api_key = st.session_state["defi_api_key"]
+        # Show API connection status
+        defi_api_key = get_defi_api_key()
+        if defi_api_key:
+            st.sidebar.success("✓ DeFi API connection configured")
+        else:
+            st.sidebar.warning("⚠️ DeFi API key not configured")
+            st.sidebar.info("Please configure your API key to access authentic data")
         
-        # Create the API key input field
-        defi_api_key = st.sidebar.text_input(
-            "DeFi API Key",
-            value=current_api_key,
-            type="password",
-            help="Enter your DeFi API key to fetch authentic liquidity pool data",
-            key="defi_api_key_input"
-        )
-        
-        # Save API key to session state when it changes
-        if defi_api_key != current_api_key:
-            st.session_state["defi_api_key"] = defi_api_key
-        
-        # Add a save button to confirm and apply the API key
-        if st.sidebar.button("💾 Save API Key", use_container_width=True):
-            # Store in session state
-            st.session_state["defi_api_key"] = defi_api_key
-            # Set it in the current environment for this session
-            os.environ["DEFI_API_KEY"] = defi_api_key
-            
-            if defi_api_key:
-                st.sidebar.success("✅ API key saved successfully!")
-                # Trigger a data refresh with the new API key
-                st.session_state['try_live_data'] = True
-                st.session_state['use_defi_api'] = True
-                st.session_state['generate_sample_data'] = False
-                
-                # Show info message and reload
-                st.info("API key saved. Attempting to fetch data with new key...")
-                time.sleep(1)
-                st.rerun()
-            else:
-                st.sidebar.warning("⚠️ Please enter a valid API key")
+        # API Key Configuration Section is now handled by the render_api_key_form() function
         
         # Show live data option with a badge
         st.sidebar.markdown("### 📊 Data Sources")
