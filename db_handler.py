@@ -1399,6 +1399,9 @@ def save_pool_to_database(pool_data: dict) -> bool:
     Save a pool to the database. This is useful for adding pools that were fetched directly
     from the API but not yet in our database, especially for watchlist pools.
     
+    This function will update an existing pool if it's already in the database or create
+    a new pool if it doesn't exist.
+    
     Args:
         pool_data: Dictionary with pool data 
         
