@@ -61,7 +61,9 @@ class CoinGeckoAPI:
             "RAY": "raydium",
             "ORCA": "orca",
             "MSOL": "marinade-staked-sol",
+            "mSOL": "marinade-staked-sol", 
             "STSOL": "lido-staked-sol",
+            "stSOL": "lido-staked-sol",
             "WSOL": "wrapped-solana",
             "SRM": "serum",
             "MNGO": "mango-markets",
@@ -116,7 +118,12 @@ class CoinGeckoAPI:
             "jupyiwryjfskupihA7hker8vutaefosybkedznsdvcn".lower(): "jupiter",
             "hpsqmvlym98yd6xekygxwp8qydvvnkpqjttuqzk2hzof9".lower(): "hedgehog-protocol", 
             "mangoczj36ajzykwvj3vny4gtonjfvenjmvvwaxlac".lower(): "mango-markets",
-            "jsol21f4hvbzfgxvjw4rtrnuhvqyjyd5axkpbgm".lower(): "jsol"
+            "jsol21f4hvbzfgxvjw4rtrnuhvqyjyd5axkpbgm".lower(): "jsol",
+            # Additional specific token addresses
+            "msolzycxhdygdzu16g5qsh3i5k3z3kzk7ytfqcjm7so".lower(): "marinade-staked-sol",
+            "msolzycxhdygdzu16g5qsh3i5k3z3kzk7ytfqcjm7so".upper(): "marinade-staked-sol",
+            "7dhbwxmci3dt8ufywyzweblxgycu7y3il6trkn1y7arj".lower(): "lido-staked-sol",
+            "7dhbwxmci3dt8ufywyzweblxgycu7y3il6trkn1y7arj".upper(): "lido-staked-sol"
         }
     
     def _rate_limit_request(self):

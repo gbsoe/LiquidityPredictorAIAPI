@@ -867,6 +867,17 @@ class TokenDataService:
             symbol = processed.get("symbol", "").upper()
             if symbol and symbol != "UNKNOWN" and processed.get("price", 0) == 0:
                 try:
+                    # Handle special token cases
+                    # For MSOL and STSOL, add special handling since these are common problematic tokens
+                    if symbol in ["MSOL", "mSOL"]:
+                        # Set explicit coingecko_id for Marinade Staked SOL
+                        processed["coingecko_id"] = "marinade-staked-sol"
+                        logger.info(f"Using explicit CoinGecko ID mapping for {symbol}: marinade-staked-sol")
+                    elif symbol in ["STSOL", "stSOL"]:
+                        # Set explicit coingecko_id for Lido Staked SOL
+                        processed["coingecko_id"] = "lido-staked-sol"
+                        logger.info(f"Using explicit CoinGecko ID mapping for {symbol}: lido-staked-sol")
+                    
                     # Skip CoinGecko if API client is not available
                     if coingecko_api is None:
                         logger.warning(f"CoinGecko API not available, skipping price lookup for {symbol}")
@@ -878,15 +889,20 @@ class TokenDataService:
                         
                         if coingecko_id:
                             # Use the ID directly if available
+                            logger.info(f"Fetching price for {symbol} using CoinGecko ID: {coingecko_id}")
                             result = coingecko_api.get_price([coingecko_id], "usd")
                             if result and coingecko_id in result:
                                 price = result[coingecko_id].get("usd", 0)
                                 logger.info(f"Retrieved price for {symbol} using coingecko_id {coingecko_id}: {price}")
+                            else:
+                                logger.warning(f"No price data returned for {symbol} with ID {coingecko_id}")
                         
                         # If no price or no coingecko_id, try by symbol
                         if not price or price == 0:
                             logger.info(f"Fetching price for {symbol} from CoinGecko by symbol")
                             price = coingecko_api.get_token_price_by_symbol(symbol)
+                            if price and price > 0:
+                                logger.info(f"Retrieved price for {symbol} by symbol lookup: {price}")
                         
                         # If still no price, try by address
                         if (not price or price == 0) and processed.get("address"):
@@ -894,6 +910,31 @@ class TokenDataService:
                             if address and isinstance(address, str):
                                 logger.info(f"Fetching price for {symbol} from CoinGecko by address: {address}")
                                 price = coingecko_api.get_token_price_by_address(address)
+                                if price and price > 0:
+                                    logger.info(f"Retrieved price for {symbol} by address lookup: {price}")
+                    
+                    # Special case for staked SOL tokens: if price still not available, 
+                    # use SOL price and slightly adjust it
+                    if (not price or price == 0) and symbol in ["MSOL", "mSOL", "STSOL", "stSOL"]:
+                        logger.info(f"Trying to estimate {symbol} price based on SOL price")
+                        sol_price = 0
+                        
+                        # Try to get SOL price from cache or API
+                        if "SOL" in self.token_cache and self.token_cache["SOL"].get("price", 0) > 0:
+                            sol_price = self.token_cache["SOL"].get("price", 0)
+                            logger.info(f"Using cached SOL price for {symbol} estimation: {sol_price}")
+                        elif coingecko_api is not None:
+                            sol_price = coingecko_api.get_token_price_by_symbol("SOL")
+                            logger.info(f"Using fresh SOL price for {symbol} estimation: {sol_price}")
+                            
+                        # Apply appropriate multiplier based on token
+                        if sol_price > 0:
+                            if symbol in ["MSOL", "mSOL"]:
+                                price = sol_price * 1.08  # MSOL typically has ~8% premium
+                                logger.info(f"Estimated MSOL price from SOL: {price}")
+                            elif symbol in ["STSOL", "stSOL"]:
+                                price = sol_price * 1.06  # STSOL typically has ~6% premium
+                                logger.info(f"Estimated STSOL price from SOL: {price}")
                     
                     # Update price if found
                     if price is not None and price > 0:
