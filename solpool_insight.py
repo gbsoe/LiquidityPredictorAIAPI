@@ -2557,27 +2557,51 @@ def main():
                         pool_tokens.add(symbol)
                         # Store basic metadata
                         if symbol not in token_metadata:
-                            token_metadata[symbol] = {
-                                'symbol': symbol,
-                                'name': 'Unknown',
-                                'address': row.get('token1_address', ''),
-                                'decimals': 0,
-                                'price': row.get('token1_price', 0),
-                                'active': True
-                            }
+                            # First try to get better metadata from token service
+                            token_info = token_service.get_token_metadata(symbol)
+                            if token_info and token_info.get('name'):
+                                token_metadata[symbol] = {
+                                    'symbol': symbol,
+                                    'name': token_info.get('name', 'Unknown'),
+                                    'address': token_info.get('address', row.get('token1_address', '')),
+                                    'decimals': token_info.get('decimals', 0),
+                                    'price': token_info.get('price', row.get('token1_price', 0)),
+                                    'active': True
+                                }
+                            else:
+                                token_metadata[symbol] = {
+                                    'symbol': symbol,
+                                    'name': 'Unknown',
+                                    'address': row.get('token1_address', ''),
+                                    'decimals': 0,
+                                    'price': row.get('token1_price', 0),
+                                    'active': True
+                                }
                     if isinstance(row["token2_symbol"], str) and len(row["token2_symbol"]) > 0:
                         symbol = row["token2_symbol"].upper() 
                         pool_tokens.add(symbol)
                         # Store basic metadata
                         if symbol not in token_metadata:
-                            token_metadata[symbol] = {
-                                'symbol': symbol,
-                                'name': 'Unknown',
-                                'address': row.get('token2_address', ''),
-                                'decimals': 0,
-                                'price': row.get('token2_price', 0),
-                                'active': True
-                            }
+                            # First try to get better metadata from token service
+                            token_info = token_service.get_token_metadata(symbol)
+                            if token_info and token_info.get('name'):
+                                token_metadata[symbol] = {
+                                    'symbol': symbol,
+                                    'name': token_info.get('name', 'Unknown'),
+                                    'address': token_info.get('address', row.get('token2_address', '')),
+                                    'decimals': token_info.get('decimals', 0),
+                                    'price': token_info.get('price', row.get('token2_price', 0)),
+                                    'active': True
+                                }
+                            else:
+                                token_metadata[symbol] = {
+                                    'symbol': symbol,
+                                    'name': 'Unknown',
+                                    'address': row.get('token2_address', ''),
+                                    'decimals': 0,
+                                    'price': row.get('token2_price', 0),
+                                    'active': True
+                                }
             
             # Store the token metadata in session state for later use
             st.session_state['token_metadata'] = token_metadata
@@ -2653,14 +2677,21 @@ def main():
             
             # Check if we have token metadata
             if 'token_metadata' in st.session_state and st.session_state['token_metadata']:
-                # Create a DataFrame from the token metadata
+                # Fetch real token prices from CoinGecko
+                all_symbols = list(st.session_state['token_metadata'].keys())
+                with st.spinner("Fetching real-time token prices..."):
+                    token_prices = get_multiple_prices(all_symbols)
+                
+                # Create a DataFrame from the token metadata with real prices
                 token_metadata_df = pd.DataFrame([
                     {
                         "Symbol": metadata['symbol'],
                         "Name": metadata['name'],
                         "Address": metadata['address'][:10] + "..." if len(metadata['address']) > 10 else metadata['address'],
                         "Decimals": metadata['decimals'],
-                        "Price": f"${metadata['price']:.6f}" if metadata['price'] < 0.01 else f"${metadata['price']:.2f}",
+                        # Use real price from CoinGecko if available
+                        "Price": f"${token_prices.get(symbol, 0):.6f}" if token_prices.get(symbol, 0) < 0.01 else 
+                                f"${token_prices.get(symbol, 0):.2f}" if token_prices.get(symbol, 0) > 0 else "Unknown",
                         "Active": "✓" if metadata['active'] else "✗",
                         "Full Address": metadata['address']  # Hidden column for reference
                     }
