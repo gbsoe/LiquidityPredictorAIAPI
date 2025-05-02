@@ -95,11 +95,12 @@ class TokenDataService:
             tokens_loaded = 0
             tokens_with_address = 0
             tokens_with_name = 0
+            tokens_with_price = 0
             
             # Process each token and add to the cache
             for token in all_tokens:
                 symbol = token.get("symbol", "").upper()
-                # Only cache if we have both a symbol and address
+                # Only cache if we have a symbol
                 if symbol:
                     # Process for consistent format
                     processed_token = self._process_token_data(token)
@@ -117,19 +118,31 @@ class TokenDataService:
                     elif (not current.get("address") and processed_token.get("address")) or \
                          (not current.get("name") and processed_token.get("name")):
                         should_update = True
+                    # If we have a price where we didn't before 
+                    elif (current.get("price", 0) == 0 and processed_token.get("price", 0) > 0):
+                        should_update = True
                     
                     if should_update:
                         self.token_cache[symbol] = processed_token
                         tokens_loaded += 1
+                    
+                    # Also cache by address if available for faster address-based lookups
+                    address = processed_token.get("address", "")
+                    if address and address.strip():
+                        # Create an address-keyed entry for direct address lookups
+                        self.token_cache[address] = processed_token
                     
                     # Track data completeness
                     if processed_token.get("address"):
                         tokens_with_address += 1
                     if processed_token.get("name"):
                         tokens_with_name += 1
+                    if processed_token.get("price", 0) > 0:
+                        tokens_with_price += 1
             
             logger.info(f"Successfully preloaded {tokens_loaded} tokens from API")
-            logger.info(f"Token data completeness: {tokens_with_address}/{tokens_loaded} have addresses, {tokens_with_name}/{tokens_loaded} have names")
+            logger.info(f"Token data completeness: {tokens_with_address}/{tokens_loaded} have addresses, " + 
+                       f"{tokens_with_name}/{tokens_loaded} have names, {tokens_with_price}/{tokens_loaded} have prices")
             
             # Try to fetch any missing tokens directly
             self._fetch_missing_common_tokens()
@@ -588,15 +601,23 @@ class TokenDataService:
                     address = token_data[address_key]
                     break
             
-            # Get token name with proper validation
+            # Get token name with proper validation and formatting
             raw_name = token_data.get("name", "")
-            name = raw_name.strip() if raw_name else f"{symbol} Token"
+            if raw_name:
+                name = raw_name.strip()
+            elif symbol and symbol != "UNKNOWN":
+                # If no name but symbol exists, create a readable name from symbol
+                name = f"{symbol} Token"
+            else:
+                # Last resort fallback
+                name = "Unknown Token"
             
             # Get decimal places with validation
             try:
                 decimals = int(token_data.get("decimals", 0))
             except (ValueError, TypeError):
-                decimals = 0
+                # Default to 6 decimals for Solana SPL tokens if value is invalid
+                decimals = 6
                 
             # Get price with validation
             try:
@@ -675,9 +696,10 @@ class TokenDataService:
                 "symbol": "UNKNOWN",
                 "name": "Unknown Token",
                 "address": "",
-                "decimals": 0,
+                "decimals": 6,  # Default to 6 decimals for Solana SPL tokens
                 "logo": "",
                 "price": 0,
+                "chain": "solana",
                 "last_updated": datetime.now().isoformat(),
             }
     
