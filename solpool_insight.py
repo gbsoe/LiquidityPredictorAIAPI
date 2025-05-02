@@ -134,10 +134,70 @@ def initialize_continuous_data_collection():
         logger.error(traceback.format_exc())
         return False
         
+# Enhanced token preloading function
+def preload_tokens_background():
+    """
+    Preload token data in a background thread to keep UI responsive.
+    This function fetches all token data from the API and CoinGecko
+    without blocking the UI thread.
+    """
+    try:
+        logger.info("Starting token preloading in background thread")
+        
+        # Get token service from session state or create new instance
+        token_service = st.session_state.get("token_service")
+        if not token_service:
+            token_service = get_token_service()
+            
+        # Preload all tokens
+        token_service.preload_all_tokens()
+        
+        # Fetch prices for common tokens
+        common_tokens = [
+            "SOL", "USDC", "USDT", "ETH", "BTC", "MSOL", "BONK", "RAY", "ORCA", 
+            "STSOL", "ATLA", "POLI", "JSOL", "JUPY", "HPSQ", "MNGO", "SAMO"
+        ]
+        
+        # Process in smaller batches to avoid rate limits
+        batch_size = 5
+        for i in range(0, len(common_tokens), batch_size):
+            batch = common_tokens[i:i+batch_size]
+            logger.info(f"Fetching prices for token batch: {batch}")
+            
+            for symbol in batch:
+                try:
+                    # Get token data to ensure it's in cache
+                    token_data = token_service.get_token_data(symbol, force_refresh=True)
+                    logger.info(f"Preloaded token data for {symbol}")
+                    
+                    # Sleep briefly to avoid hitting API rate limits
+                    time.sleep(1)
+                except Exception as e:
+                    logger.warning(f"Error preloading token {symbol}: {str(e)}")
+            
+            # Add a delay between batches
+            time.sleep(2)
+            
+        logger.info("Completed token preloading in background")
+    except Exception as e:
+        logger.error(f"Error in background token preloading: {str(e)}")
+
 # Run initialization if this is the first time
 if 'initialized_data_collection' not in st.session_state:
     perf_monitor.start_tracking("data_collection_init")
     st.session_state.initialized_data_collection = initialize_continuous_data_collection()
+    
+    # Start token preloading in a background thread
+    try:
+        token_thread = threading.Thread(target=preload_tokens_background, daemon=True)
+        token_thread.start()
+        logger.info("Started background thread for token preloading")
+    except Exception as e:
+        logger.error(f"Failed to start token preloading thread: {str(e)}")
+        # Fallback to synchronous loading if threading fails
+        if 'token_service' in st.session_state:
+            st.session_state.token_service.preload_all_tokens()
+    
     perf_monitor.stop_tracking("data_collection_init")
     perf_monitor.mark_checkpoint("data_loaded")
 
