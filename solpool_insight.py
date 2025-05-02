@@ -2677,10 +2677,47 @@ def main():
             
             # Check if we have token metadata
             if 'token_metadata' in st.session_state and st.session_state['token_metadata']:
-                # Fetch real token prices from CoinGecko
+                # Fetch real token prices from CoinGecko - with enhanced error handling and logging
                 all_symbols = list(st.session_state['token_metadata'].keys())
+                
+                # Show debug info for development - remove in production
+                st.write(f"Fetching prices for {len(all_symbols)} tokens...")
+                
                 with st.spinner("Fetching real-time token prices..."):
+                    # Let's fetch a few priority tokens explicitly first to ensure we have some real price data
+                    priority_tokens = ["SOL", "BTC", "ETH", "USDC", "MSOL", "STSOL", "RAY", "ORCA", "BONK"]
+                    
+                    # First get our priority token prices directly from CoinGecko API
+                    from coingecko_api import CoinGeckoAPI
+                    cg_api = CoinGeckoAPI()
+                    
+                    # Create mapping of symbols to CoinGecko IDs
+                    from token_price_service import DEFAULT_TOKEN_MAPPING
+                    priority_prices = {}
+                    
+                    # Fetch prices for mapped tokens
+                    available_tokens = [t for t in priority_tokens if t in DEFAULT_TOKEN_MAPPING]
+                    
+                    if available_tokens:
+                        ids = [DEFAULT_TOKEN_MAPPING[t] for t in available_tokens]
+                        try:
+                            cg_prices = cg_api.get_price(ids, "usd")
+                            for token in available_tokens:
+                                cg_id = DEFAULT_TOKEN_MAPPING[token]
+                                if cg_id in cg_prices and "usd" in cg_prices[cg_id]:
+                                    priority_prices[token] = cg_prices[cg_id]["usd"]
+                        except Exception as e:
+                            st.warning(f"Error fetching priority token prices: {e}")
+                    
+                    # Now get the rest of the tokens using the standard method
                     token_prices = get_multiple_prices(all_symbols)
+                    
+                    # Merge in our priority prices
+                    token_prices.update(priority_prices)
+                    
+                    # Show debug info - number of tokens with prices
+                    tokens_with_prices = sum(1 for p in token_prices.values() if p > 0)
+                    st.write(f"Found prices for {tokens_with_prices} out of {len(all_symbols)} tokens")
                 
                 # Create a DataFrame from the token metadata with real prices
                 token_metadata_df = pd.DataFrame([
