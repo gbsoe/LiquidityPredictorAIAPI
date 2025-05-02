@@ -51,6 +51,7 @@ class CoinGeckoAPI:
     def _init_common_token_mappings(self):
         """Initialize mappings for common token symbols to CoinGecko IDs."""
         self.token_id_cache = {
+            # Major tokens
             "SOL": "solana",
             "BTC": "bitcoin",
             "ETH": "ethereum",
@@ -60,17 +61,27 @@ class CoinGeckoAPI:
             "RAY": "raydium",
             "ORCA": "orca",
             "MSOL": "marinade-staked-sol",
-            "ATLAS": "star-atlas",
-            "UXD": "uxd-stablecoin",
             "STSOL": "lido-staked-sol",
             "WSOL": "wrapped-solana",
             "SRM": "serum",
             "MNGO": "mango-markets",
-            "SLND": "solend",
             "SAMO": "samoyedcoin",
-            "JUP": "jupiter",
-            "JUPY": "jupiter",   # Alternative symbol for Jupiter
+            
+            # Specific token variations
+            "JUP": "jupiter-exchange", 
+            "JUPY": "jupiter",
+            "HPSQ": "hedgehog-protocol",
             "MANGO": "mango-markets",
+            "ATLAS": "star-atlas",
+            "POLIS": "star-atlas-dao",
+            "ATLA": "atlas-navi",
+            "BSO1": "bastion-protocol",
+            "JSOL": "jsol",
+            "7I5K": "7i5kld8tev",
+            "7KBN": "7kbn",
+            "9VMJ": "9vmj-token",
+            "UXD": "uxd-stablecoin",
+            "SLND": "solend",
             "RENDER": "render-token",
             "REN": "republic-protocol",
             "LDO": "lido-dao",
@@ -80,6 +91,32 @@ class CoinGeckoAPI:
             "COPE": "cope",
             "FIDA": "bonfida",
             "WBTC": "wrapped-bitcoin",
+            "FWZ2": "fluxwave-ecosystem",
+            "J1TO": "j1tax",
+            "MANG": "mangoman",
+            "MPLU": "mplug"
+        }
+        
+        # Initialize address-to-ID mapping for Solana tokens
+        self.address_to_id = {
+            # Make sure addresses are lowercase for consistent lookup
+            "so11111111111111111111111111111111111111112": "solana",
+            "epjfwdd5aufqssqem2qn1xzybapC8G4wegGkzwyTDt1v".lower(): "usd-coin",
+            "es9vmfrzacermjfrf4h2fyd4kconky11mcce8bennybe".lower(): "tether",
+            "dezxaz8z7pnrnrjjz3wxborgixca6xjnb7yab1ppb263".lower(): "bonk",
+            "orcaektdk7lkz57vaayr9qensvepfiu6qemu1kektze".lower(): "orca", 
+            "4k3dyjzvzp8emzwuxbbcjevwskkk59s5icnly3qrkx6r".lower(): "raydium",
+            "msolzycxhdygdzu16g5qsh3i5k3z3kzk7ytfqcjm7so".lower(): "marinade-staked-sol",
+            "7dhbwxmci3dt8ufywyzwebLxgycu7y3il6trkn1y7arj".lower(): "lido-staked-sol",
+            "7vfcxtuxsx5wjv5jadk17duj4ksgau7utnkj4b963voxs".lower(): "ethereum",
+            "9n4nbm75f5ui33zbpyxn59ewsge8cgshtateth5yFej9e".lower(): "bitcoin",
+            "atlasxmbpqxbuybxpsv97usa3fpqyeqzqbuhgifcusxx".lower(): "star-atlas",
+            "poliswxnnrwc6obu1vhiukQzfjGl4xdsu4g9qjz9qvk".lower(): "star-atlas-dao",
+            "7xkxtg2cw87d97txjsdhpbd5jbkheTqa83tzrujosGasu".lower(): "samoyedcoin",
+            "jupyiwryjfskupihA7hker8vutaefosybkedznsdvcn".lower(): "jupiter",
+            "hpsqmvlym98yd6xekygxwp8qydvvnkpqjttuqzk2hzof9".lower(): "hedgehog-protocol", 
+            "mangoczj36ajzykwvj3vny4gtonjfvenjmvvwaxlac".lower(): "mango-markets",
+            "jsol21f4hvbzfgxvjw4rtrnuhvqyjyd5axkpbgm".lower(): "jsol"
         }
     
     def _rate_limit_request(self):
@@ -341,7 +378,22 @@ class CoinGeckoAPI:
         if not address:
             logger.warning("Empty address passed to get_token_price_by_address")
             return None
+        
+        # First, check if we have the address in our address-to-id mapping
+        address_lower = address.lower()
+        if hasattr(self, 'address_to_id') and address_lower in self.address_to_id:
+            token_id = self.address_to_id[address_lower]
+            logger.info(f"Using cached token ID mapping for address {address}: {token_id}")
             
+            # Get price using the token ID
+            result = self.get_price([token_id], vs_currency)
+            if result and token_id in result:
+                price_data = result[token_id]
+                price = price_data.get(vs_currency, 0)
+                logger.info(f"Retrieved price for token address {address} via ID {token_id}: {price} {vs_currency.upper()}")
+                return price
+        
+        # If we don't have a mapping or it failed, try the direct API endpoint
         endpoint = f"simple/token_price/{platform}?contract_addresses={address}&vs_currencies={vs_currency}"
         
         result = self._make_request(endpoint)
