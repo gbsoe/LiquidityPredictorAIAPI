@@ -162,6 +162,12 @@ class TokenDataService:
                     if token_data:
                         processed = self._process_token_data(token_data)
                         self.token_cache[symbol] = processed
+                        
+                        # Also cache by address if available for direct lookups
+                        address = processed.get("address", "")
+                        if address and address.strip():
+                            self.token_cache[address] = processed
+                            
                         logger.info(f"Directly fetched missing token: {symbol}")
                 except Exception as e:
                     logger.warning(f"Could not fetch missing token {symbol}: {e}")
@@ -277,6 +283,11 @@ class TokenDataService:
         # Add default tokens to cache
         for symbol, token_data in default_tokens.items():
             self.token_cache[symbol] = token_data
+            
+            # Also cache by address for direct lookups
+            address = token_data.get("address", "")
+            if address and address.strip():
+                self.token_cache[address] = token_data
         
         logger.info(f"Initialized default token cache with {len(default_tokens)} tokens")
     
@@ -335,6 +346,11 @@ class TokenDataService:
                 processed_data["last_updated"] = datetime.now().isoformat()
                 self.token_cache[token_symbol] = processed_data
                 
+                # Also cache by address if available for faster lookups
+                token_address = processed_data.get("address", "")
+                if token_address:
+                    self.token_cache[token_address] = processed_data
+                
                 self.stats["last_update"] = datetime.now().isoformat()
                 
                 return processed_data
@@ -357,6 +373,11 @@ class TokenDataService:
                             processed_data["last_updated"] = datetime.now().isoformat()
                             self.token_cache[token_symbol] = processed_data
                             
+                            # Also cache by address if available for faster lookups
+                            token_address = processed_data.get("address", "")
+                            if token_address:
+                                self.token_cache[token_address] = processed_data
+                            
                             self.stats["last_update"] = datetime.now().isoformat()
                             logger.info(f"Found token {token_symbol} in tokens list")
                             
@@ -377,11 +398,12 @@ class TokenDataService:
         # Return basic info if token not found
         return {
             "symbol": token_symbol,
-            "name": token_symbol,
+            "name": f"{token_symbol} Token",
             "address": "",
-            "decimals": 0,
+            "decimals": 6,  # Default to 6 decimals for Solana SPL tokens
             "logo": "",
             "price": 0,
+            "chain": "solana",
             "last_updated": datetime.now().isoformat(),
         }
     
@@ -396,23 +418,37 @@ class TokenDataService:
         Returns:
             Token data or a fallback structure if not found
         """
-        if not address:
+        if not address or not isinstance(address, str):
             return {
                 "symbol": "UNKNOWN",
                 "name": "Unknown Token",
                 "address": "",
-                "decimals": 0,
+                "decimals": 6,  # Default to 6 decimals for Solana SPL tokens
                 "logo": "",
                 "price": 0,
+                "chain": "solana",
                 "last_updated": datetime.now().isoformat(),
             }
             
-        # Look in cache first
-        for token_data in self.token_cache.values():
-            if token_data.get("address", "").lower() == address.lower():
-                if not force_refresh:
+        # Update stats
+        self.stats["total_requests"] += 1
+            
+        # First check if address is directly in cache (from our enhanced preloading)
+        if not force_refresh and address in self.token_cache:
+            self.stats["cache_hits"] += 1
+            return self.token_cache[address]
+            
+        # Then check by comparing addresses in cache
+        if not force_refresh:
+            for symbol, token_data in self.token_cache.items():
+                if token_data.get("address", "").lower() == address.lower():
+                    self.stats["cache_hits"] += 1
+                    # Also add to cache with address as key for future lookups
+                    self.token_cache[address] = token_data
                     return token_data
-                break
+        
+        # Cache miss, increment stats
+        self.stats["cache_misses"] += 1
         
         # If not in cache or forcing refresh, try API directly
         try:
@@ -451,6 +487,9 @@ class TokenDataService:
                             symbol = processed_data.get("symbol", "UNKNOWN")
                             self.token_cache[symbol] = processed_data
                             
+                            # Also cache by address for faster lookups next time
+                            self.token_cache[address] = processed_data
+                            
                             self.stats["last_update"] = datetime.now().isoformat()
                             logger.info(f"Found token with address {address} in tokens list")
                             
@@ -468,9 +507,10 @@ class TokenDataService:
             "symbol": "UNKNOWN",
             "name": "Unknown Token",
             "address": address,
-            "decimals": 0,
+            "decimals": 6,  # Default to 6 decimals for Solana SPL tokens
             "logo": "",
             "price": 0,
+            "chain": "solana",
             "last_updated": datetime.now().isoformat(),
         }
     
