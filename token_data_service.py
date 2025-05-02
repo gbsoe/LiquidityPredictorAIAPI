@@ -90,21 +90,34 @@ class TokenDataService:
             if not all_tokens or not isinstance(all_tokens, list):
                 logger.warning("Empty or invalid response when preloading tokens")
                 return
+                
+            logger.info(f"Retrieved {len(all_tokens)} tokens from API for preloading")
             
             # Track statistics for token data completeness
             tokens_loaded = 0
             tokens_with_address = 0
             tokens_with_name = 0
             tokens_with_price = 0
+            address_cached = 0
             
-            # Process each token and add to the cache
+            # First pass: Process all tokens and add them all to the cache
             for token in all_tokens:
-                symbol = token.get("symbol", "").upper()
-                # Only cache if we have a symbol
-                if symbol:
-                    # Process for consistent format
-                    processed_token = self._process_token_data(token)
+                # Skip invalid tokens
+                if not isinstance(token, dict):
+                    continue
                     
+                symbol = token.get("symbol", "").upper()
+                address = token.get("address", "")
+                
+                # Skip tokens without either symbol or address
+                if not symbol and not address:
+                    continue
+                
+                # Process for consistent format
+                processed_token = self._process_token_data(token)
+                
+                # Update cache by symbol if available
+                if symbol:
                     # Only update cache if we have more data than before
                     current = self.token_cache.get(symbol, {})
                     
@@ -118,31 +131,33 @@ class TokenDataService:
                     elif (not current.get("address") and processed_token.get("address")) or \
                          (not current.get("name") and processed_token.get("name")):
                         should_update = True
-                    # If we have a price where we didn't before 
-                    elif (current.get("price", 0) == 0 and processed_token.get("price", 0) > 0):
+                    # If we have a price and the current one doesn't
+                    elif current.get("price", 0) == 0 and processed_token.get("price", 0) > 0:
                         should_update = True
-                    
+                        
                     if should_update:
                         self.token_cache[symbol] = processed_token
                         tokens_loaded += 1
+                        
+                # Always cache by address if available, regardless of symbol
+                address = processed_token.get("address", "")
+                if address and address.strip():
+                    # Add to address-keyed cache
+                    self.token_cache[address] = processed_token
+                    address_cached += 1
                     
-                    # Also cache by address if available for faster address-based lookups
-                    address = processed_token.get("address", "")
-                    if address and address.strip():
-                        # Create an address-keyed entry for direct address lookups
-                        self.token_cache[address] = processed_token
-                    
-                    # Track data completeness
-                    if processed_token.get("address"):
-                        tokens_with_address += 1
+                    # Update stats
                     if processed_token.get("name"):
                         tokens_with_name += 1
                     if processed_token.get("price", 0) > 0:
                         tokens_with_price += 1
+                    tokens_with_address += 1
             
-            logger.info(f"Successfully preloaded {tokens_loaded} tokens from API")
-            logger.info(f"Token data completeness: {tokens_with_address}/{tokens_loaded} have addresses, " + 
-                       f"{tokens_with_name}/{tokens_loaded} have names, {tokens_with_price}/{tokens_loaded} have prices")
+            # Report results including address-cached tokens
+            logger.info(f"Successfully preloaded {tokens_loaded} tokens by symbol from API")
+            logger.info(f"Additionally cached {address_cached} tokens by address")
+            logger.info(f"Token data completeness: {tokens_with_address}/{tokens_loaded+address_cached} have addresses, " + 
+                       f"{tokens_with_name}/{tokens_loaded+address_cached} have names, {tokens_with_price}/{tokens_loaded+address_cached} have prices")
             
             # Try to fetch any missing tokens directly
             self._fetch_missing_common_tokens()
@@ -436,6 +451,12 @@ class TokenDataService:
         # First check if address is directly in cache (from our enhanced preloading)
         if not force_refresh and address in self.token_cache:
             self.stats["cache_hits"] += 1
+            
+            # Track direct address cache hits separately for analytics
+            if "direct_address_hits" not in self.stats:
+                self.stats["direct_address_hits"] = 0
+            self.stats["direct_address_hits"] += 1
+            
             return self.token_cache[address]
             
         # Then check by comparing addresses in cache
@@ -463,6 +484,9 @@ class TokenDataService:
                 processed_data["last_updated"] = datetime.now().isoformat()
                 symbol = processed_data.get("symbol", "UNKNOWN")
                 self.token_cache[symbol] = processed_data
+                
+                # Also cache by address for direct lookups
+                self.token_cache[address] = processed_data
                 
                 self.stats["last_update"] = datetime.now().isoformat()
                 logger.info(f"Found token with address {address} via direct lookup")
@@ -953,6 +977,21 @@ class TokenDataService:
         total = self.stats["cache_hits"] + self.stats["cache_misses"]
         hit_ratio = self.stats["cache_hits"] / total if total > 0 else 0
         
+        # Count symbols and addresses in cache
+        symbols = 0
+        addresses = 0
+        
+        for key in self.token_cache.keys():
+            # Heuristic to identify likely addresses vs symbols
+            if len(key) > 30:
+                addresses += 1
+            else:
+                symbols += 1
+        
+        # Add direct address hits to stats if not present
+        if "direct_address_hits" not in self.stats:
+            self.stats["direct_address_hits"] = 0
+        
         return {
             "total_requests": self.stats["total_requests"],
             "cache_hits": self.stats["cache_hits"],
@@ -960,6 +999,9 @@ class TokenDataService:
             "api_errors": self.stats["api_errors"],
             "hit_ratio": hit_ratio,
             "cache_size": len(self.token_cache),
+            "tokens_by_symbol": symbols,
+            "tokens_by_address": addresses,
+            "direct_address_hits": self.stats["direct_address_hits"],
             "last_update": self.stats["last_update"],
         }
     
