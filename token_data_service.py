@@ -72,7 +72,41 @@ class TokenDataService:
         # Initialize default token data
         self._init_default_tokens()
         
+        # Preload all token data from API
+        self.preload_all_tokens()
+        
         logger.info("Initialized token data service")
+        
+    def preload_all_tokens(self):
+        """
+        Preload all token data from the API into the cache.
+        This significantly improves token data availability and reduces Unknown token displays.
+        """
+        logger.info("Preloading all token data from API...")
+        try:
+            # Make API request to get all tokens
+            all_tokens = self.api_client.get_tokens()
+            
+            if not all_tokens or not isinstance(all_tokens, list):
+                logger.warning("Empty or invalid response when preloading tokens")
+                return
+            
+            tokens_loaded = 0
+            # Process each token and add to the cache
+            for token in all_tokens:
+                symbol = token.get("symbol", "").upper()
+                # Only cache if we have both a symbol and address
+                if symbol and token.get("address"):
+                    # Process for consistent format
+                    processed_token = self._process_token_data(token)
+                    self.token_cache[symbol] = processed_token
+                    tokens_loaded += 1
+            
+            logger.info(f"Successfully preloaded {tokens_loaded} tokens from API")
+            
+        except Exception as e:
+            logger.error(f"Error preloading tokens from API: {str(e)}")
+            # Fall back to default tokens which were already loaded
     
     def _init_default_tokens(self):
         """Initialize default token data for common tokens."""
@@ -499,7 +533,7 @@ class TokenDataService:
         if isinstance(token_data, dict):
             # Extract token data from the API response
             processed = {
-                "symbol": token_data.get("symbol", "UNKNOWN"),
+                "symbol": token_data.get("symbol", "UNKNOWN").upper(),
                 "name": token_data.get("name", "Unknown Token"),
                 "address": token_data.get("address", token_data.get("mint", "")),
                 "decimals": token_data.get("decimals", 0),
@@ -508,6 +542,8 @@ class TokenDataService:
                 "price_source": token_data.get("price_source", "defi_api"),
                 "coingecko_id": token_data.get("coingeckoId", ""),
                 "last_updated": datetime.now().isoformat(),
+                "id": token_data.get("id", 0),  # Add token ID from the API
+                "active": token_data.get("active", True),  # Add active status
             }
             
             # Add any additional fields from the API

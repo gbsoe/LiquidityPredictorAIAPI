@@ -1,9 +1,9 @@
 {
   "prices": {
     "ATLAS": 0.00132277,
-    "SOL": 143.28,
+    "SOL": 150.32,
     "BTC": 62873.15,
-    "ETH": 3018.47,
+    "ETH": 1836.64,
     "EPJF": 0,
     "4K3D": 0,
     "SO11": 0,
@@ -12,7 +12,7 @@
     "7VFC": 0,
     "DEZX": 0,
     "MSOL": 160.55,
-    "USDC": 1.0,
+    "USDC": 0.99993,
     "HPSQ": 0,
     "JUPY": 0,
     "RAY": 1.88,
@@ -20,7 +20,7 @@
     "POLI": 0,
     "ATLA": 0,
     "7I5K": 0,
-    "ORCA": 0,
+    "ORCA": 2.89,
     "MANG": 0,
     "STSOL": 0,
     "BSO1": 0,
@@ -34,5 +34,12 @@
     "7KBN": 0,
     "JSOL": 0
   },
-  "last_update": "2025-05-01T20:35:33.783469"
+  "price_sources": {
+    "USDC": "coingecko",
+    "SOL": "coingecko",
+    "USDT": "coingecko",
+    "ETH": "coingecko",
+    "ORCA": "coingecko"
+  },
+  "last_update": "2025-05-01T23:15:05.432378"
 }
