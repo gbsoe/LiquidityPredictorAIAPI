@@ -91,22 +91,67 @@ class TokenDataService:
                 logger.warning("Empty or invalid response when preloading tokens")
                 return
             
+            # Track statistics for token data completeness
             tokens_loaded = 0
+            tokens_with_address = 0
+            tokens_with_name = 0
+            
             # Process each token and add to the cache
             for token in all_tokens:
                 symbol = token.get("symbol", "").upper()
                 # Only cache if we have both a symbol and address
-                if symbol and token.get("address"):
+                if symbol:
                     # Process for consistent format
                     processed_token = self._process_token_data(token)
-                    self.token_cache[symbol] = processed_token
-                    tokens_loaded += 1
+                    
+                    # Only update cache if we have more data than before
+                    current = self.token_cache.get(symbol, {})
+                    
+                    # Decide if we should update the cache
+                    should_update = False
+                    
+                    # If we don't have this token yet, definitely add it
+                    if symbol not in self.token_cache:
+                        should_update = True
+                    # If we have better data (address or name present), update it
+                    elif (not current.get("address") and processed_token.get("address")) or \
+                         (not current.get("name") and processed_token.get("name")):
+                        should_update = True
+                    
+                    if should_update:
+                        self.token_cache[symbol] = processed_token
+                        tokens_loaded += 1
+                    
+                    # Track data completeness
+                    if processed_token.get("address"):
+                        tokens_with_address += 1
+                    if processed_token.get("name"):
+                        tokens_with_name += 1
             
             logger.info(f"Successfully preloaded {tokens_loaded} tokens from API")
+            logger.info(f"Token data completeness: {tokens_with_address}/{tokens_loaded} have addresses, {tokens_with_name}/{tokens_loaded} have names")
+            
+            # Try to fetch any missing tokens directly
+            self._fetch_missing_common_tokens()
             
         except Exception as e:
             logger.error(f"Error preloading tokens from API: {str(e)}")
             # Fall back to default tokens which were already loaded
+            
+    def _fetch_missing_common_tokens(self):
+        """Fetch any missing data for common tokens directly"""
+        common_tokens = ["SOL", "USDC", "USDT", "ETH", "BTC", "MSOL", "BONK", "RAY", "ORCA"]
+        for symbol in common_tokens:
+            if symbol not in self.token_cache or not self.token_cache[symbol].get("address"):
+                try:
+                    # Try to fetch directly by symbol
+                    token_data = self.api_client._make_request(f"tokens/{symbol}")
+                    if token_data:
+                        processed = self._process_token_data(token_data)
+                        self.token_cache[symbol] = processed
+                        logger.info(f"Directly fetched missing token: {symbol}")
+                except Exception as e:
+                    logger.warning(f"Could not fetch missing token {symbol}: {e}")
     
     def _init_default_tokens(self):
         """Initialize default token data for common tokens."""
@@ -531,19 +576,47 @@ class TokenDataService:
             Processed token data
         """
         if isinstance(token_data, dict):
+            # Extract the symbol with proper validation
+            raw_symbol = token_data.get("symbol", "")
+            # Convert to uppercase and remove any whitespace or unwanted characters
+            symbol = raw_symbol.upper().strip() if raw_symbol else "UNKNOWN"
+            
+            # Get token address from various possible sources
+            address = ""
+            for address_key in ["address", "mint", "tokenAddress", "mintAddress"]:
+                if address_key in token_data and token_data[address_key]:
+                    address = token_data[address_key]
+                    break
+            
+            # Get token name with proper validation
+            raw_name = token_data.get("name", "")
+            name = raw_name.strip() if raw_name else f"{symbol} Token"
+            
+            # Get decimal places with validation
+            try:
+                decimals = int(token_data.get("decimals", 0))
+            except (ValueError, TypeError):
+                decimals = 0
+                
+            # Get price with validation
+            try:
+                price = float(token_data.get("price", 0))
+            except (ValueError, TypeError):
+                price = 0
+                
             # Extract token data from the API response
             processed = {
-                "symbol": token_data.get("symbol", "UNKNOWN").upper(),
-                "name": token_data.get("name", "Unknown Token"),
-                "address": token_data.get("address", token_data.get("mint", "")),
-                "decimals": token_data.get("decimals", 0),
+                "symbol": symbol,
+                "name": name,
+                "address": address,
+                "decimals": decimals,
                 "logo": token_data.get("logoURI", token_data.get("logo", "")),
-                "price": token_data.get("price", 0),
+                "price": price,
                 "price_source": token_data.get("price_source", "defi_api"),
                 "coingecko_id": token_data.get("coingeckoId", ""),
                 "last_updated": datetime.now().isoformat(),
                 "id": token_data.get("id", 0),  # Add token ID from the API
-                "active": token_data.get("active", True),  # Add active status
+                "active": bool(token_data.get("active", True)),
             }
             
             # Add any additional fields from the API
