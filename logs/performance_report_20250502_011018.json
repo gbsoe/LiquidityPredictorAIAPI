@@ -1,0 +1,59 @@
+{
+  "summary": {
+    "timestamp": "2025-05-02T01:10:18.809546",
+    "total_runtime": "1.50s",
+    "time_to_data_loaded": "N/A",
+    "time_to_predictions": "N/A",
+    "time_to_ui_ready": "N/A",
+    "peak_memory_mb": "0.00 MB",
+    "memory_growth_mb": "0.00 MB",
+    "final_token_cache_size": 0,
+    "total_pools_loaded": 0
+  },
+  "segments": {
+    "test_segment": "1.50s"
+  },
+  "checkpoints": {
+    "test_checkpoint": "2025-05-02T01:10:18.307381"
+  },
+  "stats": {
+    "token_cache_size": 0,
+    "token_lookup_times": [],
+    "prediction_times": [],
+    "total_pools_loaded": 0,
+    "tokens_by_symbol": 0,
+    "tokens_by_address": 0,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "api_calls": 0,
+    "peak_memory_mb": 0
+  },
+  "timeline": [
+    {
+      "timestamp": 1746148217.3060482,
+      "time": "0.00s",
+      "event": "monitor_initialized",
+      "datetime": "2025-05-02T01:10:17.306055"
+    },
+    {
+      "timestamp": 1746148217.307226,
+      "time": "0.00s",
+      "event": "test_segment_tracking_started",
+      "datetime": "2025-05-02T01:10:17.307229"
+    },
+    {
+      "timestamp": 1746148218.3073993,
+      "time": "1.00s",
+      "event": "checkpoint_test_checkpoint",
+      "datetime": "2025-05-02T01:10:18.307402",
+      "time_since_start": "1.00s"
+    },
+    {
+      "timestamp": 1746148218.8075533,
+      "time": "1.50s",
+      "event": "test_segment_tracking_stopped",
+      "datetime": "2025-05-02T01:10:18.807556",
+      "duration": "1.50s"
+    }
+  ]
+}
