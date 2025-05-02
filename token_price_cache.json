@@ -3,7 +3,7 @@
     "ATLAS": 0.00132277,
     "SOL": 150.32,
     "BTC": 62873.15,
-    "ETH": 1836.64,
+    "ETH": 1838.49,
     "EPJF": 0,
     "4K3D": 0,
     "SO11": 0,
@@ -12,15 +12,15 @@
     "7VFC": 0,
     "DEZX": 0,
     "MSOL": 160.55,
-    "USDC": 0.99993,
+    "USDC": 0.999969,
     "HPSQ": 0,
     "JUPY": 0,
-    "RAY": 1.88,
+    "RAY": 2.91,
     "USDT": 1.0,
     "POLI": 0,
     "ATLA": 0,
     "7I5K": 0,
-    "ORCA": 2.89,
+    "ORCA": 2.95,
     "MANG": 0,
     "STSOL": 0,
     "BSO1": 0,
@@ -39,7 +39,8 @@
     "SOL": "coingecko",
     "USDT": "coingecko",
     "ETH": "coingecko",
-    "ORCA": "coingecko"
+    "ORCA": "coingecko",
+    "RAY": "coingecko"
   },
-  "last_update": "2025-05-01T23:15:05.432378"
+  "last_update": "2025-05-02T00:19:03.541039"
 }

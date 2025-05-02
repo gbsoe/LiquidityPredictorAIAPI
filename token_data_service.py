@@ -84,8 +84,8 @@ class TokenDataService:
         """
         logger.info("Preloading all token data from API...")
         try:
-            # Make API request to get all tokens
-            all_tokens = self.api_client.get_tokens()
+            # Make API request to get all tokens using the internal _make_request method
+            all_tokens = self.api_client._make_request("tokens")
             
             if not all_tokens or not isinstance(all_tokens, list):
                 logger.warning("Empty or invalid response when preloading tokens")
@@ -627,17 +627,24 @@ class TokenDataService:
                 logger.warning("Empty or invalid response when fetching all tokens")
                 return list(self.token_cache.values())  # Return cached tokens as fallback
             
-            # Process each token and add to the cache
+            # Process each token and add to the cache with proper formatting
+            tokens_loaded = 0
             for token in all_tokens:
-                symbol = token.get("symbol", "").upper()
-                if symbol:
-                    self.token_cache[symbol] = {
-                        **token,
-                        "last_updated": datetime.now().isoformat()
-                    }
+                # Check if token has required fields
+                if "symbol" in token and "address" in token:
+                    symbol = token.get("symbol", "").upper()
+                    
+                    # Process the token using our standard method for consistency
+                    processed_token = self._process_token_data(token)
+                    
+                    # Add to cache
+                    self.token_cache[symbol] = processed_token
+                    tokens_loaded += 1
             
-            # Return all tokens from the API
-            return all_tokens
+            logger.info(f"Loaded and processed {tokens_loaded} tokens from API")
+            
+            # Return processed tokens from cache to ensure consistent formatting
+            return list(self.token_cache.values())
             
         except Exception as e:
             logger.error(f"Error fetching all tokens: {str(e)}")
