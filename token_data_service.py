@@ -159,12 +159,95 @@ class TokenDataService:
             logger.info(f"Token data completeness: {tokens_with_address}/{tokens_loaded+address_cached} have addresses, " + 
                        f"{tokens_with_name}/{tokens_loaded+address_cached} have names, {tokens_with_price}/{tokens_loaded+address_cached} have prices")
             
-            # Try to fetch any missing tokens directly
-            self._fetch_missing_common_tokens()
+            # Start a background thread to fetch prices for the most common tokens
+            # This prevents blocking the UI during initial load
+            self._start_background_price_fetching()
             
         except Exception as e:
             logger.error(f"Error preloading tokens from API: {str(e)}")
             # Fall back to default tokens which were already loaded
+            
+    def _start_background_price_fetching(self):
+        """Start a background thread to fetch token prices without blocking the UI"""
+        try:
+            # Try to fetch any missing common tokens directly first
+            self._fetch_missing_common_tokens()
+            
+            # Create a list of priority tokens to fetch prices for
+            priority_tokens = ["SOL", "USDC", "USDT", "ETH", "BTC", "BONK", "RAY", "ORCA", "MSOL", "STSOL"]
+            
+            # Start a background thread to fetch prices
+            logger.info("Starting background thread for token price fetching")
+            
+            def fetch_prices_background():
+                logger.info(f"Background price fetching started for {len(priority_tokens)} priority tokens")
+                for symbol in priority_tokens:
+                    if symbol in self.token_cache:
+                        try:
+                            # Check if we already have a price
+                            if self.token_cache[symbol].get("price", 0) > 0:
+                                continue
+                                
+                            # Fetch price in background
+                            price = None
+                            
+                            # Try to get price from CoinGecko if available
+                            if coingecko_api is not None:
+                                # First try by coingecko_id if available
+                                coingecko_id = self.token_cache[symbol].get("coingecko_id")
+                                if coingecko_id:
+                                    try:
+                                        result = coingecko_api.get_price([coingecko_id], "usd")
+                                        if result and coingecko_id in result:
+                                            price = result[coingecko_id].get("usd", 0)
+                                    except Exception as e:
+                                        logger.warning(f"Error fetching price by ID for {symbol}: {e}")
+                                
+                                # If that didn't work, try by symbol
+                                if not price or price == 0:
+                                    logger.info(f"Trying to fetch price for {symbol} by symbol")
+                                    try:
+                                        price = coingecko_api.get_token_price_by_symbol(symbol)
+                                    except Exception as e:
+                                        logger.warning(f"Error fetching price by symbol for {symbol}: {e}")
+                                
+                                # If still no price, try by address
+                                if (not price or price == 0) and self.token_cache[symbol].get("address"):
+                                    address = self.token_cache[symbol].get("address")
+                                    logger.info(f"Trying to fetch price for {symbol} by address: {address}")
+                                    try:
+                                        price = coingecko_api.get_token_price_by_address(address)
+                                    except Exception as e:
+                                        logger.warning(f"Error fetching price by address for {symbol}: {e}")
+                            
+                            # Update token cache with price if found
+                            if price and price > 0:
+                                logger.info(f"Updated price for {symbol} in background: {price}")
+                                self.token_cache[symbol]["price"] = price
+                                self.token_cache[symbol]["price_source"] = "coingecko"
+                                self.token_cache[symbol]["last_updated"] = datetime.now().isoformat()
+                                
+                                # If token is also cached by address, update that cache entry too
+                                address = self.token_cache[symbol].get("address")
+                                if address and address in self.token_cache:
+                                    self.token_cache[address]["price"] = price
+                                    self.token_cache[address]["price_source"] = "coingecko"
+                                    self.token_cache[address]["last_updated"] = datetime.now().isoformat()
+                            
+                            # Add a small delay to avoid rate limits
+                            time.sleep(2)
+                            
+                        except Exception as e:
+                            logger.warning(f"Error fetching price for {symbol}: {str(e)}")
+                
+                logger.info("Background price fetching completed")
+            
+            # Start the background thread
+            price_thread = threading.Thread(target=fetch_prices_background, daemon=True)
+            price_thread.start()
+            
+        except Exception as e:
+            logger.error(f"Error starting background price fetching: {str(e)}")
             
     def _fetch_missing_common_tokens(self):
         """Fetch any missing data for common tokens directly"""

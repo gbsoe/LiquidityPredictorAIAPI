@@ -103,6 +103,11 @@ class CoinGeckoAPI:
         Returns:
             JSON response from API or None on error
         """
+        # Check if we're in a rate-limited cooldown period
+        if hasattr(self, 'rate_limited_until') and time.time() < self.rate_limited_until:
+            logger.warning(f"Skipping CoinGecko request - rate limit cooldown ({int(self.rate_limited_until - time.time())}s remaining)")
+            return None
+            
         # Apply rate limiting
         self._rate_limit_request()
         
@@ -114,12 +119,19 @@ class CoinGeckoAPI:
             
             if response.status_code == 200:
                 logger.info(f"Received successful response from CoinGecko API: {url}")
+                # Reset request delay on successful request
+                if self.request_delay > 1.5:
+                    self.request_delay = 1.5
                 return response.json()
             else:
                 logger.error(f"Error accessing CoinGecko API: {response.status_code} - {response.text}")
                 if response.status_code == 429:
-                    logger.warning("Rate limit exceeded. Implementing additional delay.")
-                    self.request_delay = min(self.request_delay * 2, 10)  # Exponential backoff up to 10 seconds
+                    logger.warning("Rate limit exceeded. Implementing temporary pause.")
+                    # Set a 30-second pause on all CoinGecko requests
+                    self.rate_limited_until = time.time() + 30
+                    logger.warning(f"CoinGecko requests paused for 30 seconds")
+                    # Increase delay for future requests
+                    self.request_delay = min(self.request_delay * 1.5, 5)
                 return None
         except Exception as e:
             logger.error(f"Exception during CoinGecko API request: {str(e)}")
