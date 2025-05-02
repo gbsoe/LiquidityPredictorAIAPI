@@ -380,11 +380,21 @@ class DefiAggregationAPI:
                     all_pools = self.get_all_pools(max_pools=200)  # Try to get a large sample
                     
                     # Search for this specific pool ID (case-insensitive)
+                    # Convert pool_id to string and lowercase for comparison
+                    if not isinstance(pool_id, str):
+                        pool_id = str(pool_id)
                     pool_id_lower = pool_id.lower()
+                    
                     for pool in all_pools:
                         pool_id_match = False
                         api_id = pool.get('id', '')
                         api_pool_id = pool.get('poolId', '')
+                        
+                        # Convert IDs to strings if they're not already
+                        if not isinstance(api_id, str):
+                            api_id = str(api_id)
+                        if not isinstance(api_pool_id, str):
+                            api_pool_id = str(api_pool_id)
                         
                         # Try multiple matching approaches
                         if (api_id and (api_id == pool_id or api_id.lower() == pool_id_lower)) or \
@@ -453,6 +463,15 @@ class DefiAggregationAPI:
                                     pool_id_match = False
                                     api_id = item.get('id', '')
                                     api_pool_id = item.get('poolId', '')
+                                    
+                                    # Convert IDs to strings if they're not already
+                                    if not isinstance(api_id, str):
+                                        api_id = str(api_id)
+                                    if not isinstance(api_pool_id, str):
+                                        api_pool_id = str(api_pool_id)
+                                    if not isinstance(pool_id, str):
+                                        pool_id = str(pool_id)
+                                    
                                     pool_id_lower = pool_id.lower()
                                     
                                     # Try multiple matching approaches
