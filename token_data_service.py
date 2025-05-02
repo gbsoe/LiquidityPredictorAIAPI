@@ -214,11 +214,12 @@ class TokenDataService:
                                 # If still no price, try by address
                                 if (not price or price == 0) and self.token_cache[symbol].get("address"):
                                     address = self.token_cache[symbol].get("address")
-                                    logger.info(f"Trying to fetch price for {symbol} by address: {address}")
-                                    try:
-                                        price = coingecko_api.get_token_price_by_address(address)
-                                    except Exception as e:
-                                        logger.warning(f"Error fetching price by address for {symbol}: {e}")
+                                    if address:  # Check if address is not None
+                                        logger.info(f"Trying to fetch price for {symbol} by address: {address}")
+                                        try:
+                                            price = coingecko_api.get_token_price_by_address(address)
+                                        except Exception as e:
+                                            logger.warning(f"Error fetching price by address for {symbol}: {e}")
                             
                             # Update token cache with price if found
                             if price and price > 0:
@@ -251,7 +252,33 @@ class TokenDataService:
             
     def _fetch_missing_common_tokens(self):
         """Fetch any missing data for common tokens directly"""
-        common_tokens = ["SOL", "USDC", "USDT", "ETH", "BTC", "MSOL", "BONK", "RAY", "ORCA"]
+        # Expanded list of common tokens to ensure better coverage
+        common_tokens = [
+            "SOL", "USDC", "USDT", "ETH", "BTC", "MSOL", "BONK", "RAY", "ORCA", 
+            "STSOL", "ATLA", "POLI", "JSOL", "JUPY", "HPSQ", "MNGO", "SAMO", 
+            "7I5K", "7KBN", "9VMJ", "BSO1", "FWZ2", "J1TO", "MANG", "MPLU"
+        ]
+        
+        # First try to get them all at once from the API
+        try:
+            all_tokens = self.api_client._make_request("tokens")
+            if all_tokens and isinstance(all_tokens, list):
+                for token in all_tokens:
+                    symbol = token.get("symbol", "").upper()
+                    if symbol and symbol in common_tokens:
+                        processed = self._process_token_data(token)
+                        self.token_cache[symbol] = processed
+                        
+                        # Also cache by address if available for direct lookups
+                        address = processed.get("address", "")
+                        if address and address.strip():
+                            self.token_cache[address] = processed
+                            
+                        logger.info(f"Fetched common token from bulk API: {symbol}")
+        except Exception as e:
+            logger.warning(f"Error fetching all tokens: {e}")
+        
+        # Now try to fetch any remaining tokens individually
         for symbol in common_tokens:
             if symbol not in self.token_cache or not self.token_cache[symbol].get("address"):
                 try:

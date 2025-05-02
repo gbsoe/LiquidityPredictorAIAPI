@@ -338,6 +338,10 @@ class CoinGeckoAPI:
         Returns:
             Token price or None if not found
         """
+        if not address:
+            logger.warning("Empty address passed to get_token_price_by_address")
+            return None
+            
         endpoint = f"simple/token_price/{platform}?contract_addresses={address}&vs_currencies={vs_currency}"
         
         result = self._make_request(endpoint)

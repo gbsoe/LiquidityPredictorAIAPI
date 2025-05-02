@@ -101,11 +101,40 @@ def main():
     with tab1:
         st.subheader("Complete Token Database")
         
+        # Process and enrich tokens before creating DataFrame
+        enriched_tokens = []
+        
+        # First, filter out tokens with no symbol
+        filtered_tokens = [t for t in tokens if t.get("symbol")]
+        
+        # Filter out duplicates by symbol
+        seen_symbols = set()
+        for t in filtered_tokens:
+            symbol = t.get("symbol", "").upper()
+            if symbol and symbol not in seen_symbols:
+                seen_symbols.add(symbol)
+                
+                # Try to get price from token_service if needed
+                if t.get("price", 0) == 0:
+                    try:
+                        # Force a fresh fetch for the token
+                        fresh_token = token_service.get_token_data(symbol, force_refresh=True)
+                        if fresh_token.get("price", 0) > 0:
+                            t["price"] = fresh_token["price"]
+                            t["price_source"] = fresh_token.get("price_source", "defi_api")
+                    except Exception as e:
+                        st.error(f"Error refreshing token {symbol}: {e}")
+                
+                enriched_tokens.append(t)
+        
+        # Sort tokens: first by price (non-zero first), then by symbol
+        enriched_tokens.sort(key=lambda t: (t.get("price", 0) == 0, t.get("symbol", "").upper()))
+        
         # Create a DataFrame for display
         token_df = pd.DataFrame([
             {
                 "Symbol": t.get("symbol", "").upper(),
-                "Name": t.get("name", "Unknown"),
+                "Name": t.get("name", "Unknown") if t.get("name") else t.get("symbol", "Unknown"),
                 "Address": format_address(t.get("address", "")),
                 "Decimals": t.get("decimals", 0),
                 "Price": format_price(float(t.get("price", 0))),
@@ -114,7 +143,7 @@ def main():
                 "ID": t.get("id", 0),
                 "Full Address": t.get("address", "")  # Hidden column for reference
             }
-            for t in tokens
+            for t in enriched_tokens
         ])
         
         # Add search functionality
@@ -177,11 +206,36 @@ def main():
             # Display token count
             st.write(f"Found {len(dex_tokens)} tokens used by {selected_dex.capitalize()}")
             
+            # Enhance tokens with fresh price data if needed
+            enhanced_dex_tokens = {}
+            for symbol, token in dex_tokens.items():
+                # Copy the token to avoid modifying the original
+                enhanced_token = token.copy()
+                
+                # Try to get fresh price if current price is 0
+                if enhanced_token.get("price", 0) == 0:
+                    try:
+                        # Force a fresh fetch for the token
+                        fresh_token = token_service.get_token_data(symbol, force_refresh=True)
+                        if fresh_token.get("price", 0) > 0:
+                            enhanced_token["price"] = fresh_token["price"]
+                            enhanced_token["price_source"] = fresh_token.get("price_source", "defi_api")
+                    except Exception as e:
+                        st.error(f"Error refreshing token {symbol}: {e}")
+                
+                enhanced_dex_tokens[symbol] = enhanced_token
+            
+            # Sort tokens: first by price (non-zero first), then by symbol
+            sorted_tokens = sorted(
+                enhanced_dex_tokens.items(), 
+                key=lambda item: (item[1].get("price", 0) == 0, item[0].upper())
+            )
+            
             # Create a DataFrame for the tokens
             dex_token_df = pd.DataFrame([
                 {
                     "Symbol": symbol,
-                    "Name": token.get("name", "Unknown"),
+                    "Name": token.get("name", "Unknown") if token.get("name") else symbol,
                     "Address": format_address(token.get("address", "")),
                     "Decimals": token.get("decimals", 0),
                     "Price": format_price(float(token.get("price", 0))),
@@ -189,7 +243,7 @@ def main():
                     "Active": "✓" if token.get("active", False) else "✗",
                     "Full Address": token.get("address", "")  # Hidden column for reference
                 }
-                for symbol, token in dex_tokens.items()
+                for symbol, token in sorted_tokens
             ])
             
             # Display the DataFrame
