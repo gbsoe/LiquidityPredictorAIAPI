@@ -152,7 +152,13 @@ def display_pool_card(pool: Dict[str, Any]) -> None:
     
     # For watchlist entries that may have minimal data
     if pool_name == 'Unknown' and pool_id != 'N/A':
-        pool_name = f"Pool {pool_id[:8]}..."  # Use shortened ID if no name
+        # Try to format a more user-friendly name if we have token symbols
+        token1_symbol = pool.get('token1_symbol', '')
+        token2_symbol = pool.get('token2_symbol', '')
+        if token1_symbol and token2_symbol:
+            pool_name = f"{token1_symbol}-{token2_symbol}"
+        else:
+            pool_name = f"Pool {pool_id[:8]}..."  # Use shortened ID if no name
     
     # Create a container with styling and handle potential missing data
     with st.container():

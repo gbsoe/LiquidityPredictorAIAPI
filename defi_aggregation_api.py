@@ -393,7 +393,13 @@ class DefiAggregationAPI:
                         
                         if pool_id_match:
                             logger.info(f"Found pool {pool_id} in main pool list")
-                            return self.transform_pool_data(pool)
+                            # If we found a match, make sure the pool ID matches what we searched for
+                            # This ensures consistency with our database records
+                            pool_data = self.transform_pool_data(pool)
+                            if pool_data:
+                                # Ensure we're using the exact ID that was requested
+                                pool_data['id'] = pool_id
+                            return pool_data
                     
                     # If we get here, we didn't find it
                     logger.warning(f"Pool {pool_id} not found in API responses")

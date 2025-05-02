@@ -1121,10 +1121,11 @@ def get_watchlist_details(watchlist_id, fetch_missing_pools=True):
                                 
                                 # Store in database for future use
                                 try:
-                                    # Create a model instance
+                                    # Create a model instance with appropriate defaults 
+                                    # to prevent errors with missing fields
                                     new_pool = LiquidityPool(
-                                        id=pool_data_from_api.get("id", ""),
-                                        name=pool_data_from_api.get("name", ""),
+                                        id=missing_id,  # Always use the ID we're searching for
+                                        name=pool_data_from_api.get("name", f"Pool {missing_id[:8]}..."),
                                         dex=pool_data_from_api.get("dex", "Unknown"),
                                         category=pool_data_from_api.get("category", "Custom"),
                                         token1_symbol=pool_data_from_api.get("token1_symbol", "Unknown"),
