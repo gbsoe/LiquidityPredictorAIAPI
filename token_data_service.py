@@ -245,8 +245,8 @@ class TokenDataService:
                                     self.token_cache[address]["price_source"] = "coingecko"
                                     self.token_cache[address]["last_updated"] = datetime.now().isoformat()
                             
-                            # Add a small delay to avoid rate limits
-                            time.sleep(2)
+                            # Add a larger delay to avoid rate limits
+                            time.sleep(3)
                             
                         except Exception as e:
                             logger.warning(f"Error fetching price for {symbol}: {str(e)}")
@@ -922,13 +922,21 @@ class TokenDataService:
                         # Try to get SOL price from cache or API
                         if "SOL" in self.token_cache and self.token_cache["SOL"].get("price", 0) > 0:
                             sol_price = self.token_cache["SOL"].get("price", 0)
-                            logger.info(f"Using cached SOL price for {symbol} estimation: {sol_price}")
+                            if sol_price and sol_price > 0:
+                                logger.info(f"Using cached SOL price for {symbol} estimation: {sol_price}")
                         elif coingecko_api is not None:
-                            sol_price = coingecko_api.get_token_price_by_symbol("SOL")
-                            logger.info(f"Using fresh SOL price for {symbol} estimation: {sol_price}")
+                            try:
+                                # Only fetch SOL price if we're not in a cooldown period
+                                if not hasattr(coingecko_api, 'rate_limited_until') or time.time() >= coingecko_api.rate_limited_until:
+                                    sol_price_value = coingecko_api.get_token_price_by_symbol("SOL")
+                                    if sol_price_value and sol_price_value > 0:
+                                        sol_price = sol_price_value
+                                        logger.info(f"Using fresh SOL price for {symbol} estimation: {sol_price}")
+                            except Exception as e:
+                                logger.warning(f"Error fetching SOL price for estimation: {e}")
                             
                         # Apply appropriate multiplier based on token
-                        if sol_price > 0:
+                        if sol_price and isinstance(sol_price, (int, float)) and sol_price > 0:
                             if symbol in ["MSOL", "mSOL"]:
                                 price = sol_price * 1.08  # MSOL typically has ~8% premium
                                 logger.info(f"Estimated MSOL price from SOL: {price}")

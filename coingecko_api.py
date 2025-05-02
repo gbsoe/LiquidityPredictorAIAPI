@@ -41,7 +41,9 @@ class CoinGeckoAPI:
         
         # Rate limiting configuration
         self.last_request_time = 0
-        self.request_delay = 1.5  # 1.5 seconds between requests to avoid rate limits
+        self.request_delay = 2.5  # 2.5 seconds between requests to avoid rate limits
+        # Set an initial cooldown to prevent immediate API calls on startup
+        self.rate_limited_until = time.time() + 5
         
         # Initialize common token mappings
         self._init_common_token_mappings()

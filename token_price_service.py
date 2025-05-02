@@ -48,6 +48,11 @@ DEFAULT_TOKEN_MAPPING = {
     "SLND": "solend",
     "AVAX": "avalanche-2",
     "BNB": "binancecoin",
+    # Special staked SOL tokens
+    "MSOL": "marinade-staked-sol",
+    "mSOL": "marinade-staked-sol",
+    "STSOL": "lido-staked-sol",
+    "stSOL": "lido-staked-sol",
     "ADA": "cardano",
     "DAI": "dai",
     "BUSD": "binance-usd",
@@ -281,39 +286,26 @@ class TokenPriceService:
         """
         result = {}
         
-        # IMPORTANT: Since the API doesn't return real prices, we'll use hardcoded realistic prices
-        # This allows us to show meaningful UI without waiting for the API to be updated
-        hardcoded_prices = {
-            "SOL": 143.28,
-            "MSOL": 160.55,
-            "BTC": 62873.15,
-            "ETH": 3018.47,
+        # Initial default values for stablecoin prices (1.0) to display while loading
+        default_prices = {
             "USDC": 1.00,
             "USDT": 1.00,
-            "RAY": 1.88,
-            "BONK": 0.000013,
-            
-            # API-specific symbols mapped to actual tokens with realistic prices
-            "SO11": 143.28,    # SOL
-            "EPJF": 1.00,      # USDC
-            "MSOL": 160.55,    # mSOL (Marinade Staked SOL)
-            "9N4N": 62873.15,  # BTC
-            "7VFC": 3018.47,   # ETH
-            "DEZX": 3018.47,   # ETH (also DezXtras)
-            "4K3D": 1.88,      # RAY (Raydium)
-            "ES9V": 1.00,      # USDC equivalent
+            "UXD": 1.00,
+            "USDH": 1.00,
+            "BUSD": 1.00,
+            "DAI": 1.00,
         }
         
         # Uppercase all input symbols for comparison
         normalized_symbols = [s.upper() for s in symbols if s != "UNKNOWN"]
         
-        # First set hardcoded prices
+        # Set default prices for stablecoins only
         for symbol in normalized_symbols:
-            if symbol in hardcoded_prices:
-                result[symbol] = hardcoded_prices[symbol]
-                self.cached_prices[symbol] = hardcoded_prices[symbol]
+            if symbol in default_prices:
+                result[symbol] = default_prices[symbol]
+                self.cached_prices[symbol] = default_prices[symbol]
                 self.cache_price_sources[symbol] = "defi_api"  # These are treated as coming from the API
-                logger.info(f"Set realistic price for {symbol}: ${hardcoded_prices[symbol]}")
+                logger.info(f"Set default stablecoin price for {symbol}: ${default_prices[symbol]}")
         
         # If we have all prices, return early
         if len(result) == len(normalized_symbols):
@@ -348,10 +340,10 @@ class TokenPriceService:
                 for token in data:
                     token_symbol = token.get("symbol", "").upper()
                     if token_symbol in normalized_symbols and token_symbol not in result:
-                        # If API returns 0 price but we have a hardcoded one, use hardcoded
+                        # If API returns 0 price but we have a default price for stablecoins, use it
                         price = token.get("price", 0)
-                        if price == 0 and token_symbol in hardcoded_prices:
-                            price = hardcoded_prices[token_symbol]
+                        if price == 0 and token_symbol in default_prices:
+                            price = default_prices[token_symbol]
                         
                         # Update result and cache
                         result[token_symbol] = price
