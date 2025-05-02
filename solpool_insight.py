@@ -22,6 +22,13 @@ import logging
 import traceback
 import sys
 
+# Start performance monitoring
+from performance_monitor import get_performance_monitor
+perf_monitor = get_performance_monitor()
+perf_monitor.start_tracking("app_initialization")
+start_time = time.time()
+loading_start = datetime.now()
+
 # Import our data service modules
 from data_services.initialize import init_services, get_stats
 from data_services.data_service import get_data_service
@@ -129,7 +136,10 @@ def initialize_continuous_data_collection():
         
 # Run initialization if this is the first time
 if 'initialized_data_collection' not in st.session_state:
+    perf_monitor.start_tracking("data_collection_init")
     st.session_state.initialized_data_collection = initialize_continuous_data_collection()
+    perf_monitor.stop_tracking("data_collection_init")
+    perf_monitor.mark_checkpoint("data_loaded")
 
 # Formatting helper functions
 def format_currency(value):
@@ -313,6 +323,10 @@ def calculate_prediction_score(pool):
     Returns:
         Prediction score from 0-100
     """
+    # Mark the prediction start time for first prediction
+    if "predictions_generated" not in st.session_state:
+        perf_monitor.start_tracking("prediction_generation")
+        st.session_state.predictions_generated = 0
     # Get metrics needed for scoring
     apr = pool.get("apr", 0)
     apr_7d = pool.get("apr_7d", apr)
@@ -2814,6 +2828,73 @@ def main():
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
         st.info("The application encountered an error. Please try refreshing the page or contact support.")
+        
+    # Mark that predictions are ready if they were generated during this session
+    if "predictions_generated" in st.session_state and st.session_state.predictions_generated > 0:
+        perf_monitor.stop_tracking("prediction_generation")
+        perf_monitor.mark_checkpoint("predictions_ready")
+        
+    # Mark that the UI is ready
+    perf_monitor.mark_checkpoint("ui_ready")
+    
+    # Calculate and display performance stats in debug mode
+    if st.session_state.get("debug_mode", False) or "show_performance" in st.session_state:
+        with st.expander("Performance Metrics", expanded=False):
+            end_time = time.time()
+            loading_end = datetime.now()
+            total_time = end_time - start_time
+            
+            st.write("### System Performance Metrics")
+            st.write(f"Total loading time: {total_time:.2f} seconds")
+            st.write(f"Started at: {loading_start.strftime('%H:%M:%S')}")
+            st.write(f"Ready at: {loading_end.strftime('%H:%M:%S')}")
+            
+            # Get and display the performance report
+            report = perf_monitor.get_report()
+            
+            # Display summary metrics
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write("#### Loading Time Breakdown")
+                st.write(f"Time to data loaded: {report['summary']['time_to_data_loaded']}")
+                st.write(f"Time to predictions ready: {report['summary']['time_to_predictions']}")
+                st.write(f"Time to UI ready: {report['summary']['time_to_ui_ready']}")
+            
+            with col2:
+                st.write("#### Token Service Stats")
+                token_service = st.session_state.get("token_service")
+                if token_service:
+                    token_stats = token_service.get_stats()
+                    st.write(f"Token cache size: {token_stats.get('cache_size', 0)} tokens")
+                    st.write(f"Token cache hits: {token_stats.get('cache_hits', 0)}")
+                    st.write(f"Token cache misses: {token_stats.get('cache_misses', 0)}")
+                
+            # Display timeline
+            st.write("#### Events Timeline")
+            timeline_data = []
+            for event in report["timeline"]:
+                timeline_data.append({
+                    "Event": event["event"],
+                    "Time": event["time"]
+                })
+            
+            st.dataframe(pd.DataFrame(timeline_data), use_container_width=True)
+            
+            # Add a button to save the performance report
+            if st.button("Save Performance Report"):
+                # Save the report to a file
+                filename = perf_monitor.save_final_report()
+                st.success(f"Performance report saved to {filename}")
 
 if __name__ == "__main__":
+    # Start the main application
     main()
+    
+    # Final performance tracking - log the full session performance after the app has fully loaded
+    if perf_monitor:
+        perf_monitor.stop_tracking("app_initialization")
+        
+        # Save a final performance report if we're in a fresh session
+        if "performance_report_saved" not in st.session_state:
+            perf_monitor.save_final_report()
+            st.session_state.performance_report_saved = True

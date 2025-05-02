@@ -29,15 +29,24 @@ Usage:
 """
 
 import time
-from datetime import datetime, timedelta
-import threading
-import logging
 import json
 import os
-from typing import Dict, List, Any, Optional
+import logging
+import psutil
+from datetime import datetime
+from threading import Timer, Lock
+from typing import Dict, List, Any, Optional, Callable
 
 # Configure logging
-logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("performance_monitor")
+
+# Singleton instance
+_instance = None
+_instance_lock = Lock()
 
 class PerformanceMonitor:
     """
@@ -46,32 +55,42 @@ class PerformanceMonitor:
     
     def __init__(self):
         """Initialize the performance monitor."""
-        # Main tracking timestamps
-        self.start_time = None
-        self.checkpoints = {}
+        # Track segments of code execution time
         self.segments = {}
-        self.active_tracking = {}
+        self.active_segments = {}
         
-        # System stats
-        self.system_stats = {
-            "token_cache_size": 0,
-            "tokens_by_symbol": 0,
-            "tokens_by_address": 0,
-            "token_cache_hits": 0,
-            "token_cache_misses": 0,
-            "address_cache_hits": 0,
-            "total_pools_loaded": 0,
-            "total_tokens_loaded": 0
+        # Track checkpoints for key events
+        self.checkpoints = {}
+        
+        # Track overall start time
+        self.start_time = time.time()
+        
+        # Track system statistics
+        self.stats = {
+            'token_cache_size': 0,
+            'token_lookup_times': [],
+            'prediction_times': [],
+            'total_pools_loaded': 0,
+            'tokens_by_symbol': 0,
+            'tokens_by_address': 0,
+            'cache_hits': 0,
+            'cache_misses': 0,
+            'api_calls': 0,
+            'peak_memory_mb': 0
         }
         
-        # Periodic stats collection
-        self.stats_thread = None
+        # Track timeline of events
+        self.timeline = []
+        self._add_timeline_event("monitor_initialized")
+        
+        # System monitoring
+        self.collection_timer = None
         self.collecting_stats = False
         
-        # Ensure directory exists
-        self.report_dir = "logs"
-        if not os.path.exists(self.report_dir):
-            os.makedirs(self.report_dir)
+        # Track memory usage at start
+        self.initial_memory = psutil.Process().memory_info().rss / (1024 * 1024)  # Convert to MB
+        
+        logger.info("Performance monitor initialized")
     
     def start_tracking(self, label: str = "application") -> None:
         """
@@ -80,16 +99,9 @@ class PerformanceMonitor:
         Args:
             label: Label for this tracking session
         """
-        if self.start_time is None:
-            self.start_time = time.time()
-            logger.info(f"Started performance tracking at {datetime.now().isoformat()}")
-        
-        # Mark the start of this specific tracking segment
-        self.active_tracking[label] = time.time()
-        logger.info(f"Started tracking segment: {label}")
-        
-        # Record as a checkpoint too
-        self.checkpoints[f"{label}_start"] = time.time()
+        self.active_segments[label] = time.time()
+        self._add_timeline_event(f"{label}_tracking_started")
+        logger.debug(f"Started tracking segment: {label}")
     
     def stop_tracking(self, label: str) -> float:
         """
@@ -101,25 +113,15 @@ class PerformanceMonitor:
         Returns:
             Duration in seconds
         """
-        if label in self.active_tracking:
-            start = self.active_tracking[label]
-            end = time.time()
-            duration = end - start
-            
-            # Record the segment duration
+        if label in self.active_segments:
+            start_time = self.active_segments[label]
+            duration = time.time() - start_time
             self.segments[label] = duration
-            
-            # Record as a checkpoint too
-            self.checkpoints[f"{label}_end"] = end
-            
-            # Remove from active tracking
-            del self.active_tracking[label]
-            
-            logger.info(f"Completed segment '{label}' in {duration:.2f}s")
+            del self.active_segments[label]
+            self._add_timeline_event(f"{label}_tracking_stopped", {"duration": f"{duration:.2f}s"})
+            logger.debug(f"Stopped tracking segment: {label}, duration: {duration:.2f}s")
             return duration
-        else:
-            logger.warning(f"Attempted to stop tracking '{label}' which wasn't started")
-            return 0
+        return 0
     
     def mark_checkpoint(self, name: str) -> None:
         """
@@ -128,12 +130,11 @@ class PerformanceMonitor:
         Args:
             name: Name of the checkpoint
         """
-        self.checkpoints[name] = time.time()
-        
-        # Calculate time since start if we have a start time
-        if self.start_time is not None:
-            elapsed = time.time() - self.start_time
-            logger.info(f"Checkpoint '{name}' reached at {elapsed:.2f}s")
+        current_time = time.time()
+        self.checkpoints[name] = current_time
+        time_since_start = current_time - self.start_time
+        self._add_timeline_event(f"checkpoint_{name}", {"time_since_start": f"{time_since_start:.2f}s"})
+        logger.debug(f"Marked checkpoint: {name} at {time_since_start:.2f}s after start")
     
     def get_checkpoint_time(self, name: str) -> Optional[float]:
         """
@@ -154,9 +155,9 @@ class PerformanceMonitor:
         Returns:
             Elapsed time in seconds or 0 if tracking hasn't started
         """
-        if self.start_time is None:
-            return 0
-        return time.time() - self.start_time
+        if self.start_time:
+            return time.time() - self.start_time
+        return 0
     
     def time_between_checkpoints(self, start_point: str, end_point: str) -> Optional[float]:
         """
@@ -169,8 +170,11 @@ class PerformanceMonitor:
         Returns:
             Time difference in seconds or None if checkpoints don't exist
         """
-        if start_point in self.checkpoints and end_point in self.checkpoints:
-            return self.checkpoints[end_point] - self.checkpoints[start_point]
+        start_time = self.get_checkpoint_time(start_point)
+        end_time = self.get_checkpoint_time(end_point)
+        
+        if start_time and end_time:
+            return end_time - start_time
         return None
     
     def update_system_stats(self, stats_dict: Dict[str, Any]) -> None:
@@ -180,7 +184,12 @@ class PerformanceMonitor:
         Args:
             stats_dict: Dictionary of stats to update
         """
-        self.system_stats.update(stats_dict)
+        for key, value in stats_dict.items():
+            self.stats[key] = value
+            
+        # Always update memory usage
+        current_memory = psutil.Process().memory_info().rss / (1024 * 1024)  # Convert to MB
+        self.stats['peak_memory_mb'] = max(self.stats['peak_memory_mb'], current_memory)
     
     def start_periodic_stats_collection(self, interval: int = 10, token_service=None, 
                                         data_service=None, prediction_service=None) -> None:
@@ -193,65 +202,64 @@ class PerformanceMonitor:
             data_service: Data service instance
             prediction_service: Prediction service instance
         """
-        if self.stats_thread is not None and self.stats_thread.is_alive():
-            logger.warning("Stats collection already running")
+        if self.collecting_stats:
             return
         
         self.collecting_stats = True
         
         def collect_stats():
-            while self.collecting_stats:
-                try:
-                    # Collect token service stats
-                    if token_service is not None and hasattr(token_service, 'get_stats'):
-                        token_stats = token_service.get_stats()
-                        self.system_stats.update({
-                            "token_cache_size": token_stats.get("cache_size", 0),
-                            "tokens_by_symbol": token_stats.get("tokens_by_symbol", 0),
-                            "tokens_by_address": token_stats.get("tokens_by_address", 0),
-                            "token_cache_hits": token_stats.get("cache_hits", 0),
-                            "token_cache_misses": token_stats.get("cache_misses", 0),
-                            "address_cache_hits": token_stats.get("direct_address_hits", 0)
-                        })
-                    
-                    # Collect data service stats
-                    if data_service is not None and hasattr(data_service, 'get_stats'):
-                        data_stats = data_service.get_stats()
-                        self.system_stats.update({
-                            "total_pools_loaded": data_stats.get("total_pools", 0),
-                            "pool_load_time": data_stats.get("load_time", 0)
-                        })
-                    
-                    # Collect prediction service stats
-                    if prediction_service is not None and hasattr(prediction_service, 'get_stats'):
-                        pred_stats = prediction_service.get_stats()
-                        self.system_stats.update({
-                            "prediction_models_loaded": pred_stats.get("models_loaded", 0),
-                            "prediction_time_avg": pred_stats.get("prediction_time_avg", 0)
-                        })
-                    
-                    # Add timestamp
-                    self.system_stats["last_updated"] = datetime.now().isoformat()
-                    
-                    # Save current stats to file
-                    self.save_interim_report()
-                    
-                except Exception as e:
-                    logger.error(f"Error collecting stats: {str(e)}")
+            try:
+                # Update memory usage
+                current_memory = psutil.Process().memory_info().rss / (1024 * 1024)  # Convert to MB
+                self.stats['peak_memory_mb'] = max(self.stats['peak_memory_mb'], current_memory)
                 
-                # Wait for next collection
-                time.sleep(interval)
+                # Collect token service stats
+                if token_service and hasattr(token_service, 'get_stats'):
+                    token_stats = token_service.get_stats()
+                    for key, value in token_stats.items():
+                        if key in self.stats:
+                            self.stats[key] = value
+                
+                # Schedule next collection if still active
+                if self.collecting_stats:
+                    self.collection_timer = Timer(interval, collect_stats)
+                    self.collection_timer.daemon = True
+                    self.collection_timer.start()
+            except Exception as e:
+                logger.error(f"Error in stats collection: {str(e)}")
         
-        self.stats_thread = threading.Thread(target=collect_stats, daemon=True)
-        self.stats_thread.start()
-        logger.info(f"Started periodic stats collection every {interval}s")
+        # Start initial collection
+        collect_stats()
     
     def stop_periodic_stats_collection(self) -> None:
         """Stop the periodic stats collection."""
         self.collecting_stats = False
-        if self.stats_thread and self.stats_thread.is_alive():
-            self.stats_thread.join(timeout=1.0)
-        logger.info("Stopped periodic stats collection")
+        if self.collection_timer:
+            self.collection_timer.cancel()
+            self.collection_timer = None
+    
+    def _add_timeline_event(self, event: str, metadata: Dict[str, Any] = None) -> None:
+        """
+        Add an event to the timeline.
+        
+        Args:
+            event: Event name
+            metadata: Additional event metadata
+        """
+        timestamp = time.time()
+        time_since_start = timestamp - self.start_time
+        
+        event_data = {
+            "timestamp": timestamp,
+            "time": f"{time_since_start:.2f}s",
+            "event": event,
+            "datetime": datetime.now().isoformat()
+        }
+        
+        if metadata:
+            event_data.update(metadata)
+            
+        self.timeline.append(event_data)
     
     def get_report(self) -> Dict[str, Any]:
         """
@@ -260,43 +268,35 @@ class PerformanceMonitor:
         Returns:
             Dictionary with performance metrics
         """
-        now = time.time()
-        total_time = now - self.start_time if self.start_time else 0
+        # Calculate key metrics
+        time_to_data = self.time_between_checkpoints('monitor_initialized', 'data_loaded')
+        time_to_predictions = self.time_between_checkpoints('monitor_initialized', 'predictions_ready')
+        time_to_ui = self.time_between_checkpoints('monitor_initialized', 'ui_ready')
         
-        # Calculate time to key events
-        time_to_data_loaded = self.time_between_checkpoints("app_initialization_start", "data_loaded") or 0
-        time_to_predictions = self.time_between_checkpoints("app_initialization_start", "predictions_ready") or 0
-        time_to_ui_ready = self.time_between_checkpoints("app_initialization_start", "ui_ready") or 0
+        # Calculate memory usage
+        current_memory = psutil.Process().memory_info().rss / (1024 * 1024)  # Convert to MB
+        memory_growth = current_memory - self.initial_memory
         
-        # Calculate segment durations
-        segment_durations = {}
-        for segment, duration in self.segments.items():
-            segment_durations[segment] = f"{duration:.2f}s"
+        # Finalize any active segments
+        active_segments = list(self.active_segments.keys())
+        for segment in active_segments:
+            self.stop_tracking(segment)
         
-        # Create checkpoint timeline
-        timeline = []
-        if self.start_time:
-            for checkpoint, timestamp in sorted(self.checkpoints.items(), key=lambda x: x[1]):
-                elapsed = timestamp - self.start_time
-                timeline.append({
-                    "event": checkpoint,
-                    "time": f"{elapsed:.2f}s",
-                    "timestamp": datetime.fromtimestamp(timestamp).isoformat()
-                })
-        
-        # Build the report
+        # Build report
         report = {
             "summary": {
-                "total_runtime": f"{total_time:.2f}s",
-                "time_to_data_loaded": f"{time_to_data_loaded:.2f}s",
-                "time_to_predictions": f"{time_to_predictions:.2f}s",
-                "time_to_ui_ready": f"{time_to_ui_ready:.2f}s",
-                "started_at": datetime.fromtimestamp(self.start_time).isoformat() if self.start_time else None,
-                "report_generated_at": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
+                "total_runtime": f"{self.time_since_start():.2f}s",
+                "time_to_data_loaded": f"{time_to_data:.2f}s" if time_to_data else "N/A",
+                "time_to_predictions": f"{time_to_predictions:.2f}s" if time_to_predictions else "N/A", 
+                "time_to_ui_ready": f"{time_to_ui:.2f}s" if time_to_ui else "N/A",
+                "peak_memory_mb": f"{self.stats['peak_memory_mb']:.2f} MB",
+                "memory_growth_mb": f"{memory_growth:.2f} MB"
             },
-            "system_stats": self.system_stats,
-            "segments": segment_durations,
-            "timeline": timeline
+            "segments": {key: f"{value:.2f}s" for key, value in self.segments.items()},
+            "checkpoints": {key: datetime.fromtimestamp(value).isoformat() for key, value in self.checkpoints.items()},
+            "stats": self.stats,
+            "timeline": self.timeline
         }
         
         return report
@@ -304,12 +304,25 @@ class PerformanceMonitor:
     def save_interim_report(self) -> None:
         """Save current stats to an interim report file."""
         try:
+            # Create logs directory if it doesn't exist
+            os.makedirs("logs", exist_ok=True)
+            
+            # Generate interim report filename with timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"logs/performance_interim_{timestamp}.json"
+            
+            # Get current report
             report = self.get_report()
-            filename = os.path.join(self.report_dir, "performance_interim.json")
+            
+            # Save to file
             with open(filename, 'w') as f:
                 json.dump(report, f, indent=2)
+                
+            logger.info(f"Saved interim performance report to {filename}")
+            return filename
         except Exception as e:
             logger.error(f"Error saving interim report: {str(e)}")
+            return None
     
     def save_final_report(self) -> str:
         """
@@ -319,22 +332,44 @@ class PerformanceMonitor:
             Path to the saved report file
         """
         try:
-            report = self.get_report()
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = os.path.join(self.report_dir, f"performance_report_{timestamp}.json")
+            # Create logs directory if it doesn't exist
+            os.makedirs("logs", exist_ok=True)
             
+            # Generate filename
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"logs/performance_report_{timestamp}.json"
+            
+            # Get final report
+            report = self.get_report()
+            
+            # Add any final metrics
+            report["summary"]["final_token_cache_size"] = self.stats.get("token_cache_size", 0)
+            report["summary"]["total_pools_loaded"] = self.stats.get("total_pools_loaded", 0)
+            
+            # Save to file
             with open(filename, 'w') as f:
                 json.dump(report, f, indent=2)
-            
-            logger.info(f"Saved performance report to {filename}")
+                
+            # Also save a simpler summary file
+            summary_filename = f"logs/performance_summary_{timestamp}.txt"
+            with open(summary_filename, 'w') as f:
+                f.write("PERFORMANCE SUMMARY\n")
+                f.write("=================\n\n")
+                f.write(f"Timestamp: {report['summary']['timestamp']}\n")
+                f.write(f"Total runtime: {report['summary']['total_runtime']}\n")
+                f.write(f"Time to data loaded: {report['summary']['time_to_data_loaded']}\n")
+                f.write(f"Time to predictions: {report['summary']['time_to_predictions']}\n")
+                f.write(f"Time to UI ready: {report['summary']['time_to_ui_ready']}\n")
+                f.write(f"Peak memory usage: {report['summary']['peak_memory_mb']}\n")
+                f.write(f"Token cache size: {report['summary']['final_token_cache_size']}\n")
+                f.write(f"Total pools loaded: {report['summary']['total_pools_loaded']}\n")
+                
+            logger.info(f"Saved final performance report to {filename}")
+            logger.info(f"Saved summary to {summary_filename}")
             return filename
         except Exception as e:
-            logger.error(f"Error saving performance report: {str(e)}")
-            return ""
-
-# Singleton instance for global access
-_instance = None
-_lock = threading.Lock()
+            logger.error(f"Error saving final report: {str(e)}")
+            return "Error saving report"
 
 def get_performance_monitor() -> PerformanceMonitor:
     """
@@ -343,10 +378,10 @@ def get_performance_monitor() -> PerformanceMonitor:
     Returns:
         PerformanceMonitor instance
     """
-    global _instance, _lock
+    global _instance
     
-    with _lock:
+    with _instance_lock:
         if _instance is None:
             _instance = PerformanceMonitor()
-    
+        
     return _instance
