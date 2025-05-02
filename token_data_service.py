@@ -173,8 +173,13 @@ class TokenDataService:
             # Try to fetch any missing common tokens directly first
             self._fetch_missing_common_tokens()
             
-            # Create a list of priority tokens to fetch prices for
-            priority_tokens = ["SOL", "USDC", "USDT", "ETH", "BTC", "BONK", "RAY", "ORCA", "MSOL", "STSOL"]
+            # Create a comprehensive list of priority tokens to fetch prices for
+            priority_tokens = [
+                "SOL", "USDC", "USDT", "ETH", "BTC", "BONK", "RAY", "ORCA", 
+                "MSOL", "STSOL", "JUP", "JUPY", "ATLAS", "UXD", "HPsQ", 
+                "SRM", "SAMO", "SLND", "mSOL", "stSOL", "MNGO", "COPE",
+                "LDO", "RNDR", "FIDA", "ATLA", "POLI"
+            ]
             
             # Start a background thread to fetch prices
             logger.info("Starting background thread for token price fetching")
@@ -186,6 +191,7 @@ class TokenDataService:
                         try:
                             # Check if we already have a price
                             if self.token_cache[symbol].get("price", 0) > 0:
+                                logger.info(f"Token {symbol} already has price: {self.token_cache[symbol].get('price')}")
                                 continue
                                 
                             # Fetch price in background
@@ -197,9 +203,13 @@ class TokenDataService:
                                 coingecko_id = self.token_cache[symbol].get("coingecko_id")
                                 if coingecko_id:
                                     try:
+                                        logger.info(f"Fetching price for {symbol} using CoinGecko ID: {coingecko_id}")
                                         result = coingecko_api.get_price([coingecko_id], "usd")
                                         if result and coingecko_id in result:
                                             price = result[coingecko_id].get("usd", 0)
+                                            logger.info(f"Retrieved price for {symbol} using ID {coingecko_id}: {price}")
+                                        else:
+                                            logger.warning(f"No price data returned for {symbol} with ID {coingecko_id}")
                                     except Exception as e:
                                         logger.warning(f"Error fetching price by ID for {symbol}: {e}")
                                 
@@ -256,8 +266,12 @@ class TokenDataService:
         common_tokens = [
             "SOL", "USDC", "USDT", "ETH", "BTC", "MSOL", "BONK", "RAY", "ORCA", 
             "STSOL", "ATLA", "POLI", "JSOL", "JUPY", "HPSQ", "MNGO", "SAMO", 
-            "7I5K", "7KBN", "9VMJ", "BSO1", "FWZ2", "J1TO", "MANG", "MPLU"
+            "7I5K", "7KBN", "9VMJ", "BSO1", "FWZ2", "J1TO", "MANG", "MPLU",
+            "mSOL", "stSOL", "JUP", "SRM", "ATLAS", "UXD", "SLND", "COPE",
+            "LDO", "RNDR", "FIDA" 
         ]
+        
+        logger.info(f"Fetching missing data for {len(common_tokens)} common tokens")
         
         # First try to get them all at once from the API
         try:
@@ -350,6 +364,36 @@ class TokenDataService:
                 "decimals": 6,
                 "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png",
                 "coingecko_id": "raydium",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
+            },
+            "MSOL": {
+                "symbol": "MSOL",
+                "name": "Marinade Staked SOL",
+                "address": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+                "decimals": 9,
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So/logo.png",
+                "coingecko_id": "marinade-staked-sol",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
+            },
+            "STSOL": {
+                "symbol": "STSOL",
+                "name": "Lido Staked SOL",
+                "address": "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj",
+                "decimals": 9,
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj/logo.png",
+                "coingecko_id": "lido-staked-sol",
+                "price": 0,
+                "last_updated": datetime.now().isoformat(),
+            },
+            "ETH": {
+                "symbol": "ETH",
+                "name": "Ethereum",
+                "address": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
+                "decimals": 8,
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs/logo.png",
+                "coingecko_id": "ethereum",
                 "price": 0,
                 "last_updated": datetime.now().isoformat(),
             },
