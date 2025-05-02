@@ -1,0 +1,146 @@
+{
+  "summary": {
+    "timestamp": "2025-05-02T05:58:34.892878",
+    "total_runtime": "82.96s",
+    "time_to_data_loaded": "N/A",
+    "time_to_predictions": "N/A",
+    "time_to_ui_ready": "N/A",
+    "peak_memory_mb": "0.00 MB",
+    "memory_growth_mb": "46.70 MB",
+    "final_token_cache_size": 0,
+    "total_pools_loaded": 0
+  },
+  "segments": {
+    "data_collection_init": "5.46s",
+    "app_initialization": "60.05s",
+    "prediction_generation": "2.68s"
+  },
+  "checkpoints": {
+    "data_loaded": "2025-05-02T05:57:37.322470",
+    "ui_ready": "2025-05-02T05:58:34.891752"
+  },
+  "stats": {
+    "token_cache_size": 0,
+    "token_lookup_times": [],
+    "prediction_times": [],
+    "total_pools_loaded": 0,
+    "tokens_by_symbol": 0,
+    "tokens_by_address": 0,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "api_calls": 0,
+    "peak_memory_mb": 0
+  },
+  "timeline": [
+    {
+      "timestamp": 1746165431.929996,
+      "time": "0.00s",
+      "event": "monitor_initialized",
+      "datetime": "2025-05-02T05:57:11.930001"
+    },
+    {
+      "timestamp": 1746165431.9302373,
+      "time": "0.00s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-02T05:57:11.930239"
+    },
+    {
+      "timestamp": 1746165436.3376899,
+      "time": "4.41s",
+      "event": "data_collection_init_tracking_started",
+      "datetime": "2025-05-02T05:57:16.337699"
+    },
+    {
+      "timestamp": 1746165446.734236,
+      "time": "14.80s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-02T05:57:26.734242"
+    },
+    {
+      "timestamp": 1746165446.7346468,
+      "time": "14.80s",
+      "event": "data_collection_init_tracking_started",
+      "datetime": "2025-05-02T05:57:26.734650"
+    },
+    {
+      "timestamp": 1746165451.8575418,
+      "time": "19.93s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-02T05:57:31.857547"
+    },
+    {
+      "timestamp": 1746165451.8577876,
+      "time": "19.93s",
+      "event": "data_collection_init_tracking_started",
+      "datetime": "2025-05-02T05:57:31.857789"
+    },
+    {
+      "timestamp": 1746165457.3220513,
+      "time": "25.39s",
+      "event": "data_collection_init_tracking_stopped",
+      "datetime": "2025-05-02T05:57:37.322055",
+      "duration": "5.46s"
+    },
+    {
+      "timestamp": 1746165457.322076,
+      "time": "25.39s",
+      "event": "checkpoint_data_loaded",
+      "datetime": "2025-05-02T05:57:37.322077",
+      "time_since_start": "25.39s"
+    },
+    {
+      "timestamp": 1746165457.3224742,
+      "time": "25.39s",
+      "event": "checkpoint_data_loaded",
+      "datetime": "2025-05-02T05:57:37.322475",
+      "time_since_start": "25.39s"
+    },
+    {
+      "timestamp": 1746165511.799143,
+      "time": "79.87s",
+      "event": "prediction_generation_tracking_started",
+      "datetime": "2025-05-02T05:58:31.799145"
+    },
+    {
+      "timestamp": 1746165511.9040115,
+      "time": "79.97s",
+      "event": "checkpoint_ui_ready",
+      "datetime": "2025-05-02T05:58:31.904030",
+      "time_since_start": "79.97s"
+    },
+    {
+      "timestamp": 1746165511.9043407,
+      "time": "79.97s",
+      "event": "app_initialization_tracking_stopped",
+      "datetime": "2025-05-02T05:58:31.904341",
+      "duration": "60.05s"
+    },
+    {
+      "timestamp": 1746165511.906749,
+      "time": "79.98s",
+      "event": "prediction_generation_tracking_stopped",
+      "datetime": "2025-05-02T05:58:31.906750",
+      "duration": "0.11s"
+    },
+    {
+      "timestamp": 1746165512.2111895,
+      "time": "80.28s",
+      "event": "prediction_generation_tracking_started",
+      "datetime": "2025-05-02T05:58:32.211192"
+    },
+    {
+      "timestamp": 1746165514.891757,
+      "time": "82.96s",
+      "event": "checkpoint_ui_ready",
+      "datetime": "2025-05-02T05:58:34.891759",
+      "time_since_start": "82.96s"
+    },
+    {
+      "timestamp": 1746165514.8928678,
+      "time": "82.96s",
+      "event": "prediction_generation_tracking_stopped",
+      "datetime": "2025-05-02T05:58:34.892869",
+      "duration": "2.68s"
+    }
+  ]
+}

@@ -1652,12 +1652,22 @@ def main():
                     st.write("### Token Information")
                     token_cols = st.columns(2)
                     
+                    # Get token service from session state
+                    from token_data_service import get_token_service, TokenDataService
+                    token_svc = get_token_service()
+                    
                     with token_cols[0]:
                         st.write(f"**Token 1:** {pool['token1_symbol']}")
                         
-                        # Get token address from token_service for more accurate data
-                        token1_metadata = token_service.get_token_metadata(pool['token1_symbol'])
-                        token1_address = token1_metadata.get('address') if token1_metadata else pool.get('token1_address', 'Unknown')
+                        # Try to get token metadata from our service
+                        token1_symbol = pool['token1_symbol']
+                        token1_address = pool.get('token1_address', 'Unknown')
+                        
+                        # Check if we can get better metadata
+                        if token1_symbol and token_svc:
+                            token1_meta = token_svc.get_token_metadata(token1_symbol)
+                            if token1_meta and token1_meta.get('address'):
+                                token1_address = token1_meta.get('address')
                         
                         if token1_address and token1_address.strip() and token1_address != 'Unknown':
                             st.write(f"**Address:** `{token1_address}`")
@@ -1670,9 +1680,15 @@ def main():
                     with token_cols[1]:
                         st.write(f"**Token 2:** {pool['token2_symbol']}")
                         
-                        # Get token address from token_service for more accurate data
-                        token2_metadata = token_service.get_token_metadata(pool['token2_symbol'])
-                        token2_address = token2_metadata.get('address') if token2_metadata else pool.get('token2_address', 'Unknown')
+                        # Try to get token metadata from our service
+                        token2_symbol = pool['token2_symbol']
+                        token2_address = pool.get('token2_address', 'Unknown')
+                        
+                        # Check if we can get better metadata
+                        if token2_symbol and token_svc:
+                            token2_meta = token_svc.get_token_metadata(token2_symbol)
+                            if token2_meta and token2_meta.get('address'):
+                                token2_address = token2_meta.get('address')
                         
                         if token2_address and token2_address.strip() and token2_address != 'Unknown':
                             st.write(f"**Address:** `{token2_address}`")
