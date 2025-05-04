@@ -2796,11 +2796,14 @@ def main():
                     # Initialize price dictionary
                     token_prices = {}
                     
+                    # Import the appropriate token price functions
+                    from token_price_service import get_token_price, get_multiple_prices
+                    
                     # Prioritize main tokens first
                     for symbol in priority_tokens:
                         if symbol in all_symbols:
                             try:
-                                price, source = token_service.get_token_price(symbol, return_source=True)
+                                price, source = get_token_price(symbol, return_source=True)
                                 if price is not None and price > 0:
                                     token_prices[symbol] = price
                                     logger.info(f"Retrieved priority token price for {symbol}: ${price} ({source})")
@@ -2816,7 +2819,7 @@ def main():
                         batch = remaining_tokens[i:i+batch_size]
                         try:
                             # Use bulk price lookup for efficiency
-                            batch_prices = token_service.get_multiple_prices(batch)
+                            batch_prices = get_multiple_prices(batch)
                             token_prices.update(batch_prices)
                             
                             # Add a small delay between batches to avoid rate limits

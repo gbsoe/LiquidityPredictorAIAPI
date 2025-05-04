@@ -35,7 +35,10 @@
     "JSOL": 0,
     "SPEC": 0.00272821,
     "FARTCOIN": 1.11,
-    "LAYER": 3.2
+    "LAYER": 3.2,
+    "POOP": 0.00043802,
+    "BOOP": 1.649e-05,
+    "LFG": 0.0001749
   },
   "price_sources": {
     "USDC": "coingecko",
@@ -66,7 +69,10 @@
     "ATLAS": "coingecko",
     "SPEC": "coingecko",
     "FARTCOIN": "coingecko",
-    "LAYER": "coingecko"
+    "LAYER": "coingecko",
+    "POOP": "coingecko",
+    "BOOP": "coingecko",
+    "LFG": "coingecko"
   },
-  "last_update": "2025-05-04T14:52:31.303265"
+  "last_update": "2025-05-04T14:54:47.532225"
 }
