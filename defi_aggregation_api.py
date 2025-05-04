@@ -52,18 +52,25 @@ class DefiAggregationAPI:
             # Use a placeholder value that will be detected later for proper error handling
             self.api_key = "API_KEY_MISSING"
         
-        # Configure base URL - using the base URL from the documentation
-        # Allow override during testing/debugging
-        self.base_url = base_url or os.getenv("DEFI_API_URL") or "https://raydium-trader-filot.replit.app/api"
+        # Configure base URL - use the base URL without the /api suffix
+        # This is important for the new API structure where some endpoints have /api prefix and others don't
+        self.base_url = base_url or os.getenv("DEFI_API_URL") or "https://raydium-trader-filot.replit.app"
         logger.info(f"Using API base URL: {self.base_url}")
         
-        # Configure request delay for rate limiting (10 req/sec)
-        self.request_delay = 0.1  # 100ms delay for 10 requests per second 
+        # Configure request delay for rate limiting (increased to avoid rate limit errors)
+        self.request_delay = 0.5  # 500ms delay for 2 requests per second
         
         # Set authentication headers - use X-API-KEY format (confirmed working with the new API)
         self.headers = {
             "X-API-KEY": self.api_key,  # This format is required by the new API endpoint
             "Content-Type": "application/json"
+        }
+        
+        # Track API endpoint structure 
+        self.endpoints = {
+            "health": "/health",
+            "pools": "/api/pools",
+            "pool_details": "/api/pool/{}"  # Format string for pool ID
         }
         
         logger.info(f"DeFi Aggregation API client initialized with base URL: {self.base_url}")
@@ -73,7 +80,7 @@ class DefiAggregationAPI:
         Make a rate-limited request to the API.
         
         Args:
-            endpoint: API endpoint path
+            endpoint: API endpoint path or key from self.endpoints
             params: Query parameters
             
         Returns:
@@ -82,7 +89,14 @@ class DefiAggregationAPI:
         Raises:
             ValueError: For various API errors with specific messages
         """
-        url = f"{self.base_url}/{endpoint.lstrip('/')}"
+        # Check if the endpoint is a key in our endpoints dictionary
+        if endpoint in self.endpoints:
+            path = self.endpoints[endpoint]
+        else:
+            # Use the provided path directly
+            path = endpoint
+            
+        url = f"{self.base_url}/{path.lstrip('/')}"
         
         if params is None:
             params = {}
@@ -357,8 +371,8 @@ class DefiAggregationAPI:
     def get_pool_by_id(self, pool_id: str) -> Optional[Dict[str, Any]]:
         """
         Get detailed information for a specific pool by its ID.
-        Based on the GET Pool Docs which provides endpoints in the format:
-        /api/v1/pools/{poolId}
+        Based on the new API which provides endpoints in the format:
+        /api/pool/{poolId}
         
         Args:
             pool_id: The authentic base58 pool ID
@@ -367,12 +381,13 @@ class DefiAggregationAPI:
             Pool data or None if not found, transformed to application format
         """
         try:
-            # Make the API request using the documented endpoint format
+            # Make the API request using the correct endpoint format
             logger.info(f"Fetching individual pool data for {pool_id}")
             
             try:
-                # First try the specific pool endpoint
-                response = self._make_request(f"pools/{pool_id}")
+                # Use the pool_details endpoint format string from our endpoints dictionary
+                endpoint_path = self.endpoints["pool_details"].format(pool_id)
+                response = self._make_request(endpoint_path)
             except ValueError as e:
                 if "Resource not found" in str(e):
                     # If the specific endpoint fails, try to find it in the main list
