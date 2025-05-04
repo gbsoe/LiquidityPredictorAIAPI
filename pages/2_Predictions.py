@@ -339,6 +339,7 @@ try:
                             
                             # Basic info about the pool with Pool ID
                             pool_info = f"**{pool['pool_name']}**  \n" \
+                                      f"Pool ID: {pool['pool_id']}  \n" \
                                       f"APR: {pool['predicted_apr']:.2f}%  \n" \
                                       f"Risk: {pool['risk_score']:.2f}"
                             
@@ -386,6 +387,7 @@ try:
                             
                             # Basic info about the pool with Pool ID
                             pool_info = f"**{pool['pool_name']}**  \n" \
+                                      f"Pool ID: {pool['pool_id']}  \n" \
                                       f"APR: {pool['predicted_apr']:.2f}%  \n" \
                                       f"Risk: {pool['risk_score']:.2f}"
                             
