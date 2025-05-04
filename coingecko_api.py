@@ -29,8 +29,17 @@ class CoinGeckoAPI:
     
     def __init__(self):
         """Initialize the CoinGecko API client."""
-        # Base URL for the CoinGecko API
-        self.base_url = "https://api.coingecko.com/api/v3"
+        # Determine the base URL based on whether we have a Pro API key
+        api_key = os.getenv("COINGECKO_API_KEY")
+        
+        if api_key:
+            # If we have a Pro API key, use the Pro API URL
+            self.base_url = "https://pro-api.coingecko.com/api/v3"
+            logger.info("Using CoinGecko Pro API URL with API key")
+        else:
+            # Otherwise, use the standard API URL
+            self.base_url = "https://api.coingecko.com/api/v3"
+            logger.info(f"Using CoinGecko standard API URL: {self.base_url}")
         
         # Initialize token cache for prices
         self.price_cache = {}
@@ -71,6 +80,7 @@ class CoinGeckoAPI:
             "SRM": "serum",
             "MNGO": "mango-markets",
             "SAMO": "samoyedcoin",
+            "SOOMER": "soomer",  # Added SOOMER token mapping
             
             # Specific token variations
             "JUP": "jupiter-exchange", 
@@ -123,6 +133,8 @@ class CoinGeckoAPI:
             "hpsqmvlym98yd6xekygxwp8qydvvnkpqjttuqzk2hzof9".lower(): "hedgehog-protocol", 
             "mangoczj36ajzykwvj3vny4gtonjfvenjmvvwaxlac".lower(): "mango-markets",
             "jsol21f4hvbzfgxvjw4rtrnuhvqyjyd5axkpbgm".lower(): "jsol",
+            # SOOMER token with specific address provided by user
+            "CTh5k7EHD2HBX64xZkeBDwmHskWvNq5WB8f4PWuW1hmz".lower(): "soomer",
             # Additional specific token addresses
             "msolzycxhdygdzu16g5qsh3i5k3z3kzk7ytfqcjm7so".lower(): "marinade-staked-sol",
             "msolzycxhdygdzu16g5qsh3i5k3z3kzk7ytfqcjm7so".upper(): "marinade-staked-sol",
@@ -160,19 +172,36 @@ class CoinGeckoAPI:
         # Apply rate limiting
         self._rate_limit_request()
         
-        url = f"{self.base_url}/{endpoint}"
-        logger.info(f"Making CoinGecko API request to URL: {url}")
-        
         # Create default headers if none provided
         if headers is None:
             headers = {}
             
         # Add API key from environment if available and not already in headers
         api_key = os.getenv("COINGECKO_API_KEY")
-        if api_key and "x-cg-pro-api-key" not in headers:
-            headers["x-cg-pro-api-key"] = api_key
-            headers["x-cg-api-key"] = api_key
-            logger.info("Using CoinGecko API key from environment")
+        use_query_param = False
+        
+        if api_key:
+            # For Demo API key
+            if "x_cg_demo_api_key" not in headers and "x-cg-demo-api-key" not in headers:
+                headers["x-cg-demo-api-key"] = api_key
+                # Also use as query parameter for some endpoints that require it
+                use_query_param = True
+                logger.info("Using CoinGecko Demo API key from environment")
+                
+            # For Pro API keys (maintain backward compatibility)
+            if "x-cg-pro-api-key" not in headers and "x-cg-api-key" not in headers:
+                headers["x-cg-pro-api-key"] = api_key
+                headers["x-cg-api-key"] = api_key
+                logger.info("Using CoinGecko Pro API key from environment")
+        
+        # Add API key as query parameter if needed
+        if use_query_param and api_key and "?" in endpoint:
+            endpoint += f"&x_cg_demo_api_key={api_key}"
+        elif use_query_param and api_key:
+            endpoint += f"?x_cg_demo_api_key={api_key}"
+            
+        url = f"{self.base_url}/{endpoint}"
+        logger.info(f"Making CoinGecko API request to URL: {url}")
             
         try:
             logger.debug(f"Request headers: {headers}")
@@ -466,8 +495,13 @@ class CoinGeckoAPI:
             # Add API key from environment if available
             api_key = os.getenv("COINGECKO_API_KEY")
             if api_key:
+                # For Demo API key
+                headers["x-cg-demo-api-key"] = api_key
+                
+                # For Pro API keys (maintain backward compatibility)
                 headers["x-cg-pro-api-key"] = api_key
                 headers["x-cg-api-key"] = api_key
+                
                 logger.info("Using CoinGecko API key from environment for address lookup")
         
         # First, check if we have the address in our address-to-id mapping

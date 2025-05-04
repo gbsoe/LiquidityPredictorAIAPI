@@ -16,7 +16,7 @@
         "name": "Fartcoin",
         "address": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
         "decimals": 9,
-        "price": 1.1
+        "price": 1.09
       },
       {
         "symbol": "USDC",
@@ -28,22 +28,22 @@
     ],
     "poolId": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
     "programId": "",
-    "liquidity": 186063.81,
-    "volume_24h": 4604380.75,
-    "apr": 526.6,
+    "liquidity": 185558.15,
+    "volume_24h": 4580056.26,
+    "apr": 525.65,
     "fee": 0,
-    "apr_24h": 526.6,
-    "apr_7d": 416.39,
-    "apr_30d": 231.7,
+    "apr_24h": 525.65,
+    "apr_7d": 417.55,
+    "apr_30d": 232.42,
     "apr_change_24h": 0,
-    "apr_change_7d": -20.928598556779345,
-    "apr_change_30d": -44.3550517543649,
+    "apr_change_7d": -20.56501474365071,
+    "apr_change_30d": -44.33720512513472,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:28.150509",
-    "updated_at": "2025-05-04T12:40:28.150517",
+    "created_at": "2025-05-04T12:51:02.647231",
+    "updated_at": "2025-05-04T12:51:02.647244",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -55,11 +55,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 186063.81,
-      "volumeUsd": 4604380.75,
-      "apy24h": 526.6,
-      "apy7d": 416.39,
-      "apy30d": 231.7
+      "tvl": 185558.15,
+      "volumeUsd": 4580056.26,
+      "apy24h": 525.65,
+      "apy7d": 417.55,
+      "apy30d": 232.42
     },
     "api_response": {
       "id": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
@@ -69,11 +69,11 @@
       "name": "Fartcoin/USDC",
       "active": true,
       "metrics": {
-        "tvl": 186063.81,
-        "volumeUsd": 4604380.75,
-        "apy24h": 526.6,
-        "apy7d": 416.39,
-        "apy30d": 231.7
+        "tvl": 185558.15,
+        "volumeUsd": 4580056.26,
+        "apy24h": 525.65,
+        "apy7d": 417.55,
+        "apy30d": 232.42
       }
     },
     "token1_price_source": "none",
@@ -96,7 +96,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 18095114.43
+        "price": 18299881.63
       },
       {
         "symbol": "POOP",
@@ -108,22 +108,22 @@
     ],
     "poolId": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
     "programId": "",
-    "liquidity": 384934.87,
-    "volume_24h": 46303847.33,
-    "apr": 439.06,
+    "liquidity": 382213.83,
+    "volume_24h": 46715753.18,
+    "apr": 446.12,
     "fee": 0,
-    "apr_24h": 439.06,
-    "apr_7d": 41.94,
-    "apr_30d": 16.78,
+    "apr_24h": 446.12,
+    "apr_7d": 42.67,
+    "apr_30d": 17.07,
     "apr_change_24h": 0,
-    "apr_change_7d": -90.44777479160024,
-    "apr_change_30d": -59.99046256556986,
+    "apr_change_7d": -90.43530888550166,
+    "apr_change_30d": -59.995312866182324,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:28.523431",
-    "updated_at": "2025-05-04T12:40:28.523438",
+    "created_at": "2025-05-04T12:51:03.080602",
+    "updated_at": "2025-05-04T12:51:03.080615",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -135,11 +135,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 384934.87,
-      "volumeUsd": 46303847.33,
-      "apy24h": 439.06,
-      "apy7d": 41.94,
-      "apy30d": 16.78
+      "tvl": 382213.83,
+      "volumeUsd": 46715753.18,
+      "apy24h": 446.12,
+      "apy7d": 42.67,
+      "apy30d": 17.07
     },
     "api_response": {
       "id": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
@@ -149,11 +149,11 @@
       "name": "SOL/POOP",
       "active": true,
       "metrics": {
-        "tvl": 384934.87,
-        "volumeUsd": 46303847.33,
-        "apy24h": 439.06,
-        "apy7d": 41.94,
-        "apy30d": 16.78
+        "tvl": 382213.83,
+        "volumeUsd": 46715753.18,
+        "apy24h": 446.12,
+        "apy7d": 42.67,
+        "apy30d": 17.07
       }
     },
     "token1_price_source": "coingecko",
@@ -176,7 +176,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 132.68
+        "price": 133.23
       },
       {
         "symbol": "Fartcoin",
@@ -188,22 +188,22 @@
     ],
     "poolId": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
     "programId": "",
-    "liquidity": 406488.0,
-    "volume_24h": 5053159.16,
-    "apr": 261.19,
+    "liquidity": 405197.05,
+    "volume_24h": 5041702.09,
+    "apr": 261.51,
     "fee": 0,
-    "apr_24h": 261.19,
-    "apr_7d": 220.94,
-    "apr_30d": 128.38,
+    "apr_24h": 261.51,
+    "apr_7d": 221.6,
+    "apr_30d": 128.84,
     "apr_change_24h": 0,
-    "apr_change_7d": -15.410237757953979,
-    "apr_change_30d": -41.8937268036571,
+    "apr_change_7d": -15.261366678138502,
+    "apr_change_30d": -41.85920577617328,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:28.891544",
-    "updated_at": "2025-05-04T12:40:28.891551",
+    "created_at": "2025-05-04T12:51:03.487078",
+    "updated_at": "2025-05-04T12:51:03.487089",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -215,11 +215,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 406488.0,
-      "volumeUsd": 5053159.16,
-      "apy24h": 261.19,
-      "apy7d": 220.94,
-      "apy30d": 128.38
+      "tvl": 405197.05,
+      "volumeUsd": 5041702.09,
+      "apy24h": 261.51,
+      "apy7d": 221.6,
+      "apy30d": 128.84
     },
     "api_response": {
       "id": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
@@ -229,11 +229,11 @@
       "name": "SOL/Fartcoin",
       "active": true,
       "metrics": {
-        "tvl": 406488.0,
-        "volumeUsd": 5053159.16,
-        "apy24h": 261.19,
-        "apy7d": 220.94,
-        "apy30d": 128.38
+        "tvl": 405197.05,
+        "volumeUsd": 5041702.09,
+        "apy24h": 261.51,
+        "apy7d": 221.6,
+        "apy30d": 128.84
       }
     },
     "token1_price_source": "coingecko",
@@ -268,22 +268,22 @@
     ],
     "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
     "programId": "",
-    "liquidity": 1925844.02,
-    "volume_24h": 4342303.33,
-    "apr": 205.75,
+    "liquidity": 1927660.41,
+    "volume_24h": 4302752.3,
+    "apr": 203.68,
     "fee": 0,
-    "apr_24h": 205.75,
-    "apr_7d": 273.46,
-    "apr_30d": 109.38,
+    "apr_24h": 203.68,
+    "apr_7d": 273.27,
+    "apr_30d": 109.31,
     "apr_change_24h": 0,
-    "apr_change_7d": 32.90886998784932,
-    "apr_change_30d": -60.00146273678052,
+    "apr_change_7d": 34.1663393558523,
+    "apr_change_30d": -59.99926812310169,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:29.253559",
-    "updated_at": "2025-05-04T12:40:29.253567",
+    "created_at": "2025-05-04T12:51:03.908135",
+    "updated_at": "2025-05-04T12:51:03.908146",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -295,11 +295,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1925844.02,
-      "volumeUsd": 4342303.33,
-      "apy24h": 205.75,
-      "apy7d": 273.46,
-      "apy30d": 109.38
+      "tvl": 1927660.41,
+      "volumeUsd": 4302752.3,
+      "apy24h": 203.68,
+      "apy7d": 273.27,
+      "apy30d": 109.31
     },
     "api_response": {
       "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
@@ -309,11 +309,11 @@
       "name": "BOOP/USDC",
       "active": true,
       "metrics": {
-        "tvl": 1925844.02,
-        "volumeUsd": 4342303.33,
-        "apy24h": 205.75,
-        "apy7d": 273.46,
-        "apy30d": 109.38
+        "tvl": 1927660.41,
+        "volumeUsd": 4302752.3,
+        "apy24h": 203.68,
+        "apy7d": 273.27,
+        "apy30d": 109.31
       }
     },
     "token1_price_source": "none",
@@ -336,7 +336,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 23614.71
+        "price": 23914.06
       },
       {
         "symbol": "SOGENT",
@@ -348,22 +348,22 @@
     ],
     "poolId": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
     "programId": "",
-    "liquidity": 505498.42,
-    "volume_24h": 23831800.46,
-    "apr": 172.08,
+    "liquidity": 504264.12,
+    "volume_24h": 23388223.94,
+    "apr": 169.29,
     "fee": 0,
-    "apr_24h": 172.08,
-    "apr_7d": 28.98,
-    "apr_30d": 11.59,
+    "apr_24h": 169.29,
+    "apr_7d": 29.06,
+    "apr_30d": 11.62,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.15899581589959,
-    "apr_change_30d": -60.00690131124914,
+    "apr_change_7d": -82.83418985173371,
+    "apr_change_30d": -60.01376462491397,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:29.619281",
-    "updated_at": "2025-05-04T12:40:29.619290",
+    "created_at": "2025-05-04T12:51:04.312972",
+    "updated_at": "2025-05-04T12:51:04.312983",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -375,11 +375,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 505498.42,
-      "volumeUsd": 23831800.46,
-      "apy24h": 172.08,
-      "apy7d": 28.98,
-      "apy30d": 11.59
+      "tvl": 504264.12,
+      "volumeUsd": 23388223.94,
+      "apy24h": 169.29,
+      "apy7d": 29.06,
+      "apy30d": 11.62
     },
     "api_response": {
       "id": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
@@ -389,91 +389,11 @@
       "name": "SOL/SOGENT",
       "active": true,
       "metrics": {
-        "tvl": 505498.42,
-        "volumeUsd": 23831800.46,
-        "apy24h": 172.08,
-        "apy7d": 28.98,
-        "apy30d": 11.59
-      }
-    },
-    "token1_price_source": "coingecko",
-    "token2_price_source": "none"
-  },
-  {
-    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "name": "SOL/LFG",
-    "dex": "raydium",
-    "category": "Meme Token",
-    "token1_symbol": "SOL",
-    "token2_symbol": "LFG",
-    "token1_address": "So11111111111111111111111111111111111111112",
-    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-    "token1_price": 145.4,
-    "token2_price": 0.0,
-    "tokens": [
-      {
-        "symbol": "SOL",
-        "name": "Solana",
-        "address": "So11111111111111111111111111111111111111112",
-        "decimals": 9,
-        "price": 124779.41
-      },
-      {
-        "symbol": "LFG",
-        "name": "LFG",
-        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-        "decimals": 9,
-        "price": 0
-      }
-    ],
-    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "programId": "",
-    "liquidity": 459850.9,
-    "volume_24h": 18395314.04,
-    "apr": 146.01,
-    "fee": 0,
-    "apr_24h": 146.01,
-    "apr_7d": 67.24,
-    "apr_30d": 26.9,
-    "apr_change_24h": 0,
-    "apr_change_7d": -53.948359701390316,
-    "apr_change_30d": -59.9940511600238,
-    "tvl_change_24h": 0,
-    "tvl_change_7d": 0,
-    "tvl_change_30d": 0,
-    "active": true,
-    "created_at": "2025-05-04T12:40:30.041674",
-    "updated_at": "2025-05-04T12:40:30.041686",
-    "extra_data": {},
-    "version": "1.0",
-    "prediction_score": 0,
-    "risk_score": 0,
-    "volatility": 0,
-    "dex_specific": {
-      "ammId": "",
-      "concentrationBounds": "",
-      "whirlpoolId": ""
-    },
-    "metrics_data": {
-      "tvl": 459850.9,
-      "volumeUsd": 18395314.04,
-      "apy24h": 146.01,
-      "apy7d": 67.24,
-      "apy30d": 26.9
-    },
-    "api_response": {
-      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "programId": "",
-      "source": "raydium",
-      "name": "SOL/LFG",
-      "active": true,
-      "metrics": {
-        "tvl": 459850.9,
-        "volumeUsd": 18395314.04,
-        "apy24h": 146.01,
-        "apy7d": 67.24,
-        "apy30d": 26.9
+        "tvl": 504264.12,
+        "volumeUsd": 23388223.94,
+        "apy24h": 169.29,
+        "apy7d": 29.06,
+        "apy30d": 11.62
       }
     },
     "token1_price_source": "coingecko",
@@ -496,7 +416,7 @@
         "name": "Layerhub",
         "address": "LAYER4xPpTCb3QL8S9u41EAhAX7mhBn8Q6xMTwY2Yzc",
         "decimals": 9,
-        "price": 3.21
+        "price": 3.17
       },
       {
         "symbol": "SOL",
@@ -508,22 +428,22 @@
     ],
     "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
     "programId": "",
-    "liquidity": 3891619.77,
-    "volume_24h": 15549617.3,
-    "apr": 145.84,
+    "liquidity": 3879486.67,
+    "volume_24h": 15577319.14,
+    "apr": 146.56,
     "fee": 0,
-    "apr_24h": 145.84,
-    "apr_7d": 77.02,
-    "apr_30d": 73.41,
+    "apr_24h": 146.56,
+    "apr_7d": 77.28,
+    "apr_30d": 73.69,
     "apr_change_24h": 0,
-    "apr_change_7d": -47.188699945145366,
-    "apr_change_30d": -4.687094261230849,
+    "apr_change_7d": -47.27074235807861,
+    "apr_change_30d": -4.645445134575573,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:30.408042",
-    "updated_at": "2025-05-04T12:40:30.408050",
+    "created_at": "2025-05-04T12:51:05.625977",
+    "updated_at": "2025-05-04T12:51:05.625988",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -535,11 +455,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 3891619.77,
-      "volumeUsd": 15549617.3,
-      "apy24h": 145.84,
-      "apy7d": 77.02,
-      "apy30d": 73.41
+      "tvl": 3879486.67,
+      "volumeUsd": 15577319.14,
+      "apy24h": 146.56,
+      "apy7d": 77.28,
+      "apy30d": 73.69
     },
     "api_response": {
       "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
@@ -549,15 +469,95 @@
       "name": "LAYER/SOL",
       "active": true,
       "metrics": {
-        "tvl": 3891619.77,
-        "volumeUsd": 15549617.3,
-        "apy24h": 145.84,
-        "apy7d": 77.02,
-        "apy30d": 73.41
+        "tvl": 3879486.67,
+        "volumeUsd": 15577319.14,
+        "apy24h": 146.56,
+        "apy7d": 77.28,
+        "apy30d": 73.69
       }
     },
     "token1_price_source": "none",
     "token2_price_source": "coingecko"
+  },
+  {
+    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "name": "SOL/LFG",
+    "dex": "raydium",
+    "category": "Meme Token",
+    "token1_symbol": "SOL",
+    "token2_symbol": "LFG",
+    "token1_address": "So11111111111111111111111111111111111111112",
+    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+    "token1_price": 145.4,
+    "token2_price": 0.0,
+    "tokens": [
+      {
+        "symbol": "SOL",
+        "name": "Solana",
+        "address": "So11111111111111111111111111111111111111112",
+        "decimals": 9,
+        "price": 125650.15
+      },
+      {
+        "symbol": "LFG",
+        "name": "LFG",
+        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+        "decimals": 9,
+        "price": 0
+      }
+    ],
+    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "programId": "",
+    "liquidity": 457900.55,
+    "volume_24h": 18094552.93,
+    "apr": 144.23,
+    "fee": 0,
+    "apr_24h": 144.23,
+    "apr_7d": 67.54,
+    "apr_30d": 27.02,
+    "apr_change_24h": 0,
+    "apr_change_7d": -53.17201691742355,
+    "apr_change_30d": -59.99407758365414,
+    "tvl_change_24h": 0,
+    "tvl_change_7d": 0,
+    "tvl_change_30d": 0,
+    "active": true,
+    "created_at": "2025-05-04T12:51:05.989054",
+    "updated_at": "2025-05-04T12:51:05.989062",
+    "extra_data": {},
+    "version": "1.0",
+    "prediction_score": 0,
+    "risk_score": 0,
+    "volatility": 0,
+    "dex_specific": {
+      "ammId": "",
+      "concentrationBounds": "",
+      "whirlpoolId": ""
+    },
+    "metrics_data": {
+      "tvl": 457900.55,
+      "volumeUsd": 18094552.93,
+      "apy24h": 144.23,
+      "apy7d": 67.54,
+      "apy30d": 27.02
+    },
+    "api_response": {
+      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "programId": "",
+      "source": "raydium",
+      "name": "SOL/LFG",
+      "active": true,
+      "metrics": {
+        "tvl": 457900.55,
+        "volumeUsd": 18094552.93,
+        "apy24h": 144.23,
+        "apy7d": 67.54,
+        "apy30d": 27.02
+      }
+    },
+    "token1_price_source": "coingecko",
+    "token2_price_source": "none"
   },
   {
     "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -576,7 +576,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 12095.31
+        "price": 12155.72
       },
       {
         "symbol": "SOOMER",
@@ -588,22 +588,22 @@
     ],
     "poolId": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
     "programId": "",
-    "liquidity": 661871.25,
-    "volume_24h": 19744988.12,
-    "apr": 108.89,
+    "liquidity": 660706.2,
+    "volume_24h": 19366599.07,
+    "apr": 106.99,
     "fee": 0,
-    "apr_24h": 108.89,
-    "apr_7d": 18.44,
-    "apr_30d": 7.38,
+    "apr_24h": 106.99,
+    "apr_7d": 18.47,
+    "apr_30d": 7.39,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.06547892368445,
-    "apr_change_30d": -59.97830802603038,
+    "apr_change_7d": -82.73670436489392,
+    "apr_change_30d": -59.98917162966973,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:30.767829",
-    "updated_at": "2025-05-04T12:40:30.767838",
+    "created_at": "2025-05-04T12:51:06.391693",
+    "updated_at": "2025-05-04T12:51:06.391703",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -615,11 +615,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 661871.25,
-      "volumeUsd": 19744988.12,
-      "apy24h": 108.89,
-      "apy7d": 18.44,
-      "apy30d": 7.38
+      "tvl": 660706.2,
+      "volumeUsd": 19366599.07,
+      "apy24h": 106.99,
+      "apy7d": 18.47,
+      "apy30d": 7.39
     },
     "api_response": {
       "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -629,11 +629,11 @@
       "name": "SOL/SOOMER",
       "active": true,
       "metrics": {
-        "tvl": 661871.25,
-        "volumeUsd": 19744988.12,
-        "apy24h": 108.89,
-        "apy7d": 18.44,
-        "apy30d": 7.38
+        "tvl": 660706.2,
+        "volumeUsd": 19366599.07,
+        "apy24h": 106.99,
+        "apy7d": 18.47,
+        "apy30d": 7.39
       }
     },
     "token1_price_source": "coingecko",
@@ -656,7 +656,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 14882.67
+        "price": 13745.99
       },
       {
         "symbol": "SPEC",
@@ -668,22 +668,22 @@
     ],
     "poolId": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
     "programId": "",
-    "liquidity": 668684.74,
-    "volume_24h": 17709473.33,
-    "apr": 96.67,
+    "liquidity": 700596.08,
+    "volume_24h": 17617450.66,
+    "apr": 91.78,
     "fee": 0,
-    "apr_24h": 96.67,
-    "apr_7d": 14.57,
-    "apr_30d": 5.83,
+    "apr_24h": 91.78,
+    "apr_7d": 13.98,
+    "apr_30d": 5.59,
     "apr_change_24h": 0,
-    "apr_change_7d": -84.92810592738181,
-    "apr_change_30d": -59.98627316403569,
+    "apr_change_7d": -84.76792329483547,
+    "apr_change_30d": -60.014306151645215,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:31.164999",
-    "updated_at": "2025-05-04T12:40:31.165007",
+    "created_at": "2025-05-04T12:51:07.123363",
+    "updated_at": "2025-05-04T12:51:07.123374",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -695,11 +695,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 668684.74,
-      "volumeUsd": 17709473.33,
-      "apy24h": 96.67,
-      "apy7d": 14.57,
-      "apy30d": 5.83
+      "tvl": 700596.08,
+      "volumeUsd": 17617450.66,
+      "apy24h": 91.78,
+      "apy7d": 13.98,
+      "apy30d": 5.59
     },
     "api_response": {
       "id": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
@@ -709,11 +709,11 @@
       "name": "SOL/SPEC",
       "active": true,
       "metrics": {
-        "tvl": 668684.74,
-        "volumeUsd": 17709473.33,
-        "apy24h": 96.67,
-        "apy7d": 14.57,
-        "apy30d": 5.83
+        "tvl": 700596.08,
+        "volumeUsd": 17617450.66,
+        "apy24h": 91.78,
+        "apy7d": 13.98,
+        "apy30d": 5.59
       }
     },
     "token1_price_source": "coingecko",
@@ -748,22 +748,22 @@
     ],
     "poolId": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
     "programId": "",
-    "liquidity": 364527.21,
-    "volume_24h": 193616.16,
-    "apr": 48.47,
+    "liquidity": 365008.28,
+    "volume_24h": 192006.52,
+    "apr": 48.0,
     "fee": 0,
-    "apr_24h": 48.47,
-    "apr_7d": 47.67,
-    "apr_30d": 61.17,
+    "apr_24h": 48.0,
+    "apr_7d": 47.51,
+    "apr_30d": 61.09,
     "apr_change_24h": 0,
-    "apr_change_7d": -1.6505054672993544,
-    "apr_change_30d": 28.319697923222154,
+    "apr_change_7d": -1.0208333333333375,
+    "apr_change_30d": 28.58345611450222,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:31.165218",
-    "updated_at": "2025-05-04T12:40:31.165221",
+    "created_at": "2025-05-04T12:51:07.123555",
+    "updated_at": "2025-05-04T12:51:07.123558",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -775,11 +775,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 364527.21,
-      "volumeUsd": 193616.16,
-      "apy24h": 48.47,
-      "apy7d": 47.67,
-      "apy30d": 61.17
+      "tvl": 365008.28,
+      "volumeUsd": 192006.52,
+      "apy24h": 48.0,
+      "apy7d": 47.51,
+      "apy30d": 61.09
     },
     "api_response": {
       "id": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
@@ -789,11 +789,11 @@
       "name": "RAY/USDC",
       "active": true,
       "metrics": {
-        "tvl": 364527.21,
-        "volumeUsd": 193616.16,
-        "apy24h": 48.47,
-        "apy7d": 47.67,
-        "apy30d": 61.17
+        "tvl": 365008.28,
+        "volumeUsd": 192006.52,
+        "apy24h": 48.0,
+        "apy7d": 47.51,
+        "apy30d": 61.09
       }
     },
     "token1_price_source": "coingecko",
@@ -816,7 +816,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.73
+        "price": 145.82
       },
       {
         "symbol": "USDC",
@@ -828,22 +828,22 @@
     ],
     "poolId": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
     "programId": "",
-    "liquidity": 9866001.7,
-    "volume_24h": 22825029.79,
-    "apr": 35.19,
+    "liquidity": 9863683.33,
+    "volume_24h": 22747294.53,
+    "apr": 35.08,
     "fee": 0,
-    "apr_24h": 35.19,
-    "apr_7d": 35.92,
-    "apr_30d": 84.96,
+    "apr_24h": 35.08,
+    "apr_7d": 35.9,
+    "apr_30d": 84.98,
     "apr_change_24h": 0,
-    "apr_change_7d": 2.074452969593646,
-    "apr_change_30d": 136.52561247216033,
+    "apr_change_7d": 2.3375142531356907,
+    "apr_change_30d": 136.7130919220056,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:31.165385",
-    "updated_at": "2025-05-04T12:40:31.165390",
+    "created_at": "2025-05-04T12:51:07.123768",
+    "updated_at": "2025-05-04T12:51:07.123771",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -855,11 +855,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 9866001.7,
-      "volumeUsd": 22825029.79,
-      "apy24h": 35.19,
-      "apy7d": 35.92,
-      "apy30d": 84.96
+      "tvl": 9863683.33,
+      "volumeUsd": 22747294.53,
+      "apy24h": 35.08,
+      "apy7d": 35.9,
+      "apy30d": 84.98
     },
     "api_response": {
       "id": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
@@ -869,11 +869,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 9866001.7,
-        "volumeUsd": 22825029.79,
-        "apy24h": 35.19,
-        "apy7d": 35.92,
-        "apy30d": 84.96
+        "tvl": 9863683.33,
+        "volumeUsd": 22747294.53,
+        "apy24h": 35.08,
+        "apy7d": 35.9,
+        "apy30d": 84.98
       }
     },
     "token1_price_source": "coingecko",
@@ -896,7 +896,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 54.52
+        "price": 54.55
       },
       {
         "symbol": "RAY",
@@ -908,22 +908,22 @@
     ],
     "poolId": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
     "programId": "",
-    "liquidity": 4137004.67,
-    "volume_24h": 5080125.1,
-    "apr": 24.43,
+    "liquidity": 4136864.34,
+    "volume_24h": 5049390.76,
+    "apr": 24.3,
     "fee": 0,
-    "apr_24h": 24.43,
-    "apr_7d": 33.6,
-    "apr_30d": 56.21,
+    "apr_24h": 24.3,
+    "apr_7d": 33.55,
+    "apr_30d": 56.22,
     "apr_change_24h": 0,
-    "apr_change_7d": 37.535816618911184,
-    "apr_change_30d": 67.29166666666666,
+    "apr_change_7d": 38.06584362139916,
+    "apr_change_30d": 67.57078986587184,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:31.165525",
-    "updated_at": "2025-05-04T12:40:31.165530",
+    "created_at": "2025-05-04T12:51:07.123930",
+    "updated_at": "2025-05-04T12:51:07.123933",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -935,11 +935,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4137004.67,
-      "volumeUsd": 5080125.1,
-      "apy24h": 24.43,
-      "apy7d": 33.6,
-      "apy30d": 56.21
+      "tvl": 4136864.34,
+      "volumeUsd": 5049390.76,
+      "apy24h": 24.3,
+      "apy7d": 33.55,
+      "apy30d": 56.22
     },
     "api_response": {
       "id": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
@@ -949,11 +949,11 @@
       "name": "SOL/RAY",
       "active": true,
       "metrics": {
-        "tvl": 4137004.67,
-        "volumeUsd": 5080125.1,
-        "apy24h": 24.43,
-        "apy7d": 33.6,
-        "apy30d": 56.21
+        "tvl": 4136864.34,
+        "volumeUsd": 5049390.76,
+        "apy24h": 24.3,
+        "apy7d": 33.55,
+        "apy30d": 56.22
       }
     },
     "token1_price_source": "coingecko",
@@ -976,7 +976,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.72
+        "price": 145.86
       },
       {
         "symbol": "USDC",
@@ -988,22 +988,22 @@
     ],
     "poolId": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
     "programId": "",
-    "liquidity": 4575102.3,
-    "volume_24h": 26397019.09,
-    "apr": 22.28,
+    "liquidity": 4538955.87,
+    "volume_24h": 26258623.59,
+    "apr": 22.35,
     "fee": 0,
-    "apr_24h": 22.28,
-    "apr_7d": 24.48,
-    "apr_30d": 22.34,
+    "apr_24h": 22.35,
+    "apr_7d": 24.66,
+    "apr_30d": 22.52,
     "apr_change_24h": 0,
-    "apr_change_7d": 9.87432675044883,
-    "apr_change_30d": -8.74183006535948,
+    "apr_change_7d": 10.33557046979865,
+    "apr_change_30d": -8.678021086780213,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:31.165668",
-    "updated_at": "2025-05-04T12:40:31.165670",
+    "created_at": "2025-05-04T12:51:07.124080",
+    "updated_at": "2025-05-04T12:51:07.124082",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1015,11 +1015,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4575102.3,
-      "volumeUsd": 26397019.09,
-      "apy24h": 22.28,
-      "apy7d": 24.48,
-      "apy30d": 22.34
+      "tvl": 4538955.87,
+      "volumeUsd": 26258623.59,
+      "apy24h": 22.35,
+      "apy7d": 24.66,
+      "apy30d": 22.52
     },
     "api_response": {
       "id": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
@@ -1029,11 +1029,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 4575102.3,
-        "volumeUsd": 26397019.09,
-        "apy24h": 22.28,
-        "apy7d": 24.48,
-        "apy30d": 22.34
+        "tvl": 4538955.87,
+        "volumeUsd": 26258623.59,
+        "apy24h": 22.35,
+        "apy7d": 24.66,
+        "apy30d": 22.52
       }
     },
     "token1_price_source": "coingecko",
@@ -1056,7 +1056,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.7
+        "price": 145.85
       },
       {
         "symbol": "USDT",
@@ -1068,22 +1068,22 @@
     ],
     "poolId": "3nMFwZXwY1s1M5s8vYAHqd4wGs4iSxXE4LRoUMMYqEgF",
     "programId": "",
-    "liquidity": 1052432.6,
-    "volume_24h": 6374663.52,
-    "apr": 22.11,
+    "liquidity": 1052378.69,
+    "volume_24h": 6344513.08,
+    "apr": 22.0,
     "fee": 0,
-    "apr_24h": 22.11,
-    "apr_7d": 20.55,
+    "apr_24h": 22.0,
+    "apr_7d": 20.54,
     "apr_30d": 32.41,
     "apr_change_24h": 0,
-    "apr_change_7d": -7.055630936227946,
-    "apr_change_30d": 57.71289537712894,
+    "apr_change_7d": -6.63636363636364,
+    "apr_change_30d": 57.789678675754615,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:31.165803",
-    "updated_at": "2025-05-04T12:40:31.165805",
+    "created_at": "2025-05-04T12:51:07.124317",
+    "updated_at": "2025-05-04T12:51:07.124320",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1095,10 +1095,10 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1052432.6,
-      "volumeUsd": 6374663.52,
-      "apy24h": 22.11,
-      "apy7d": 20.55,
+      "tvl": 1052378.69,
+      "volumeUsd": 6344513.08,
+      "apy24h": 22.0,
+      "apy7d": 20.54,
       "apy30d": 32.41
     },
     "api_response": {
@@ -1109,10 +1109,10 @@
       "name": "SOL/USDT",
       "active": true,
       "metrics": {
-        "tvl": 1052432.6,
-        "volumeUsd": 6374663.52,
-        "apy24h": 22.11,
-        "apy7d": 20.55,
+        "tvl": 1052378.69,
+        "volumeUsd": 6344513.08,
+        "apy24h": 22.0,
+        "apy7d": 20.54,
         "apy30d": 32.41
       }
     },
@@ -1136,7 +1136,7 @@
         "name": "Fartcoin",
         "address": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
         "decimals": 9,
-        "price": 1.1
+        "price": 1.09
       },
       {
         "symbol": "USDC",
@@ -1148,22 +1148,22 @@
     ],
     "poolId": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
     "programId": "",
-    "liquidity": 186063.81,
-    "volume_24h": 4604380.75,
-    "apr": 526.6,
+    "liquidity": 185558.15,
+    "volume_24h": 4580056.26,
+    "apr": 525.65,
     "fee": 0,
-    "apr_24h": 526.6,
-    "apr_7d": 416.39,
-    "apr_30d": 231.7,
+    "apr_24h": 525.65,
+    "apr_7d": 417.55,
+    "apr_30d": 232.42,
     "apr_change_24h": 0,
-    "apr_change_7d": -20.928598556779345,
-    "apr_change_30d": -44.3550517543649,
+    "apr_change_7d": -20.56501474365071,
+    "apr_change_30d": -44.33720512513472,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:37.879656",
-    "updated_at": "2025-05-04T12:40:37.879665",
+    "created_at": "2025-05-04T12:51:17.349510",
+    "updated_at": "2025-05-04T12:51:17.349518",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1175,11 +1175,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 186063.81,
-      "volumeUsd": 4604380.75,
-      "apy24h": 526.6,
-      "apy7d": 416.39,
-      "apy30d": 231.7
+      "tvl": 185558.15,
+      "volumeUsd": 4580056.26,
+      "apy24h": 525.65,
+      "apy7d": 417.55,
+      "apy30d": 232.42
     },
     "api_response": {
       "id": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
@@ -1189,11 +1189,11 @@
       "name": "Fartcoin/USDC",
       "active": true,
       "metrics": {
-        "tvl": 186063.81,
-        "volumeUsd": 4604380.75,
-        "apy24h": 526.6,
-        "apy7d": 416.39,
-        "apy30d": 231.7
+        "tvl": 185558.15,
+        "volumeUsd": 4580056.26,
+        "apy24h": 525.65,
+        "apy7d": 417.55,
+        "apy30d": 232.42
       }
     },
     "token1_price_source": "none",
@@ -1216,7 +1216,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 18095114.43
+        "price": 18299881.63
       },
       {
         "symbol": "POOP",
@@ -1228,22 +1228,22 @@
     ],
     "poolId": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
     "programId": "",
-    "liquidity": 384934.87,
-    "volume_24h": 46303847.33,
-    "apr": 439.06,
+    "liquidity": 382213.83,
+    "volume_24h": 46715753.18,
+    "apr": 446.12,
     "fee": 0,
-    "apr_24h": 439.06,
-    "apr_7d": 41.94,
-    "apr_30d": 16.78,
+    "apr_24h": 446.12,
+    "apr_7d": 42.67,
+    "apr_30d": 17.07,
     "apr_change_24h": 0,
-    "apr_change_7d": -90.44777479160024,
-    "apr_change_30d": -59.99046256556986,
+    "apr_change_7d": -90.43530888550166,
+    "apr_change_30d": -59.995312866182324,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:38.244267",
-    "updated_at": "2025-05-04T12:40:38.244276",
+    "created_at": "2025-05-04T12:51:17.718774",
+    "updated_at": "2025-05-04T12:51:17.718782",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1255,11 +1255,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 384934.87,
-      "volumeUsd": 46303847.33,
-      "apy24h": 439.06,
-      "apy7d": 41.94,
-      "apy30d": 16.78
+      "tvl": 382213.83,
+      "volumeUsd": 46715753.18,
+      "apy24h": 446.12,
+      "apy7d": 42.67,
+      "apy30d": 17.07
     },
     "api_response": {
       "id": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
@@ -1269,11 +1269,11 @@
       "name": "SOL/POOP",
       "active": true,
       "metrics": {
-        "tvl": 384934.87,
-        "volumeUsd": 46303847.33,
-        "apy24h": 439.06,
-        "apy7d": 41.94,
-        "apy30d": 16.78
+        "tvl": 382213.83,
+        "volumeUsd": 46715753.18,
+        "apy24h": 446.12,
+        "apy7d": 42.67,
+        "apy30d": 17.07
       }
     },
     "token1_price_source": "coingecko",
@@ -1296,7 +1296,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 132.68
+        "price": 133.23
       },
       {
         "symbol": "Fartcoin",
@@ -1308,22 +1308,22 @@
     ],
     "poolId": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
     "programId": "",
-    "liquidity": 406488.0,
-    "volume_24h": 5053159.16,
-    "apr": 261.19,
+    "liquidity": 405197.05,
+    "volume_24h": 5041702.09,
+    "apr": 261.51,
     "fee": 0,
-    "apr_24h": 261.19,
-    "apr_7d": 220.94,
-    "apr_30d": 128.38,
+    "apr_24h": 261.51,
+    "apr_7d": 221.6,
+    "apr_30d": 128.84,
     "apr_change_24h": 0,
-    "apr_change_7d": -15.410237757953979,
-    "apr_change_30d": -41.8937268036571,
+    "apr_change_7d": -15.261366678138502,
+    "apr_change_30d": -41.85920577617328,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:38.610153",
-    "updated_at": "2025-05-04T12:40:38.610164",
+    "created_at": "2025-05-04T12:51:18.086615",
+    "updated_at": "2025-05-04T12:51:18.086625",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1335,11 +1335,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 406488.0,
-      "volumeUsd": 5053159.16,
-      "apy24h": 261.19,
-      "apy7d": 220.94,
-      "apy30d": 128.38
+      "tvl": 405197.05,
+      "volumeUsd": 5041702.09,
+      "apy24h": 261.51,
+      "apy7d": 221.6,
+      "apy30d": 128.84
     },
     "api_response": {
       "id": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
@@ -1349,11 +1349,11 @@
       "name": "SOL/Fartcoin",
       "active": true,
       "metrics": {
-        "tvl": 406488.0,
-        "volumeUsd": 5053159.16,
-        "apy24h": 261.19,
-        "apy7d": 220.94,
-        "apy30d": 128.38
+        "tvl": 405197.05,
+        "volumeUsd": 5041702.09,
+        "apy24h": 261.51,
+        "apy7d": 221.6,
+        "apy30d": 128.84
       }
     },
     "token1_price_source": "coingecko",
@@ -1388,22 +1388,22 @@
     ],
     "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
     "programId": "",
-    "liquidity": 1925844.02,
-    "volume_24h": 4342303.33,
-    "apr": 205.75,
+    "liquidity": 1927660.41,
+    "volume_24h": 4302752.3,
+    "apr": 203.68,
     "fee": 0,
-    "apr_24h": 205.75,
-    "apr_7d": 273.46,
-    "apr_30d": 109.38,
+    "apr_24h": 203.68,
+    "apr_7d": 273.27,
+    "apr_30d": 109.31,
     "apr_change_24h": 0,
-    "apr_change_7d": 32.90886998784932,
-    "apr_change_30d": -60.00146273678052,
+    "apr_change_7d": 34.1663393558523,
+    "apr_change_30d": -59.99926812310169,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:38.968839",
-    "updated_at": "2025-05-04T12:40:38.968845",
+    "created_at": "2025-05-04T12:51:18.446516",
+    "updated_at": "2025-05-04T12:51:18.446524",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1415,11 +1415,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1925844.02,
-      "volumeUsd": 4342303.33,
-      "apy24h": 205.75,
-      "apy7d": 273.46,
-      "apy30d": 109.38
+      "tvl": 1927660.41,
+      "volumeUsd": 4302752.3,
+      "apy24h": 203.68,
+      "apy7d": 273.27,
+      "apy30d": 109.31
     },
     "api_response": {
       "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
@@ -1429,11 +1429,11 @@
       "name": "BOOP/USDC",
       "active": true,
       "metrics": {
-        "tvl": 1925844.02,
-        "volumeUsd": 4342303.33,
-        "apy24h": 205.75,
-        "apy7d": 273.46,
-        "apy30d": 109.38
+        "tvl": 1927660.41,
+        "volumeUsd": 4302752.3,
+        "apy24h": 203.68,
+        "apy7d": 273.27,
+        "apy30d": 109.31
       }
     },
     "token1_price_source": "none",
@@ -1456,7 +1456,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 23614.71
+        "price": 23914.06
       },
       {
         "symbol": "SOGENT",
@@ -1468,22 +1468,22 @@
     ],
     "poolId": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
     "programId": "",
-    "liquidity": 505498.42,
-    "volume_24h": 23831800.46,
-    "apr": 172.08,
+    "liquidity": 504264.12,
+    "volume_24h": 23388223.94,
+    "apr": 169.29,
     "fee": 0,
-    "apr_24h": 172.08,
-    "apr_7d": 28.98,
-    "apr_30d": 11.59,
+    "apr_24h": 169.29,
+    "apr_7d": 29.06,
+    "apr_30d": 11.62,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.15899581589959,
-    "apr_change_30d": -60.00690131124914,
+    "apr_change_7d": -82.83418985173371,
+    "apr_change_30d": -60.01376462491397,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:39.339030",
-    "updated_at": "2025-05-04T12:40:39.339040",
+    "created_at": "2025-05-04T12:51:18.858365",
+    "updated_at": "2025-05-04T12:51:18.858375",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1495,11 +1495,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 505498.42,
-      "volumeUsd": 23831800.46,
-      "apy24h": 172.08,
-      "apy7d": 28.98,
-      "apy30d": 11.59
+      "tvl": 504264.12,
+      "volumeUsd": 23388223.94,
+      "apy24h": 169.29,
+      "apy7d": 29.06,
+      "apy30d": 11.62
     },
     "api_response": {
       "id": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
@@ -1509,91 +1509,11 @@
       "name": "SOL/SOGENT",
       "active": true,
       "metrics": {
-        "tvl": 505498.42,
-        "volumeUsd": 23831800.46,
-        "apy24h": 172.08,
-        "apy7d": 28.98,
-        "apy30d": 11.59
-      }
-    },
-    "token1_price_source": "coingecko",
-    "token2_price_source": "none"
-  },
-  {
-    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "name": "SOL/LFG",
-    "dex": "raydium",
-    "category": "Meme Token",
-    "token1_symbol": "SOL",
-    "token2_symbol": "LFG",
-    "token1_address": "So11111111111111111111111111111111111111112",
-    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-    "token1_price": 145.4,
-    "token2_price": 0.0,
-    "tokens": [
-      {
-        "symbol": "SOL",
-        "name": "Solana",
-        "address": "So11111111111111111111111111111111111111112",
-        "decimals": 9,
-        "price": 124779.41
-      },
-      {
-        "symbol": "LFG",
-        "name": "LFG",
-        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-        "decimals": 9,
-        "price": 0
-      }
-    ],
-    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "programId": "",
-    "liquidity": 459850.9,
-    "volume_24h": 18395314.04,
-    "apr": 146.01,
-    "fee": 0,
-    "apr_24h": 146.01,
-    "apr_7d": 67.24,
-    "apr_30d": 26.9,
-    "apr_change_24h": 0,
-    "apr_change_7d": -53.948359701390316,
-    "apr_change_30d": -59.9940511600238,
-    "tvl_change_24h": 0,
-    "tvl_change_7d": 0,
-    "tvl_change_30d": 0,
-    "active": true,
-    "created_at": "2025-05-04T12:40:39.730822",
-    "updated_at": "2025-05-04T12:40:39.730831",
-    "extra_data": {},
-    "version": "1.0",
-    "prediction_score": 0,
-    "risk_score": 0,
-    "volatility": 0,
-    "dex_specific": {
-      "ammId": "",
-      "concentrationBounds": "",
-      "whirlpoolId": ""
-    },
-    "metrics_data": {
-      "tvl": 459850.9,
-      "volumeUsd": 18395314.04,
-      "apy24h": 146.01,
-      "apy7d": 67.24,
-      "apy30d": 26.9
-    },
-    "api_response": {
-      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "programId": "",
-      "source": "raydium",
-      "name": "SOL/LFG",
-      "active": true,
-      "metrics": {
-        "tvl": 459850.9,
-        "volumeUsd": 18395314.04,
-        "apy24h": 146.01,
-        "apy7d": 67.24,
-        "apy30d": 26.9
+        "tvl": 504264.12,
+        "volumeUsd": 23388223.94,
+        "apy24h": 169.29,
+        "apy7d": 29.06,
+        "apy30d": 11.62
       }
     },
     "token1_price_source": "coingecko",
@@ -1616,7 +1536,7 @@
         "name": "Layerhub",
         "address": "LAYER4xPpTCb3QL8S9u41EAhAX7mhBn8Q6xMTwY2Yzc",
         "decimals": 9,
-        "price": 3.21
+        "price": 3.17
       },
       {
         "symbol": "SOL",
@@ -1628,22 +1548,22 @@
     ],
     "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
     "programId": "",
-    "liquidity": 3891619.77,
-    "volume_24h": 15549617.3,
-    "apr": 145.84,
+    "liquidity": 3879486.67,
+    "volume_24h": 15577319.14,
+    "apr": 146.56,
     "fee": 0,
-    "apr_24h": 145.84,
-    "apr_7d": 77.02,
-    "apr_30d": 73.41,
+    "apr_24h": 146.56,
+    "apr_7d": 77.28,
+    "apr_30d": 73.69,
     "apr_change_24h": 0,
-    "apr_change_7d": -47.188699945145366,
-    "apr_change_30d": -4.687094261230849,
+    "apr_change_7d": -47.27074235807861,
+    "apr_change_30d": -4.645445134575573,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:40.097427",
-    "updated_at": "2025-05-04T12:40:40.097438",
+    "created_at": "2025-05-04T12:51:20.097319",
+    "updated_at": "2025-05-04T12:51:20.097329",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1655,11 +1575,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 3891619.77,
-      "volumeUsd": 15549617.3,
-      "apy24h": 145.84,
-      "apy7d": 77.02,
-      "apy30d": 73.41
+      "tvl": 3879486.67,
+      "volumeUsd": 15577319.14,
+      "apy24h": 146.56,
+      "apy7d": 77.28,
+      "apy30d": 73.69
     },
     "api_response": {
       "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
@@ -1669,15 +1589,95 @@
       "name": "LAYER/SOL",
       "active": true,
       "metrics": {
-        "tvl": 3891619.77,
-        "volumeUsd": 15549617.3,
-        "apy24h": 145.84,
-        "apy7d": 77.02,
-        "apy30d": 73.41
+        "tvl": 3879486.67,
+        "volumeUsd": 15577319.14,
+        "apy24h": 146.56,
+        "apy7d": 77.28,
+        "apy30d": 73.69
       }
     },
     "token1_price_source": "none",
     "token2_price_source": "coingecko"
+  },
+  {
+    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "name": "SOL/LFG",
+    "dex": "raydium",
+    "category": "Meme Token",
+    "token1_symbol": "SOL",
+    "token2_symbol": "LFG",
+    "token1_address": "So11111111111111111111111111111111111111112",
+    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+    "token1_price": 145.4,
+    "token2_price": 0.0,
+    "tokens": [
+      {
+        "symbol": "SOL",
+        "name": "Solana",
+        "address": "So11111111111111111111111111111111111111112",
+        "decimals": 9,
+        "price": 125650.15
+      },
+      {
+        "symbol": "LFG",
+        "name": "LFG",
+        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+        "decimals": 9,
+        "price": 0
+      }
+    ],
+    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "programId": "",
+    "liquidity": 457900.55,
+    "volume_24h": 18094552.93,
+    "apr": 144.23,
+    "fee": 0,
+    "apr_24h": 144.23,
+    "apr_7d": 67.54,
+    "apr_30d": 27.02,
+    "apr_change_24h": 0,
+    "apr_change_7d": -53.17201691742355,
+    "apr_change_30d": -59.99407758365414,
+    "tvl_change_24h": 0,
+    "tvl_change_7d": 0,
+    "tvl_change_30d": 0,
+    "active": true,
+    "created_at": "2025-05-04T12:51:20.519319",
+    "updated_at": "2025-05-04T12:51:20.519328",
+    "extra_data": {},
+    "version": "1.0",
+    "prediction_score": 0,
+    "risk_score": 0,
+    "volatility": 0,
+    "dex_specific": {
+      "ammId": "",
+      "concentrationBounds": "",
+      "whirlpoolId": ""
+    },
+    "metrics_data": {
+      "tvl": 457900.55,
+      "volumeUsd": 18094552.93,
+      "apy24h": 144.23,
+      "apy7d": 67.54,
+      "apy30d": 27.02
+    },
+    "api_response": {
+      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "programId": "",
+      "source": "raydium",
+      "name": "SOL/LFG",
+      "active": true,
+      "metrics": {
+        "tvl": 457900.55,
+        "volumeUsd": 18094552.93,
+        "apy24h": 144.23,
+        "apy7d": 67.54,
+        "apy30d": 27.02
+      }
+    },
+    "token1_price_source": "coingecko",
+    "token2_price_source": "none"
   },
   {
     "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -1696,7 +1696,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 12095.31
+        "price": 12155.72
       },
       {
         "symbol": "SOOMER",
@@ -1708,22 +1708,22 @@
     ],
     "poolId": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
     "programId": "",
-    "liquidity": 661871.25,
-    "volume_24h": 19744988.12,
-    "apr": 108.89,
+    "liquidity": 660706.2,
+    "volume_24h": 19366599.07,
+    "apr": 106.99,
     "fee": 0,
-    "apr_24h": 108.89,
-    "apr_7d": 18.44,
-    "apr_30d": 7.38,
+    "apr_24h": 106.99,
+    "apr_7d": 18.47,
+    "apr_30d": 7.39,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.06547892368445,
-    "apr_change_30d": -59.97830802603038,
+    "apr_change_7d": -82.73670436489392,
+    "apr_change_30d": -59.98917162966973,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:40.455759",
-    "updated_at": "2025-05-04T12:40:40.455766",
+    "created_at": "2025-05-04T12:51:20.883983",
+    "updated_at": "2025-05-04T12:51:20.883994",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1735,11 +1735,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 661871.25,
-      "volumeUsd": 19744988.12,
-      "apy24h": 108.89,
-      "apy7d": 18.44,
-      "apy30d": 7.38
+      "tvl": 660706.2,
+      "volumeUsd": 19366599.07,
+      "apy24h": 106.99,
+      "apy7d": 18.47,
+      "apy30d": 7.39
     },
     "api_response": {
       "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -1749,11 +1749,11 @@
       "name": "SOL/SOOMER",
       "active": true,
       "metrics": {
-        "tvl": 661871.25,
-        "volumeUsd": 19744988.12,
-        "apy24h": 108.89,
-        "apy7d": 18.44,
-        "apy30d": 7.38
+        "tvl": 660706.2,
+        "volumeUsd": 19366599.07,
+        "apy24h": 106.99,
+        "apy7d": 18.47,
+        "apy30d": 7.39
       }
     },
     "token1_price_source": "coingecko",
@@ -1776,7 +1776,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 14882.67
+        "price": 13745.99
       },
       {
         "symbol": "SPEC",
@@ -1788,22 +1788,22 @@
     ],
     "poolId": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
     "programId": "",
-    "liquidity": 668684.74,
-    "volume_24h": 17709473.33,
-    "apr": 96.67,
+    "liquidity": 700596.08,
+    "volume_24h": 17617450.66,
+    "apr": 91.78,
     "fee": 0,
-    "apr_24h": 96.67,
-    "apr_7d": 14.57,
-    "apr_30d": 5.83,
+    "apr_24h": 91.78,
+    "apr_7d": 13.98,
+    "apr_30d": 5.59,
     "apr_change_24h": 0,
-    "apr_change_7d": -84.92810592738181,
-    "apr_change_30d": -59.98627316403569,
+    "apr_change_7d": -84.76792329483547,
+    "apr_change_30d": -60.014306151645215,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:40.853557",
-    "updated_at": "2025-05-04T12:40:40.853565",
+    "created_at": "2025-05-04T12:51:21.621734",
+    "updated_at": "2025-05-04T12:51:21.621744",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1815,11 +1815,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 668684.74,
-      "volumeUsd": 17709473.33,
-      "apy24h": 96.67,
-      "apy7d": 14.57,
-      "apy30d": 5.83
+      "tvl": 700596.08,
+      "volumeUsd": 17617450.66,
+      "apy24h": 91.78,
+      "apy7d": 13.98,
+      "apy30d": 5.59
     },
     "api_response": {
       "id": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
@@ -1829,11 +1829,11 @@
       "name": "SOL/SPEC",
       "active": true,
       "metrics": {
-        "tvl": 668684.74,
-        "volumeUsd": 17709473.33,
-        "apy24h": 96.67,
-        "apy7d": 14.57,
-        "apy30d": 5.83
+        "tvl": 700596.08,
+        "volumeUsd": 17617450.66,
+        "apy24h": 91.78,
+        "apy7d": 13.98,
+        "apy30d": 5.59
       }
     },
     "token1_price_source": "coingecko",
@@ -1868,22 +1868,22 @@
     ],
     "poolId": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
     "programId": "",
-    "liquidity": 364527.21,
-    "volume_24h": 193616.16,
-    "apr": 48.47,
+    "liquidity": 365008.28,
+    "volume_24h": 192006.52,
+    "apr": 48.0,
     "fee": 0,
-    "apr_24h": 48.47,
-    "apr_7d": 47.67,
-    "apr_30d": 61.17,
+    "apr_24h": 48.0,
+    "apr_7d": 47.51,
+    "apr_30d": 61.09,
     "apr_change_24h": 0,
-    "apr_change_7d": -1.6505054672993544,
-    "apr_change_30d": 28.319697923222154,
+    "apr_change_7d": -1.0208333333333375,
+    "apr_change_30d": 28.58345611450222,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:40.853755",
-    "updated_at": "2025-05-04T12:40:40.853758",
+    "created_at": "2025-05-04T12:51:21.621963",
+    "updated_at": "2025-05-04T12:51:21.621968",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1895,11 +1895,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 364527.21,
-      "volumeUsd": 193616.16,
-      "apy24h": 48.47,
-      "apy7d": 47.67,
-      "apy30d": 61.17
+      "tvl": 365008.28,
+      "volumeUsd": 192006.52,
+      "apy24h": 48.0,
+      "apy7d": 47.51,
+      "apy30d": 61.09
     },
     "api_response": {
       "id": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
@@ -1909,11 +1909,11 @@
       "name": "RAY/USDC",
       "active": true,
       "metrics": {
-        "tvl": 364527.21,
-        "volumeUsd": 193616.16,
-        "apy24h": 48.47,
-        "apy7d": 47.67,
-        "apy30d": 61.17
+        "tvl": 365008.28,
+        "volumeUsd": 192006.52,
+        "apy24h": 48.0,
+        "apy7d": 47.51,
+        "apy30d": 61.09
       }
     },
     "token1_price_source": "coingecko",
@@ -1936,7 +1936,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.73
+        "price": 145.82
       },
       {
         "symbol": "USDC",
@@ -1948,22 +1948,22 @@
     ],
     "poolId": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
     "programId": "",
-    "liquidity": 9866001.7,
-    "volume_24h": 22825029.79,
-    "apr": 35.19,
+    "liquidity": 9863683.33,
+    "volume_24h": 22747294.53,
+    "apr": 35.08,
     "fee": 0,
-    "apr_24h": 35.19,
-    "apr_7d": 35.92,
-    "apr_30d": 84.96,
+    "apr_24h": 35.08,
+    "apr_7d": 35.9,
+    "apr_30d": 84.98,
     "apr_change_24h": 0,
-    "apr_change_7d": 2.074452969593646,
-    "apr_change_30d": 136.52561247216033,
+    "apr_change_7d": 2.3375142531356907,
+    "apr_change_30d": 136.7130919220056,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:40.853905",
-    "updated_at": "2025-05-04T12:40:40.853908",
+    "created_at": "2025-05-04T12:51:21.622182",
+    "updated_at": "2025-05-04T12:51:21.622186",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -1975,11 +1975,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 9866001.7,
-      "volumeUsd": 22825029.79,
-      "apy24h": 35.19,
-      "apy7d": 35.92,
-      "apy30d": 84.96
+      "tvl": 9863683.33,
+      "volumeUsd": 22747294.53,
+      "apy24h": 35.08,
+      "apy7d": 35.9,
+      "apy30d": 84.98
     },
     "api_response": {
       "id": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
@@ -1989,11 +1989,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 9866001.7,
-        "volumeUsd": 22825029.79,
-        "apy24h": 35.19,
-        "apy7d": 35.92,
-        "apy30d": 84.96
+        "tvl": 9863683.33,
+        "volumeUsd": 22747294.53,
+        "apy24h": 35.08,
+        "apy7d": 35.9,
+        "apy30d": 84.98
       }
     },
     "token1_price_source": "coingecko",
@@ -2016,7 +2016,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 54.52
+        "price": 54.55
       },
       {
         "symbol": "RAY",
@@ -2028,22 +2028,22 @@
     ],
     "poolId": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
     "programId": "",
-    "liquidity": 4137004.67,
-    "volume_24h": 5080125.1,
-    "apr": 24.43,
+    "liquidity": 4136864.34,
+    "volume_24h": 5049390.76,
+    "apr": 24.3,
     "fee": 0,
-    "apr_24h": 24.43,
-    "apr_7d": 33.6,
-    "apr_30d": 56.21,
+    "apr_24h": 24.3,
+    "apr_7d": 33.55,
+    "apr_30d": 56.22,
     "apr_change_24h": 0,
-    "apr_change_7d": 37.535816618911184,
-    "apr_change_30d": 67.29166666666666,
+    "apr_change_7d": 38.06584362139916,
+    "apr_change_30d": 67.57078986587184,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:40.854044",
-    "updated_at": "2025-05-04T12:40:40.854047",
+    "created_at": "2025-05-04T12:51:21.622389",
+    "updated_at": "2025-05-04T12:51:21.622394",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -2055,11 +2055,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4137004.67,
-      "volumeUsd": 5080125.1,
-      "apy24h": 24.43,
-      "apy7d": 33.6,
-      "apy30d": 56.21
+      "tvl": 4136864.34,
+      "volumeUsd": 5049390.76,
+      "apy24h": 24.3,
+      "apy7d": 33.55,
+      "apy30d": 56.22
     },
     "api_response": {
       "id": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
@@ -2069,11 +2069,11 @@
       "name": "SOL/RAY",
       "active": true,
       "metrics": {
-        "tvl": 4137004.67,
-        "volumeUsd": 5080125.1,
-        "apy24h": 24.43,
-        "apy7d": 33.6,
-        "apy30d": 56.21
+        "tvl": 4136864.34,
+        "volumeUsd": 5049390.76,
+        "apy24h": 24.3,
+        "apy7d": 33.55,
+        "apy30d": 56.22
       }
     },
     "token1_price_source": "coingecko",
@@ -2096,7 +2096,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.72
+        "price": 145.86
       },
       {
         "symbol": "USDC",
@@ -2108,22 +2108,22 @@
     ],
     "poolId": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
     "programId": "",
-    "liquidity": 4575102.3,
-    "volume_24h": 26397019.09,
-    "apr": 22.28,
+    "liquidity": 4538955.87,
+    "volume_24h": 26258623.59,
+    "apr": 22.35,
     "fee": 0,
-    "apr_24h": 22.28,
-    "apr_7d": 24.48,
-    "apr_30d": 22.34,
+    "apr_24h": 22.35,
+    "apr_7d": 24.66,
+    "apr_30d": 22.52,
     "apr_change_24h": 0,
-    "apr_change_7d": 9.87432675044883,
-    "apr_change_30d": -8.74183006535948,
+    "apr_change_7d": 10.33557046979865,
+    "apr_change_30d": -8.678021086780213,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:40.854210",
-    "updated_at": "2025-05-04T12:40:40.854214",
+    "created_at": "2025-05-04T12:51:21.622583",
+    "updated_at": "2025-05-04T12:51:21.622587",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -2135,11 +2135,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4575102.3,
-      "volumeUsd": 26397019.09,
-      "apy24h": 22.28,
-      "apy7d": 24.48,
-      "apy30d": 22.34
+      "tvl": 4538955.87,
+      "volumeUsd": 26258623.59,
+      "apy24h": 22.35,
+      "apy7d": 24.66,
+      "apy30d": 22.52
     },
     "api_response": {
       "id": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
@@ -2149,11 +2149,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 4575102.3,
-        "volumeUsd": 26397019.09,
-        "apy24h": 22.28,
-        "apy7d": 24.48,
-        "apy30d": 22.34
+        "tvl": 4538955.87,
+        "volumeUsd": 26258623.59,
+        "apy24h": 22.35,
+        "apy7d": 24.66,
+        "apy30d": 22.52
       }
     },
     "token1_price_source": "coingecko",
@@ -2176,7 +2176,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.7
+        "price": 145.85
       },
       {
         "symbol": "USDT",
@@ -2188,22 +2188,22 @@
     ],
     "poolId": "3nMFwZXwY1s1M5s8vYAHqd4wGs4iSxXE4LRoUMMYqEgF",
     "programId": "",
-    "liquidity": 1052432.6,
-    "volume_24h": 6374663.52,
-    "apr": 22.11,
+    "liquidity": 1052378.69,
+    "volume_24h": 6344513.08,
+    "apr": 22.0,
     "fee": 0,
-    "apr_24h": 22.11,
-    "apr_7d": 20.55,
+    "apr_24h": 22.0,
+    "apr_7d": 20.54,
     "apr_30d": 32.41,
     "apr_change_24h": 0,
-    "apr_change_7d": -7.055630936227946,
-    "apr_change_30d": 57.71289537712894,
+    "apr_change_7d": -6.63636363636364,
+    "apr_change_30d": 57.789678675754615,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:40.854494",
-    "updated_at": "2025-05-04T12:40:40.854497",
+    "created_at": "2025-05-04T12:51:21.622769",
+    "updated_at": "2025-05-04T12:51:21.622773",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -2215,10 +2215,10 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1052432.6,
-      "volumeUsd": 6374663.52,
-      "apy24h": 22.11,
-      "apy7d": 20.55,
+      "tvl": 1052378.69,
+      "volumeUsd": 6344513.08,
+      "apy24h": 22.0,
+      "apy7d": 20.54,
       "apy30d": 32.41
     },
     "api_response": {
@@ -2229,10 +2229,10 @@
       "name": "SOL/USDT",
       "active": true,
       "metrics": {
-        "tvl": 1052432.6,
-        "volumeUsd": 6374663.52,
-        "apy24h": 22.11,
-        "apy7d": 20.55,
+        "tvl": 1052378.69,
+        "volumeUsd": 6344513.08,
+        "apy24h": 22.0,
+        "apy7d": 20.54,
         "apy30d": 32.41
       }
     },
@@ -2256,7 +2256,7 @@
         "name": "Fartcoin",
         "address": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
         "decimals": 9,
-        "price": 1.1
+        "price": 1.09
       },
       {
         "symbol": "USDC",
@@ -2268,22 +2268,22 @@
     ],
     "poolId": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
     "programId": "",
-    "liquidity": 186063.81,
-    "volume_24h": 4604380.75,
-    "apr": 526.6,
+    "liquidity": 185558.15,
+    "volume_24h": 4580056.26,
+    "apr": 525.65,
     "fee": 0,
-    "apr_24h": 526.6,
-    "apr_7d": 416.39,
-    "apr_30d": 231.7,
+    "apr_24h": 525.65,
+    "apr_7d": 417.55,
+    "apr_30d": 232.42,
     "apr_change_24h": 0,
-    "apr_change_7d": -20.928598556779345,
-    "apr_change_30d": -44.3550517543649,
+    "apr_change_7d": -20.56501474365071,
+    "apr_change_30d": -44.33720512513472,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:47.561046",
-    "updated_at": "2025-05-04T12:40:47.561059",
+    "created_at": "2025-05-04T12:51:28.393892",
+    "updated_at": "2025-05-04T12:51:28.393903",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -2295,11 +2295,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 186063.81,
-      "volumeUsd": 4604380.75,
-      "apy24h": 526.6,
-      "apy7d": 416.39,
-      "apy30d": 231.7
+      "tvl": 185558.15,
+      "volumeUsd": 4580056.26,
+      "apy24h": 525.65,
+      "apy7d": 417.55,
+      "apy30d": 232.42
     },
     "api_response": {
       "id": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
@@ -2309,11 +2309,11 @@
       "name": "Fartcoin/USDC",
       "active": true,
       "metrics": {
-        "tvl": 186063.81,
-        "volumeUsd": 4604380.75,
-        "apy24h": 526.6,
-        "apy7d": 416.39,
-        "apy30d": 231.7
+        "tvl": 185558.15,
+        "volumeUsd": 4580056.26,
+        "apy24h": 525.65,
+        "apy7d": 417.55,
+        "apy30d": 232.42
       }
     },
     "token1_price_source": "none",
@@ -2336,7 +2336,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 18095114.43
+        "price": 18299881.63
       },
       {
         "symbol": "POOP",
@@ -2348,22 +2348,22 @@
     ],
     "poolId": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
     "programId": "",
-    "liquidity": 384934.87,
-    "volume_24h": 46303847.33,
-    "apr": 439.06,
+    "liquidity": 382213.83,
+    "volume_24h": 46715753.18,
+    "apr": 446.12,
     "fee": 0,
-    "apr_24h": 439.06,
-    "apr_7d": 41.94,
-    "apr_30d": 16.78,
+    "apr_24h": 446.12,
+    "apr_7d": 42.67,
+    "apr_30d": 17.07,
     "apr_change_24h": 0,
-    "apr_change_7d": -90.44777479160024,
-    "apr_change_30d": -59.99046256556986,
+    "apr_change_7d": -90.43530888550166,
+    "apr_change_30d": -59.995312866182324,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:47.919735",
-    "updated_at": "2025-05-04T12:40:47.919745",
+    "created_at": "2025-05-04T12:51:28.765555",
+    "updated_at": "2025-05-04T12:51:28.765562",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -2375,11 +2375,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 384934.87,
-      "volumeUsd": 46303847.33,
-      "apy24h": 439.06,
-      "apy7d": 41.94,
-      "apy30d": 16.78
+      "tvl": 382213.83,
+      "volumeUsd": 46715753.18,
+      "apy24h": 446.12,
+      "apy7d": 42.67,
+      "apy30d": 17.07
     },
     "api_response": {
       "id": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
@@ -2389,11 +2389,11 @@
       "name": "SOL/POOP",
       "active": true,
       "metrics": {
-        "tvl": 384934.87,
-        "volumeUsd": 46303847.33,
-        "apy24h": 439.06,
-        "apy7d": 41.94,
-        "apy30d": 16.78
+        "tvl": 382213.83,
+        "volumeUsd": 46715753.18,
+        "apy24h": 446.12,
+        "apy7d": 42.67,
+        "apy30d": 17.07
       }
     },
     "token1_price_source": "coingecko",
@@ -2416,7 +2416,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 132.68
+        "price": 133.23
       },
       {
         "symbol": "Fartcoin",
@@ -2428,22 +2428,22 @@
     ],
     "poolId": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
     "programId": "",
-    "liquidity": 406488.0,
-    "volume_24h": 5053159.16,
-    "apr": 261.19,
+    "liquidity": 405197.05,
+    "volume_24h": 5041702.09,
+    "apr": 261.51,
     "fee": 0,
-    "apr_24h": 261.19,
-    "apr_7d": 220.94,
-    "apr_30d": 128.38,
+    "apr_24h": 261.51,
+    "apr_7d": 221.6,
+    "apr_30d": 128.84,
     "apr_change_24h": 0,
-    "apr_change_7d": -15.410237757953979,
-    "apr_change_30d": -41.8937268036571,
+    "apr_change_7d": -15.261366678138502,
+    "apr_change_30d": -41.85920577617328,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:48.283182",
-    "updated_at": "2025-05-04T12:40:48.283192",
+    "created_at": "2025-05-04T12:51:29.120642",
+    "updated_at": "2025-05-04T12:51:29.120650",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -2455,11 +2455,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 406488.0,
-      "volumeUsd": 5053159.16,
-      "apy24h": 261.19,
-      "apy7d": 220.94,
-      "apy30d": 128.38
+      "tvl": 405197.05,
+      "volumeUsd": 5041702.09,
+      "apy24h": 261.51,
+      "apy7d": 221.6,
+      "apy30d": 128.84
     },
     "api_response": {
       "id": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
@@ -2469,11 +2469,11 @@
       "name": "SOL/Fartcoin",
       "active": true,
       "metrics": {
-        "tvl": 406488.0,
-        "volumeUsd": 5053159.16,
-        "apy24h": 261.19,
-        "apy7d": 220.94,
-        "apy30d": 128.38
+        "tvl": 405197.05,
+        "volumeUsd": 5041702.09,
+        "apy24h": 261.51,
+        "apy7d": 221.6,
+        "apy30d": 128.84
       }
     },
     "token1_price_source": "coingecko",
@@ -2508,22 +2508,22 @@
     ],
     "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
     "programId": "",
-    "liquidity": 1925844.02,
-    "volume_24h": 4342303.33,
-    "apr": 205.75,
+    "liquidity": 1927660.41,
+    "volume_24h": 4302752.3,
+    "apr": 203.68,
     "fee": 0,
-    "apr_24h": 205.75,
-    "apr_7d": 273.46,
-    "apr_30d": 109.38,
+    "apr_24h": 203.68,
+    "apr_7d": 273.27,
+    "apr_30d": 109.31,
     "apr_change_24h": 0,
-    "apr_change_7d": 32.90886998784932,
-    "apr_change_30d": -60.00146273678052,
+    "apr_change_7d": 34.1663393558523,
+    "apr_change_30d": -59.99926812310169,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:48.649535",
-    "updated_at": "2025-05-04T12:40:48.649545",
+    "created_at": "2025-05-04T12:51:29.484181",
+    "updated_at": "2025-05-04T12:51:29.484192",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -2535,11 +2535,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1925844.02,
-      "volumeUsd": 4342303.33,
-      "apy24h": 205.75,
-      "apy7d": 273.46,
-      "apy30d": 109.38
+      "tvl": 1927660.41,
+      "volumeUsd": 4302752.3,
+      "apy24h": 203.68,
+      "apy7d": 273.27,
+      "apy30d": 109.31
     },
     "api_response": {
       "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
@@ -2549,11 +2549,11 @@
       "name": "BOOP/USDC",
       "active": true,
       "metrics": {
-        "tvl": 1925844.02,
-        "volumeUsd": 4342303.33,
-        "apy24h": 205.75,
-        "apy7d": 273.46,
-        "apy30d": 109.38
+        "tvl": 1927660.41,
+        "volumeUsd": 4302752.3,
+        "apy24h": 203.68,
+        "apy7d": 273.27,
+        "apy30d": 109.31
       }
     },
     "token1_price_source": "none",
@@ -2576,7 +2576,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 23614.71
+        "price": 23914.06
       },
       {
         "symbol": "SOGENT",
@@ -2588,22 +2588,22 @@
     ],
     "poolId": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
     "programId": "",
-    "liquidity": 505498.42,
-    "volume_24h": 23831800.46,
-    "apr": 172.08,
+    "liquidity": 504264.12,
+    "volume_24h": 23388223.94,
+    "apr": 169.29,
     "fee": 0,
-    "apr_24h": 172.08,
-    "apr_7d": 28.98,
-    "apr_30d": 11.59,
+    "apr_24h": 169.29,
+    "apr_7d": 29.06,
+    "apr_30d": 11.62,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.15899581589959,
-    "apr_change_30d": -60.00690131124914,
+    "apr_change_7d": -82.83418985173371,
+    "apr_change_30d": -60.01376462491397,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:49.011307",
-    "updated_at": "2025-05-04T12:40:49.011317",
+    "created_at": "2025-05-04T12:51:29.843030",
+    "updated_at": "2025-05-04T12:51:29.843039",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -2615,11 +2615,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 505498.42,
-      "volumeUsd": 23831800.46,
-      "apy24h": 172.08,
-      "apy7d": 28.98,
-      "apy30d": 11.59
+      "tvl": 504264.12,
+      "volumeUsd": 23388223.94,
+      "apy24h": 169.29,
+      "apy7d": 29.06,
+      "apy30d": 11.62
     },
     "api_response": {
       "id": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
@@ -2629,91 +2629,11 @@
       "name": "SOL/SOGENT",
       "active": true,
       "metrics": {
-        "tvl": 505498.42,
-        "volumeUsd": 23831800.46,
-        "apy24h": 172.08,
-        "apy7d": 28.98,
-        "apy30d": 11.59
-      }
-    },
-    "token1_price_source": "coingecko",
-    "token2_price_source": "none"
-  },
-  {
-    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "name": "SOL/LFG",
-    "dex": "raydium",
-    "category": "Meme Token",
-    "token1_symbol": "SOL",
-    "token2_symbol": "LFG",
-    "token1_address": "So11111111111111111111111111111111111111112",
-    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-    "token1_price": 145.4,
-    "token2_price": 0.0,
-    "tokens": [
-      {
-        "symbol": "SOL",
-        "name": "Solana",
-        "address": "So11111111111111111111111111111111111111112",
-        "decimals": 9,
-        "price": 124779.41
-      },
-      {
-        "symbol": "LFG",
-        "name": "LFG",
-        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-        "decimals": 9,
-        "price": 0
-      }
-    ],
-    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "programId": "",
-    "liquidity": 459850.9,
-    "volume_24h": 18395314.04,
-    "apr": 146.01,
-    "fee": 0,
-    "apr_24h": 146.01,
-    "apr_7d": 67.24,
-    "apr_30d": 26.9,
-    "apr_change_24h": 0,
-    "apr_change_7d": -53.948359701390316,
-    "apr_change_30d": -59.9940511600238,
-    "tvl_change_24h": 0,
-    "tvl_change_7d": 0,
-    "tvl_change_30d": 0,
-    "active": true,
-    "created_at": "2025-05-04T12:40:49.402906",
-    "updated_at": "2025-05-04T12:40:49.402917",
-    "extra_data": {},
-    "version": "1.0",
-    "prediction_score": 0,
-    "risk_score": 0,
-    "volatility": 0,
-    "dex_specific": {
-      "ammId": "",
-      "concentrationBounds": "",
-      "whirlpoolId": ""
-    },
-    "metrics_data": {
-      "tvl": 459850.9,
-      "volumeUsd": 18395314.04,
-      "apy24h": 146.01,
-      "apy7d": 67.24,
-      "apy30d": 26.9
-    },
-    "api_response": {
-      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "programId": "",
-      "source": "raydium",
-      "name": "SOL/LFG",
-      "active": true,
-      "metrics": {
-        "tvl": 459850.9,
-        "volumeUsd": 18395314.04,
-        "apy24h": 146.01,
-        "apy7d": 67.24,
-        "apy30d": 26.9
+        "tvl": 504264.12,
+        "volumeUsd": 23388223.94,
+        "apy24h": 169.29,
+        "apy7d": 29.06,
+        "apy30d": 11.62
       }
     },
     "token1_price_source": "coingecko",
@@ -2736,7 +2656,7 @@
         "name": "Layerhub",
         "address": "LAYER4xPpTCb3QL8S9u41EAhAX7mhBn8Q6xMTwY2Yzc",
         "decimals": 9,
-        "price": 3.21
+        "price": 3.17
       },
       {
         "symbol": "SOL",
@@ -2748,22 +2668,22 @@
     ],
     "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
     "programId": "",
-    "liquidity": 3891619.77,
-    "volume_24h": 15549617.3,
-    "apr": 145.84,
+    "liquidity": 3879486.67,
+    "volume_24h": 15577319.14,
+    "apr": 146.56,
     "fee": 0,
-    "apr_24h": 145.84,
-    "apr_7d": 77.02,
-    "apr_30d": 73.41,
+    "apr_24h": 146.56,
+    "apr_7d": 77.28,
+    "apr_30d": 73.69,
     "apr_change_24h": 0,
-    "apr_change_7d": -47.188699945145366,
-    "apr_change_30d": -4.687094261230849,
+    "apr_change_7d": -47.27074235807861,
+    "apr_change_30d": -4.645445134575573,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:49.762536",
-    "updated_at": "2025-05-04T12:40:49.762545",
+    "created_at": "2025-05-04T12:51:30.236151",
+    "updated_at": "2025-05-04T12:51:30.236161",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -2775,11 +2695,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 3891619.77,
-      "volumeUsd": 15549617.3,
-      "apy24h": 145.84,
-      "apy7d": 77.02,
-      "apy30d": 73.41
+      "tvl": 3879486.67,
+      "volumeUsd": 15577319.14,
+      "apy24h": 146.56,
+      "apy7d": 77.28,
+      "apy30d": 73.69
     },
     "api_response": {
       "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
@@ -2789,15 +2709,95 @@
       "name": "LAYER/SOL",
       "active": true,
       "metrics": {
-        "tvl": 3891619.77,
-        "volumeUsd": 15549617.3,
-        "apy24h": 145.84,
-        "apy7d": 77.02,
-        "apy30d": 73.41
+        "tvl": 3879486.67,
+        "volumeUsd": 15577319.14,
+        "apy24h": 146.56,
+        "apy7d": 77.28,
+        "apy30d": 73.69
       }
     },
     "token1_price_source": "none",
     "token2_price_source": "coingecko"
+  },
+  {
+    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "name": "SOL/LFG",
+    "dex": "raydium",
+    "category": "Meme Token",
+    "token1_symbol": "SOL",
+    "token2_symbol": "LFG",
+    "token1_address": "So11111111111111111111111111111111111111112",
+    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+    "token1_price": 145.4,
+    "token2_price": 0.0,
+    "tokens": [
+      {
+        "symbol": "SOL",
+        "name": "Solana",
+        "address": "So11111111111111111111111111111111111111112",
+        "decimals": 9,
+        "price": 125650.15
+      },
+      {
+        "symbol": "LFG",
+        "name": "LFG",
+        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+        "decimals": 9,
+        "price": 0
+      }
+    ],
+    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "programId": "",
+    "liquidity": 457900.55,
+    "volume_24h": 18094552.93,
+    "apr": 144.23,
+    "fee": 0,
+    "apr_24h": 144.23,
+    "apr_7d": 67.54,
+    "apr_30d": 27.02,
+    "apr_change_24h": 0,
+    "apr_change_7d": -53.17201691742355,
+    "apr_change_30d": -59.99407758365414,
+    "tvl_change_24h": 0,
+    "tvl_change_7d": 0,
+    "tvl_change_30d": 0,
+    "active": true,
+    "created_at": "2025-05-04T12:51:30.595298",
+    "updated_at": "2025-05-04T12:51:30.595308",
+    "extra_data": {},
+    "version": "1.0",
+    "prediction_score": 0,
+    "risk_score": 0,
+    "volatility": 0,
+    "dex_specific": {
+      "ammId": "",
+      "concentrationBounds": "",
+      "whirlpoolId": ""
+    },
+    "metrics_data": {
+      "tvl": 457900.55,
+      "volumeUsd": 18094552.93,
+      "apy24h": 144.23,
+      "apy7d": 67.54,
+      "apy30d": 27.02
+    },
+    "api_response": {
+      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "programId": "",
+      "source": "raydium",
+      "name": "SOL/LFG",
+      "active": true,
+      "metrics": {
+        "tvl": 457900.55,
+        "volumeUsd": 18094552.93,
+        "apy24h": 144.23,
+        "apy7d": 67.54,
+        "apy30d": 27.02
+      }
+    },
+    "token1_price_source": "coingecko",
+    "token2_price_source": "none"
   },
   {
     "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -2816,7 +2816,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 12095.31
+        "price": 12155.72
       },
       {
         "symbol": "SOOMER",
@@ -2828,22 +2828,22 @@
     ],
     "poolId": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
     "programId": "",
-    "liquidity": 661871.25,
-    "volume_24h": 19744988.12,
-    "apr": 108.89,
+    "liquidity": 660706.2,
+    "volume_24h": 19366599.07,
+    "apr": 106.99,
     "fee": 0,
-    "apr_24h": 108.89,
-    "apr_7d": 18.44,
-    "apr_30d": 7.38,
+    "apr_24h": 106.99,
+    "apr_7d": 18.47,
+    "apr_30d": 7.39,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.06547892368445,
-    "apr_change_30d": -59.97830802603038,
+    "apr_change_7d": -82.73670436489392,
+    "apr_change_30d": -59.98917162966973,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:50.121871",
-    "updated_at": "2025-05-04T12:40:50.121881",
+    "created_at": "2025-05-04T12:51:30.962931",
+    "updated_at": "2025-05-04T12:51:30.962942",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -2855,11 +2855,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 661871.25,
-      "volumeUsd": 19744988.12,
-      "apy24h": 108.89,
-      "apy7d": 18.44,
-      "apy30d": 7.38
+      "tvl": 660706.2,
+      "volumeUsd": 19366599.07,
+      "apy24h": 106.99,
+      "apy7d": 18.47,
+      "apy30d": 7.39
     },
     "api_response": {
       "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -2869,11 +2869,11 @@
       "name": "SOL/SOOMER",
       "active": true,
       "metrics": {
-        "tvl": 661871.25,
-        "volumeUsd": 19744988.12,
-        "apy24h": 108.89,
-        "apy7d": 18.44,
-        "apy30d": 7.38
+        "tvl": 660706.2,
+        "volumeUsd": 19366599.07,
+        "apy24h": 106.99,
+        "apy7d": 18.47,
+        "apy30d": 7.39
       }
     },
     "token1_price_source": "coingecko",
@@ -2896,7 +2896,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 14882.67
+        "price": 13745.99
       },
       {
         "symbol": "SPEC",
@@ -2908,22 +2908,22 @@
     ],
     "poolId": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
     "programId": "",
-    "liquidity": 668684.74,
-    "volume_24h": 17709473.33,
-    "apr": 96.67,
+    "liquidity": 700596.08,
+    "volume_24h": 17617450.66,
+    "apr": 91.78,
     "fee": 0,
-    "apr_24h": 96.67,
-    "apr_7d": 14.57,
-    "apr_30d": 5.83,
+    "apr_24h": 91.78,
+    "apr_7d": 13.98,
+    "apr_30d": 5.59,
     "apr_change_24h": 0,
-    "apr_change_7d": -84.92810592738181,
-    "apr_change_30d": -59.98627316403569,
+    "apr_change_7d": -84.76792329483547,
+    "apr_change_30d": -60.014306151645215,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:50.506793",
-    "updated_at": "2025-05-04T12:40:50.506803",
+    "created_at": "2025-05-04T12:51:31.395603",
+    "updated_at": "2025-05-04T12:51:31.395613",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -2935,11 +2935,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 668684.74,
-      "volumeUsd": 17709473.33,
-      "apy24h": 96.67,
-      "apy7d": 14.57,
-      "apy30d": 5.83
+      "tvl": 700596.08,
+      "volumeUsd": 17617450.66,
+      "apy24h": 91.78,
+      "apy7d": 13.98,
+      "apy30d": 5.59
     },
     "api_response": {
       "id": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
@@ -2949,11 +2949,11 @@
       "name": "SOL/SPEC",
       "active": true,
       "metrics": {
-        "tvl": 668684.74,
-        "volumeUsd": 17709473.33,
-        "apy24h": 96.67,
-        "apy7d": 14.57,
-        "apy30d": 5.83
+        "tvl": 700596.08,
+        "volumeUsd": 17617450.66,
+        "apy24h": 91.78,
+        "apy7d": 13.98,
+        "apy30d": 5.59
       }
     },
     "token1_price_source": "coingecko",
@@ -2988,22 +2988,22 @@
     ],
     "poolId": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
     "programId": "",
-    "liquidity": 364527.21,
-    "volume_24h": 193616.16,
-    "apr": 48.47,
+    "liquidity": 365008.28,
+    "volume_24h": 192006.52,
+    "apr": 48.0,
     "fee": 0,
-    "apr_24h": 48.47,
-    "apr_7d": 47.67,
-    "apr_30d": 61.17,
+    "apr_24h": 48.0,
+    "apr_7d": 47.51,
+    "apr_30d": 61.09,
     "apr_change_24h": 0,
-    "apr_change_7d": -1.6505054672993544,
-    "apr_change_30d": 28.319697923222154,
+    "apr_change_7d": -1.0208333333333375,
+    "apr_change_30d": 28.58345611450222,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:50.507011",
-    "updated_at": "2025-05-04T12:40:50.507014",
+    "created_at": "2025-05-04T12:51:31.395853",
+    "updated_at": "2025-05-04T12:51:31.395858",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3015,11 +3015,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 364527.21,
-      "volumeUsd": 193616.16,
-      "apy24h": 48.47,
-      "apy7d": 47.67,
-      "apy30d": 61.17
+      "tvl": 365008.28,
+      "volumeUsd": 192006.52,
+      "apy24h": 48.0,
+      "apy7d": 47.51,
+      "apy30d": 61.09
     },
     "api_response": {
       "id": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
@@ -3029,11 +3029,11 @@
       "name": "RAY/USDC",
       "active": true,
       "metrics": {
-        "tvl": 364527.21,
-        "volumeUsd": 193616.16,
-        "apy24h": 48.47,
-        "apy7d": 47.67,
-        "apy30d": 61.17
+        "tvl": 365008.28,
+        "volumeUsd": 192006.52,
+        "apy24h": 48.0,
+        "apy7d": 47.51,
+        "apy30d": 61.09
       }
     },
     "token1_price_source": "coingecko",
@@ -3056,7 +3056,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.73
+        "price": 145.82
       },
       {
         "symbol": "USDC",
@@ -3068,22 +3068,22 @@
     ],
     "poolId": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
     "programId": "",
-    "liquidity": 9866001.7,
-    "volume_24h": 22825029.79,
-    "apr": 35.19,
+    "liquidity": 9863683.33,
+    "volume_24h": 22747294.53,
+    "apr": 35.08,
     "fee": 0,
-    "apr_24h": 35.19,
-    "apr_7d": 35.92,
-    "apr_30d": 84.96,
+    "apr_24h": 35.08,
+    "apr_7d": 35.9,
+    "apr_30d": 84.98,
     "apr_change_24h": 0,
-    "apr_change_7d": 2.074452969593646,
-    "apr_change_30d": 136.52561247216033,
+    "apr_change_7d": 2.3375142531356907,
+    "apr_change_30d": 136.7130919220056,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:50.507217",
-    "updated_at": "2025-05-04T12:40:50.507222",
+    "created_at": "2025-05-04T12:51:31.396061",
+    "updated_at": "2025-05-04T12:51:31.396067",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3095,11 +3095,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 9866001.7,
-      "volumeUsd": 22825029.79,
-      "apy24h": 35.19,
-      "apy7d": 35.92,
-      "apy30d": 84.96
+      "tvl": 9863683.33,
+      "volumeUsd": 22747294.53,
+      "apy24h": 35.08,
+      "apy7d": 35.9,
+      "apy30d": 84.98
     },
     "api_response": {
       "id": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
@@ -3109,11 +3109,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 9866001.7,
-        "volumeUsd": 22825029.79,
-        "apy24h": 35.19,
-        "apy7d": 35.92,
-        "apy30d": 84.96
+        "tvl": 9863683.33,
+        "volumeUsd": 22747294.53,
+        "apy24h": 35.08,
+        "apy7d": 35.9,
+        "apy30d": 84.98
       }
     },
     "token1_price_source": "coingecko",
@@ -3136,7 +3136,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 54.52
+        "price": 54.55
       },
       {
         "symbol": "RAY",
@@ -3148,22 +3148,22 @@
     ],
     "poolId": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
     "programId": "",
-    "liquidity": 4137004.67,
-    "volume_24h": 5080125.1,
-    "apr": 24.43,
+    "liquidity": 4136864.34,
+    "volume_24h": 5049390.76,
+    "apr": 24.3,
     "fee": 0,
-    "apr_24h": 24.43,
-    "apr_7d": 33.6,
-    "apr_30d": 56.21,
+    "apr_24h": 24.3,
+    "apr_7d": 33.55,
+    "apr_30d": 56.22,
     "apr_change_24h": 0,
-    "apr_change_7d": 37.535816618911184,
-    "apr_change_30d": 67.29166666666666,
+    "apr_change_7d": 38.06584362139916,
+    "apr_change_30d": 67.57078986587184,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:50.507369",
-    "updated_at": "2025-05-04T12:40:50.507372",
+    "created_at": "2025-05-04T12:51:31.396307",
+    "updated_at": "2025-05-04T12:51:31.396312",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3175,11 +3175,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4137004.67,
-      "volumeUsd": 5080125.1,
-      "apy24h": 24.43,
-      "apy7d": 33.6,
-      "apy30d": 56.21
+      "tvl": 4136864.34,
+      "volumeUsd": 5049390.76,
+      "apy24h": 24.3,
+      "apy7d": 33.55,
+      "apy30d": 56.22
     },
     "api_response": {
       "id": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
@@ -3189,11 +3189,11 @@
       "name": "SOL/RAY",
       "active": true,
       "metrics": {
-        "tvl": 4137004.67,
-        "volumeUsd": 5080125.1,
-        "apy24h": 24.43,
-        "apy7d": 33.6,
-        "apy30d": 56.21
+        "tvl": 4136864.34,
+        "volumeUsd": 5049390.76,
+        "apy24h": 24.3,
+        "apy7d": 33.55,
+        "apy30d": 56.22
       }
     },
     "token1_price_source": "coingecko",
@@ -3216,7 +3216,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.72
+        "price": 145.86
       },
       {
         "symbol": "USDC",
@@ -3228,22 +3228,22 @@
     ],
     "poolId": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
     "programId": "",
-    "liquidity": 4575102.3,
-    "volume_24h": 26397019.09,
-    "apr": 22.28,
+    "liquidity": 4538955.87,
+    "volume_24h": 26258623.59,
+    "apr": 22.35,
     "fee": 0,
-    "apr_24h": 22.28,
-    "apr_7d": 24.48,
-    "apr_30d": 22.34,
+    "apr_24h": 22.35,
+    "apr_7d": 24.66,
+    "apr_30d": 22.52,
     "apr_change_24h": 0,
-    "apr_change_7d": 9.87432675044883,
-    "apr_change_30d": -8.74183006535948,
+    "apr_change_7d": 10.33557046979865,
+    "apr_change_30d": -8.678021086780213,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:50.507479",
-    "updated_at": "2025-05-04T12:40:50.507483",
+    "created_at": "2025-05-04T12:51:31.396578",
+    "updated_at": "2025-05-04T12:51:31.396581",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3255,11 +3255,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4575102.3,
-      "volumeUsd": 26397019.09,
-      "apy24h": 22.28,
-      "apy7d": 24.48,
-      "apy30d": 22.34
+      "tvl": 4538955.87,
+      "volumeUsd": 26258623.59,
+      "apy24h": 22.35,
+      "apy7d": 24.66,
+      "apy30d": 22.52
     },
     "api_response": {
       "id": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
@@ -3269,11 +3269,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 4575102.3,
-        "volumeUsd": 26397019.09,
-        "apy24h": 22.28,
-        "apy7d": 24.48,
-        "apy30d": 22.34
+        "tvl": 4538955.87,
+        "volumeUsd": 26258623.59,
+        "apy24h": 22.35,
+        "apy7d": 24.66,
+        "apy30d": 22.52
       }
     },
     "token1_price_source": "coingecko",
@@ -3296,7 +3296,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.7
+        "price": 145.85
       },
       {
         "symbol": "USDT",
@@ -3308,22 +3308,22 @@
     ],
     "poolId": "3nMFwZXwY1s1M5s8vYAHqd4wGs4iSxXE4LRoUMMYqEgF",
     "programId": "",
-    "liquidity": 1052432.6,
-    "volume_24h": 6374663.52,
-    "apr": 22.11,
+    "liquidity": 1052378.69,
+    "volume_24h": 6344513.08,
+    "apr": 22.0,
     "fee": 0,
-    "apr_24h": 22.11,
-    "apr_7d": 20.55,
+    "apr_24h": 22.0,
+    "apr_7d": 20.54,
     "apr_30d": 32.41,
     "apr_change_24h": 0,
-    "apr_change_7d": -7.055630936227946,
-    "apr_change_30d": 57.71289537712894,
+    "apr_change_7d": -6.63636363636364,
+    "apr_change_30d": 57.789678675754615,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:50.507643",
-    "updated_at": "2025-05-04T12:40:50.507647",
+    "created_at": "2025-05-04T12:51:31.396743",
+    "updated_at": "2025-05-04T12:51:31.396748",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3335,10 +3335,10 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1052432.6,
-      "volumeUsd": 6374663.52,
-      "apy24h": 22.11,
-      "apy7d": 20.55,
+      "tvl": 1052378.69,
+      "volumeUsd": 6344513.08,
+      "apy24h": 22.0,
+      "apy7d": 20.54,
       "apy30d": 32.41
     },
     "api_response": {
@@ -3349,10 +3349,10 @@
       "name": "SOL/USDT",
       "active": true,
       "metrics": {
-        "tvl": 1052432.6,
-        "volumeUsd": 6374663.52,
-        "apy24h": 22.11,
-        "apy7d": 20.55,
+        "tvl": 1052378.69,
+        "volumeUsd": 6344513.08,
+        "apy24h": 22.0,
+        "apy7d": 20.54,
         "apy30d": 32.41
       }
     },
@@ -3376,7 +3376,7 @@
         "name": "Fartcoin",
         "address": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
         "decimals": 9,
-        "price": 1.1
+        "price": 1.09
       },
       {
         "symbol": "USDC",
@@ -3388,22 +3388,22 @@
     ],
     "poolId": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
     "programId": "",
-    "liquidity": 186063.81,
-    "volume_24h": 4604380.75,
-    "apr": 526.6,
+    "liquidity": 185558.15,
+    "volume_24h": 4580056.26,
+    "apr": 525.65,
     "fee": 0,
-    "apr_24h": 526.6,
-    "apr_7d": 416.39,
-    "apr_30d": 231.7,
+    "apr_24h": 525.65,
+    "apr_7d": 417.55,
+    "apr_30d": 232.42,
     "apr_change_24h": 0,
-    "apr_change_7d": -20.928598556779345,
-    "apr_change_30d": -44.3550517543649,
+    "apr_change_7d": -20.56501474365071,
+    "apr_change_30d": -44.33720512513472,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:57.130857",
-    "updated_at": "2025-05-04T12:40:57.130868",
+    "created_at": "2025-05-04T12:51:38.205006",
+    "updated_at": "2025-05-04T12:51:38.205015",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3415,11 +3415,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 186063.81,
-      "volumeUsd": 4604380.75,
-      "apy24h": 526.6,
-      "apy7d": 416.39,
-      "apy30d": 231.7
+      "tvl": 185558.15,
+      "volumeUsd": 4580056.26,
+      "apy24h": 525.65,
+      "apy7d": 417.55,
+      "apy30d": 232.42
     },
     "api_response": {
       "id": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
@@ -3429,11 +3429,11 @@
       "name": "Fartcoin/USDC",
       "active": true,
       "metrics": {
-        "tvl": 186063.81,
-        "volumeUsd": 4604380.75,
-        "apy24h": 526.6,
-        "apy7d": 416.39,
-        "apy30d": 231.7
+        "tvl": 185558.15,
+        "volumeUsd": 4580056.26,
+        "apy24h": 525.65,
+        "apy7d": 417.55,
+        "apy30d": 232.42
       }
     },
     "token1_price_source": "none",
@@ -3456,7 +3456,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 18095114.43
+        "price": 18299881.63
       },
       {
         "symbol": "POOP",
@@ -3468,22 +3468,22 @@
     ],
     "poolId": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
     "programId": "",
-    "liquidity": 384934.87,
-    "volume_24h": 46303847.33,
-    "apr": 439.06,
+    "liquidity": 382213.83,
+    "volume_24h": 46715753.18,
+    "apr": 446.12,
     "fee": 0,
-    "apr_24h": 439.06,
-    "apr_7d": 41.94,
-    "apr_30d": 16.78,
+    "apr_24h": 446.12,
+    "apr_7d": 42.67,
+    "apr_30d": 17.07,
     "apr_change_24h": 0,
-    "apr_change_7d": -90.44777479160024,
-    "apr_change_30d": -59.99046256556986,
+    "apr_change_7d": -90.43530888550166,
+    "apr_change_30d": -59.995312866182324,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:57.489309",
-    "updated_at": "2025-05-04T12:40:57.489318",
+    "created_at": "2025-05-04T12:51:38.561046",
+    "updated_at": "2025-05-04T12:51:38.561052",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3495,11 +3495,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 384934.87,
-      "volumeUsd": 46303847.33,
-      "apy24h": 439.06,
-      "apy7d": 41.94,
-      "apy30d": 16.78
+      "tvl": 382213.83,
+      "volumeUsd": 46715753.18,
+      "apy24h": 446.12,
+      "apy7d": 42.67,
+      "apy30d": 17.07
     },
     "api_response": {
       "id": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
@@ -3509,11 +3509,11 @@
       "name": "SOL/POOP",
       "active": true,
       "metrics": {
-        "tvl": 384934.87,
-        "volumeUsd": 46303847.33,
-        "apy24h": 439.06,
-        "apy7d": 41.94,
-        "apy30d": 16.78
+        "tvl": 382213.83,
+        "volumeUsd": 46715753.18,
+        "apy24h": 446.12,
+        "apy7d": 42.67,
+        "apy30d": 17.07
       }
     },
     "token1_price_source": "coingecko",
@@ -3536,7 +3536,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 132.68
+        "price": 133.23
       },
       {
         "symbol": "Fartcoin",
@@ -3548,22 +3548,22 @@
     ],
     "poolId": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
     "programId": "",
-    "liquidity": 406488.0,
-    "volume_24h": 5053159.16,
-    "apr": 261.19,
+    "liquidity": 405197.05,
+    "volume_24h": 5041702.09,
+    "apr": 261.51,
     "fee": 0,
-    "apr_24h": 261.19,
-    "apr_7d": 220.94,
-    "apr_30d": 128.38,
+    "apr_24h": 261.51,
+    "apr_7d": 221.6,
+    "apr_30d": 128.84,
     "apr_change_24h": 0,
-    "apr_change_7d": -15.410237757953979,
-    "apr_change_30d": -41.8937268036571,
+    "apr_change_7d": -15.261366678138502,
+    "apr_change_30d": -41.85920577617328,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:57.849179",
-    "updated_at": "2025-05-04T12:40:57.849189",
+    "created_at": "2025-05-04T12:51:38.922236",
+    "updated_at": "2025-05-04T12:51:38.922245",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3575,11 +3575,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 406488.0,
-      "volumeUsd": 5053159.16,
-      "apy24h": 261.19,
-      "apy7d": 220.94,
-      "apy30d": 128.38
+      "tvl": 405197.05,
+      "volumeUsd": 5041702.09,
+      "apy24h": 261.51,
+      "apy7d": 221.6,
+      "apy30d": 128.84
     },
     "api_response": {
       "id": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
@@ -3589,11 +3589,11 @@
       "name": "SOL/Fartcoin",
       "active": true,
       "metrics": {
-        "tvl": 406488.0,
-        "volumeUsd": 5053159.16,
-        "apy24h": 261.19,
-        "apy7d": 220.94,
-        "apy30d": 128.38
+        "tvl": 405197.05,
+        "volumeUsd": 5041702.09,
+        "apy24h": 261.51,
+        "apy7d": 221.6,
+        "apy30d": 128.84
       }
     },
     "token1_price_source": "coingecko",
@@ -3628,22 +3628,22 @@
     ],
     "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
     "programId": "",
-    "liquidity": 1925844.02,
-    "volume_24h": 4342303.33,
-    "apr": 205.75,
+    "liquidity": 1927660.41,
+    "volume_24h": 4302752.3,
+    "apr": 203.68,
     "fee": 0,
-    "apr_24h": 205.75,
-    "apr_7d": 273.46,
-    "apr_30d": 109.38,
+    "apr_24h": 203.68,
+    "apr_7d": 273.27,
+    "apr_30d": 109.31,
     "apr_change_24h": 0,
-    "apr_change_7d": 32.90886998784932,
-    "apr_change_30d": -60.00146273678052,
+    "apr_change_7d": 34.1663393558523,
+    "apr_change_30d": -59.99926812310169,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:58.207612",
-    "updated_at": "2025-05-04T12:40:58.207623",
+    "created_at": "2025-05-04T12:51:39.285754",
+    "updated_at": "2025-05-04T12:51:39.285763",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3655,11 +3655,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1925844.02,
-      "volumeUsd": 4342303.33,
-      "apy24h": 205.75,
-      "apy7d": 273.46,
-      "apy30d": 109.38
+      "tvl": 1927660.41,
+      "volumeUsd": 4302752.3,
+      "apy24h": 203.68,
+      "apy7d": 273.27,
+      "apy30d": 109.31
     },
     "api_response": {
       "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
@@ -3669,11 +3669,11 @@
       "name": "BOOP/USDC",
       "active": true,
       "metrics": {
-        "tvl": 1925844.02,
-        "volumeUsd": 4342303.33,
-        "apy24h": 205.75,
-        "apy7d": 273.46,
-        "apy30d": 109.38
+        "tvl": 1927660.41,
+        "volumeUsd": 4302752.3,
+        "apy24h": 203.68,
+        "apy7d": 273.27,
+        "apy30d": 109.31
       }
     },
     "token1_price_source": "none",
@@ -3696,7 +3696,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 23614.71
+        "price": 23914.06
       },
       {
         "symbol": "SOGENT",
@@ -3708,22 +3708,22 @@
     ],
     "poolId": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
     "programId": "",
-    "liquidity": 505498.42,
-    "volume_24h": 23831800.46,
-    "apr": 172.08,
+    "liquidity": 504264.12,
+    "volume_24h": 23388223.94,
+    "apr": 169.29,
     "fee": 0,
-    "apr_24h": 172.08,
-    "apr_7d": 28.98,
-    "apr_30d": 11.59,
+    "apr_24h": 169.29,
+    "apr_7d": 29.06,
+    "apr_30d": 11.62,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.15899581589959,
-    "apr_change_30d": -60.00690131124914,
+    "apr_change_7d": -82.83418985173371,
+    "apr_change_30d": -60.01376462491397,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:58.562384",
-    "updated_at": "2025-05-04T12:40:58.562393",
+    "created_at": "2025-05-04T12:51:39.645970",
+    "updated_at": "2025-05-04T12:51:39.645980",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3735,11 +3735,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 505498.42,
-      "volumeUsd": 23831800.46,
-      "apy24h": 172.08,
-      "apy7d": 28.98,
-      "apy30d": 11.59
+      "tvl": 504264.12,
+      "volumeUsd": 23388223.94,
+      "apy24h": 169.29,
+      "apy7d": 29.06,
+      "apy30d": 11.62
     },
     "api_response": {
       "id": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
@@ -3749,91 +3749,11 @@
       "name": "SOL/SOGENT",
       "active": true,
       "metrics": {
-        "tvl": 505498.42,
-        "volumeUsd": 23831800.46,
-        "apy24h": 172.08,
-        "apy7d": 28.98,
-        "apy30d": 11.59
-      }
-    },
-    "token1_price_source": "coingecko",
-    "token2_price_source": "none"
-  },
-  {
-    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "name": "SOL/LFG",
-    "dex": "raydium",
-    "category": "Meme Token",
-    "token1_symbol": "SOL",
-    "token2_symbol": "LFG",
-    "token1_address": "So11111111111111111111111111111111111111112",
-    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-    "token1_price": 145.4,
-    "token2_price": 0.0,
-    "tokens": [
-      {
-        "symbol": "SOL",
-        "name": "Solana",
-        "address": "So11111111111111111111111111111111111111112",
-        "decimals": 9,
-        "price": 124779.41
-      },
-      {
-        "symbol": "LFG",
-        "name": "LFG",
-        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-        "decimals": 9,
-        "price": 0
-      }
-    ],
-    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "programId": "",
-    "liquidity": 459850.9,
-    "volume_24h": 18395314.04,
-    "apr": 146.01,
-    "fee": 0,
-    "apr_24h": 146.01,
-    "apr_7d": 67.24,
-    "apr_30d": 26.9,
-    "apr_change_24h": 0,
-    "apr_change_7d": -53.948359701390316,
-    "apr_change_30d": -59.9940511600238,
-    "tvl_change_24h": 0,
-    "tvl_change_7d": 0,
-    "tvl_change_30d": 0,
-    "active": true,
-    "created_at": "2025-05-04T12:40:58.944162",
-    "updated_at": "2025-05-04T12:40:58.944173",
-    "extra_data": {},
-    "version": "1.0",
-    "prediction_score": 0,
-    "risk_score": 0,
-    "volatility": 0,
-    "dex_specific": {
-      "ammId": "",
-      "concentrationBounds": "",
-      "whirlpoolId": ""
-    },
-    "metrics_data": {
-      "tvl": 459850.9,
-      "volumeUsd": 18395314.04,
-      "apy24h": 146.01,
-      "apy7d": 67.24,
-      "apy30d": 26.9
-    },
-    "api_response": {
-      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "programId": "",
-      "source": "raydium",
-      "name": "SOL/LFG",
-      "active": true,
-      "metrics": {
-        "tvl": 459850.9,
-        "volumeUsd": 18395314.04,
-        "apy24h": 146.01,
-        "apy7d": 67.24,
-        "apy30d": 26.9
+        "tvl": 504264.12,
+        "volumeUsd": 23388223.94,
+        "apy24h": 169.29,
+        "apy7d": 29.06,
+        "apy30d": 11.62
       }
     },
     "token1_price_source": "coingecko",
@@ -3856,7 +3776,7 @@
         "name": "Layerhub",
         "address": "LAYER4xPpTCb3QL8S9u41EAhAX7mhBn8Q6xMTwY2Yzc",
         "decimals": 9,
-        "price": 3.21
+        "price": 3.17
       },
       {
         "symbol": "SOL",
@@ -3868,22 +3788,22 @@
     ],
     "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
     "programId": "",
-    "liquidity": 3891619.77,
-    "volume_24h": 15549617.3,
-    "apr": 145.84,
+    "liquidity": 3879486.67,
+    "volume_24h": 15577319.14,
+    "apr": 146.56,
     "fee": 0,
-    "apr_24h": 145.84,
-    "apr_7d": 77.02,
-    "apr_30d": 73.41,
+    "apr_24h": 146.56,
+    "apr_7d": 77.28,
+    "apr_30d": 73.69,
     "apr_change_24h": 0,
-    "apr_change_7d": -47.188699945145366,
-    "apr_change_30d": -4.687094261230849,
+    "apr_change_7d": -47.27074235807861,
+    "apr_change_30d": -4.645445134575573,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:59.304742",
-    "updated_at": "2025-05-04T12:40:59.304751",
+    "created_at": "2025-05-04T12:51:40.040617",
+    "updated_at": "2025-05-04T12:51:40.040627",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3895,11 +3815,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 3891619.77,
-      "volumeUsd": 15549617.3,
-      "apy24h": 145.84,
-      "apy7d": 77.02,
-      "apy30d": 73.41
+      "tvl": 3879486.67,
+      "volumeUsd": 15577319.14,
+      "apy24h": 146.56,
+      "apy7d": 77.28,
+      "apy30d": 73.69
     },
     "api_response": {
       "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
@@ -3909,15 +3829,95 @@
       "name": "LAYER/SOL",
       "active": true,
       "metrics": {
-        "tvl": 3891619.77,
-        "volumeUsd": 15549617.3,
-        "apy24h": 145.84,
-        "apy7d": 77.02,
-        "apy30d": 73.41
+        "tvl": 3879486.67,
+        "volumeUsd": 15577319.14,
+        "apy24h": 146.56,
+        "apy7d": 77.28,
+        "apy30d": 73.69
       }
     },
     "token1_price_source": "none",
     "token2_price_source": "coingecko"
+  },
+  {
+    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "name": "SOL/LFG",
+    "dex": "raydium",
+    "category": "Meme Token",
+    "token1_symbol": "SOL",
+    "token2_symbol": "LFG",
+    "token1_address": "So11111111111111111111111111111111111111112",
+    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+    "token1_price": 145.4,
+    "token2_price": 0.0,
+    "tokens": [
+      {
+        "symbol": "SOL",
+        "name": "Solana",
+        "address": "So11111111111111111111111111111111111111112",
+        "decimals": 9,
+        "price": 125650.15
+      },
+      {
+        "symbol": "LFG",
+        "name": "LFG",
+        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+        "decimals": 9,
+        "price": 0
+      }
+    ],
+    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "programId": "",
+    "liquidity": 457900.55,
+    "volume_24h": 18094552.93,
+    "apr": 144.23,
+    "fee": 0,
+    "apr_24h": 144.23,
+    "apr_7d": 67.54,
+    "apr_30d": 27.02,
+    "apr_change_24h": 0,
+    "apr_change_7d": -53.17201691742355,
+    "apr_change_30d": -59.99407758365414,
+    "tvl_change_24h": 0,
+    "tvl_change_7d": 0,
+    "tvl_change_30d": 0,
+    "active": true,
+    "created_at": "2025-05-04T12:51:40.402093",
+    "updated_at": "2025-05-04T12:51:40.402122",
+    "extra_data": {},
+    "version": "1.0",
+    "prediction_score": 0,
+    "risk_score": 0,
+    "volatility": 0,
+    "dex_specific": {
+      "ammId": "",
+      "concentrationBounds": "",
+      "whirlpoolId": ""
+    },
+    "metrics_data": {
+      "tvl": 457900.55,
+      "volumeUsd": 18094552.93,
+      "apy24h": 144.23,
+      "apy7d": 67.54,
+      "apy30d": 27.02
+    },
+    "api_response": {
+      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "programId": "",
+      "source": "raydium",
+      "name": "SOL/LFG",
+      "active": true,
+      "metrics": {
+        "tvl": 457900.55,
+        "volumeUsd": 18094552.93,
+        "apy24h": 144.23,
+        "apy7d": 67.54,
+        "apy30d": 27.02
+      }
+    },
+    "token1_price_source": "coingecko",
+    "token2_price_source": "none"
   },
   {
     "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -3936,7 +3936,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 12095.31
+        "price": 12155.72
       },
       {
         "symbol": "SOOMER",
@@ -3948,22 +3948,22 @@
     ],
     "poolId": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
     "programId": "",
-    "liquidity": 661871.25,
-    "volume_24h": 19744988.12,
-    "apr": 108.89,
+    "liquidity": 660706.2,
+    "volume_24h": 19366599.07,
+    "apr": 106.99,
     "fee": 0,
-    "apr_24h": 108.89,
-    "apr_7d": 18.44,
-    "apr_30d": 7.38,
+    "apr_24h": 106.99,
+    "apr_7d": 18.47,
+    "apr_30d": 7.39,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.06547892368445,
-    "apr_change_30d": -59.97830802603038,
+    "apr_change_7d": -82.73670436489392,
+    "apr_change_30d": -59.98917162966973,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:40:59.673798",
-    "updated_at": "2025-05-04T12:40:59.673808",
+    "created_at": "2025-05-04T12:51:40.773723",
+    "updated_at": "2025-05-04T12:51:40.773731",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -3975,11 +3975,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 661871.25,
-      "volumeUsd": 19744988.12,
-      "apy24h": 108.89,
-      "apy7d": 18.44,
-      "apy30d": 7.38
+      "tvl": 660706.2,
+      "volumeUsd": 19366599.07,
+      "apy24h": 106.99,
+      "apy7d": 18.47,
+      "apy30d": 7.39
     },
     "api_response": {
       "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -3989,11 +3989,11 @@
       "name": "SOL/SOOMER",
       "active": true,
       "metrics": {
-        "tvl": 661871.25,
-        "volumeUsd": 19744988.12,
-        "apy24h": 108.89,
-        "apy7d": 18.44,
-        "apy30d": 7.38
+        "tvl": 660706.2,
+        "volumeUsd": 19366599.07,
+        "apy24h": 106.99,
+        "apy7d": 18.47,
+        "apy30d": 7.39
       }
     },
     "token1_price_source": "coingecko",
@@ -4016,7 +4016,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 14882.67
+        "price": 13745.99
       },
       {
         "symbol": "SPEC",
@@ -4028,22 +4028,22 @@
     ],
     "poolId": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
     "programId": "",
-    "liquidity": 668684.74,
-    "volume_24h": 17709473.33,
-    "apr": 96.67,
+    "liquidity": 700596.08,
+    "volume_24h": 17617450.66,
+    "apr": 91.78,
     "fee": 0,
-    "apr_24h": 96.67,
-    "apr_7d": 14.57,
-    "apr_30d": 5.83,
+    "apr_24h": 91.78,
+    "apr_7d": 13.98,
+    "apr_30d": 5.59,
     "apr_change_24h": 0,
-    "apr_change_7d": -84.92810592738181,
-    "apr_change_30d": -59.98627316403569,
+    "apr_change_7d": -84.76792329483547,
+    "apr_change_30d": -60.014306151645215,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:00.375248",
-    "updated_at": "2025-05-04T12:41:00.375260",
+    "created_at": "2025-05-04T12:51:41.175126",
+    "updated_at": "2025-05-04T12:51:41.175138",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -4055,11 +4055,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 668684.74,
-      "volumeUsd": 17709473.33,
-      "apy24h": 96.67,
-      "apy7d": 14.57,
-      "apy30d": 5.83
+      "tvl": 700596.08,
+      "volumeUsd": 17617450.66,
+      "apy24h": 91.78,
+      "apy7d": 13.98,
+      "apy30d": 5.59
     },
     "api_response": {
       "id": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
@@ -4069,11 +4069,11 @@
       "name": "SOL/SPEC",
       "active": true,
       "metrics": {
-        "tvl": 668684.74,
-        "volumeUsd": 17709473.33,
-        "apy24h": 96.67,
-        "apy7d": 14.57,
-        "apy30d": 5.83
+        "tvl": 700596.08,
+        "volumeUsd": 17617450.66,
+        "apy24h": 91.78,
+        "apy7d": 13.98,
+        "apy30d": 5.59
       }
     },
     "token1_price_source": "coingecko",
@@ -4108,22 +4108,22 @@
     ],
     "poolId": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
     "programId": "",
-    "liquidity": 364527.21,
-    "volume_24h": 193616.16,
-    "apr": 48.47,
+    "liquidity": 365008.28,
+    "volume_24h": 192006.52,
+    "apr": 48.0,
     "fee": 0,
-    "apr_24h": 48.47,
-    "apr_7d": 47.67,
-    "apr_30d": 61.17,
+    "apr_24h": 48.0,
+    "apr_7d": 47.51,
+    "apr_30d": 61.09,
     "apr_change_24h": 0,
-    "apr_change_7d": -1.6505054672993544,
-    "apr_change_30d": 28.319697923222154,
+    "apr_change_7d": -1.0208333333333375,
+    "apr_change_30d": 28.58345611450222,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:00.375515",
-    "updated_at": "2025-05-04T12:41:00.375521",
+    "created_at": "2025-05-04T12:51:41.175450",
+    "updated_at": "2025-05-04T12:51:41.175456",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -4135,11 +4135,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 364527.21,
-      "volumeUsd": 193616.16,
-      "apy24h": 48.47,
-      "apy7d": 47.67,
-      "apy30d": 61.17
+      "tvl": 365008.28,
+      "volumeUsd": 192006.52,
+      "apy24h": 48.0,
+      "apy7d": 47.51,
+      "apy30d": 61.09
     },
     "api_response": {
       "id": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
@@ -4149,11 +4149,11 @@
       "name": "RAY/USDC",
       "active": true,
       "metrics": {
-        "tvl": 364527.21,
-        "volumeUsd": 193616.16,
-        "apy24h": 48.47,
-        "apy7d": 47.67,
-        "apy30d": 61.17
+        "tvl": 365008.28,
+        "volumeUsd": 192006.52,
+        "apy24h": 48.0,
+        "apy7d": 47.51,
+        "apy30d": 61.09
       }
     },
     "token1_price_source": "coingecko",
@@ -4176,7 +4176,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.73
+        "price": 145.82
       },
       {
         "symbol": "USDC",
@@ -4188,22 +4188,22 @@
     ],
     "poolId": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
     "programId": "",
-    "liquidity": 9866001.7,
-    "volume_24h": 22825029.79,
-    "apr": 35.19,
+    "liquidity": 9863683.33,
+    "volume_24h": 22747294.53,
+    "apr": 35.08,
     "fee": 0,
-    "apr_24h": 35.19,
-    "apr_7d": 35.92,
-    "apr_30d": 84.96,
+    "apr_24h": 35.08,
+    "apr_7d": 35.9,
+    "apr_30d": 84.98,
     "apr_change_24h": 0,
-    "apr_change_7d": 2.074452969593646,
-    "apr_change_30d": 136.52561247216033,
+    "apr_change_7d": 2.3375142531356907,
+    "apr_change_30d": 136.7130919220056,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:00.375702",
-    "updated_at": "2025-05-04T12:41:00.375707",
+    "created_at": "2025-05-04T12:51:41.175720",
+    "updated_at": "2025-05-04T12:51:41.175725",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -4215,11 +4215,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 9866001.7,
-      "volumeUsd": 22825029.79,
-      "apy24h": 35.19,
-      "apy7d": 35.92,
-      "apy30d": 84.96
+      "tvl": 9863683.33,
+      "volumeUsd": 22747294.53,
+      "apy24h": 35.08,
+      "apy7d": 35.9,
+      "apy30d": 84.98
     },
     "api_response": {
       "id": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
@@ -4229,11 +4229,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 9866001.7,
-        "volumeUsd": 22825029.79,
-        "apy24h": 35.19,
-        "apy7d": 35.92,
-        "apy30d": 84.96
+        "tvl": 9863683.33,
+        "volumeUsd": 22747294.53,
+        "apy24h": 35.08,
+        "apy7d": 35.9,
+        "apy30d": 84.98
       }
     },
     "token1_price_source": "coingecko",
@@ -4256,7 +4256,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 54.52
+        "price": 54.55
       },
       {
         "symbol": "RAY",
@@ -4268,22 +4268,22 @@
     ],
     "poolId": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
     "programId": "",
-    "liquidity": 4137004.67,
-    "volume_24h": 5080125.1,
-    "apr": 24.43,
+    "liquidity": 4136864.34,
+    "volume_24h": 5049390.76,
+    "apr": 24.3,
     "fee": 0,
-    "apr_24h": 24.43,
-    "apr_7d": 33.6,
-    "apr_30d": 56.21,
+    "apr_24h": 24.3,
+    "apr_7d": 33.55,
+    "apr_30d": 56.22,
     "apr_change_24h": 0,
-    "apr_change_7d": 37.535816618911184,
-    "apr_change_30d": 67.29166666666666,
+    "apr_change_7d": 38.06584362139916,
+    "apr_change_30d": 67.57078986587184,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:00.375887",
-    "updated_at": "2025-05-04T12:41:00.375891",
+    "created_at": "2025-05-04T12:51:41.175986",
+    "updated_at": "2025-05-04T12:51:41.175992",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -4295,11 +4295,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4137004.67,
-      "volumeUsd": 5080125.1,
-      "apy24h": 24.43,
-      "apy7d": 33.6,
-      "apy30d": 56.21
+      "tvl": 4136864.34,
+      "volumeUsd": 5049390.76,
+      "apy24h": 24.3,
+      "apy7d": 33.55,
+      "apy30d": 56.22
     },
     "api_response": {
       "id": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
@@ -4309,11 +4309,11 @@
       "name": "SOL/RAY",
       "active": true,
       "metrics": {
-        "tvl": 4137004.67,
-        "volumeUsd": 5080125.1,
-        "apy24h": 24.43,
-        "apy7d": 33.6,
-        "apy30d": 56.21
+        "tvl": 4136864.34,
+        "volumeUsd": 5049390.76,
+        "apy24h": 24.3,
+        "apy7d": 33.55,
+        "apy30d": 56.22
       }
     },
     "token1_price_source": "coingecko",
@@ -4336,7 +4336,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.72
+        "price": 145.86
       },
       {
         "symbol": "USDC",
@@ -4348,22 +4348,22 @@
     ],
     "poolId": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
     "programId": "",
-    "liquidity": 4575102.3,
-    "volume_24h": 26397019.09,
-    "apr": 22.28,
+    "liquidity": 4538955.87,
+    "volume_24h": 26258623.59,
+    "apr": 22.35,
     "fee": 0,
-    "apr_24h": 22.28,
-    "apr_7d": 24.48,
-    "apr_30d": 22.34,
+    "apr_24h": 22.35,
+    "apr_7d": 24.66,
+    "apr_30d": 22.52,
     "apr_change_24h": 0,
-    "apr_change_7d": 9.87432675044883,
-    "apr_change_30d": -8.74183006535948,
+    "apr_change_7d": 10.33557046979865,
+    "apr_change_30d": -8.678021086780213,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:00.376138",
-    "updated_at": "2025-05-04T12:41:00.376143",
+    "created_at": "2025-05-04T12:51:41.176399",
+    "updated_at": "2025-05-04T12:51:41.176404",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -4375,11 +4375,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4575102.3,
-      "volumeUsd": 26397019.09,
-      "apy24h": 22.28,
-      "apy7d": 24.48,
-      "apy30d": 22.34
+      "tvl": 4538955.87,
+      "volumeUsd": 26258623.59,
+      "apy24h": 22.35,
+      "apy7d": 24.66,
+      "apy30d": 22.52
     },
     "api_response": {
       "id": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
@@ -4389,11 +4389,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 4575102.3,
-        "volumeUsd": 26397019.09,
-        "apy24h": 22.28,
-        "apy7d": 24.48,
-        "apy30d": 22.34
+        "tvl": 4538955.87,
+        "volumeUsd": 26258623.59,
+        "apy24h": 22.35,
+        "apy7d": 24.66,
+        "apy30d": 22.52
       }
     },
     "token1_price_source": "coingecko",
@@ -4416,7 +4416,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.7
+        "price": 145.85
       },
       {
         "symbol": "USDT",
@@ -4428,22 +4428,22 @@
     ],
     "poolId": "3nMFwZXwY1s1M5s8vYAHqd4wGs4iSxXE4LRoUMMYqEgF",
     "programId": "",
-    "liquidity": 1052432.6,
-    "volume_24h": 6374663.52,
-    "apr": 22.11,
+    "liquidity": 1052378.69,
+    "volume_24h": 6344513.08,
+    "apr": 22.0,
     "fee": 0,
-    "apr_24h": 22.11,
-    "apr_7d": 20.55,
+    "apr_24h": 22.0,
+    "apr_7d": 20.54,
     "apr_30d": 32.41,
     "apr_change_24h": 0,
-    "apr_change_7d": -7.055630936227946,
-    "apr_change_30d": 57.71289537712894,
+    "apr_change_7d": -6.63636363636364,
+    "apr_change_30d": 57.789678675754615,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:00.376507",
-    "updated_at": "2025-05-04T12:41:00.376510",
+    "created_at": "2025-05-04T12:51:41.176621",
+    "updated_at": "2025-05-04T12:51:41.176625",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -4455,10 +4455,10 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1052432.6,
-      "volumeUsd": 6374663.52,
-      "apy24h": 22.11,
-      "apy7d": 20.55,
+      "tvl": 1052378.69,
+      "volumeUsd": 6344513.08,
+      "apy24h": 22.0,
+      "apy7d": 20.54,
       "apy30d": 32.41
     },
     "api_response": {
@@ -4469,10 +4469,10 @@
       "name": "SOL/USDT",
       "active": true,
       "metrics": {
-        "tvl": 1052432.6,
-        "volumeUsd": 6374663.52,
-        "apy24h": 22.11,
-        "apy7d": 20.55,
+        "tvl": 1052378.69,
+        "volumeUsd": 6344513.08,
+        "apy24h": 22.0,
+        "apy7d": 20.54,
         "apy30d": 32.41
       }
     },
@@ -4496,7 +4496,7 @@
         "name": "Fartcoin",
         "address": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
         "decimals": 9,
-        "price": 1.1
+        "price": 1.09
       },
       {
         "symbol": "USDC",
@@ -4508,22 +4508,22 @@
     ],
     "poolId": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
     "programId": "",
-    "liquidity": 186063.81,
-    "volume_24h": 4604380.75,
-    "apr": 526.6,
+    "liquidity": 185558.15,
+    "volume_24h": 4580056.26,
+    "apr": 525.65,
     "fee": 0,
-    "apr_24h": 526.6,
-    "apr_7d": 416.39,
-    "apr_30d": 231.7,
+    "apr_24h": 525.65,
+    "apr_7d": 417.55,
+    "apr_30d": 232.42,
     "apr_change_24h": 0,
-    "apr_change_7d": -20.928598556779345,
-    "apr_change_30d": -44.3550517543649,
+    "apr_change_7d": -20.56501474365071,
+    "apr_change_30d": -44.33720512513472,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:07.026087",
-    "updated_at": "2025-05-04T12:41:07.026095",
+    "created_at": "2025-05-04T12:51:48.015562",
+    "updated_at": "2025-05-04T12:51:48.015569",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -4535,11 +4535,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 186063.81,
-      "volumeUsd": 4604380.75,
-      "apy24h": 526.6,
-      "apy7d": 416.39,
-      "apy30d": 231.7
+      "tvl": 185558.15,
+      "volumeUsd": 4580056.26,
+      "apy24h": 525.65,
+      "apy7d": 417.55,
+      "apy30d": 232.42
     },
     "api_response": {
       "id": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
@@ -4549,11 +4549,11 @@
       "name": "Fartcoin/USDC",
       "active": true,
       "metrics": {
-        "tvl": 186063.81,
-        "volumeUsd": 4604380.75,
-        "apy24h": 526.6,
-        "apy7d": 416.39,
-        "apy30d": 231.7
+        "tvl": 185558.15,
+        "volumeUsd": 4580056.26,
+        "apy24h": 525.65,
+        "apy7d": 417.55,
+        "apy30d": 232.42
       }
     },
     "token1_price_source": "none",
@@ -4576,7 +4576,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 18095114.43
+        "price": 18299881.63
       },
       {
         "symbol": "POOP",
@@ -4588,22 +4588,22 @@
     ],
     "poolId": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
     "programId": "",
-    "liquidity": 384934.87,
-    "volume_24h": 46303847.33,
-    "apr": 439.06,
+    "liquidity": 382213.83,
+    "volume_24h": 46715753.18,
+    "apr": 446.12,
     "fee": 0,
-    "apr_24h": 439.06,
-    "apr_7d": 41.94,
-    "apr_30d": 16.78,
+    "apr_24h": 446.12,
+    "apr_7d": 42.67,
+    "apr_30d": 17.07,
     "apr_change_24h": 0,
-    "apr_change_7d": -90.44777479160024,
-    "apr_change_30d": -59.99046256556986,
+    "apr_change_7d": -90.43530888550166,
+    "apr_change_30d": -59.995312866182324,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:07.385378",
-    "updated_at": "2025-05-04T12:41:07.385387",
+    "created_at": "2025-05-04T12:51:48.388504",
+    "updated_at": "2025-05-04T12:51:48.388514",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -4615,11 +4615,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 384934.87,
-      "volumeUsd": 46303847.33,
-      "apy24h": 439.06,
-      "apy7d": 41.94,
-      "apy30d": 16.78
+      "tvl": 382213.83,
+      "volumeUsd": 46715753.18,
+      "apy24h": 446.12,
+      "apy7d": 42.67,
+      "apy30d": 17.07
     },
     "api_response": {
       "id": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
@@ -4629,11 +4629,11 @@
       "name": "SOL/POOP",
       "active": true,
       "metrics": {
-        "tvl": 384934.87,
-        "volumeUsd": 46303847.33,
-        "apy24h": 439.06,
-        "apy7d": 41.94,
-        "apy30d": 16.78
+        "tvl": 382213.83,
+        "volumeUsd": 46715753.18,
+        "apy24h": 446.12,
+        "apy7d": 42.67,
+        "apy30d": 17.07
       }
     },
     "token1_price_source": "coingecko",
@@ -4656,7 +4656,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 132.68
+        "price": 133.23
       },
       {
         "symbol": "Fartcoin",
@@ -4668,22 +4668,22 @@
     ],
     "poolId": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
     "programId": "",
-    "liquidity": 406488.0,
-    "volume_24h": 5053159.16,
-    "apr": 261.19,
+    "liquidity": 405197.05,
+    "volume_24h": 5041702.09,
+    "apr": 261.51,
     "fee": 0,
-    "apr_24h": 261.19,
-    "apr_7d": 220.94,
-    "apr_30d": 128.38,
+    "apr_24h": 261.51,
+    "apr_7d": 221.6,
+    "apr_30d": 128.84,
     "apr_change_24h": 0,
-    "apr_change_7d": -15.410237757953979,
-    "apr_change_30d": -41.8937268036571,
+    "apr_change_7d": -15.261366678138502,
+    "apr_change_30d": -41.85920577617328,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:07.748569",
-    "updated_at": "2025-05-04T12:41:07.748579",
+    "created_at": "2025-05-04T12:51:48.746491",
+    "updated_at": "2025-05-04T12:51:48.746501",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -4695,11 +4695,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 406488.0,
-      "volumeUsd": 5053159.16,
-      "apy24h": 261.19,
-      "apy7d": 220.94,
-      "apy30d": 128.38
+      "tvl": 405197.05,
+      "volumeUsd": 5041702.09,
+      "apy24h": 261.51,
+      "apy7d": 221.6,
+      "apy30d": 128.84
     },
     "api_response": {
       "id": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
@@ -4709,11 +4709,11 @@
       "name": "SOL/Fartcoin",
       "active": true,
       "metrics": {
-        "tvl": 406488.0,
-        "volumeUsd": 5053159.16,
-        "apy24h": 261.19,
-        "apy7d": 220.94,
-        "apy30d": 128.38
+        "tvl": 405197.05,
+        "volumeUsd": 5041702.09,
+        "apy24h": 261.51,
+        "apy7d": 221.6,
+        "apy30d": 128.84
       }
     },
     "token1_price_source": "coingecko",
@@ -4748,22 +4748,22 @@
     ],
     "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
     "programId": "",
-    "liquidity": 1925844.02,
-    "volume_24h": 4342303.33,
-    "apr": 205.75,
+    "liquidity": 1927660.41,
+    "volume_24h": 4302752.3,
+    "apr": 203.68,
     "fee": 0,
-    "apr_24h": 205.75,
-    "apr_7d": 273.46,
-    "apr_30d": 109.38,
+    "apr_24h": 203.68,
+    "apr_7d": 273.27,
+    "apr_30d": 109.31,
     "apr_change_24h": 0,
-    "apr_change_7d": 32.90886998784932,
-    "apr_change_30d": -60.00146273678052,
+    "apr_change_7d": 34.1663393558523,
+    "apr_change_30d": -59.99926812310169,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:08.105171",
-    "updated_at": "2025-05-04T12:41:08.105179",
+    "created_at": "2025-05-04T12:51:49.106659",
+    "updated_at": "2025-05-04T12:51:49.106670",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -4775,11 +4775,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1925844.02,
-      "volumeUsd": 4342303.33,
-      "apy24h": 205.75,
-      "apy7d": 273.46,
-      "apy30d": 109.38
+      "tvl": 1927660.41,
+      "volumeUsd": 4302752.3,
+      "apy24h": 203.68,
+      "apy7d": 273.27,
+      "apy30d": 109.31
     },
     "api_response": {
       "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
@@ -4789,11 +4789,11 @@
       "name": "BOOP/USDC",
       "active": true,
       "metrics": {
-        "tvl": 1925844.02,
-        "volumeUsd": 4342303.33,
-        "apy24h": 205.75,
-        "apy7d": 273.46,
-        "apy30d": 109.38
+        "tvl": 1927660.41,
+        "volumeUsd": 4302752.3,
+        "apy24h": 203.68,
+        "apy7d": 273.27,
+        "apy30d": 109.31
       }
     },
     "token1_price_source": "none",
@@ -4816,7 +4816,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 23614.71
+        "price": 23914.06
       },
       {
         "symbol": "SOGENT",
@@ -4828,22 +4828,22 @@
     ],
     "poolId": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
     "programId": "",
-    "liquidity": 505498.42,
-    "volume_24h": 23831800.46,
-    "apr": 172.08,
+    "liquidity": 504264.12,
+    "volume_24h": 23388223.94,
+    "apr": 169.29,
     "fee": 0,
-    "apr_24h": 172.08,
-    "apr_7d": 28.98,
-    "apr_30d": 11.59,
+    "apr_24h": 169.29,
+    "apr_7d": 29.06,
+    "apr_30d": 11.62,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.15899581589959,
-    "apr_change_30d": -60.00690131124914,
+    "apr_change_7d": -82.83418985173371,
+    "apr_change_30d": -60.01376462491397,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:08.466088",
-    "updated_at": "2025-05-04T12:41:08.466122",
+    "created_at": "2025-05-04T12:51:49.471713",
+    "updated_at": "2025-05-04T12:51:49.471723",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -4855,11 +4855,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 505498.42,
-      "volumeUsd": 23831800.46,
-      "apy24h": 172.08,
-      "apy7d": 28.98,
-      "apy30d": 11.59
+      "tvl": 504264.12,
+      "volumeUsd": 23388223.94,
+      "apy24h": 169.29,
+      "apy7d": 29.06,
+      "apy30d": 11.62
     },
     "api_response": {
       "id": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
@@ -4869,91 +4869,11 @@
       "name": "SOL/SOGENT",
       "active": true,
       "metrics": {
-        "tvl": 505498.42,
-        "volumeUsd": 23831800.46,
-        "apy24h": 172.08,
-        "apy7d": 28.98,
-        "apy30d": 11.59
-      }
-    },
-    "token1_price_source": "coingecko",
-    "token2_price_source": "none"
-  },
-  {
-    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "name": "SOL/LFG",
-    "dex": "raydium",
-    "category": "Meme Token",
-    "token1_symbol": "SOL",
-    "token2_symbol": "LFG",
-    "token1_address": "So11111111111111111111111111111111111111112",
-    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-    "token1_price": 145.4,
-    "token2_price": 0.0,
-    "tokens": [
-      {
-        "symbol": "SOL",
-        "name": "Solana",
-        "address": "So11111111111111111111111111111111111111112",
-        "decimals": 9,
-        "price": 124779.41
-      },
-      {
-        "symbol": "LFG",
-        "name": "LFG",
-        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-        "decimals": 9,
-        "price": 0
-      }
-    ],
-    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "programId": "",
-    "liquidity": 459850.9,
-    "volume_24h": 18395314.04,
-    "apr": 146.01,
-    "fee": 0,
-    "apr_24h": 146.01,
-    "apr_7d": 67.24,
-    "apr_30d": 26.9,
-    "apr_change_24h": 0,
-    "apr_change_7d": -53.948359701390316,
-    "apr_change_30d": -59.9940511600238,
-    "tvl_change_24h": 0,
-    "tvl_change_7d": 0,
-    "tvl_change_30d": 0,
-    "active": true,
-    "created_at": "2025-05-04T12:41:09.699294",
-    "updated_at": "2025-05-04T12:41:09.699300",
-    "extra_data": {},
-    "version": "1.0",
-    "prediction_score": 0,
-    "risk_score": 0,
-    "volatility": 0,
-    "dex_specific": {
-      "ammId": "",
-      "concentrationBounds": "",
-      "whirlpoolId": ""
-    },
-    "metrics_data": {
-      "tvl": 459850.9,
-      "volumeUsd": 18395314.04,
-      "apy24h": 146.01,
-      "apy7d": 67.24,
-      "apy30d": 26.9
-    },
-    "api_response": {
-      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "programId": "",
-      "source": "raydium",
-      "name": "SOL/LFG",
-      "active": true,
-      "metrics": {
-        "tvl": 459850.9,
-        "volumeUsd": 18395314.04,
-        "apy24h": 146.01,
-        "apy7d": 67.24,
-        "apy30d": 26.9
+        "tvl": 504264.12,
+        "volumeUsd": 23388223.94,
+        "apy24h": 169.29,
+        "apy7d": 29.06,
+        "apy30d": 11.62
       }
     },
     "token1_price_source": "coingecko",
@@ -4976,7 +4896,7 @@
         "name": "Layerhub",
         "address": "LAYER4xPpTCb3QL8S9u41EAhAX7mhBn8Q6xMTwY2Yzc",
         "decimals": 9,
-        "price": 3.21
+        "price": 3.17
       },
       {
         "symbol": "SOL",
@@ -4988,22 +4908,22 @@
     ],
     "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
     "programId": "",
-    "liquidity": 3891619.77,
-    "volume_24h": 15549617.3,
-    "apr": 145.84,
+    "liquidity": 3879486.67,
+    "volume_24h": 15577319.14,
+    "apr": 146.56,
     "fee": 0,
-    "apr_24h": 145.84,
-    "apr_7d": 77.02,
-    "apr_30d": 73.41,
+    "apr_24h": 146.56,
+    "apr_7d": 77.28,
+    "apr_30d": 73.69,
     "apr_change_24h": 0,
-    "apr_change_7d": -47.188699945145366,
-    "apr_change_30d": -4.687094261230849,
+    "apr_change_7d": -47.27074235807861,
+    "apr_change_30d": -4.645445134575573,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:10.068621",
-    "updated_at": "2025-05-04T12:41:10.068632",
+    "created_at": "2025-05-04T12:51:49.862398",
+    "updated_at": "2025-05-04T12:51:49.862409",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5015,11 +4935,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 3891619.77,
-      "volumeUsd": 15549617.3,
-      "apy24h": 145.84,
-      "apy7d": 77.02,
-      "apy30d": 73.41
+      "tvl": 3879486.67,
+      "volumeUsd": 15577319.14,
+      "apy24h": 146.56,
+      "apy7d": 77.28,
+      "apy30d": 73.69
     },
     "api_response": {
       "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
@@ -5029,15 +4949,95 @@
       "name": "LAYER/SOL",
       "active": true,
       "metrics": {
-        "tvl": 3891619.77,
-        "volumeUsd": 15549617.3,
-        "apy24h": 145.84,
-        "apy7d": 77.02,
-        "apy30d": 73.41
+        "tvl": 3879486.67,
+        "volumeUsd": 15577319.14,
+        "apy24h": 146.56,
+        "apy7d": 77.28,
+        "apy30d": 73.69
       }
     },
     "token1_price_source": "none",
     "token2_price_source": "coingecko"
+  },
+  {
+    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "name": "SOL/LFG",
+    "dex": "raydium",
+    "category": "Meme Token",
+    "token1_symbol": "SOL",
+    "token2_symbol": "LFG",
+    "token1_address": "So11111111111111111111111111111111111111112",
+    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+    "token1_price": 145.4,
+    "token2_price": 0.0,
+    "tokens": [
+      {
+        "symbol": "SOL",
+        "name": "Solana",
+        "address": "So11111111111111111111111111111111111111112",
+        "decimals": 9,
+        "price": 125650.15
+      },
+      {
+        "symbol": "LFG",
+        "name": "LFG",
+        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+        "decimals": 9,
+        "price": 0
+      }
+    ],
+    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "programId": "",
+    "liquidity": 457900.55,
+    "volume_24h": 18094552.93,
+    "apr": 144.23,
+    "fee": 0,
+    "apr_24h": 144.23,
+    "apr_7d": 67.54,
+    "apr_30d": 27.02,
+    "apr_change_24h": 0,
+    "apr_change_7d": -53.17201691742355,
+    "apr_change_30d": -59.99407758365414,
+    "tvl_change_24h": 0,
+    "tvl_change_7d": 0,
+    "tvl_change_30d": 0,
+    "active": true,
+    "created_at": "2025-05-04T12:51:50.219200",
+    "updated_at": "2025-05-04T12:51:50.219206",
+    "extra_data": {},
+    "version": "1.0",
+    "prediction_score": 0,
+    "risk_score": 0,
+    "volatility": 0,
+    "dex_specific": {
+      "ammId": "",
+      "concentrationBounds": "",
+      "whirlpoolId": ""
+    },
+    "metrics_data": {
+      "tvl": 457900.55,
+      "volumeUsd": 18094552.93,
+      "apy24h": 144.23,
+      "apy7d": 67.54,
+      "apy30d": 27.02
+    },
+    "api_response": {
+      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "programId": "",
+      "source": "raydium",
+      "name": "SOL/LFG",
+      "active": true,
+      "metrics": {
+        "tvl": 457900.55,
+        "volumeUsd": 18094552.93,
+        "apy24h": 144.23,
+        "apy7d": 67.54,
+        "apy30d": 27.02
+      }
+    },
+    "token1_price_source": "coingecko",
+    "token2_price_source": "none"
   },
   {
     "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -5056,7 +5056,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 12095.31
+        "price": 12155.72
       },
       {
         "symbol": "SOOMER",
@@ -5068,22 +5068,22 @@
     ],
     "poolId": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
     "programId": "",
-    "liquidity": 661871.25,
-    "volume_24h": 19744988.12,
-    "apr": 108.89,
+    "liquidity": 660706.2,
+    "volume_24h": 19366599.07,
+    "apr": 106.99,
     "fee": 0,
-    "apr_24h": 108.89,
-    "apr_7d": 18.44,
-    "apr_30d": 7.38,
+    "apr_24h": 106.99,
+    "apr_7d": 18.47,
+    "apr_30d": 7.39,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.06547892368445,
-    "apr_change_30d": -59.97830802603038,
+    "apr_change_7d": -82.73670436489392,
+    "apr_change_30d": -59.98917162966973,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:10.425176",
-    "updated_at": "2025-05-04T12:41:10.425186",
+    "created_at": "2025-05-04T12:51:50.634344",
+    "updated_at": "2025-05-04T12:51:50.634353",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5095,11 +5095,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 661871.25,
-      "volumeUsd": 19744988.12,
-      "apy24h": 108.89,
-      "apy7d": 18.44,
-      "apy30d": 7.38
+      "tvl": 660706.2,
+      "volumeUsd": 19366599.07,
+      "apy24h": 106.99,
+      "apy7d": 18.47,
+      "apy30d": 7.39
     },
     "api_response": {
       "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -5109,11 +5109,11 @@
       "name": "SOL/SOOMER",
       "active": true,
       "metrics": {
-        "tvl": 661871.25,
-        "volumeUsd": 19744988.12,
-        "apy24h": 108.89,
-        "apy7d": 18.44,
-        "apy30d": 7.38
+        "tvl": 660706.2,
+        "volumeUsd": 19366599.07,
+        "apy24h": 106.99,
+        "apy7d": 18.47,
+        "apy30d": 7.39
       }
     },
     "token1_price_source": "coingecko",
@@ -5136,7 +5136,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 14882.67
+        "price": 13745.99
       },
       {
         "symbol": "SPEC",
@@ -5148,22 +5148,22 @@
     ],
     "poolId": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
     "programId": "",
-    "liquidity": 668684.74,
-    "volume_24h": 17709473.33,
-    "apr": 96.67,
+    "liquidity": 700596.08,
+    "volume_24h": 17617450.66,
+    "apr": 91.78,
     "fee": 0,
-    "apr_24h": 96.67,
-    "apr_7d": 14.57,
-    "apr_30d": 5.83,
+    "apr_24h": 91.78,
+    "apr_7d": 13.98,
+    "apr_30d": 5.59,
     "apr_change_24h": 0,
-    "apr_change_7d": -84.92810592738181,
-    "apr_change_30d": -59.98627316403569,
+    "apr_change_7d": -84.76792329483547,
+    "apr_change_30d": -60.014306151645215,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:11.698186",
-    "updated_at": "2025-05-04T12:41:11.698195",
+    "created_at": "2025-05-04T12:51:51.021191",
+    "updated_at": "2025-05-04T12:51:51.021201",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5175,11 +5175,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 668684.74,
-      "volumeUsd": 17709473.33,
-      "apy24h": 96.67,
-      "apy7d": 14.57,
-      "apy30d": 5.83
+      "tvl": 700596.08,
+      "volumeUsd": 17617450.66,
+      "apy24h": 91.78,
+      "apy7d": 13.98,
+      "apy30d": 5.59
     },
     "api_response": {
       "id": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
@@ -5189,11 +5189,11 @@
       "name": "SOL/SPEC",
       "active": true,
       "metrics": {
-        "tvl": 668684.74,
-        "volumeUsd": 17709473.33,
-        "apy24h": 96.67,
-        "apy7d": 14.57,
-        "apy30d": 5.83
+        "tvl": 700596.08,
+        "volumeUsd": 17617450.66,
+        "apy24h": 91.78,
+        "apy7d": 13.98,
+        "apy30d": 5.59
       }
     },
     "token1_price_source": "coingecko",
@@ -5228,22 +5228,22 @@
     ],
     "poolId": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
     "programId": "",
-    "liquidity": 364527.21,
-    "volume_24h": 193616.16,
-    "apr": 48.47,
+    "liquidity": 365008.28,
+    "volume_24h": 192006.52,
+    "apr": 48.0,
     "fee": 0,
-    "apr_24h": 48.47,
-    "apr_7d": 47.67,
-    "apr_30d": 61.17,
+    "apr_24h": 48.0,
+    "apr_7d": 47.51,
+    "apr_30d": 61.09,
     "apr_change_24h": 0,
-    "apr_change_7d": -1.6505054672993544,
-    "apr_change_30d": 28.319697923222154,
+    "apr_change_7d": -1.0208333333333375,
+    "apr_change_30d": 28.58345611450222,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:11.698386",
-    "updated_at": "2025-05-04T12:41:11.698389",
+    "created_at": "2025-05-04T12:51:51.021530",
+    "updated_at": "2025-05-04T12:51:51.021535",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5255,11 +5255,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 364527.21,
-      "volumeUsd": 193616.16,
-      "apy24h": 48.47,
-      "apy7d": 47.67,
-      "apy30d": 61.17
+      "tvl": 365008.28,
+      "volumeUsd": 192006.52,
+      "apy24h": 48.0,
+      "apy7d": 47.51,
+      "apy30d": 61.09
     },
     "api_response": {
       "id": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
@@ -5269,11 +5269,11 @@
       "name": "RAY/USDC",
       "active": true,
       "metrics": {
-        "tvl": 364527.21,
-        "volumeUsd": 193616.16,
-        "apy24h": 48.47,
-        "apy7d": 47.67,
-        "apy30d": 61.17
+        "tvl": 365008.28,
+        "volumeUsd": 192006.52,
+        "apy24h": 48.0,
+        "apy7d": 47.51,
+        "apy30d": 61.09
       }
     },
     "token1_price_source": "coingecko",
@@ -5296,7 +5296,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.73
+        "price": 145.82
       },
       {
         "symbol": "USDC",
@@ -5308,22 +5308,22 @@
     ],
     "poolId": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
     "programId": "",
-    "liquidity": 9866001.7,
-    "volume_24h": 22825029.79,
-    "apr": 35.19,
+    "liquidity": 9863683.33,
+    "volume_24h": 22747294.53,
+    "apr": 35.08,
     "fee": 0,
-    "apr_24h": 35.19,
-    "apr_7d": 35.92,
-    "apr_30d": 84.96,
+    "apr_24h": 35.08,
+    "apr_7d": 35.9,
+    "apr_30d": 84.98,
     "apr_change_24h": 0,
-    "apr_change_7d": 2.074452969593646,
-    "apr_change_30d": 136.52561247216033,
+    "apr_change_7d": 2.3375142531356907,
+    "apr_change_30d": 136.7130919220056,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:11.698520",
-    "updated_at": "2025-05-04T12:41:11.698522",
+    "created_at": "2025-05-04T12:51:51.021746",
+    "updated_at": "2025-05-04T12:51:51.021751",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5335,11 +5335,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 9866001.7,
-      "volumeUsd": 22825029.79,
-      "apy24h": 35.19,
-      "apy7d": 35.92,
-      "apy30d": 84.96
+      "tvl": 9863683.33,
+      "volumeUsd": 22747294.53,
+      "apy24h": 35.08,
+      "apy7d": 35.9,
+      "apy30d": 84.98
     },
     "api_response": {
       "id": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
@@ -5349,11 +5349,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 9866001.7,
-        "volumeUsd": 22825029.79,
-        "apy24h": 35.19,
-        "apy7d": 35.92,
-        "apy30d": 84.96
+        "tvl": 9863683.33,
+        "volumeUsd": 22747294.53,
+        "apy24h": 35.08,
+        "apy7d": 35.9,
+        "apy30d": 84.98
       }
     },
     "token1_price_source": "coingecko",
@@ -5376,7 +5376,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 54.52
+        "price": 54.55
       },
       {
         "symbol": "RAY",
@@ -5388,22 +5388,22 @@
     ],
     "poolId": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
     "programId": "",
-    "liquidity": 4137004.67,
-    "volume_24h": 5080125.1,
-    "apr": 24.43,
+    "liquidity": 4136864.34,
+    "volume_24h": 5049390.76,
+    "apr": 24.3,
     "fee": 0,
-    "apr_24h": 24.43,
-    "apr_7d": 33.6,
-    "apr_30d": 56.21,
+    "apr_24h": 24.3,
+    "apr_7d": 33.55,
+    "apr_30d": 56.22,
     "apr_change_24h": 0,
-    "apr_change_7d": 37.535816618911184,
-    "apr_change_30d": 67.29166666666666,
+    "apr_change_7d": 38.06584362139916,
+    "apr_change_30d": 67.57078986587184,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:11.698691",
-    "updated_at": "2025-05-04T12:41:11.698694",
+    "created_at": "2025-05-04T12:51:51.021902",
+    "updated_at": "2025-05-04T12:51:51.021905",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5415,11 +5415,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4137004.67,
-      "volumeUsd": 5080125.1,
-      "apy24h": 24.43,
-      "apy7d": 33.6,
-      "apy30d": 56.21
+      "tvl": 4136864.34,
+      "volumeUsd": 5049390.76,
+      "apy24h": 24.3,
+      "apy7d": 33.55,
+      "apy30d": 56.22
     },
     "api_response": {
       "id": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
@@ -5429,11 +5429,11 @@
       "name": "SOL/RAY",
       "active": true,
       "metrics": {
-        "tvl": 4137004.67,
-        "volumeUsd": 5080125.1,
-        "apy24h": 24.43,
-        "apy7d": 33.6,
-        "apy30d": 56.21
+        "tvl": 4136864.34,
+        "volumeUsd": 5049390.76,
+        "apy24h": 24.3,
+        "apy7d": 33.55,
+        "apy30d": 56.22
       }
     },
     "token1_price_source": "coingecko",
@@ -5456,7 +5456,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.72
+        "price": 145.86
       },
       {
         "symbol": "USDC",
@@ -5468,22 +5468,22 @@
     ],
     "poolId": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
     "programId": "",
-    "liquidity": 4575102.3,
-    "volume_24h": 26397019.09,
-    "apr": 22.28,
+    "liquidity": 4538955.87,
+    "volume_24h": 26258623.59,
+    "apr": 22.35,
     "fee": 0,
-    "apr_24h": 22.28,
-    "apr_7d": 24.48,
-    "apr_30d": 22.34,
+    "apr_24h": 22.35,
+    "apr_7d": 24.66,
+    "apr_30d": 22.52,
     "apr_change_24h": 0,
-    "apr_change_7d": 9.87432675044883,
-    "apr_change_30d": -8.74183006535948,
+    "apr_change_7d": 10.33557046979865,
+    "apr_change_30d": -8.678021086780213,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:11.698821",
-    "updated_at": "2025-05-04T12:41:11.698825",
+    "created_at": "2025-05-04T12:51:51.022036",
+    "updated_at": "2025-05-04T12:51:51.022039",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5495,11 +5495,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4575102.3,
-      "volumeUsd": 26397019.09,
-      "apy24h": 22.28,
-      "apy7d": 24.48,
-      "apy30d": 22.34
+      "tvl": 4538955.87,
+      "volumeUsd": 26258623.59,
+      "apy24h": 22.35,
+      "apy7d": 24.66,
+      "apy30d": 22.52
     },
     "api_response": {
       "id": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
@@ -5509,11 +5509,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 4575102.3,
-        "volumeUsd": 26397019.09,
-        "apy24h": 22.28,
-        "apy7d": 24.48,
-        "apy30d": 22.34
+        "tvl": 4538955.87,
+        "volumeUsd": 26258623.59,
+        "apy24h": 22.35,
+        "apy7d": 24.66,
+        "apy30d": 22.52
       }
     },
     "token1_price_source": "coingecko",
@@ -5536,7 +5536,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.7
+        "price": 145.85
       },
       {
         "symbol": "USDT",
@@ -5548,22 +5548,22 @@
     ],
     "poolId": "3nMFwZXwY1s1M5s8vYAHqd4wGs4iSxXE4LRoUMMYqEgF",
     "programId": "",
-    "liquidity": 1052432.6,
-    "volume_24h": 6374663.52,
-    "apr": 22.11,
+    "liquidity": 1052378.69,
+    "volume_24h": 6344513.08,
+    "apr": 22.0,
     "fee": 0,
-    "apr_24h": 22.11,
-    "apr_7d": 20.55,
+    "apr_24h": 22.0,
+    "apr_7d": 20.54,
     "apr_30d": 32.41,
     "apr_change_24h": 0,
-    "apr_change_7d": -7.055630936227946,
-    "apr_change_30d": 57.71289537712894,
+    "apr_change_7d": -6.63636363636364,
+    "apr_change_30d": 57.789678675754615,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:11.699012",
-    "updated_at": "2025-05-04T12:41:11.699015",
+    "created_at": "2025-05-04T12:51:51.022222",
+    "updated_at": "2025-05-04T12:51:51.022225",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5575,10 +5575,10 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1052432.6,
-      "volumeUsd": 6374663.52,
-      "apy24h": 22.11,
-      "apy7d": 20.55,
+      "tvl": 1052378.69,
+      "volumeUsd": 6344513.08,
+      "apy24h": 22.0,
+      "apy7d": 20.54,
       "apy30d": 32.41
     },
     "api_response": {
@@ -5589,10 +5589,10 @@
       "name": "SOL/USDT",
       "active": true,
       "metrics": {
-        "tvl": 1052432.6,
-        "volumeUsd": 6374663.52,
-        "apy24h": 22.11,
-        "apy7d": 20.55,
+        "tvl": 1052378.69,
+        "volumeUsd": 6344513.08,
+        "apy24h": 22.0,
+        "apy7d": 20.54,
         "apy30d": 32.41
       }
     },
@@ -5616,7 +5616,7 @@
         "name": "Fartcoin",
         "address": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
         "decimals": 9,
-        "price": 1.1
+        "price": 1.09
       },
       {
         "symbol": "USDC",
@@ -5628,22 +5628,22 @@
     ],
     "poolId": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
     "programId": "",
-    "liquidity": 186063.81,
-    "volume_24h": 4604380.75,
-    "apr": 526.6,
+    "liquidity": 185558.15,
+    "volume_24h": 4580056.26,
+    "apr": 525.65,
     "fee": 0,
-    "apr_24h": 526.6,
-    "apr_7d": 416.39,
-    "apr_30d": 231.7,
+    "apr_24h": 525.65,
+    "apr_7d": 417.55,
+    "apr_30d": 232.42,
     "apr_change_24h": 0,
-    "apr_change_7d": -20.928598556779345,
-    "apr_change_30d": -44.3550517543649,
+    "apr_change_7d": -20.56501474365071,
+    "apr_change_30d": -44.33720512513472,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:18.399049",
-    "updated_at": "2025-05-04T12:41:18.399058",
+    "created_at": "2025-05-04T12:51:57.827428",
+    "updated_at": "2025-05-04T12:51:57.827441",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5655,11 +5655,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 186063.81,
-      "volumeUsd": 4604380.75,
-      "apy24h": 526.6,
-      "apy7d": 416.39,
-      "apy30d": 231.7
+      "tvl": 185558.15,
+      "volumeUsd": 4580056.26,
+      "apy24h": 525.65,
+      "apy7d": 417.55,
+      "apy30d": 232.42
     },
     "api_response": {
       "id": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
@@ -5669,11 +5669,11 @@
       "name": "Fartcoin/USDC",
       "active": true,
       "metrics": {
-        "tvl": 186063.81,
-        "volumeUsd": 4604380.75,
-        "apy24h": 526.6,
-        "apy7d": 416.39,
-        "apy30d": 231.7
+        "tvl": 185558.15,
+        "volumeUsd": 4580056.26,
+        "apy24h": 525.65,
+        "apy7d": 417.55,
+        "apy30d": 232.42
       }
     },
     "token1_price_source": "none",
@@ -5696,7 +5696,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 18095114.43
+        "price": 18299881.63
       },
       {
         "symbol": "POOP",
@@ -5708,22 +5708,22 @@
     ],
     "poolId": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
     "programId": "",
-    "liquidity": 384934.87,
-    "volume_24h": 46303847.33,
-    "apr": 439.06,
+    "liquidity": 382213.83,
+    "volume_24h": 46715753.18,
+    "apr": 446.12,
     "fee": 0,
-    "apr_24h": 439.06,
-    "apr_7d": 41.94,
-    "apr_30d": 16.78,
+    "apr_24h": 446.12,
+    "apr_7d": 42.67,
+    "apr_30d": 17.07,
     "apr_change_24h": 0,
-    "apr_change_7d": -90.44777479160024,
-    "apr_change_30d": -59.99046256556986,
+    "apr_change_7d": -90.43530888550166,
+    "apr_change_30d": -59.995312866182324,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:18.766642",
-    "updated_at": "2025-05-04T12:41:18.766649",
+    "created_at": "2025-05-04T12:51:58.192514",
+    "updated_at": "2025-05-04T12:51:58.192521",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5735,11 +5735,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 384934.87,
-      "volumeUsd": 46303847.33,
-      "apy24h": 439.06,
-      "apy7d": 41.94,
-      "apy30d": 16.78
+      "tvl": 382213.83,
+      "volumeUsd": 46715753.18,
+      "apy24h": 446.12,
+      "apy7d": 42.67,
+      "apy30d": 17.07
     },
     "api_response": {
       "id": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
@@ -5749,11 +5749,11 @@
       "name": "SOL/POOP",
       "active": true,
       "metrics": {
-        "tvl": 384934.87,
-        "volumeUsd": 46303847.33,
-        "apy24h": 439.06,
-        "apy7d": 41.94,
-        "apy30d": 16.78
+        "tvl": 382213.83,
+        "volumeUsd": 46715753.18,
+        "apy24h": 446.12,
+        "apy7d": 42.67,
+        "apy30d": 17.07
       }
     },
     "token1_price_source": "coingecko",
@@ -5776,7 +5776,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 132.68
+        "price": 133.23
       },
       {
         "symbol": "Fartcoin",
@@ -5788,22 +5788,22 @@
     ],
     "poolId": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
     "programId": "",
-    "liquidity": 406488.0,
-    "volume_24h": 5053159.16,
-    "apr": 261.19,
+    "liquidity": 405197.05,
+    "volume_24h": 5041702.09,
+    "apr": 261.51,
     "fee": 0,
-    "apr_24h": 261.19,
-    "apr_7d": 220.94,
-    "apr_30d": 128.38,
+    "apr_24h": 261.51,
+    "apr_7d": 221.6,
+    "apr_30d": 128.84,
     "apr_change_24h": 0,
-    "apr_change_7d": -15.410237757953979,
-    "apr_change_30d": -41.8937268036571,
+    "apr_change_7d": -15.261366678138502,
+    "apr_change_30d": -41.85920577617328,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:19.130143",
-    "updated_at": "2025-05-04T12:41:19.130153",
+    "created_at": "2025-05-04T12:51:58.558872",
+    "updated_at": "2025-05-04T12:51:58.558882",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5815,11 +5815,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 406488.0,
-      "volumeUsd": 5053159.16,
-      "apy24h": 261.19,
-      "apy7d": 220.94,
-      "apy30d": 128.38
+      "tvl": 405197.05,
+      "volumeUsd": 5041702.09,
+      "apy24h": 261.51,
+      "apy7d": 221.6,
+      "apy30d": 128.84
     },
     "api_response": {
       "id": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
@@ -5829,11 +5829,11 @@
       "name": "SOL/Fartcoin",
       "active": true,
       "metrics": {
-        "tvl": 406488.0,
-        "volumeUsd": 5053159.16,
-        "apy24h": 261.19,
-        "apy7d": 220.94,
-        "apy30d": 128.38
+        "tvl": 405197.05,
+        "volumeUsd": 5041702.09,
+        "apy24h": 261.51,
+        "apy7d": 221.6,
+        "apy30d": 128.84
       }
     },
     "token1_price_source": "coingecko",
@@ -5868,22 +5868,22 @@
     ],
     "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
     "programId": "",
-    "liquidity": 1925844.02,
-    "volume_24h": 4342303.33,
-    "apr": 205.75,
+    "liquidity": 1927660.41,
+    "volume_24h": 4302752.3,
+    "apr": 203.68,
     "fee": 0,
-    "apr_24h": 205.75,
-    "apr_7d": 273.46,
-    "apr_30d": 109.38,
+    "apr_24h": 203.68,
+    "apr_7d": 273.27,
+    "apr_30d": 109.31,
     "apr_change_24h": 0,
-    "apr_change_7d": 32.90886998784932,
-    "apr_change_30d": -60.00146273678052,
+    "apr_change_7d": 34.1663393558523,
+    "apr_change_30d": -59.99926812310169,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:19.496254",
-    "updated_at": "2025-05-04T12:41:19.496264",
+    "created_at": "2025-05-04T12:51:58.919615",
+    "updated_at": "2025-05-04T12:51:58.919625",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5895,11 +5895,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1925844.02,
-      "volumeUsd": 4342303.33,
-      "apy24h": 205.75,
-      "apy7d": 273.46,
-      "apy30d": 109.38
+      "tvl": 1927660.41,
+      "volumeUsd": 4302752.3,
+      "apy24h": 203.68,
+      "apy7d": 273.27,
+      "apy30d": 109.31
     },
     "api_response": {
       "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
@@ -5909,11 +5909,11 @@
       "name": "BOOP/USDC",
       "active": true,
       "metrics": {
-        "tvl": 1925844.02,
-        "volumeUsd": 4342303.33,
-        "apy24h": 205.75,
-        "apy7d": 273.46,
-        "apy30d": 109.38
+        "tvl": 1927660.41,
+        "volumeUsd": 4302752.3,
+        "apy24h": 203.68,
+        "apy7d": 273.27,
+        "apy30d": 109.31
       }
     },
     "token1_price_source": "none",
@@ -5936,7 +5936,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 23614.71
+        "price": 23914.06
       },
       {
         "symbol": "SOGENT",
@@ -5948,22 +5948,22 @@
     ],
     "poolId": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
     "programId": "",
-    "liquidity": 505498.42,
-    "volume_24h": 23831800.46,
-    "apr": 172.08,
+    "liquidity": 504264.12,
+    "volume_24h": 23388223.94,
+    "apr": 169.29,
     "fee": 0,
-    "apr_24h": 172.08,
-    "apr_7d": 28.98,
-    "apr_30d": 11.59,
+    "apr_24h": 169.29,
+    "apr_7d": 29.06,
+    "apr_30d": 11.62,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.15899581589959,
-    "apr_change_30d": -60.00690131124914,
+    "apr_change_7d": -82.83418985173371,
+    "apr_change_30d": -60.01376462491397,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:19.858743",
-    "updated_at": "2025-05-04T12:41:19.858752",
+    "created_at": "2025-05-04T12:51:59.280164",
+    "updated_at": "2025-05-04T12:51:59.280171",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -5975,11 +5975,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 505498.42,
-      "volumeUsd": 23831800.46,
-      "apy24h": 172.08,
-      "apy7d": 28.98,
-      "apy30d": 11.59
+      "tvl": 504264.12,
+      "volumeUsd": 23388223.94,
+      "apy24h": 169.29,
+      "apy7d": 29.06,
+      "apy30d": 11.62
     },
     "api_response": {
       "id": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
@@ -5989,91 +5989,11 @@
       "name": "SOL/SOGENT",
       "active": true,
       "metrics": {
-        "tvl": 505498.42,
-        "volumeUsd": 23831800.46,
-        "apy24h": 172.08,
-        "apy7d": 28.98,
-        "apy30d": 11.59
-      }
-    },
-    "token1_price_source": "coingecko",
-    "token2_price_source": "none"
-  },
-  {
-    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "name": "SOL/LFG",
-    "dex": "raydium",
-    "category": "Meme Token",
-    "token1_symbol": "SOL",
-    "token2_symbol": "LFG",
-    "token1_address": "So11111111111111111111111111111111111111112",
-    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-    "token1_price": 145.4,
-    "token2_price": 0.0,
-    "tokens": [
-      {
-        "symbol": "SOL",
-        "name": "Solana",
-        "address": "So11111111111111111111111111111111111111112",
-        "decimals": 9,
-        "price": 124779.41
-      },
-      {
-        "symbol": "LFG",
-        "name": "LFG",
-        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
-        "decimals": 9,
-        "price": 0
-      }
-    ],
-    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-    "programId": "",
-    "liquidity": 459850.9,
-    "volume_24h": 18395314.04,
-    "apr": 146.01,
-    "fee": 0,
-    "apr_24h": 146.01,
-    "apr_7d": 67.24,
-    "apr_30d": 26.9,
-    "apr_change_24h": 0,
-    "apr_change_7d": -53.948359701390316,
-    "apr_change_30d": -59.9940511600238,
-    "tvl_change_24h": 0,
-    "tvl_change_7d": 0,
-    "tvl_change_30d": 0,
-    "active": true,
-    "created_at": "2025-05-04T12:41:21.193333",
-    "updated_at": "2025-05-04T12:41:21.193353",
-    "extra_data": {},
-    "version": "1.0",
-    "prediction_score": 0,
-    "risk_score": 0,
-    "volatility": 0,
-    "dex_specific": {
-      "ammId": "",
-      "concentrationBounds": "",
-      "whirlpoolId": ""
-    },
-    "metrics_data": {
-      "tvl": 459850.9,
-      "volumeUsd": 18395314.04,
-      "apy24h": 146.01,
-      "apy7d": 67.24,
-      "apy30d": 26.9
-    },
-    "api_response": {
-      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
-      "programId": "",
-      "source": "raydium",
-      "name": "SOL/LFG",
-      "active": true,
-      "metrics": {
-        "tvl": 459850.9,
-        "volumeUsd": 18395314.04,
-        "apy24h": 146.01,
-        "apy7d": 67.24,
-        "apy30d": 26.9
+        "tvl": 504264.12,
+        "volumeUsd": 23388223.94,
+        "apy24h": 169.29,
+        "apy7d": 29.06,
+        "apy30d": 11.62
       }
     },
     "token1_price_source": "coingecko",
@@ -6096,7 +6016,7 @@
         "name": "Layerhub",
         "address": "LAYER4xPpTCb3QL8S9u41EAhAX7mhBn8Q6xMTwY2Yzc",
         "decimals": 9,
-        "price": 3.21
+        "price": 3.17
       },
       {
         "symbol": "SOL",
@@ -6108,22 +6028,22 @@
     ],
     "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
     "programId": "",
-    "liquidity": 3891619.77,
-    "volume_24h": 15549617.3,
-    "apr": 145.84,
+    "liquidity": 3879486.67,
+    "volume_24h": 15577319.14,
+    "apr": 146.56,
     "fee": 0,
-    "apr_24h": 145.84,
-    "apr_7d": 77.02,
-    "apr_30d": 73.41,
+    "apr_24h": 146.56,
+    "apr_7d": 77.28,
+    "apr_30d": 73.69,
     "apr_change_24h": 0,
-    "apr_change_7d": -47.188699945145366,
-    "apr_change_30d": -4.687094261230849,
+    "apr_change_7d": -47.27074235807861,
+    "apr_change_30d": -4.645445134575573,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:21.550208",
-    "updated_at": "2025-05-04T12:41:21.550218",
+    "created_at": "2025-05-04T12:51:59.682471",
+    "updated_at": "2025-05-04T12:51:59.682480",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -6135,11 +6055,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 3891619.77,
-      "volumeUsd": 15549617.3,
-      "apy24h": 145.84,
-      "apy7d": 77.02,
-      "apy30d": 73.41
+      "tvl": 3879486.67,
+      "volumeUsd": 15577319.14,
+      "apy24h": 146.56,
+      "apy7d": 77.28,
+      "apy30d": 73.69
     },
     "api_response": {
       "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
@@ -6149,15 +6069,95 @@
       "name": "LAYER/SOL",
       "active": true,
       "metrics": {
-        "tvl": 3891619.77,
-        "volumeUsd": 15549617.3,
-        "apy24h": 145.84,
-        "apy7d": 77.02,
-        "apy30d": 73.41
+        "tvl": 3879486.67,
+        "volumeUsd": 15577319.14,
+        "apy24h": 146.56,
+        "apy7d": 77.28,
+        "apy30d": 73.69
       }
     },
     "token1_price_source": "none",
     "token2_price_source": "coingecko"
+  },
+  {
+    "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "name": "SOL/LFG",
+    "dex": "raydium",
+    "category": "Meme Token",
+    "token1_symbol": "SOL",
+    "token2_symbol": "LFG",
+    "token1_address": "So11111111111111111111111111111111111111112",
+    "token2_address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+    "token1_price": 145.4,
+    "token2_price": 0.0,
+    "tokens": [
+      {
+        "symbol": "SOL",
+        "name": "Solana",
+        "address": "So11111111111111111111111111111111111111112",
+        "decimals": 9,
+        "price": 125650.15
+      },
+      {
+        "symbol": "LFG",
+        "name": "LFG",
+        "address": "8hhRHZkoCwLojdSthxu3Ho5K2j4BZHnSZ93HZjd4Mxo6",
+        "decimals": 9,
+        "price": 0
+      }
+    ],
+    "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+    "programId": "",
+    "liquidity": 457900.55,
+    "volume_24h": 18094552.93,
+    "apr": 144.23,
+    "fee": 0,
+    "apr_24h": 144.23,
+    "apr_7d": 67.54,
+    "apr_30d": 27.02,
+    "apr_change_24h": 0,
+    "apr_change_7d": -53.17201691742355,
+    "apr_change_30d": -59.99407758365414,
+    "tvl_change_24h": 0,
+    "tvl_change_7d": 0,
+    "tvl_change_30d": 0,
+    "active": true,
+    "created_at": "2025-05-04T12:52:00.036324",
+    "updated_at": "2025-05-04T12:52:00.036331",
+    "extra_data": {},
+    "version": "1.0",
+    "prediction_score": 0,
+    "risk_score": 0,
+    "volatility": 0,
+    "dex_specific": {
+      "ammId": "",
+      "concentrationBounds": "",
+      "whirlpoolId": ""
+    },
+    "metrics_data": {
+      "tvl": 457900.55,
+      "volumeUsd": 18094552.93,
+      "apy24h": 144.23,
+      "apy7d": 67.54,
+      "apy30d": 27.02
+    },
+    "api_response": {
+      "id": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "poolId": "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "programId": "",
+      "source": "raydium",
+      "name": "SOL/LFG",
+      "active": true,
+      "metrics": {
+        "tvl": 457900.55,
+        "volumeUsd": 18094552.93,
+        "apy24h": 144.23,
+        "apy7d": 67.54,
+        "apy30d": 27.02
+      }
+    },
+    "token1_price_source": "coingecko",
+    "token2_price_source": "none"
   },
   {
     "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -6176,7 +6176,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 12095.31
+        "price": 12155.72
       },
       {
         "symbol": "SOOMER",
@@ -6188,22 +6188,22 @@
     ],
     "poolId": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
     "programId": "",
-    "liquidity": 661871.25,
-    "volume_24h": 19744988.12,
-    "apr": 108.89,
+    "liquidity": 660706.2,
+    "volume_24h": 19366599.07,
+    "apr": 106.99,
     "fee": 0,
-    "apr_24h": 108.89,
-    "apr_7d": 18.44,
-    "apr_30d": 7.38,
+    "apr_24h": 106.99,
+    "apr_7d": 18.47,
+    "apr_30d": 7.39,
     "apr_change_24h": 0,
-    "apr_change_7d": -83.06547892368445,
-    "apr_change_30d": -59.97830802603038,
+    "apr_change_7d": -82.73670436489392,
+    "apr_change_30d": -59.98917162966973,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:21.906446",
-    "updated_at": "2025-05-04T12:41:21.906456",
+    "created_at": "2025-05-04T12:52:00.399086",
+    "updated_at": "2025-05-04T12:52:00.399200",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -6215,11 +6215,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 661871.25,
-      "volumeUsd": 19744988.12,
-      "apy24h": 108.89,
-      "apy7d": 18.44,
-      "apy30d": 7.38
+      "tvl": 660706.2,
+      "volumeUsd": 19366599.07,
+      "apy24h": 106.99,
+      "apy7d": 18.47,
+      "apy30d": 7.39
     },
     "api_response": {
       "id": "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
@@ -6229,11 +6229,11 @@
       "name": "SOL/SOOMER",
       "active": true,
       "metrics": {
-        "tvl": 661871.25,
-        "volumeUsd": 19744988.12,
-        "apy24h": 108.89,
-        "apy7d": 18.44,
-        "apy30d": 7.38
+        "tvl": 660706.2,
+        "volumeUsd": 19366599.07,
+        "apy24h": 106.99,
+        "apy7d": 18.47,
+        "apy30d": 7.39
       }
     },
     "token1_price_source": "coingecko",
@@ -6256,7 +6256,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 14882.67
+        "price": 13745.99
       },
       {
         "symbol": "SPEC",
@@ -6268,22 +6268,22 @@
     ],
     "poolId": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
     "programId": "",
-    "liquidity": 668684.74,
-    "volume_24h": 17709473.33,
-    "apr": 96.67,
+    "liquidity": 700596.08,
+    "volume_24h": 17617450.66,
+    "apr": 91.78,
     "fee": 0,
-    "apr_24h": 96.67,
-    "apr_7d": 14.57,
-    "apr_30d": 5.83,
+    "apr_24h": 91.78,
+    "apr_7d": 13.98,
+    "apr_30d": 5.59,
     "apr_change_24h": 0,
-    "apr_change_7d": -84.92810592738181,
-    "apr_change_30d": -59.98627316403569,
+    "apr_change_7d": -84.76792329483547,
+    "apr_change_30d": -60.014306151645215,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:23.140485",
-    "updated_at": "2025-05-04T12:41:23.140492",
+    "created_at": "2025-05-04T12:52:00.804774",
+    "updated_at": "2025-05-04T12:52:00.804784",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -6295,11 +6295,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 668684.74,
-      "volumeUsd": 17709473.33,
-      "apy24h": 96.67,
-      "apy7d": 14.57,
-      "apy30d": 5.83
+      "tvl": 700596.08,
+      "volumeUsd": 17617450.66,
+      "apy24h": 91.78,
+      "apy7d": 13.98,
+      "apy30d": 5.59
     },
     "api_response": {
       "id": "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
@@ -6309,11 +6309,11 @@
       "name": "SOL/SPEC",
       "active": true,
       "metrics": {
-        "tvl": 668684.74,
-        "volumeUsd": 17709473.33,
-        "apy24h": 96.67,
-        "apy7d": 14.57,
-        "apy30d": 5.83
+        "tvl": 700596.08,
+        "volumeUsd": 17617450.66,
+        "apy24h": 91.78,
+        "apy7d": 13.98,
+        "apy30d": 5.59
       }
     },
     "token1_price_source": "coingecko",
@@ -6348,22 +6348,22 @@
     ],
     "poolId": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
     "programId": "",
-    "liquidity": 364527.21,
-    "volume_24h": 193616.16,
-    "apr": 48.47,
+    "liquidity": 365008.28,
+    "volume_24h": 192006.52,
+    "apr": 48.0,
     "fee": 0,
-    "apr_24h": 48.47,
-    "apr_7d": 47.67,
-    "apr_30d": 61.17,
+    "apr_24h": 48.0,
+    "apr_7d": 47.51,
+    "apr_30d": 61.09,
     "apr_change_24h": 0,
-    "apr_change_7d": -1.6505054672993544,
-    "apr_change_30d": 28.319697923222154,
+    "apr_change_7d": -1.0208333333333375,
+    "apr_change_30d": 28.58345611450222,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:23.140676",
-    "updated_at": "2025-05-04T12:41:23.140679",
+    "created_at": "2025-05-04T12:52:00.805012",
+    "updated_at": "2025-05-04T12:52:00.805016",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -6375,11 +6375,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 364527.21,
-      "volumeUsd": 193616.16,
-      "apy24h": 48.47,
-      "apy7d": 47.67,
-      "apy30d": 61.17
+      "tvl": 365008.28,
+      "volumeUsd": 192006.52,
+      "apy24h": 48.0,
+      "apy7d": 47.51,
+      "apy30d": 61.09
     },
     "api_response": {
       "id": "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
@@ -6389,11 +6389,11 @@
       "name": "RAY/USDC",
       "active": true,
       "metrics": {
-        "tvl": 364527.21,
-        "volumeUsd": 193616.16,
-        "apy24h": 48.47,
-        "apy7d": 47.67,
-        "apy30d": 61.17
+        "tvl": 365008.28,
+        "volumeUsd": 192006.52,
+        "apy24h": 48.0,
+        "apy7d": 47.51,
+        "apy30d": 61.09
       }
     },
     "token1_price_source": "coingecko",
@@ -6416,7 +6416,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.73
+        "price": 145.82
       },
       {
         "symbol": "USDC",
@@ -6428,22 +6428,22 @@
     ],
     "poolId": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
     "programId": "",
-    "liquidity": 9866001.7,
-    "volume_24h": 22825029.79,
-    "apr": 35.19,
+    "liquidity": 9863683.33,
+    "volume_24h": 22747294.53,
+    "apr": 35.08,
     "fee": 0,
-    "apr_24h": 35.19,
-    "apr_7d": 35.92,
-    "apr_30d": 84.96,
+    "apr_24h": 35.08,
+    "apr_7d": 35.9,
+    "apr_30d": 84.98,
     "apr_change_24h": 0,
-    "apr_change_7d": 2.074452969593646,
-    "apr_change_30d": 136.52561247216033,
+    "apr_change_7d": 2.3375142531356907,
+    "apr_change_30d": 136.7130919220056,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:23.140836",
-    "updated_at": "2025-05-04T12:41:23.140841",
+    "created_at": "2025-05-04T12:52:00.805219",
+    "updated_at": "2025-05-04T12:52:00.805223",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -6455,11 +6455,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 9866001.7,
-      "volumeUsd": 22825029.79,
-      "apy24h": 35.19,
-      "apy7d": 35.92,
-      "apy30d": 84.96
+      "tvl": 9863683.33,
+      "volumeUsd": 22747294.53,
+      "apy24h": 35.08,
+      "apy7d": 35.9,
+      "apy30d": 84.98
     },
     "api_response": {
       "id": "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
@@ -6469,11 +6469,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 9866001.7,
-        "volumeUsd": 22825029.79,
-        "apy24h": 35.19,
-        "apy7d": 35.92,
-        "apy30d": 84.96
+        "tvl": 9863683.33,
+        "volumeUsd": 22747294.53,
+        "apy24h": 35.08,
+        "apy7d": 35.9,
+        "apy30d": 84.98
       }
     },
     "token1_price_source": "coingecko",
@@ -6496,7 +6496,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 54.52
+        "price": 54.55
       },
       {
         "symbol": "RAY",
@@ -6508,22 +6508,22 @@
     ],
     "poolId": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
     "programId": "",
-    "liquidity": 4137004.67,
-    "volume_24h": 5080125.1,
-    "apr": 24.43,
+    "liquidity": 4136864.34,
+    "volume_24h": 5049390.76,
+    "apr": 24.3,
     "fee": 0,
-    "apr_24h": 24.43,
-    "apr_7d": 33.6,
-    "apr_30d": 56.21,
+    "apr_24h": 24.3,
+    "apr_7d": 33.55,
+    "apr_30d": 56.22,
     "apr_change_24h": 0,
-    "apr_change_7d": 37.535816618911184,
-    "apr_change_30d": 67.29166666666666,
+    "apr_change_7d": 38.06584362139916,
+    "apr_change_30d": 67.57078986587184,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:23.140999",
-    "updated_at": "2025-05-04T12:41:23.141002",
+    "created_at": "2025-05-04T12:52:00.805390",
+    "updated_at": "2025-05-04T12:52:00.805393",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -6535,11 +6535,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4137004.67,
-      "volumeUsd": 5080125.1,
-      "apy24h": 24.43,
-      "apy7d": 33.6,
-      "apy30d": 56.21
+      "tvl": 4136864.34,
+      "volumeUsd": 5049390.76,
+      "apy24h": 24.3,
+      "apy7d": 33.55,
+      "apy30d": 56.22
     },
     "api_response": {
       "id": "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
@@ -6549,11 +6549,11 @@
       "name": "SOL/RAY",
       "active": true,
       "metrics": {
-        "tvl": 4137004.67,
-        "volumeUsd": 5080125.1,
-        "apy24h": 24.43,
-        "apy7d": 33.6,
-        "apy30d": 56.21
+        "tvl": 4136864.34,
+        "volumeUsd": 5049390.76,
+        "apy24h": 24.3,
+        "apy7d": 33.55,
+        "apy30d": 56.22
       }
     },
     "token1_price_source": "coingecko",
@@ -6576,7 +6576,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.72
+        "price": 145.86
       },
       {
         "symbol": "USDC",
@@ -6588,22 +6588,22 @@
     ],
     "poolId": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
     "programId": "",
-    "liquidity": 4575102.3,
-    "volume_24h": 26397019.09,
-    "apr": 22.28,
+    "liquidity": 4538955.87,
+    "volume_24h": 26258623.59,
+    "apr": 22.35,
     "fee": 0,
-    "apr_24h": 22.28,
-    "apr_7d": 24.48,
-    "apr_30d": 22.34,
+    "apr_24h": 22.35,
+    "apr_7d": 24.66,
+    "apr_30d": 22.52,
     "apr_change_24h": 0,
-    "apr_change_7d": 9.87432675044883,
-    "apr_change_30d": -8.74183006535948,
+    "apr_change_7d": 10.33557046979865,
+    "apr_change_30d": -8.678021086780213,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:23.141168",
-    "updated_at": "2025-05-04T12:41:23.141172",
+    "created_at": "2025-05-04T12:52:00.805560",
+    "updated_at": "2025-05-04T12:52:00.805575",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -6615,11 +6615,11 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 4575102.3,
-      "volumeUsd": 26397019.09,
-      "apy24h": 22.28,
-      "apy7d": 24.48,
-      "apy30d": 22.34
+      "tvl": 4538955.87,
+      "volumeUsd": 26258623.59,
+      "apy24h": 22.35,
+      "apy7d": 24.66,
+      "apy30d": 22.52
     },
     "api_response": {
       "id": "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
@@ -6629,11 +6629,11 @@
       "name": "SOL/USDC",
       "active": true,
       "metrics": {
-        "tvl": 4575102.3,
-        "volumeUsd": 26397019.09,
-        "apy24h": 22.28,
-        "apy7d": 24.48,
-        "apy30d": 22.34
+        "tvl": 4538955.87,
+        "volumeUsd": 26258623.59,
+        "apy24h": 22.35,
+        "apy7d": 24.66,
+        "apy30d": 22.52
       }
     },
     "token1_price_source": "coingecko",
@@ -6656,7 +6656,7 @@
         "name": "Solana",
         "address": "So11111111111111111111111111111111111111112",
         "decimals": 9,
-        "price": 145.7
+        "price": 145.85
       },
       {
         "symbol": "USDT",
@@ -6668,22 +6668,22 @@
     ],
     "poolId": "3nMFwZXwY1s1M5s8vYAHqd4wGs4iSxXE4LRoUMMYqEgF",
     "programId": "",
-    "liquidity": 1052432.6,
-    "volume_24h": 6374663.52,
-    "apr": 22.11,
+    "liquidity": 1052378.69,
+    "volume_24h": 6344513.08,
+    "apr": 22.0,
     "fee": 0,
-    "apr_24h": 22.11,
-    "apr_7d": 20.55,
+    "apr_24h": 22.0,
+    "apr_7d": 20.54,
     "apr_30d": 32.41,
     "apr_change_24h": 0,
-    "apr_change_7d": -7.055630936227946,
-    "apr_change_30d": 57.71289537712894,
+    "apr_change_7d": -6.63636363636364,
+    "apr_change_30d": 57.789678675754615,
     "tvl_change_24h": 0,
     "tvl_change_7d": 0,
     "tvl_change_30d": 0,
     "active": true,
-    "created_at": "2025-05-04T12:41:23.141304",
-    "updated_at": "2025-05-04T12:41:23.141306",
+    "created_at": "2025-05-04T12:52:00.805737",
+    "updated_at": "2025-05-04T12:52:00.805741",
     "extra_data": {},
     "version": "1.0",
     "prediction_score": 0,
@@ -6695,10 +6695,10 @@
       "whirlpoolId": ""
     },
     "metrics_data": {
-      "tvl": 1052432.6,
-      "volumeUsd": 6374663.52,
-      "apy24h": 22.11,
-      "apy7d": 20.55,
+      "tvl": 1052378.69,
+      "volumeUsd": 6344513.08,
+      "apy24h": 22.0,
+      "apy7d": 20.54,
       "apy30d": 32.41
     },
     "api_response": {
@@ -6709,10 +6709,10 @@
       "name": "SOL/USDT",
       "active": true,
       "metrics": {
-        "tvl": 1052432.6,
-        "volumeUsd": 6374663.52,
-        "apy24h": 22.11,
-        "apy7d": 20.55,
+        "tvl": 1052378.69,
+        "volumeUsd": 6344513.08,
+        "apy24h": 22.0,
+        "apy7d": 20.54,
         "apy30d": 32.41
       }
     },
