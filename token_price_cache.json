@@ -32,7 +32,8 @@
     "USDH": 1.0,
     "MPLU": 0,
     "7KBN": 0,
-    "JSOL": 0
+    "JSOL": 0,
+    "SPEC": 0.00272821
   },
   "price_sources": {
     "USDC": "coingecko",
@@ -60,7 +61,8 @@
     "6DAZ": "defi_api",
     "JSOL": "defi_api",
     "FWZ2": "defi_api",
-    "ATLAS": "coingecko"
+    "ATLAS": "coingecko",
+    "SPEC": "coingecko"
   },
-  "last_update": "2025-05-04T11:59:23.683530"
+  "last_update": "2025-05-04T12:12:37.716268"
 }

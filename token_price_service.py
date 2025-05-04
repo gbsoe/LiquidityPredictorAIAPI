@@ -57,8 +57,11 @@ DEFAULT_TOKEN_MAPPING = {
     "DAI": "dai",
     "BUSD": "binance-usd",
     "USDH": "usdh",
-    "MSOL": "marinade-staked-sol",
-    "mSOL": "marinade-staked-sol",
+    
+    # Additional tokens seen in the app
+    "SOOMER": "soomer",
+    "SOGENT": "sogent",
+    "SPEC": "spectrum-token",
     
     # API-specific symbols (important: these match actual token symbols in the API!)
     "So11": "solana",        # Solana
@@ -247,7 +250,14 @@ class TokenPriceService:
                 "vs_currencies": "usd"
             }
             
-            response = requests.get(url, params=params, timeout=10)
+            # Check if we have a CoinGecko API key
+            coingecko_api_key = os.getenv("COINGECKO_API_KEY")
+            headers = {}
+            if coingecko_api_key:
+                headers["x-cg-api-key"] = coingecko_api_key
+                logger.info(f"Using CoinGecko API key for {symbol}")
+            
+            response = requests.get(url, params=params, headers=headers, timeout=10)
             response.raise_for_status()
             data = response.json()
             
@@ -417,7 +427,14 @@ class TokenPriceService:
                 "vs_currencies": "usd"
             }
             
-            response = requests.get(url, params=params, timeout=10)
+            # Check if we have a CoinGecko API key
+            coingecko_api_key = os.getenv("COINGECKO_API_KEY")
+            headers = {}
+            if coingecko_api_key:
+                headers["x-cg-api-key"] = coingecko_api_key
+                logger.info(f"Using CoinGecko API key for multiple tokens")
+            
+            response = requests.get(url, params=params, headers=headers, timeout=10)
             response.raise_for_status()
             data = response.json()
             
