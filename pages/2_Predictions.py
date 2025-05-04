@@ -289,10 +289,9 @@ try:
                             has_stability = 'tvl_stability' in pool and pool['tvl_stability'] is not None
                             has_category = 'category' in pool and pool['category'] is not None
                             
-                            # Basic info about the pool
+                            # Basic info about the pool with Pool ID
                             pool_info = f"**{pool['pool_name']}**  \n" \
-                                      f"Pool ID: {pool['pool_id']}\
-" \
+                                      f"Pool ID: {pool['pool_id']}  \n" \
                                       f"APR: {pool['predicted_apr']:.2f}%  \n" \
                                       f"Risk: {pool['risk_score']:.2f}"
                             
