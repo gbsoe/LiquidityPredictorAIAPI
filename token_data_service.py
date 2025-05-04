@@ -81,17 +81,61 @@ class TokenDataService:
         """
         Preload all token data from the API into the cache.
         This significantly improves token data availability and reduces Unknown token displays.
+        For the new API endpoint that doesn't have a separate tokens endpoint,
+        we extract token data from the pools data.
         """
         logger.info("Preloading all token data from API...")
         try:
-            # Make API request to get all tokens using the internal _make_request method
-            all_tokens = self.api_client._make_request("tokens")
+            # The new API endpoint doesn't have a separate tokens endpoint
+            # Instead, we'll extract token data from pools which contains token addresses
+            # First try getting pools from API
+            all_pools = self.api_client.get_pools(limit=50)  # Get a good sample of pools
             
-            if not all_tokens or not isinstance(all_tokens, list):
-                logger.warning("Empty or invalid response when preloading tokens")
+            if not all_pools or not isinstance(all_pools, list):
+                logger.warning("Empty or invalid response when preloading pools for token data")
                 return
                 
-            logger.info(f"Retrieved {len(all_tokens)} tokens from API for preloading")
+            logger.info(f"Retrieved {len(all_pools)} pools to extract token data")
+            
+            # Now, extract token data from pools
+            all_tokens = []
+            for pool in all_pools:
+                # Check if the pool has tokens array
+                if 'tokens' in pool and isinstance(pool['tokens'], list):
+                    for token in pool['tokens']:
+                        if isinstance(token, dict) and 'symbol' in token and token['symbol']:
+                            all_tokens.append(token)
+                # Otherwise, try to extract from token pair, baseMint and quoteMint fields
+                elif 'tokenPair' in pool and '/' in pool['tokenPair']:
+                    token1_symbol, token2_symbol = pool['tokenPair'].split('/')
+                    
+                    # Create token objects
+                    token1 = {
+                        'symbol': token1_symbol,
+                        'name': self.api_client._get_token_name(token1_symbol),
+                        'address': pool.get('baseMint', ''),
+                        'decimals': 9  # Default for Solana
+                    }
+                    
+                    token2 = {
+                        'symbol': token2_symbol,
+                        'name': self.api_client._get_token_name(token2_symbol),
+                        'address': pool.get('quoteMint', ''),
+                        'decimals': 6 if token2_symbol == 'USDC' else 9  # USDC has 6 decimals
+                    }
+                    
+                    all_tokens.append(token1)
+                    all_tokens.append(token2)
+            
+            # Remove duplicates (by symbol)
+            unique_tokens = {}
+            for token in all_tokens:
+                symbol = token.get('symbol', '').upper()
+                if symbol and (symbol not in unique_tokens or not unique_tokens[symbol].get('address')):
+                    unique_tokens[symbol] = token
+            
+            all_tokens = list(unique_tokens.values())
+            logger.info(f"Extracted {len(all_tokens)} unique tokens from pool data")
             
             # Track statistics for token data completeness
             tokens_loaded = 0
@@ -503,30 +547,31 @@ class TokenDataService:
         self.stats["cache_misses"] += 1
         
         try:
-            # First try to get the specific token
+            # First try to get the specific token (for backward compatibility)
             logger.info(f"Making API request for token: {token_symbol}")
-            token_data = self.api_client._make_request(f"tokens/{token_symbol}")
+            try:
+                token_data = self.api_client._make_request(f"tokens/{token_symbol}")
+                
+                if token_data:
+                    # Process the token data
+                    processed_data = self._process_token_data(token_data)
+                    
+                    # Update the cache
+                    processed_data["last_updated"] = datetime.now().isoformat()
+                    self.token_cache[token_symbol] = processed_data
+                    
+                    # Also cache by address if available for faster lookups
+                    token_address = processed_data.get("address", "")
+                    if token_address:
+                        self.token_cache[token_address] = processed_data
+                    
+                    self.stats["last_update"] = datetime.now().isoformat()
+                    
+                    return processed_data
+            except Exception as direct_error:
+                logger.info(f"Token {token_symbol} not found via direct lookup, trying token list")
             
-            if token_data:
-                # Process the token data
-                processed_data = self._process_token_data(token_data)
-                
-                # Update the cache
-                processed_data["last_updated"] = datetime.now().isoformat()
-                self.token_cache[token_symbol] = processed_data
-                
-                # Also cache by address if available for faster lookups
-                token_address = processed_data.get("address", "")
-                if token_address:
-                    self.token_cache[token_address] = processed_data
-                
-                self.stats["last_update"] = datetime.now().isoformat()
-                
-                return processed_data
-        except Exception as e:
-            logger.info(f"Token {token_symbol} not found via direct lookup, trying token list")
-            
-            # If direct token lookup fails, try fetching from the list
+            # If direct token lookup fails, try fetching from the list (for backward compatibility)
             try:
                 # Get all tokens and find the one we want
                 all_tokens = self.api_client._make_request("tokens")
@@ -553,9 +598,106 @@ class TokenDataService:
                             return processed_data
             except Exception as list_error:
                 logger.warning(f"Failed to get token {token_symbol} from tokens list: {str(list_error)}")
+                
+            # For new API, try to extract token data from pools
+            try:
+                # Try to find pools that might contain this token
+                pools = self.api_client.get_pools_by_token(token_symbol)
+                
+                # Extract token data from pools
+                if pools and isinstance(pools, list):
+                    # Log found pools
+                    logger.info(f"Found {len(pools)} pools that might contain token {token_symbol}")
+                    
+                    # Look for our token in pool token pairs
+                    for pool in pools:
+                        # First check if we have tokens array and get our token
+                        if 'tokens' in pool and isinstance(pool['tokens'], list):
+                            for token in pool['tokens']:
+                                # Check if this is our token
+                                if isinstance(token, dict) and token.get('symbol', '').upper() == token_symbol:
+                                    # Found our token!
+                                    processed_data = self._process_token_data(token)
+                                    
+                                    # Add timestamp
+                                    processed_data["last_updated"] = datetime.now().isoformat()
+                                    
+                                    # Update cache
+                                    self.token_cache[token_symbol] = processed_data
+                                    
+                                    # Also cache by address if available
+                                    token_address = processed_data.get("address", "")
+                                    if token_address:
+                                        self.token_cache[token_address] = processed_data
+                                    
+                                    self.stats["last_update"] = datetime.now().isoformat()
+                                    logger.info(f"Extracted token {token_symbol} data from pool tokens")
+                                    
+                                    return processed_data
+                        
+                        # Otherwise try to get from tokenPair and mint addresses
+                        if 'tokenPair' in pool and '/' in pool['tokenPair']:
+                            token1_symbol, token2_symbol = pool['tokenPair'].split('/')
+                            
+                            # Check if our token is token1
+                            if token1_symbol.upper() == token_symbol:
+                                # Create and return token data
+                                token_data = {
+                                    'symbol': token1_symbol,
+                                    'name': self.api_client._get_token_name(token1_symbol),
+                                    'address': pool.get('baseMint', ''),
+                                    'decimals': 9  # Default for Solana
+                                }
+                                
+                                processed_data = self._process_token_data(token_data)
+                                processed_data["last_updated"] = datetime.now().isoformat()
+                                
+                                # Update cache
+                                self.token_cache[token_symbol] = processed_data
+                                
+                                # Also cache by address if available
+                                token_address = processed_data.get("address", "")
+                                if token_address:
+                                    self.token_cache[token_address] = processed_data
+                                
+                                self.stats["last_update"] = datetime.now().isoformat()
+                                logger.info(f"Extracted token {token_symbol} data from pool token pair (as token1)")
+                                
+                                return processed_data
+                            
+                            # Check if our token is token2
+                            elif token2_symbol.upper() == token_symbol:
+                                # Create and return token data
+                                token_data = {
+                                    'symbol': token2_symbol,
+                                    'name': self.api_client._get_token_name(token2_symbol),
+                                    'address': pool.get('quoteMint', ''),
+                                    'decimals': 6 if token2_symbol == 'USDC' else 9  # USDC has 6 decimals
+                                }
+                                
+                                processed_data = self._process_token_data(token_data)
+                                processed_data["last_updated"] = datetime.now().isoformat()
+                                
+                                # Update cache
+                                self.token_cache[token_symbol] = processed_data
+                                
+                                # Also cache by address if available
+                                token_address = processed_data.get("address", "")
+                                if token_address:
+                                    self.token_cache[token_address] = processed_data
+                                
+                                self.stats["last_update"] = datetime.now().isoformat()
+                                logger.info(f"Extracted token {token_symbol} data from pool token pair (as token2)")
+                                
+                                return processed_data
+            except Exception as pool_error:
+                logger.warning(f"Failed to extract token {token_symbol} from pools: {str(pool_error)}")
             
-            # Both attempts failed
+            # All attempts failed
             logger.warning(f"Token {token_symbol} not found in API")
+            self.stats["api_errors"] += 1
+        except Exception as e:
+            logger.error(f"Error retrieving token data for {token_symbol}: {str(e)}")
             self.stats["api_errors"] += 1
         
         # If we get here, API request failed or returned invalid data
