@@ -51,14 +51,14 @@ class CoinGeckoAPI:
         
         # Initialize token cache for prices
         self.price_cache = {}
-        self.price_cache_ttl = 300  # 5 minutes TTL for price data
+        self.price_cache_ttl = 900  # 15 minutes TTL for price data
         
         # Initialize token ID cache (maps symbols to IDs) - type annotation to ensure only strings are stored
         self.token_id_cache: Dict[str, str] = {}
         
         # Rate limiting configuration
         self.last_request_time = 0
-        self.request_delay = 2.5  # 2.5 seconds between requests to avoid rate limits
+        self.request_delay = 4.0  # 4.0 seconds between requests to avoid rate limits
         # Set an initial cooldown to prevent immediate API calls on startup
         self.rate_limited_until = time.time() + 5
         
@@ -117,7 +117,8 @@ class CoinGeckoAPI:
             "FWZ2": "fluxwave-ecosystem",
             "J1TO": "j1tax",
             "MANG": "mangoman",
-            "MPLU": "mplug"
+            "MPLU": "mplug",
+            "LAYER": "unilayer"  # Added LAYER token mapping
         }
         
         # Initialize address-to-ID mapping for Solana tokens
@@ -225,11 +226,11 @@ class CoinGeckoAPI:
                 logger.error(f"Error accessing CoinGecko API: {response.status_code} - {response.text}")
                 if response.status_code == 429:
                     logger.warning("Rate limit exceeded. Implementing temporary pause.")
-                    # Set a 30-second pause on all CoinGecko requests
-                    self.rate_limited_until = time.time() + 30
-                    logger.warning(f"CoinGecko requests paused for 30 seconds")
+                    # Set a 60-second pause on all CoinGecko requests
+                    self.rate_limited_until = time.time() + 60
+                    logger.warning(f"CoinGecko requests paused for 60 seconds")
                     # Increase delay for future requests
-                    self.request_delay = min(self.request_delay * 1.5, 5)
+                    self.request_delay = min(self.request_delay * 2.0, 8.0)
                 return None
         except Exception as e:
             logger.error(f"Exception during CoinGecko API request: {str(e)}")

@@ -1,7 +1,7 @@
 {
   "prices": {
     "ATLAS": 0.00122813,
-    "SOL": 145.4,
+    "SOL": 145.73,
     "BTC": 95668,
     "ETH": 1833.29,
     "EPJF": 0,
@@ -12,7 +12,7 @@
     "7VFC": 0,
     "DEZX": 0,
     "MSOL": 0,
-    "USDC": 1.0,
+    "USDC": 0.99997,
     "HPSQ": 0,
     "JUPY": 0,
     "RAY": 2.93,
@@ -64,5 +64,5 @@
     "ATLAS": "coingecko",
     "SPEC": "coingecko"
   },
-  "last_update": "2025-05-04T12:13:58.175141"
+  "last_update": "2025-05-04T13:16:26.001667"
 }
