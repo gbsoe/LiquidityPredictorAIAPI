@@ -494,6 +494,21 @@ class TokenPriceService:
         if not remaining_symbols:
             return result
             
+        # Special case: Handle SOOMER token by token address lookup
+        if "SOOMER" in remaining_symbols:
+            logger.info("Special handling for SOOMER token in batch request")
+            soomer_price = self.get_price_by_token_address("CTh5k7EHD2HBX64xZkeBDwmHskWvNq5WB8f4PWuW1hmz")
+            if soomer_price is not None:
+                result["SOOMER"] = soomer_price
+                self.cached_prices["SOOMER"] = soomer_price
+                self.cache_price_sources["SOOMER"] = "coingecko_address"
+                logger.info(f"Retrieved SOOMER price by direct address lookup: ${soomer_price}")
+                # Remove SOOMER from remaining symbols since we've handled it
+                remaining_symbols.remove("SOOMER")
+        
+        if not remaining_symbols:
+            return result
+            
         # Convert symbols to CoinGecko IDs
         coingecko_ids = [self.token_mapping[s] for s in remaining_symbols if s in self.token_mapping]
         
