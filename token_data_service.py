@@ -472,7 +472,8 @@ class TokenDataService:
                 "decimals": 9,
                 "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
                 "coingecko_id": "solana",
-                "price": 0,
+                "price": 0,   # Price will be fetched from CoinGecko
+                "price_source": "coingecko",  # Force CoinGecko as source
                 "last_updated": datetime.now().isoformat(),
             },
             "USDC": {
@@ -643,6 +644,29 @@ class TokenDataService:
             
             # Check if cache is still valid
             if (datetime.now() - cache_time).total_seconds() < self.token_cache_ttl:
+                # Special case for SOL - validate the price
+                if token_symbol == "SOL" and token_data.get("price", 0) > 1000:  # Obviously wrong SOL price
+                    logger.warning(f"Detected incorrect SOL price in cache: ${token_data.get('price')}. Refreshing from CoinGecko.")
+                    # Try to get correct price from CoinGecko
+                    try:
+                        if coingecko_api is not None:
+                            price_data = coingecko_api.get_price(["solana"], "usd")
+                            if price_data and "solana" in price_data and "usd" in price_data["solana"]:
+                                corrected_price = price_data["solana"]["usd"]
+                                logger.info(f"Retrieved corrected SOL price from CoinGecko: ${corrected_price}")
+                                token_data["price"] = corrected_price
+                                token_data["price_source"] = "coingecko"
+                                token_data["last_updated"] = datetime.now().isoformat()
+                                self.token_cache["SOL"] = token_data  # Update cache with correct price
+                                # Also update the cache by address
+                                sol_address = "So11111111111111111111111111111111111111112"
+                                if sol_address in self.token_cache:
+                                    self.token_cache[sol_address]["price"] = corrected_price
+                                    self.token_cache[sol_address]["price_source"] = "coingecko"
+                                    self.token_cache[sol_address]["last_updated"] = datetime.now().isoformat()
+                    except Exception as e:
+                        logger.error(f"Error fetching corrected SOL price from CoinGecko: {e}")
+                
                 self.stats["cache_hits"] += 1
                 logger.debug(f"Token {token_symbol} found in cache")
                 return token_data
@@ -1177,6 +1201,25 @@ class TokenDataService:
             # Get price with validation
             try:
                 price = float(token_data.get("price", 0))
+                
+                # Special validation for SOL token - unrealistic prices
+                if symbol == "SOL" and price > 1000:
+                    logger.warning(f"Detected unrealistic SOL price: ${price} - rejecting value")
+                    # Try to get price from CoinGecko directly if available
+                    if coingecko_api is not None:
+                        try:
+                            sol_price = coingecko_api.get_token_price_by_symbol("SOL")
+                            if sol_price and sol_price > 0 and sol_price < 1000:  # Sanity check
+                                logger.info(f"Retrieved corrected SOL price from CoinGecko: ${sol_price}")
+                                price = sol_price
+                            else:
+                                logger.warning(f"CoinGecko returned invalid SOL price: ${sol_price}, using 0")
+                                price = 0
+                        except Exception as e:
+                            logger.error(f"Error fetching SOL price from CoinGecko: {e}")
+                            price = 0
+                    else:
+                        price = 0
             except (ValueError, TypeError):
                 price = 0
                 
