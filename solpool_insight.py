@@ -231,12 +231,16 @@ def get_trend_icon(value):
 def get_category_badge(category):
     """Return HTML for a category badge"""
     colors = {
-        "Major": "#1E88E5",  # Blue
-        "DeFi": "#43A047",   # Green
-        "Meme": "#FFC107",   # Yellow
-        "Gaming": "#D81B60", # Pink
-        "Stablecoin": "#6D4C41",  # Brown
-        "Other": "#757575"   # Grey
+        "Major Token": "#1E88E5",  # Blue
+        "Major": "#1E88E5",        # Blue (for backward compatibility)
+        "DeFi": "#43A047",         # Green
+        "Meme Token": "#FFC107",   # Yellow
+        "Meme": "#FFC107",         # Yellow (for backward compatibility)
+        "Gaming": "#D81B60",       # Pink
+        "Blue Chip": "#9C27B0",    # Purple
+        "Stablecoin": "#6D4C41",   # Brown
+        "Alt Token": "#FF5722",    # Orange
+        "Other": "#757575"         # Grey
     }
     
     color = colors.get(category, "#757575")
@@ -526,9 +530,10 @@ def ensure_all_fields(pool_data):
             # Capitalize the first letter and set the DEX name
             validated_pool["dex"] = source.capitalize()
             
-            # Set proper category based on the DEX and tokens
-            if validated_pool.get("category", "") == "Unknown":
-                # Check pool name and tokens for category clues
+            # Keep the existing category if it's already set by the API 
+            # or only set it if it's missing or Unknown
+            if not validated_pool.get("category") or validated_pool.get("category", "") == "Unknown":
+                # In this case, we need to infer the category
                 pool_name = validated_pool.get("name", "").lower()
                 token1 = validated_pool.get("token1_symbol", "").lower()
                 token2 = validated_pool.get("token2_symbol", "").lower()
@@ -536,45 +541,52 @@ def ensure_all_fields(pool_data):
                 # Map tokens based on the API response data
                 # These mappings reflect the actual token symbols in the API
                 stablecoin_tokens = ["usdc", "usdt", "dai", "busd", "tusd", "usdh", "frax", "epjf"]
-                meme_tokens = ["doge", "bonk", "pepe", "shib", "meme", "samo", "doggo"]
-                defi_tokens = ["sol", "msol", "stsol", "jito", "jet", "orca", "ray", "4k3d"]
+                meme_tokens = ["boop", "doge", "bonk", "pepe", "shib", "meme", "samo", "doggo", "poop", "fart", "soomer", "lfg", "cope"]
+                defi_tokens = ["sol", "msol", "stsol", "jito", "jet", "orca", "ray", "jup", "pyth", "atlas"]
                 gaming_tokens = ["gari", "game", "star", "atlas", "polis", "cope", "step", "es9v"]
                 major_tokens = ["so11", "9n4n", "dezx", "7vfc", "btc", "eth"]
                 
-                # Check for stablecoins first
-                if any(stable in pool_name for stable in stablecoin_tokens) or \
-                   any(stable in token1 for stable in stablecoin_tokens) or \
-                   any(stable in token2 for stable in stablecoin_tokens):
+                # First check for meme tokens (highest priority)
+                if any(meme in pool_name for meme in meme_tokens) or \
+                   any(meme in token1 for meme in meme_tokens) or \
+                   any(meme in token2 for meme in meme_tokens):
+                    validated_pool["category"] = "Meme Token"
+                
+                # Then check for blue chip tokens (major tokens paired with stablecoins)
+                elif (any(major in token1.lower() for major in major_tokens) and 
+                      any(stable in token2 for stable in stablecoin_tokens)) or \
+                     (any(major in token2.lower() for major in major_tokens) and 
+                      any(stable in token1 for stable in stablecoin_tokens)):
+                    validated_pool["category"] = "Blue Chip"
+                
+                # Then check for other stablecoin pairs
+                elif any(stable in pool_name for stable in stablecoin_tokens) or \
+                     any(stable in token1 for stable in stablecoin_tokens) or \
+                     any(stable in token2 for stable in stablecoin_tokens):
                     validated_pool["category"] = "Stablecoin"
                 
-                # Check for meme tokens
-                elif any(meme in pool_name for meme in meme_tokens) or \
-                     any(meme in token1 for meme in meme_tokens) or \
-                     any(meme in token2 for meme in meme_tokens):
-                    validated_pool["category"] = "Meme"
-                
-                # Check for gaming tokens
+                # Then check for gaming tokens
                 elif any(game in pool_name for game in gaming_tokens) or \
                      any(game in token1 for game in gaming_tokens) or \
                      any(game in token2 for game in gaming_tokens):
                     validated_pool["category"] = "Gaming"
                 
-                # Check for DeFi tokens
+                # Then check for DeFi tokens
                 elif any(defi in pool_name for defi in defi_tokens) or \
                      any(defi in token1 for defi in defi_tokens) or \
                      any(defi in token2 for defi in defi_tokens) or \
                      "defi" in pool_name:
                     validated_pool["category"] = "DeFi"
                 
-                # Default to Major category for recognized tokens from our major_tokens list
+                # Then check for major tokens (not with stablecoins)
                 elif any(major in token1.lower() for major in major_tokens) or \
                      any(major in token2.lower() for major in major_tokens) or \
                      any(major in pool_name.lower() for major in major_tokens):
-                    validated_pool["category"] = "Major"
+                    validated_pool["category"] = "Major Token"
                 
-                # Final fallback to DeFi category
+                # Final fallback to Alt Token category
                 else:
-                    validated_pool["category"] = "DeFi"
+                    validated_pool["category"] = "Alt Token"
         
         # ENHANCED: Process token data from pool name if tokens array is empty
         pool_name = validated_pool.get("name", "")
