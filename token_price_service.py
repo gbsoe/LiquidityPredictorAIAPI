@@ -770,10 +770,10 @@ def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
 
 def update_pool_with_token_prices(pool: dict) -> dict:
     """
-    Update a pool dictionary with current token prices from DeFi API or CoinGecko
+    Update a pool dictionary with current token prices from CoinGecko
     
-    The system first tries to get prices from the DeFi API (which aligns with the
-    pool data source), and falls back to CoinGecko only if needed.
+    The system prioritizes getting prices from CoinGecko for accuracy,
+    and falls back to DeFi API only if needed.
     
     Args:
         pool: Dictionary containing pool data with token1_symbol and token2_symbol
