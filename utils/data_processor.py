@@ -7,63 +7,69 @@ logger = logging.getLogger(__name__)
 def get_pool_list(db=None):
     """
     Get list of pools from the database.
-    Falls back to mock DB if real DB fails.
+    Returns empty DataFrame if fails.
     """
     try:
         if db is None:
-            db = MockDBManager()
-        return db.get_pool_list()
+            logger.error("No database connection provided")
+            return pd.DataFrame()  # Return empty DataFrame instead of using mock data
+        
+        pool_list = db.get_pool_list()
+        
+        if pool_list.empty:
+            logger.warning("No pool data found in the database")
+            return pd.DataFrame()  # Return empty DataFrame
+            
+        return pool_list
     except Exception as e:
         logger.error(f"Error getting pool list: {str(e)}")
-        # Fallback to mock if real DB fails
-        mock_db = MockDBManager()
-        return mock_db.get_pool_list()
+        return pd.DataFrame()  # Return empty DataFrame instead of using mock data
 
 def get_pool_details(db, pool_id):
     """
     Get details for a specific pool.
-    Falls back to mock DB if real DB fails.
+    Returns None if fails.
     """
     try:
         if db is None:
-            db = MockDBManager()
+            logger.error("No database connection provided")
+            return None  # Return None instead of using mock data
+        
         pool_details = db.get_pool_details(pool_id)
         if pool_details is None:
-            # Fallback to mock if real DB returns None
-            mock_db = MockDBManager()
-            return mock_db.get_pool_details(pool_id)
+            logger.warning(f"No details found for pool ID: {pool_id}")
+            return None  # Return None instead of using mock data
+            
         return pool_details
     except Exception as e:
         logger.error(f"Error getting pool details: {str(e)}")
-        # Fallback to mock if real DB fails
-        mock_db = MockDBManager()
-        return mock_db.get_pool_details(pool_id)
+        return None  # Return None instead of using mock data
 
 def get_pool_metrics(db, pool_id, days=7):
     """
     Get historical metrics for a specific pool.
-    Falls back to mock DB if real DB fails.
+    Returns empty DataFrame if fails.
     """
     try:
         if db is None:
-            db = MockDBManager()
+            logger.error("No database connection provided")
+            return pd.DataFrame()  # Return empty DataFrame instead of using mock data
+        
         metrics = db.get_pool_metrics(pool_id, days)
         if metrics.empty:
-            # Fallback to mock if real DB returns empty
-            mock_db = MockDBManager()
-            return mock_db.get_pool_metrics(pool_id, days)
+            logger.warning(f"No metrics found for pool ID: {pool_id}")
+            return pd.DataFrame()  # Return empty DataFrame instead of using mock data
+            
         return metrics
     except Exception as e:
         logger.error(f"Error getting pool metrics: {str(e)}")
-        # Fallback to mock if real DB fails
-        mock_db = MockDBManager()
-        return mock_db.get_pool_metrics(pool_id, days)
+        return pd.DataFrame()  # Return empty DataFrame instead of using mock data
 
 def get_token_prices(db, token_symbols, days=7):
     """
     Get historical token prices.
-    First tries CoinGecko for real data, then falls back to database,
-    and finally to mock DB if needed.
+    First tries CoinGecko for real data, then falls back to database.
+    Returns empty DataFrame if both fail.
     """
     # First try to get real-time prices from CoinGecko
     try:
@@ -103,21 +109,18 @@ def get_token_prices(db, token_symbols, days=7):
     # If CoinGecko fails, try the database
     try:
         if db is None:
-            db = MockDBManager()
+            logger.error("No database connection provided")
+            return pd.DataFrame(columns=['token_symbol', 'price_usd', 'timestamp'])
+            
         prices = db.get_token_prices(token_symbols, days)
         if not prices.empty:
             return prices
     except Exception as e:
         logger.error(f"Error getting token prices from database: {str(e)}")
     
-    # If all else fails, use mock data
-    try:
-        mock_db = MockDBManager()
-        return mock_db.get_token_prices(token_symbols, days)
-    except Exception as e:
-        logger.error(f"Error getting mock token prices: {str(e)}")
-        # Return empty DataFrame as last resort
-        return pd.DataFrame(columns=['token_symbol', 'price_usd', 'timestamp'])
+    # Return empty DataFrame if all sources fail
+    logger.error("Failed to get token prices from all sources")
+    return pd.DataFrame(columns=['token_symbol', 'price_usd', 'timestamp'])
 
 def get_top_predictions(db, category="apr", limit=10, ascending=False):
     """
@@ -143,7 +146,7 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
 def get_pool_predictions(db, pool_id, days=30):
     """
     Get prediction history for a specific pool.
-    Falls back to mock DB if real DB fails.
+    Returns empty DataFrame if fails.
     
     Args:
         db: Database manager instance
@@ -152,7 +155,8 @@ def get_pool_predictions(db, pool_id, days=30):
     """
     try:
         if db is None:
-            db = MockDBManager()
+            logger.error("No database connection provided")
+            return pd.DataFrame()  # Return empty DataFrame instead of using mock data
         
         # Try to call with days parameter if it's supported
         try:
@@ -162,19 +166,10 @@ def get_pool_predictions(db, pool_id, days=30):
             predictions = db.get_pool_predictions(pool_id)
             
         if predictions.empty:
-            # Fallback to mock if real DB returns empty
-            mock_db = MockDBManager()
-            try:
-                return mock_db.get_pool_predictions(pool_id, days)
-            except TypeError:
-                return mock_db.get_pool_predictions(pool_id)
+            logger.warning(f"No prediction data found for pool ID: {pool_id}")
+            return pd.DataFrame()  # Return empty DataFrame instead of using mock data
                 
         return predictions
     except Exception as e:
         logger.error(f"Error getting pool predictions: {str(e)}")
-        # Fallback to mock if real DB fails
-        mock_db = MockDBManager()
-        try:
-            return mock_db.get_pool_predictions(pool_id, days)
-        except TypeError:
-            return mock_db.get_pool_predictions(pool_id)
+        return pd.DataFrame()  # Return empty DataFrame instead of using mock data
