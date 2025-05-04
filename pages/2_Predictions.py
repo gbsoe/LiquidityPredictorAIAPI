@@ -281,7 +281,7 @@ try:
                             (top_predictions['risk_score'] < top_predictions['risk_score'].median())
                         ]
                     
-                    st.markdown("### 🌟 Optimal Pools (Precision Investing)")
+                    st.markdown("### 🌟 Prime Opportunity Pools")
                     if not ideal_pools.empty:
                         for _, pool in ideal_pools.head(3).iterrows():
                             # Check if we have detailed metrics to show
@@ -329,7 +329,7 @@ try:
                             (top_predictions['risk_score'] > top_predictions['risk_score'].median())
                         ]
                     
-                    st.markdown("### 🔥 High-Yield Pools (High APR)")
+                    st.markdown("### 🔥 Maximum Yield Generators")
                     if not aggressive_pools.empty:
                         for _, pool in aggressive_pools.head(3).iterrows():
                             # Check if we have detailed metrics to show
@@ -375,7 +375,7 @@ try:
                             (top_predictions['risk_score'] < top_predictions['risk_score'].median())
                         ]
                     
-                    st.markdown("### 🛡️ Conservative Pools (Capital Preservation)")
+                    st.markdown("### 🛡️ Stability-Focused Assets")
                     if not conservative_pools.empty:
                         for _, pool in conservative_pools.head(3).iterrows():
                             # Check if we have detailed metrics to show

@@ -31,7 +31,7 @@ class DefiApiClient:
         if not self.api_key:
             raise ValueError("No API key provided. Set the DEFI_API_KEY environment variable or pass it explicitly.")
         
-        self.base_url = base_url or "https://filotdefiapi.replit.app/api/v1"
+        self.base_url = base_url or "https://raydium-trader-filot.replit.app"
         
         # Create a session for better performance
         self.session = requests.Session()
@@ -132,7 +132,7 @@ class DefiApiClient:
         if order:
             params["order"] = order
         
-        return self._make_request("/pools", params)
+        return self._make_request("/api/pools", params)
     
     def get_pool_by_id(self, pool_id: str) -> Dict[str, Any]:
         """
@@ -144,7 +144,7 @@ class DefiApiClient:
         Returns:
             Dictionary with pool details
         """
-        return self._make_request(f"/pools/{pool_id}")
+        return self._make_request(f"/api/pools/{pool_id}")
     
     def get_token_information(self, token_symbol: str) -> Dict[str, Any]:
         """
@@ -156,7 +156,7 @@ class DefiApiClient:
         Returns:
             Dictionary with token details
         """
-        return self._make_request(f"/tokens/{token_symbol}")
+        return self._make_request(f"/api/tokens/{token_symbol}")
     
     def get_top_pools_by_apr(self, limit: int = 10) -> Dict[str, Any]:
         """
