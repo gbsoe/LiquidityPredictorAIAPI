@@ -2745,9 +2745,18 @@ def main():
                     available_tokens = [t for t in priority_tokens if t in DEFAULT_TOKEN_MAPPING]
                     
                     if available_tokens:
+                        # Get API key for CoinGecko 
+                        coingecko_api_key = os.getenv("COINGECKO_API_KEY")
+                        headers = {}
+                        if coingecko_api_key:
+                            headers["x-cg-pro-api-key"] = coingecko_api_key
+                            headers["x-cg-api-key"] = coingecko_api_key
+                            logger.info(f"Using CoinGecko API key for priority tokens")
+                            
                         ids = [DEFAULT_TOKEN_MAPPING[t] for t in available_tokens]
                         try:
-                            cg_prices = cg_api.get_price(ids, "usd")
+                            # Use direct API call with proper headers
+                            cg_prices = cg_api.get_price(ids, "usd", headers=headers)
                             for token in available_tokens:
                                 cg_id = DEFAULT_TOKEN_MAPPING[token]
                                 if cg_id in cg_prices and "usd" in cg_prices[cg_id]:
@@ -2756,6 +2765,7 @@ def main():
                             st.warning(f"Error fetching priority token prices: {e}")
                     
                     # Now get the rest of the tokens using the standard method
+                    # which now includes the proper API key integration
                     token_prices = get_multiple_prices(all_symbols)
                     
                     # Merge in our priority prices

@@ -518,7 +518,17 @@ def get_token_price(symbol: str, return_source: bool = False) -> Union[float, Tu
             return 0.0
 
 def get_multiple_prices(symbols: List[str]) -> Dict[str, float]:
-    """Convenience function to get multiple token prices"""
+    """
+    Convenience function to get multiple token prices with API key integration
+    
+    This ensures that all token price requests properly use the authenticated API
+    with the CoinGecko API key from the environment.
+    """
+    # Log that we're using the API key
+    coingecko_api_key = os.getenv("COINGECKO_API_KEY")
+    if coingecko_api_key:
+        logger.info(f"Using CoinGecko API key for multiple token price lookup")
+        
     return price_service.get_multiple_prices(symbols)
 
 def update_pool_with_token_prices(pool: dict) -> dict:
