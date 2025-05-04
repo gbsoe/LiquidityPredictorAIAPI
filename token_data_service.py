@@ -1243,7 +1243,8 @@ class TokenDataService:
                 if key not in processed:
                     processed[key] = value
             
-            # Get token price from CoinGecko if price is 0 or missing
+            # Always prefer CoinGecko for token prices, regardless of whether a price exists
+            # This ensures we're using the most accurate and reliable price source
             symbol = processed.get("symbol", "").upper()
             if symbol and symbol != "UNKNOWN":
                 try:
@@ -1266,12 +1267,12 @@ class TokenDataService:
                     
                     # Skip CoinGecko if API client is not available
                     if coingecko_api is None:
-                        logger.warning(f"CoinGecko API not available, skipping price lookup for {symbol}")
-                        price = None
+                        logger.warning(f"CoinGecko API not available, using existing price for {symbol}")
+                        # Keep existing price
                     else:
+                        price = None
                         # Try with CoinGecko ID first if available
                         coingecko_id = processed.get("coingecko_id")
-                        price = None
                         
                         if coingecko_id:
                             # Use the ID directly if available
@@ -1290,8 +1291,8 @@ class TokenDataService:
                             else:
                                 logger.warning(f"No price data returned for {symbol} with ID {coingecko_id}")
                         
-                        # If no price or no coingecko_id, try by symbol
-                        if processed.get("price", 0) == 0 and (not price or price == 0):
+                        # If no price from ID, try by symbol
+                        if not price or price == 0:
                             logger.info(f"Fetching price for {symbol} from CoinGecko by symbol")
                             price = coingecko_api.get_token_price_by_symbol(symbol)
                             if price and price > 0:
@@ -1305,7 +1306,7 @@ class TokenDataService:
                                         coingecko_api.add_address_mapping(processed.get("address"), token_id)
                         
                         # If still no price, try by address
-                        if processed.get("price", 0) == 0 and (not price or price == 0) and processed.get("address"):
+                        if (not price or price == 0) and processed.get("address"):
                             address = processed.get("address")
                             if address and isinstance(address, str):
                                 logger.info(f"Fetching price for {symbol} from CoinGecko by address: {address}")
@@ -1318,42 +1319,41 @@ class TokenDataService:
                                         token_id = coingecko_api.address_to_id[address.lower()]
                                         coingecko_api.add_token_mapping(symbol, token_id)
                     
-                    # Special case for staked SOL tokens: if price still not available, 
-                    # use SOL price and slightly adjust it
-                    if (not price or price == 0) and symbol in ["MSOL", "mSOL", "STSOL", "stSOL"]:
-                        logger.info(f"Trying to estimate {symbol} price based on SOL price")
-                        sol_price = 0
-                        
-                        # Try to get SOL price from cache or API
-                        if "SOL" in self.token_cache and self.token_cache["SOL"].get("price", 0) > 0:
-                            sol_price = self.token_cache["SOL"].get("price", 0)
-                            if sol_price and sol_price > 0:
-                                logger.info(f"Using cached SOL price for {symbol} estimation: {sol_price}")
-                        elif coingecko_api is not None:
-                            try:
-                                # Only fetch SOL price if we're not in a cooldown period
-                                if not hasattr(coingecko_api, 'rate_limited_until') or time.time() >= coingecko_api.rate_limited_until:
-                                    sol_price_value = coingecko_api.get_token_price_by_symbol("SOL")
-                                    if sol_price_value and sol_price_value > 0:
-                                        sol_price = sol_price_value
-                                        logger.info(f"Using fresh SOL price for {symbol} estimation: {sol_price}")
-                            except Exception as e:
-                                logger.warning(f"Error fetching SOL price for estimation: {e}")
+                        # Special case for staked SOL tokens: if price still not available, 
+                        # use SOL price and slightly adjust it
+                        if (not price or price == 0) and symbol in ["MSOL", "mSOL", "STSOL", "stSOL"]:
+                            logger.info(f"Trying to estimate {symbol} price based on SOL price")
+                            sol_price = 0
                             
-                        # Apply appropriate multiplier based on token
-                        if sol_price and isinstance(sol_price, (int, float)) and sol_price > 0:
-                            if symbol in ["MSOL", "mSOL"]:
-                                price = sol_price * 1.08  # MSOL typically has ~8% premium
-                                logger.info(f"Estimated MSOL price from SOL: {price}")
-                            elif symbol in ["STSOL", "stSOL"]:
-                                price = sol_price * 1.06  # STSOL typically has ~6% premium
-                                logger.info(f"Estimated STSOL price from SOL: {price}")
-                    
-                    # Update price if found
-                    if price is not None and price > 0:
-                        processed["price"] = price
-                        processed["price_source"] = "coingecko"
-                        logger.info(f"Updated price for {symbol} from CoinGecko: {price}")
+                            # Try to get SOL price from cache or API
+                            if "SOL" in self.token_cache and self.token_cache["SOL"].get("price", 0) > 0 and self.token_cache["SOL"].get("price", 0) < 1000:
+                                sol_price = self.token_cache["SOL"].get("price", 0)
+                                logger.info(f"Using cached SOL price for {symbol} estimation: {sol_price}")
+                            else:
+                                try:
+                                    # Only fetch SOL price if we're not in a cooldown period
+                                    if not hasattr(coingecko_api, 'rate_limited_until') or time.time() >= coingecko_api.rate_limited_until:
+                                        sol_price_value = coingecko_api.get_token_price_by_symbol("SOL")
+                                        if sol_price_value and sol_price_value > 0:
+                                            sol_price = sol_price_value
+                                            logger.info(f"Using fresh SOL price for {symbol} estimation: {sol_price}")
+                                except Exception as e:
+                                    logger.warning(f"Error fetching SOL price for estimation: {e}")
+                                
+                            # Apply appropriate multiplier based on token
+                            if sol_price and isinstance(sol_price, (int, float)) and sol_price > 0:
+                                if symbol in ["MSOL", "mSOL"]:
+                                    price = sol_price * 1.08  # MSOL typically has ~8% premium
+                                    logger.info(f"Estimated MSOL price from SOL: {price}")
+                                elif symbol in ["STSOL", "stSOL"]:
+                                    price = sol_price * 1.06  # STSOL typically has ~6% premium
+                                    logger.info(f"Estimated STSOL price from SOL: {price}")
+                        
+                        # Update price if found
+                        if price is not None and price > 0:
+                            processed["price"] = price
+                            processed["price_source"] = "coingecko"
+                            logger.info(f"Updated price for {symbol} from CoinGecko: {price}")
                 
                 except Exception as e:
                     logger.warning(f"Error getting price from CoinGecko for {symbol}: {str(e)}")
