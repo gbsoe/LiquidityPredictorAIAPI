@@ -56,6 +56,17 @@ def create_test_pool_data():
                 logger.error("Tables do not exist. Run init_prediction_tables.py first.")
                 return False
                 
+            # Clean existing data to ensure a fresh start
+            try:
+                logger.info("Cleaning existing test data...")
+                cursor.execute("DELETE FROM predictions")
+                cursor.execute("DELETE FROM pools")
+                conn.commit()
+                logger.info("Cleaned existing data from database")
+            except Exception as e:
+                logger.warning(f"Error cleaning existing data: {e}")
+                conn.rollback()
+                
             # Insert pools
             for pool in pools_data:
                 # Skip pools with missing required fields
@@ -88,10 +99,35 @@ def create_test_pool_data():
                 except Exception as e:
                     logger.error(f"Error inserting pool {name}: {e}")
                     
+            # Verify pool count    
+            cursor.execute("SELECT COUNT(*) FROM pools")
+            actual_pool_count = cursor.fetchone()[0]
+            
+            # If no pools were inserted, likely an issue with the query
+            if actual_pool_count == 0:
+                logger.error("No pools were inserted. Attempting alternative approach...")
+                
+                # Try a simpler version with hardcoded pools for testing
+                for i, pool in enumerate(pools_data[:15]):
+                    pool_id = pool.get('id', '')
+                    name = pool.get('name', f"Test Pool {i}")
+                    
+                    try:
+                        cursor.execute("""
+                        INSERT INTO pools (pool_id, name, dex, token1, token2) 
+                        VALUES (%s, %s, 'Test DEX', 'TokenA', 'TokenB')
+                        ON CONFLICT (pool_id) DO NOTHING
+                        """, (pool_id, name))
+                    except Exception as e:
+                        logger.error(f"Error in alternative insert for {name}: {e}")
+                
+                cursor.execute("SELECT COUNT(*) FROM pools")
+                actual_pool_count = cursor.fetchone()[0]
+            
             # Commit changes
             conn.commit()
             
-            logger.info(f"Inserted {pool_count} pools into database")
+            logger.info(f"Inserted {actual_pool_count} pools into database")
                 
             # Generate realistic predictions for these pools
             for pool in pools_data[:15]:  # Just generate for the first 15 pools
