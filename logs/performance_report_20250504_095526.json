@@ -1,0 +1,101 @@
+{
+  "summary": {
+    "timestamp": "2025-05-04T09:55:26.089034",
+    "total_runtime": "22.01s",
+    "time_to_data_loaded": "N/A",
+    "time_to_predictions": "N/A",
+    "time_to_ui_ready": "N/A",
+    "peak_memory_mb": "0.00 MB",
+    "memory_growth_mb": "51.91 MB",
+    "final_token_cache_size": 0,
+    "total_pools_loaded": 0
+  },
+  "segments": {
+    "data_collection_init": "0.96s",
+    "app_initialization": "19.66s",
+    "prediction_generation": "12.06s"
+  },
+  "checkpoints": {
+    "data_loaded": "2025-05-04T09:55:09.720983",
+    "ui_ready": "2025-05-04T09:55:26.087700"
+  },
+  "stats": {
+    "token_cache_size": 0,
+    "token_lookup_times": [],
+    "prediction_times": [],
+    "total_pools_loaded": 0,
+    "tokens_by_symbol": 0,
+    "tokens_by_address": 0,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "api_calls": 0,
+    "peak_memory_mb": 0
+  },
+  "timeline": [
+    {
+      "timestamp": 1746352504.0792794,
+      "time": "0.00s",
+      "event": "monitor_initialized",
+      "datetime": "2025-05-04T09:55:04.079288"
+    },
+    {
+      "timestamp": 1746352504.079611,
+      "time": "0.00s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-04T09:55:04.079613"
+    },
+    {
+      "timestamp": 1746352506.429128,
+      "time": "2.35s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-04T09:55:06.429136"
+    },
+    {
+      "timestamp": 1746352508.7602558,
+      "time": "4.68s",
+      "event": "data_collection_init_tracking_started",
+      "datetime": "2025-05-04T09:55:08.760274"
+    },
+    {
+      "timestamp": 1746352509.7209687,
+      "time": "5.64s",
+      "event": "data_collection_init_tracking_stopped",
+      "datetime": "2025-05-04T09:55:09.720971",
+      "duration": "0.96s"
+    },
+    {
+      "timestamp": 1746352509.7209845,
+      "time": "5.64s",
+      "event": "checkpoint_data_loaded",
+      "datetime": "2025-05-04T09:55:09.720985",
+      "time_since_start": "5.64s"
+    },
+    {
+      "timestamp": 1746352514.0263703,
+      "time": "9.95s",
+      "event": "prediction_generation_tracking_started",
+      "datetime": "2025-05-04T09:55:14.026375"
+    },
+    {
+      "timestamp": 1746352526.0877068,
+      "time": "22.01s",
+      "event": "checkpoint_ui_ready",
+      "datetime": "2025-05-04T09:55:26.087709",
+      "time_since_start": "22.01s"
+    },
+    {
+      "timestamp": 1746352526.0886939,
+      "time": "22.01s",
+      "event": "app_initialization_tracking_stopped",
+      "datetime": "2025-05-04T09:55:26.088695",
+      "duration": "19.66s"
+    },
+    {
+      "timestamp": 1746352526.0890021,
+      "time": "22.01s",
+      "event": "prediction_generation_tracking_stopped",
+      "datetime": "2025-05-04T09:55:26.089003",
+      "duration": "12.06s"
+    }
+  ]
+}
