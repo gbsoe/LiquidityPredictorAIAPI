@@ -38,24 +38,34 @@ st.markdown("View ML-powered predictions for APR, performance classification, an
 st.image("https://images.unsplash.com/photo-1516534775068-ba3e7458af70", 
          caption="Machine Learning Concept")
 
-# Initialize ML models - replaced with mock models due to TensorFlow compatibility issues
+# Initialize prediction system
 @st.cache_resource
-def load_ml_models():
-    # Using dictionary objects instead of actual models
-    class SimpleModel:
-        def __init__(self, model_type):
-            self.model_type = model_type
-            
-        def predict(self, data):
-            return pd.DataFrame({'prediction': [0.0] * len(data)})
-            
-    apr_model = SimpleModel("APR")
-    perf_model = SimpleModel("Performance")
-    risk_model = SimpleModel("Risk")
-    return apr_model, perf_model, risk_model
-
-# Comment out the model loading to avoid TensorFlow issues
-# apr_model, perf_model, risk_model = load_ml_models()
+def load_prediction_system():
+    """
+    Load or initialize the prediction system.
+    This is a placeholder for potential direct model integration in the future.
+    Currently, predictions are generated and stored in the database separately.
+    """
+    try:
+        # Import the prediction system
+        from generate_real_predictions import SimplePredictionModel
+        
+        # Create instances for each prediction type
+        apr_model = SimplePredictionModel('apr')
+        perf_model = SimplePredictionModel('performance')
+        risk_model = SimplePredictionModel('risk')
+        
+        logger = logging.getLogger('predictions')
+        logger.info("Prediction system initialized successfully")
+        
+        return apr_model, perf_model, risk_model
+    except Exception as e:
+        logger = logging.getLogger('predictions')
+        logger.error(f"Error initializing prediction system: {e}")
+        return None, None, None
+        
+# Do not load models by default as they're used only for on-demand prediction
+# prediction_system = load_prediction_system()
 
 # Sidebar for pool selection
 st.sidebar.header("Pool Selection")

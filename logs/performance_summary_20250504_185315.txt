@@ -1,0 +1,11 @@
+PERFORMANCE SUMMARY
+=================
+
+Timestamp: 2025-05-04T18:53:15.681702
+Total runtime: 82.79s
+Time to data loaded: N/A
+Time to predictions: N/A
+Time to UI ready: N/A
+Peak memory usage: 0.00 MB
+Token cache size: 0
+Total pools loaded: 0

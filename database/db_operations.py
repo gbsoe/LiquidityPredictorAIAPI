@@ -170,18 +170,176 @@ class DBManager:
         if self.use_mock:
             return self.mock_db.get_token_prices(token_symbols, days)
         
-        # Real implementation would query the database
-        # For now, just return mock data
-        return self.mock_db.get_token_prices(token_symbols, days)
+        try:
+            conn = psycopg2.connect(**self.db_params)
+            cursor = conn.cursor()
+            
+            # Convert token_symbols to a list if it's a single string
+            if isinstance(token_symbols, str):
+                token_symbols = [token_symbols]
+            
+            # Format for SQL IN clause
+            tokens_str = ','.join([f"'{token}'" for token in token_symbols])
+            
+            # Query to get historical token prices
+            query = f"""
+            SELECT token_symbol, price_usd, timestamp
+            FROM token_prices
+            WHERE token_symbol IN ({tokens_str})
+            AND timestamp > NOW() - INTERVAL %s DAY
+            ORDER BY token_symbol, timestamp
+            """
+            
+            cursor.execute(query, (days,))
+            rows = cursor.fetchall()
+            
+            if not rows:
+                self.logger.warning(f"No token prices found for {token_symbols}")
+                return self.mock_db.get_token_prices(token_symbols, days)
+                
+            # Column names for the DataFrame
+            columns = ['token_symbol', 'price_usd', 'timestamp']
+            
+            # Create DataFrame
+            price_df = pd.DataFrame(rows, columns=columns)
+            
+            cursor.close()
+            conn.close()
+            
+            return price_df
+            
+        except Exception as e:
+            self.logger.error(f"Error getting token prices from database: {str(e)}")
+            return self.mock_db.get_token_prices(token_symbols, days)
+    
+    def save_prediction(self, pool_id, predicted_apr, performance_class, risk_score, model_version=None):
+        """
+        Save a prediction to the database
+        
+        Args:
+            pool_id: Pool ID
+            predicted_apr: Predicted APR value
+            performance_class: Performance class ('high', 'medium', 'low')
+            risk_score: Risk score (0-1, lower is better)
+            model_version: Version of the model used for prediction
+        """
+        if self.use_mock:
+            self.logger.warning("Using mock database - prediction not saved")
+            return
+            
+        try:
+            conn = psycopg2.connect(**self.db_params)
+            cursor = conn.cursor()
+            
+            # Convert performance class to integer for storage
+            # high: 3, medium: 2, low: 1
+            if isinstance(performance_class, str):
+                performance_class_map = {
+                    'high': 3,
+                    'medium': 2,
+                    'low': 1
+                }
+                perf_class_value = performance_class_map.get(performance_class.lower(), 2)
+            else:
+                perf_class_value = performance_class
+            
+            # Insert prediction
+            query = """
+            INSERT INTO predictions (
+                pool_id, 
+                predicted_apr, 
+                risk_score, 
+                performance_class, 
+                prediction_timestamp
+            ) VALUES (%s, %s, %s, %s, NOW())
+            """
+            
+            cursor.execute(query, (
+                pool_id,
+                predicted_apr,
+                risk_score,
+                perf_class_value
+            ))
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            
+            self.logger.info(f"Saved prediction for pool {pool_id}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error saving prediction to database: {str(e)}")
+            return False
     
     def get_top_predictions(self, category="apr", limit=10, ascending=False):
         """Get top predictions based on category"""
         if self.use_mock:
             return self.mock_db.get_top_predictions(category, limit, ascending)
         
-        # Real implementation would query the database
-        # For now, just return mock data
-        return self.mock_db.get_top_predictions(category, limit, ascending)
+        try:
+            conn = psycopg2.connect(**self.db_params)
+            cursor = conn.cursor()
+            
+            # Determine sort column and direction based on category
+            if category == "apr":
+                sort_column = "predicted_apr"
+                sort_direction = "DESC" if not ascending else "ASC"
+            elif category == "risk":
+                sort_column = "risk_score"
+                sort_direction = "ASC" if not ascending else "DESC"  # Lower risk is better
+            else:  # Performance
+                sort_column = "performance_class"
+                sort_direction = "DESC" if not ascending else "ASC"
+            
+            # Query the most recent prediction for each pool and sort by the specified category
+            query = f"""
+            WITH latest_predictions AS (
+                SELECT DISTINCT ON (p.pool_id) 
+                    p.pool_id,
+                    p.predicted_apr,
+                    p.risk_score,
+                    p.performance_class,
+                    p.prediction_timestamp,
+                    pl.name
+                FROM predictions p
+                JOIN pools pl ON p.pool_id = pl.pool_id
+                ORDER BY p.pool_id, p.prediction_timestamp DESC
+            )
+            SELECT * FROM latest_predictions
+            ORDER BY {sort_column} {sort_direction}
+            LIMIT %s
+            """
+            
+            cursor.execute(query, (limit,))
+            rows = cursor.fetchall()
+            
+            if not rows:
+                self.logger.warning("No predictions found in database")
+                return self.mock_db.get_top_predictions(category, limit, ascending)
+            
+            # Column names for the DataFrame
+            columns = ['pool_id', 'predicted_apr', 'risk_score', 'performance_class', 
+                      'prediction_timestamp', 'pool_name']
+            
+            # Create DataFrame with decoded performance class
+            predictions_df = pd.DataFrame(rows, columns=columns)
+            
+            # Map numeric performance class to string labels
+            predictions_df['performance_class'] = predictions_df['performance_class'].map({
+                3: 'high',
+                2: 'medium',
+                1: 'low'
+            })
+            
+            cursor.close()
+            conn.close()
+            
+            return predictions_df
+            
+        except Exception as e:
+            self.logger.error(f"Error getting top predictions from database: {str(e)}")
+            return self.mock_db.get_top_predictions(category, limit, ascending)
     
     def get_pool_predictions(self, pool_id, days=30):
         """
@@ -194,14 +352,58 @@ class DBManager:
         if self.use_mock:
             return self.mock_db.get_pool_predictions(pool_id, days)
         
-        # Real implementation would query the database with time filtering
-        # For example: SELECT * FROM predictions WHERE pool_id = ? AND timestamp > (NOW() - INTERVAL ? DAY)
-        # For now, just get all mock data and filter by date
-        all_predictions = self.mock_db.get_pool_predictions(pool_id)
-        
-        if days and not all_predictions.empty and 'timestamp' in all_predictions.columns:
-            # Filter by days if we have timestamp data
-            cutoff_date = pd.Timestamp.now() - pd.Timedelta(days=days)
-            return all_predictions[all_predictions['timestamp'] >= cutoff_date]
-        
-        return all_predictions
+        try:
+            conn = psycopg2.connect(**self.db_params)
+            cursor = conn.cursor()
+            
+            # Query predictions for the specified pool with time filtering
+            query = """
+            SELECT p.pool_id, 
+                  p.predicted_apr, 
+                  p.risk_score, 
+                  p.performance_class, 
+                  p.prediction_timestamp,
+                  pl.name as pool_name
+            FROM predictions p
+            JOIN pools pl ON p.pool_id = pl.pool_id
+            WHERE p.pool_id = %s
+              AND p.prediction_timestamp > NOW() - INTERVAL %s DAY
+            ORDER BY p.prediction_timestamp
+            """
+            
+            cursor.execute(query, (pool_id, days))
+            rows = cursor.fetchall()
+            
+            if not rows:
+                self.logger.warning(f"No predictions found for pool {pool_id}")
+                return self.mock_db.get_pool_predictions(pool_id, days)
+                
+            # Column names for the DataFrame
+            columns = ['pool_id', 'predicted_apr', 'risk_score', 'performance_class', 
+                      'prediction_timestamp', 'pool_name']
+            
+            # Create DataFrame with decoded performance class
+            predictions_df = pd.DataFrame(rows, columns=columns)
+            
+            # Map numeric performance class to string labels
+            predictions_df['performance_class'] = predictions_df['performance_class'].map({
+                3: 'high',
+                2: 'medium',
+                1: 'low'
+            })
+            
+            cursor.close()
+            conn.close()
+            
+            return predictions_df
+            
+        except Exception as e:
+            self.logger.error(f"Error getting pool predictions from database: {str(e)}")
+            all_predictions = self.mock_db.get_pool_predictions(pool_id)
+            
+            if days and not all_predictions.empty and 'timestamp' in all_predictions.columns:
+                # Filter by days if we have timestamp data
+                cutoff_date = pd.Timestamp.now() - pd.Timedelta(days=days)
+                return all_predictions[all_predictions['timestamp'] >= cutoff_date]
+            
+            return all_predictions
