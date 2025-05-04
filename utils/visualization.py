@@ -162,13 +162,34 @@ def create_pool_comparison_chart(df, metric, metric_label):
 
 def create_risk_heat_map(df):
     """Create a risk vs. reward heat map"""
+    if df.empty:
+        # Create empty figure with a message
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No prediction data available",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5,
+            showarrow=False
+        )
+        return fig
+    
+    # Handle unrealistic APR values if present
+    display_df = df.copy()
+    max_apr_warning = None
+    
+    # Check for unrealistically high APR values
+    max_apr = df['predicted_apr'].max()
+    if max_apr > 50:
+        max_apr_warning = f"Capping unrealistically high APR values ({max_apr:.2f}%) to 50% for visualization."
+        display_df['predicted_apr'] = display_df['predicted_apr'].clip(upper=50)
+    
     # Create scatter plot
     fig = px.scatter(
-        df,
+        display_df,
         x='risk_score',
         y='predicted_apr',
         color='predicted_apr',
-        size='tvl',
+        size='tvl' if 'tvl' in display_df.columns else None,
         hover_name='pool_name',
         color_continuous_scale='Viridis',
         labels={
@@ -178,44 +199,48 @@ def create_risk_heat_map(df):
         }
     )
     
+    # Calculate max Y value for risk zones
+    max_y = min(50, display_df['predicted_apr'].max() * 1.1)
+    
     # Add risk zones
     fig.add_shape(
         type="rect",
         x0=0, y0=0,
-        x1=0.3, y1=df['predicted_apr'].max() * 1.1,
+        x1=0.3, y1=max_y,
         line=dict(width=0),
         fillcolor="rgba(0,255,0,0.1)"
     )
     fig.add_shape(
         type="rect",
         x0=0.3, y0=0,
-        x1=0.7, y1=df['predicted_apr'].max() * 1.1,
+        x1=0.7, y1=max_y,
         line=dict(width=0),
         fillcolor="rgba(255,255,0,0.1)"
     )
     fig.add_shape(
         type="rect",
         x0=0.7, y0=0,
-        x1=1.0, y1=df['predicted_apr'].max() * 1.1,
+        x1=1.0, y1=max_y,
         line=dict(width=0),
         fillcolor="rgba(255,0,0,0.1)"
     )
     
     # Add text annotations for risk zones
+    annotation_y = max_y * 0.9
     fig.add_annotation(
-        x=0.15, y=df['predicted_apr'].max(),
+        x=0.15, y=annotation_y,
         text="Low Risk",
         showarrow=False,
         font=dict(color="darkgreen", size=12)
     )
     fig.add_annotation(
-        x=0.5, y=df['predicted_apr'].max(),
+        x=0.5, y=annotation_y,
         text="Medium Risk",
         showarrow=False,
         font=dict(color="darkgoldenrod", size=12)
     )
     fig.add_annotation(
-        x=0.85, y=df['predicted_apr'].max(),
+        x=0.85, y=annotation_y,
         text="High Risk",
         showarrow=False,
         font=dict(color="darkred", size=12)
@@ -229,10 +254,21 @@ def create_risk_heat_map(df):
             range=[0, 1]
         ),
         yaxis=dict(
-            title="Predicted APR (%)"
+            title="Predicted APR (%)",
+            range=[0, max_y]
         ),
         height=500
     )
+    
+    # Add warning annotation if needed
+    if max_apr_warning:
+        fig.add_annotation(
+            text=max_apr_warning,
+            xref="paper", yref="paper",
+            x=0.5, y=-0.1,
+            showarrow=False,
+            font=dict(color="red", size=10)
+        )
     
     return fig
 
@@ -324,8 +360,34 @@ def create_impermanent_loss_chart(token1_change=None, token2_change=None):
 
 def create_prediction_chart(df, metric='predicted_apr'):
     """Create a line chart for prediction history"""
+    if df.empty:
+        # Create empty figure with a message
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No prediction data available",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5,
+            showarrow=False
+        )
+        return fig
+    
+    # For safer visualization, ensure data is sorted by timestamp
+    if 'prediction_timestamp' in df.columns:
+        df = df.sort_values('prediction_timestamp')
+    
+    # Handle unrealistic APR values if present
+    display_df = df.copy()
+    max_apr_warning = None
+    
+    if metric == 'predicted_apr':
+        max_apr = df[metric].max()
+        if max_apr > 50:
+            max_apr_warning = f"Capping unrealistically high APR values ({max_apr:.2f}%) to 50% for visualization."
+            display_df[metric] = display_df[metric].clip(upper=50)
+    
+    # Create the line chart
     fig = px.line(
-        df,
+        display_df,
         x='prediction_timestamp',
         y=metric,
         title=f"{'Predicted APR' if metric == 'predicted_apr' else 'Risk Score'} Over Time",
@@ -346,32 +408,99 @@ def create_prediction_chart(df, metric='predicted_apr'):
         height=400
     )
     
+    # Set appropriate y-axis limits
+    if metric == 'predicted_apr':
+        # Set y-axis to max out at 50% or the actual maximum if lower
+        ymax = min(50, display_df[metric].max() * 1.1)  # Add 10% padding
+        fig.update_layout(yaxis=dict(range=[0, ymax]))
+    elif metric == 'risk_score':
+        # Risk is always 0-1
+        fig.update_layout(yaxis=dict(range=[0, 1]))
+    
+    # Add warning annotation if needed
+    if max_apr_warning:
+        fig.add_annotation(
+            text=max_apr_warning,
+            xref="paper", yref="paper",
+            x=0.5, y=-0.15,
+            showarrow=False,
+            font=dict(color="red", size=10)
+        )
+    
     return fig
 
 def create_performance_distribution_chart(df):
     """Create a pie chart showing performance class distribution"""
+    if df.empty:
+        # Create empty figure with a message
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No prediction data available",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5,
+            showarrow=False
+        )
+        return fig
+    
     # Count pools in each performance class
-    perf_counts = df['performance_class'].value_counts().reset_index()
-    perf_counts.columns = ['Performance Class', 'Count']
-    
-    # Map class numbers to labels
-    class_map = {1: 'High', 2: 'Medium', 3: 'Low'}
-    perf_counts['Class'] = perf_counts['Performance Class'].map(class_map)
-    
-    # Define colors
-    color_map = {'High': '#4CAF50', 'Medium': '#FFC107', 'Low': '#F44336'}
-    
-    # Create pie chart
-    fig = px.pie(
-        perf_counts,
-        values='Count',
-        names='Class',
-        title="Distribution of Performance Classes",
-        color='Class',
-        color_discrete_map=color_map
-    )
-    
-    # Format layout
-    fig.update_layout(height=400)
-    
-    return fig
+    try:
+        perf_counts = df['performance_class'].value_counts().reset_index()
+        perf_counts.columns = ['Performance Class', 'Count']
+        
+        # Map class numbers/strings to labels
+        # First check if we have numeric or string values
+        if perf_counts['Performance Class'].dtype == 'object':
+            # String format (already have 'high', 'medium', 'low')
+            class_map = {
+                'high': 'High',
+                'medium': 'Medium', 
+                'low': 'Low'
+            }
+        else:
+            # Numeric format: 1, 2, 3
+            # Note that in db_operations.py: high=3, medium=2, low=1
+            class_map = {
+                3: 'High', 
+                2: 'Medium', 
+                1: 'Low'
+            }
+        
+        # Apply mapping with fallback for unknown values
+        perf_counts['Class'] = perf_counts['Performance Class'].apply(
+            lambda x: class_map.get(x, 'Unknown')
+        )
+        
+        # Define colors
+        color_map = {
+            'High': '#4CAF50',    # Green
+            'Medium': '#FFC107',  # Amber
+            'Low': '#F44336',     # Red
+            'Unknown': '#9E9E9E'  # Gray
+        }
+        
+        # Create pie chart
+        fig = px.pie(
+            perf_counts,
+            values='Count',
+            names='Class',
+            title="Distribution of Performance Classes",
+            color='Class',
+            color_discrete_map=color_map
+        )
+        
+        # Format layout
+        fig.update_layout(height=400)
+        
+        return fig
+        
+    except Exception as e:
+        # If something goes wrong, return empty chart with error message
+        fig = go.Figure()
+        fig.add_annotation(
+            text=f"Error creating performance distribution: {str(e)}",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5,
+            showarrow=False,
+            font=dict(color="red")
+        )
+        return fig
