@@ -11,11 +11,18 @@ class DBManager:
     With fallback to mock DB if database connection fails
     """
     
-    def __init__(self):
+    def __init__(self, use_mock=None):
         self.logger = logging.getLogger(__name__)
         
         # Always create the mock database for fallback
         self.mock_db = MockDBManager()
+        
+        # Allow forcing mock DB usage
+        if use_mock is not None:
+            self.use_mock = use_mock
+            if use_mock:
+                self.logger.info("Explicitly using mock database")
+            return
         
         try:
             # Get database connection parameters from environment
@@ -27,6 +34,11 @@ class DBManager:
                 'port': os.getenv('PGPORT', 5432)
             }
             
+            # Check for DATABASE_URL and use it if available
+            db_url = os.environ.get("DATABASE_URL")
+            if db_url:
+                self.db_params = self._parse_db_url(db_url)
+                
             # Test connection
             self._test_connection()
             
@@ -42,6 +54,35 @@ class DBManager:
             
             # If database connection fails, use mock DB
             self.use_mock = True
+            
+    def _parse_db_url(self, db_url):
+        """Parse DATABASE_URL into connection parameters"""
+        try:
+            # Replace postgres:// with postgresql:// if needed
+            if db_url.startswith("postgres://"):
+                db_url = db_url.replace("postgres://", "postgresql://", 1)
+                
+            # Parse the URL
+            from urllib.parse import urlparse
+            parsed = urlparse(db_url)
+            
+            return {
+                "dbname": parsed.path[1:],
+                "user": parsed.username,
+                "password": parsed.password,
+                "host": parsed.hostname,
+                "port": parsed.port or 5432
+            }
+        except Exception as e:
+            self.logger.error(f"Error parsing DATABASE_URL: {e}")
+            # Return default parameters
+            return {
+                'dbname': os.getenv('PGDATABASE', 'postgres'),
+                'user': os.getenv('PGUSER', 'postgres'),
+                'password': os.getenv('PGPASSWORD', ''),
+                'host': os.getenv('PGHOST', 'localhost'),
+                'port': os.getenv('PGPORT', 5432)
+            }
     
     def _test_connection(self):
         """Test database connection"""
