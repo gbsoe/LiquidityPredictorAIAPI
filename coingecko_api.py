@@ -16,6 +16,10 @@ from datetime import datetime, timedelta
 # Configure logging
 logger = logging.getLogger(__name__)
 
+# Constants for URLs
+DEMO_API_URL = "https://api.coingecko.com/api/v3"
+PRO_API_URL = "https://pro-api.coingecko.com/api/v3"
+
 class CoinGeckoAPI:
     """
     Client for the CoinGecko API which provides token price data.
@@ -29,25 +33,25 @@ class CoinGeckoAPI:
     
     def __init__(self):
         """Initialize the CoinGecko API client."""
-        # Determine the base URL based on the type of API key
-        api_key = os.getenv("COINGECKO_API_KEY")
+        # Get the API key from environment variable
+        self.api_key = os.getenv("COINGECKO_API_KEY", "")
         
-        # Check if it's a Demo API key (starts with CG-) or Pro API key
-        if api_key and api_key.startswith("CG-"):
-            # For Demo API keys, use standard API URL
-            self.base_url = "https://api.coingecko.com/api/v3"
-            logger.info("Using CoinGecko Demo API with standard URL")
-            self.api_key_type = "demo"
-        elif api_key:
-            # For Pro API keys, use Pro API URL
-            self.base_url = "https://pro-api.coingecko.com/api/v3"
-            logger.info("Using CoinGecko Pro API URL with API key")
-            self.api_key_type = "pro"
-        else:
-            # Otherwise, use the standard API URL without a key
-            self.base_url = "https://api.coingecko.com/api/v3"
-            logger.info(f"Using CoinGecko standard API URL: {self.base_url}")
+        # Configure API based on key type
+        if not self.api_key:
+            # No API key - use standard API with no auth
+            self.base_url = DEMO_API_URL
             self.api_key_type = "none"
+            logger.info("Initialized CoinGecko API client with no API key")
+        elif self.api_key.startswith("CG-"):
+            # Demo API key - use standard API
+            self.base_url = DEMO_API_URL
+            self.api_key_type = "demo"
+            logger.info("Initialized CoinGecko API client with Demo API key")
+        else:
+            # Pro API key - use Pro API
+            self.base_url = PRO_API_URL
+            self.api_key_type = "pro"
+            logger.info("Initialized CoinGecko API client with Pro API key")
         
         # Initialize token cache for prices
         self.price_cache = {}
@@ -187,35 +191,47 @@ class CoinGeckoAPI:
         if headers is None:
             headers = {}
             
-        # Add API key from environment if available and not already in headers
-        api_key = os.getenv("COINGECKO_API_KEY")
-        use_query_param = False
+        # Prepare parameters object for query parameters
+        params = {}
         
-        if api_key:
-            # For Demo API key
-            if "x_cg_demo_api_key" not in headers and "x-cg-demo-api-key" not in headers:
-                headers["x-cg-demo-api-key"] = api_key
-                # Also use as query parameter for some endpoints that require it
-                use_query_param = True
-                logger.info("Using CoinGecko Demo API key from environment")
-                
-            # For Pro API keys (maintain backward compatibility)
-            if "x-cg-pro-api-key" not in headers and "x-cg-api-key" not in headers:
-                headers["x-cg-pro-api-key"] = api_key
-                headers["x-cg-api-key"] = api_key
-                logger.info("Using CoinGecko Pro API key from environment")
-        
-        # Add API key as query parameter if needed
-        if use_query_param and api_key and "?" in endpoint:
-            endpoint += f"&x_cg_demo_api_key={api_key}"
-        elif use_query_param and api_key:
-            endpoint += f"?x_cg_demo_api_key={api_key}"
+        # If endpoint already has query parameters, extract them
+        if "?" in endpoint:
+            endpoint_parts = endpoint.split("?", 1)
+            endpoint = endpoint_parts[0]
+            query_str = endpoint_parts[1]
             
+            # Parse existing query parameters
+            for param in query_str.split("&"):
+                if "=" in param:
+                    key, value = param.split("=", 1)
+                    params[key] = value
+                    
+        # Add authentication based on API key type
+        if self.api_key_type == "demo" and self.api_key:
+            # Demo API key - add as header and query parameter
+            headers["x-cg-demo-api-key"] = self.api_key
+            params["x_cg_demo_api_key"] = self.api_key
+        elif self.api_key_type == "pro" and self.api_key:
+            # Pro API key - add as header only
+            headers["x-cg-pro-api-key"] = self.api_key
+            
+        # Build the URL with the base URL
         url = f"{self.base_url}/{endpoint}"
-        logger.info(f"Making CoinGecko API request to URL: {url}")
+        
+        # Log the request details
+        logger.info(f"Making CoinGecko API request to: {url}")
             
         try:
             logger.debug(f"Request headers: {headers}")
+            logger.debug(f"Request params: {params}")
+            
+            # Convert params dict to query string
+            query_string = "&".join([f"{k}={v}" for k, v in params.items()]) if params else ""
+            
+            # Add query string to URL if it exists
+            if query_string:
+                url = f"{url}?{query_string}"
+                
             response = requests.get(url, headers=headers, timeout=10)
             
             if response.status_code == 200:

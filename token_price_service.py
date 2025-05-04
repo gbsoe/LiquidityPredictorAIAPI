@@ -544,8 +544,16 @@ class TokenPriceService:
             coingecko_api_key = os.getenv("COINGECKO_API_KEY")
             headers = {}
             if coingecko_api_key:
-                headers["x-cg-pro-api-key"] = coingecko_api_key
-                headers["x-cg-api-key"] = coingecko_api_key
+                # Check if it's a Demo API key (starts with CG-) or Pro API key
+                if coingecko_api_key.startswith("CG-"):
+                    # For Demo API keys
+                    headers["x-cg-demo-api-key"] = coingecko_api_key
+                    # Also add as query parameter for some endpoints
+                    params["x_cg_demo_api_key"] = coingecko_api_key
+                else:
+                    # For Pro API keys (maintain backward compatibility)
+                    headers["x-cg-pro-api-key"] = coingecko_api_key
+                    headers["x-cg-api-key"] = coingecko_api_key
                 logger.info(f"Using CoinGecko API key for multiple tokens")
             
             response = requests.get(url, params=params, headers=headers, timeout=10)
