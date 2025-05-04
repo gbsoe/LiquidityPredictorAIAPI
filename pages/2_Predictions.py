@@ -120,9 +120,9 @@ try:
                 # Display predictions table
                 st.subheader(f"Top {top_n} Pools by {prediction_category}")
                 
-                # Format dataframe for display
-                display_df = top_predictions[['pool_name', 'predicted_apr', 'performance_class', 'risk_score']].copy()
-                display_df.columns = ['Pool Name', 'Predicted APR (%)', 'Performance Class', 'Risk Score']
+                # Format dataframe for display - Ensure we include pool_id 
+                display_df = top_predictions[['pool_name', 'pool_id', 'predicted_apr', 'performance_class', 'risk_score']].copy()
+                display_df.columns = ['Pool Name', 'Pool ID', 'Predicted APR (%)', 'Performance Class', 'Risk Score']
                 
                 # Apply styling to the dataframe
                 def highlight_performance(val):
@@ -281,7 +281,7 @@ try:
                             (top_predictions['risk_score'] < top_predictions['risk_score'].median())
                         ]
                     
-                    st.markdown("### 🌟 Prime Opportunity Pools")
+                    st.markdown("### Strategic Investment Opportunities")
                     if not ideal_pools.empty:
                         for _, pool in ideal_pools.head(3).iterrows():
                             # Check if we have detailed metrics to show

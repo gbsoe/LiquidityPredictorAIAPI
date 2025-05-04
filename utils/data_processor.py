@@ -122,22 +122,23 @@ def get_token_prices(db, token_symbols, days=7):
 def get_top_predictions(db, category="apr", limit=10, ascending=False):
     """
     Get top predictions based on category.
-    Falls back to mock DB if real DB fails.
+    Uses only authentic data from the database.
     """
     try:
         if db is None:
-            db = MockDBManager()
+            logger.error("No database connection provided")
+            return pd.DataFrame()  # Return empty DataFrame instead of using mock data
+        
         predictions = db.get_top_predictions(category, limit, ascending)
+        
         if predictions.empty:
-            # Fallback to mock if real DB returns empty
-            mock_db = MockDBManager()
-            return mock_db.get_top_predictions(category, limit, ascending)
+            logger.warning(f"No prediction data found for category: {category}")
+            return pd.DataFrame()  # Return empty DataFrame instead of using mock data
+            
         return predictions
     except Exception as e:
         logger.error(f"Error getting top predictions: {str(e)}")
-        # Fallback to mock if real DB fails
-        mock_db = MockDBManager()
-        return mock_db.get_top_predictions(category, limit, ascending)
+        return pd.DataFrame()  # Return empty DataFrame instead of using mock data
 
 def get_pool_predictions(db, pool_id, days=30):
     """
