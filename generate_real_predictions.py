@@ -66,17 +66,36 @@ class SimplePredictionModel:
                 logger.warning(f"Pool details not found for {pool_id}")
                 return None
                 
+            # Get current APR as baseline - this may come from mock data
+            # We'll ensure it's realistic before using it
+            current_apr = pool_details.get('apr', 10)
+            
+            # Sanity check on current APR - unrealistically high values are common in mock data
+            # Real-world APRs for Solana pools are typically between 1% and 50%
+            # with a few exceptional cases going higher
+            if current_apr > 100:
+                # Cap unrealistically high APRs at a more reasonable level
+                logger.warning(f"Unrealistically high APR detected for pool {pool_id}: {current_apr}%. Capping at 50%.")
+                current_apr = min(current_apr, 50.0)
+            
             metrics = self.get_historical_metrics(pool_id)
             if metrics.empty:
                 # If no metrics, use current APR with small variation
-                current_apr = pool_details.get('apr', 10)
                 return current_apr * (1 + random.uniform(-0.05, 0.15))
             
             # Calculate APR trend
             if 'apr' in metrics.columns:
                 # Sort by timestamp to get trend
                 metrics = metrics.sort_values('timestamp')
-                apr_values = metrics['apr'].values
+                
+                # Filter out unrealistic APR values - sometimes mock data has extreme values
+                realistic_metrics = metrics[metrics['apr'] <= 100]
+                
+                if realistic_metrics.empty:
+                    # If filtering removed all data, use capped current APR
+                    return current_apr * (1 + random.uniform(-0.05, 0.15))
+                
+                apr_values = realistic_metrics['apr'].values
                 
                 if len(apr_values) >= 2:
                     # Use weighted average of recent APRs with slight trend projection
@@ -93,15 +112,23 @@ class SimplePredictionModel:
                     # Add small random variation
                     predicted_apr *= (1 + random.uniform(-0.05, 0.1))
                     
-                    return max(0.1, predicted_apr)  # Ensure APR is at least 0.1%
+                    # Final sanity check to ensure APR is within realistic bounds
+                    predicted_apr = max(0.1, min(50.0, predicted_apr))
+                    
+                    return predicted_apr
                 else:
                     # Not enough data points for trend, use current APR with variation
-                    current_apr = apr_values[-1] if len(apr_values) > 0 else pool_details.get('apr', 10)
-                    return current_apr * (1 + random.uniform(-0.05, 0.15))
+                    current_apr = apr_values[-1] if len(apr_values) > 0 else current_apr
+                    predicted_apr = current_apr * (1 + random.uniform(-0.05, 0.15))
+                    
+                    # Final sanity check
+                    return max(0.1, min(50.0, predicted_apr))
             else:
                 # No APR data in metrics, use current APR with variation
-                current_apr = pool_details.get('apr', 10)
-                return current_apr * (1 + random.uniform(-0.05, 0.15))
+                predicted_apr = current_apr * (1 + random.uniform(-0.05, 0.15))
+                
+                # Final sanity check
+                return max(0.1, min(50.0, predicted_apr))
                 
         except Exception as e:
             logger.error(f"Error predicting APR for pool {pool_id}: {e}")
@@ -208,15 +235,16 @@ class SimplePredictionModel:
             # 3. Token risk based on category
             category = pool_details.get('category', 'Unknown')
             token_risk = 0.5  # Default
-            if category.lower() == 'meme':
+            if 'meme' in str(category).lower():
                 token_risk = 0.8  # Meme coins are higher risk
-            elif category.lower() == 'stablecoin':
+            elif 'stable' in str(category).lower():
                 token_risk = 0.2  # Stablecoins are lower risk
-            elif category.lower() == 'defi':
+            elif 'defi' in str(category).lower():
                 token_risk = 0.4  # DeFi tokens are medium risk
             
             # 4. APR risk (higher APR = higher risk, generally)
-            apr_risk = min(1.0, predicted_apr / 50)  # Normalize APR to 0-1 (assuming 50% is very high)
+            # More realistic - most pools are under 30% APR
+            apr_risk = min(1.0, predicted_apr / 30)  # Normalize APR to 0-1
             
             # 5. Performance stability (from performance class if provided)
             stability_risk = 0.5  # Default
