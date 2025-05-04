@@ -494,6 +494,11 @@ class DefiAggregationAPI:
                             return pool_data
                     
                     # If we get here, we didn't find it
+                    # Check if this is a mock/test pool ID (like pool1, pool2, etc.)
+                    if isinstance(pool_id, str) and pool_id.startswith('pool') and pool_id[4:].isdigit():
+                        logger.info(f"Mock pool ID detected: {pool_id} - These are no longer supported")
+                        return None
+                    
                     logger.warning(f"Pool {pool_id} not found in API responses")
                     
                     # Handle known pools that aren't in the API
