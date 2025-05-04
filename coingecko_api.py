@@ -29,17 +29,25 @@ class CoinGeckoAPI:
     
     def __init__(self):
         """Initialize the CoinGecko API client."""
-        # Determine the base URL based on whether we have a Pro API key
+        # Determine the base URL based on the type of API key
         api_key = os.getenv("COINGECKO_API_KEY")
         
-        if api_key:
-            # If we have a Pro API key, use the Pro API URL
+        # Check if it's a Demo API key (starts with CG-) or Pro API key
+        if api_key and api_key.startswith("CG-"):
+            # For Demo API keys, use standard API URL
+            self.base_url = "https://api.coingecko.com/api/v3"
+            logger.info("Using CoinGecko Demo API with standard URL")
+            self.api_key_type = "demo"
+        elif api_key:
+            # For Pro API keys, use Pro API URL
             self.base_url = "https://pro-api.coingecko.com/api/v3"
             logger.info("Using CoinGecko Pro API URL with API key")
+            self.api_key_type = "pro"
         else:
-            # Otherwise, use the standard API URL
+            # Otherwise, use the standard API URL without a key
             self.base_url = "https://api.coingecko.com/api/v3"
             logger.info(f"Using CoinGecko standard API URL: {self.base_url}")
+            self.api_key_type = "none"
         
         # Initialize token cache for prices
         self.price_cache = {}
@@ -320,7 +328,13 @@ class CoinGeckoAPI:
         
         # Otherwise, fetch fresh prices from API
         ids_str = ",".join(tokens_to_fetch)
-        endpoint = f"simple/price?ids={ids_str}&vs_currencies={vs_currency}"
+        
+        # For Demo API keys, include as query parameter
+        api_key = os.getenv("COINGECKO_API_KEY")
+        if api_key and api_key.startswith("CG-") and self.api_key_type == "demo":
+            endpoint = f"simple/price?ids={ids_str}&vs_currencies={vs_currency}&x_cg_demo_api_key={api_key}"
+        else:
+            endpoint = f"simple/price?ids={ids_str}&vs_currencies={vs_currency}"
         
         # Make the API request with authentication headers
         result = self._make_request(endpoint, headers=headers)
@@ -494,15 +508,20 @@ class CoinGeckoAPI:
             headers = {}
             # Add API key from environment if available
             api_key = os.getenv("COINGECKO_API_KEY")
+            use_query_param = False
+            
             if api_key:
-                # For Demo API key
-                headers["x-cg-demo-api-key"] = api_key
-                
-                # For Pro API keys (maintain backward compatibility)
-                headers["x-cg-pro-api-key"] = api_key
-                headers["x-cg-api-key"] = api_key
-                
-                logger.info("Using CoinGecko API key from environment for address lookup")
+                # Check type of API key
+                if api_key.startswith("CG-"):
+                    # For Demo API key
+                    headers["x-cg-demo-api-key"] = api_key
+                    use_query_param = True
+                    logger.info("Using CoinGecko Demo API key for address lookup")
+                else:
+                    # For Pro API keys (maintain backward compatibility)
+                    headers["x-cg-pro-api-key"] = api_key
+                    headers["x-cg-api-key"] = api_key
+                    logger.info("Using CoinGecko Pro API key for address lookup")
         
         # First, check if we have the address in our address-to-id mapping
         address_lower = address.lower()
@@ -519,7 +538,13 @@ class CoinGeckoAPI:
                 return price
         
         # If we don't have a mapping or it failed, try the direct API endpoint
-        endpoint = f"simple/token_price/{platform}?contract_addresses={address}&vs_currencies={vs_currency}"
+        api_key = os.getenv("COINGECKO_API_KEY")
+        if api_key and api_key.startswith("CG-") and self.api_key_type == "demo":
+            # For Demo API keys, include as query parameter
+            endpoint = f"simple/token_price/{platform}?contract_addresses={address}&vs_currencies={vs_currency}&x_cg_demo_api_key={api_key}"
+        else:
+            # For Pro API keys or no key, use standard query format
+            endpoint = f"simple/token_price/{platform}?contract_addresses={address}&vs_currencies={vs_currency}"
         
         # Make the API request with authentication headers
         result = self._make_request(endpoint, headers=headers)
