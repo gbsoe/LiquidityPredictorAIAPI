@@ -205,8 +205,7 @@ class DefiAggregationAPI:
                         if isinstance(pool_list, list):
                             # Enhance pool data with category information
                             for pool in pool_list:
-                                # Add category to each pool for classification
-                                pool['category'] = category
+                                # Don't use the API category, we'll calculate our own based on token pair
                                 # Add a source field if not present (needed for our data model)
                                 if 'source' not in pool:
                                     # Default to "raydium" as it's the most common
@@ -217,6 +216,10 @@ class DefiAggregationAPI:
                                     token_pair = pool.get('tokenPair', '')
                                     if '/' in token_pair:
                                         token1_symbol, token2_symbol = token_pair.split('/')
+                                        
+                                        # Set the pool name to use token pair from API directly
+                                        pool['name'] = token_pair
+                                        
                                         # Create basic token objects with symbols
                                         pool['tokens'] = [
                                             {
@@ -760,12 +763,18 @@ class DefiAggregationAPI:
             # IMPORTANT: The API returns empty tokens arrays but includes token symbols in the pool name
             # We need to extract the token symbols from the pool name and look them up in the tokens API
             
-            # Always try to extract from pool name, even if tokens array has values
-            # This ensures we have the best token data possible
+            # Check if we have a tokenPair first (from the API directly)
+            token_pair = pool.get('tokenPair', '')
             pool_name = pool.get('name', '')
             
-            # If pool name has token symbols, parse them
-            if pool_name and "-" in pool_name:
+            # If we have a token pair from the API, use it directly
+            if token_pair and '/' in token_pair:
+                # Set the pool name directly from token pair
+                pool['name'] = token_pair
+                # Parse token symbols
+                token1_symbol, token2_symbol = token_pair.split('/')
+            # Otherwise try to extract from pool name
+            elif pool_name and "-" in pool_name:
                 name_parts = pool_name.split("-")
                 if len(name_parts) >= 2:
                     token1_symbol = name_parts[0].strip()
@@ -895,19 +904,52 @@ class DefiAggregationAPI:
             # Extract any extra data from metrics
             extra_data = metrics.get('extraData', {})
             
-            # Determine category based on token pair
+            # Determine category based on token pair characteristics
             category = "Unknown"
             token1_symbol = token1.get('symbol', '').upper()
             token2_symbol = token2.get('symbol', '').upper()
             
-            if "USD" in token1_symbol or "USD" in token2_symbol or "USDT" in token1_symbol or "USDT" in token2_symbol:
+            # List of stablecoins
+            stablecoins = ["USDC", "USDT", "BUSD", "DAI", "USDR", "USDH", "USDT", "FDUSD", "TUSD"]
+            
+            # List of major base tokens
+            major_tokens = ["SOL", "ETH", "BTC", "WSOL", "WETH", "WBTC"]
+            
+            # List of known meme tokens
+            meme_tokens = ["BONK", "BOOP", "WIF", "DOGE", "PEPE", "SHIB", "FLOKI", "CORG", "PUSSY", 
+                          "ANDY", "SAMO", "POPCAT", "SLOTH", "MYRO", "TOAD", "KITTY", "PUPPY", "DOGWIFHAT"]
+            
+            # List of known DeFi protocol tokens
+            defi_tokens = ["RAY", "MNGO", "ORCA", "JTO", "STSOL", "MSOL", "JUP", "PYTH", "PORT", "SLND",
+                          "TULIP", "ATLAS", "STEP", "SRM", "LIDO", "AURY", "LDO", "MEAN", "RENDER", "RENDER"]
+            
+            # Check for stablecoin pairs
+            if token1_symbol in stablecoins or token2_symbol in stablecoins:
                 category = "Stablecoin"
-            elif token1_symbol == "SOL" or token2_symbol == "SOL":
-                category = "Major"
-            elif any(meme in token1_symbol.lower() or meme in token2_symbol.lower() for meme in ['doge', 'pepe', 'shib', 'meme']):
-                category = "Meme"
-            else:
+            
+            # Check for major token pairs that are not stablecoins
+            elif (token1_symbol in major_tokens and token2_symbol not in stablecoins) or \
+                 (token2_symbol in major_tokens and token1_symbol not in stablecoins):
+                category = "Major Token"
+            
+            # Check for meme tokens
+            elif token1_symbol in meme_tokens or token2_symbol in meme_tokens or \
+                 any(meme in token1_symbol.lower() or meme in token2_symbol.lower() 
+                     for meme in ['dog', 'doge', 'pepe', 'shib', 'cat', 'meme', 'inu', 'frog']):
+                category = "Meme Token"
+            
+            # Check for DeFi protocols
+            elif token1_symbol in defi_tokens or token2_symbol in defi_tokens:
                 category = "DeFi"
+                
+            # For tokens like SOL paired with stablecoins, classify as Blue Chip
+            elif (token1_symbol in major_tokens and token2_symbol in stablecoins) or \
+                 (token2_symbol in major_tokens and token1_symbol in stablecoins):
+                category = "Blue Chip"
+                
+            # Default for unknown pairs
+            else:
+                category = "Alt Token"
                 
             # Get the pool name from API or construct a descriptive one
             pool_name = pool.get('name', '')

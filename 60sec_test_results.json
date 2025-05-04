@@ -2,15 +2,15 @@
   "stats": {
     "total_pools": 26,
     "unique_pools": [
-      "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
-      "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3"
+      "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
+      "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH"
     ],
     "total_tokens": 52,
     "unique_tokens": [
-      "USDC",
+      "SOL",
       "BOOP",
       "LAYER",
-      "SOL"
+      "USDC"
     ],
     "dex_counts": {
       "raydium": 26
@@ -18,13 +18,13 @@
     "api_calls": 13,
     "errors": 0,
     "db_writes": 26,
-    "start_time": "2025-05-04T09:07:48.086801",
-    "end_time": "2025-05-04T09:08:50.143505",
-    "elapsed_seconds": 62.05654311180115,
-    "pools_per_second": 0.4189727415714789
+    "start_time": "2025-05-04T09:11:59.226435",
+    "end_time": "2025-05-04T09:13:00.664001",
+    "elapsed_seconds": 61.437406063079834,
+    "pools_per_second": 0.42319495021168263
   },
-  "test_duration": "62.06 seconds",
-  "timestamp": "2025-05-04T09:08:50.143512",
+  "test_duration": "61.44 seconds",
+  "timestamp": "2025-05-04T09:13:00.664008",
   "sample_pools": [
     {
       "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
@@ -43,7 +43,7 @@
           "name": "Boop",
           "address": "boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i",
           "decimals": 9,
-          "price": 0.26
+          "price": 0.25
         },
         {
           "symbol": "USDC",
@@ -55,22 +55,22 @@
       ],
       "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
       "programId": "",
-      "liquidity": 2030142.29,
-      "volume_24h": 4580365.03,
-      "apr": 205.88,
+      "liquidity": 1993731.6,
+      "volume_24h": 4578860.9,
+      "apr": 209.57,
       "fee": 0,
-      "apr_24h": 205.88,
-      "apr_7d": 257.01,
-      "apr_30d": 102.81,
+      "apr_24h": 209.57,
+      "apr_7d": 261.9,
+      "apr_30d": 104.76,
       "apr_change_24h": 0,
-      "apr_change_7d": 24.834855255488634,
-      "apr_change_30d": -59.997665460487916,
+      "apr_change_7d": 24.97017702915493,
+      "apr_change_30d": -60.0,
       "tvl_change_24h": 0,
       "tvl_change_7d": 0,
       "tvl_change_30d": 0,
       "active": true,
-      "created_at": "2025-05-04T09:07:50.916861",
-      "updated_at": "2025-05-04T09:07:50.916874",
+      "created_at": "2025-05-04T09:12:01.200393",
+      "updated_at": "2025-05-04T09:12:01.200406",
       "extra_data": {},
       "version": "1.0",
       "prediction_score": 0,
@@ -82,11 +82,11 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "tvl": 2030142.29,
-        "volumeUsd": 4580365.03,
-        "apy24h": 205.88,
-        "apy7d": 257.01,
-        "apy30d": 102.81
+        "tvl": 1993731.6,
+        "volumeUsd": 4578860.9,
+        "apy24h": 209.57,
+        "apy7d": 261.9,
+        "apy30d": 104.76
       },
       "api_response": {
         "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
@@ -96,11 +96,11 @@
         "name": "BOOP-USDC",
         "active": true,
         "metrics": {
-          "tvl": 2030142.29,
-          "volumeUsd": 4580365.03,
-          "apy24h": 205.88,
-          "apy7d": 257.01,
-          "apy30d": 102.81
+          "tvl": 1993731.6,
+          "volumeUsd": 4578860.9,
+          "apy24h": 209.57,
+          "apy7d": 261.9,
+          "apy30d": 104.76
         }
       },
       "token1_price_source": "none",
@@ -135,22 +135,22 @@
       ],
       "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
       "programId": "",
-      "liquidity": 3892654.06,
-      "volume_24h": 14169380.91,
-      "apr": 132.86,
+      "liquidity": 3890762.17,
+      "volume_24h": 14181707.37,
+      "apr": 133.04,
       "fee": 0,
-      "apr_24h": 132.86,
-      "apr_7d": 75.95,
-      "apr_30d": 72.42,
+      "apr_24h": 133.04,
+      "apr_7d": 75.99,
+      "apr_30d": 72.49,
       "apr_change_24h": 0,
-      "apr_change_7d": -42.8345626975764,
-      "apr_change_30d": -4.647794601711654,
+      "apr_change_7d": -42.881840048105836,
+      "apr_change_30d": -4.60586919331491,
       "tvl_change_24h": 0,
       "tvl_change_7d": 0,
       "tvl_change_30d": 0,
       "active": true,
-      "created_at": "2025-05-04T09:07:51.321257",
-      "updated_at": "2025-05-04T09:07:51.321265",
+      "created_at": "2025-05-04T09:12:01.590095",
+      "updated_at": "2025-05-04T09:12:01.590104",
       "extra_data": {},
       "version": "1.0",
       "prediction_score": 0,
@@ -162,11 +162,11 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "tvl": 3892654.06,
-        "volumeUsd": 14169380.91,
-        "apy24h": 132.86,
-        "apy7d": 75.95,
-        "apy30d": 72.42
+        "tvl": 3890762.17,
+        "volumeUsd": 14181707.37,
+        "apy24h": 133.04,
+        "apy7d": 75.99,
+        "apy30d": 72.49
       },
       "api_response": {
         "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
@@ -176,11 +176,11 @@
         "name": "LAYER-SOL",
         "active": true,
         "metrics": {
-          "tvl": 3892654.06,
-          "volumeUsd": 14169380.91,
-          "apy24h": 132.86,
-          "apy7d": 75.95,
-          "apy30d": 72.42
+          "tvl": 3890762.17,
+          "volumeUsd": 14181707.37,
+          "apy24h": 133.04,
+          "apy7d": 75.99,
+          "apy30d": 72.49
         }
       },
       "token1_price_source": "none",
@@ -203,7 +203,7 @@
           "name": "Boop",
           "address": "boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i",
           "decimals": 9,
-          "price": 0.26
+          "price": 0.25
         },
         {
           "symbol": "USDC",
@@ -215,22 +215,22 @@
       ],
       "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
       "programId": "",
-      "liquidity": 2030142.29,
-      "volume_24h": 4580365.03,
-      "apr": 205.88,
+      "liquidity": 1993731.6,
+      "volume_24h": 4578860.9,
+      "apr": 209.57,
       "fee": 0,
-      "apr_24h": 205.88,
-      "apr_7d": 257.01,
-      "apr_30d": 102.81,
+      "apr_24h": 209.57,
+      "apr_7d": 261.9,
+      "apr_30d": 104.76,
       "apr_change_24h": 0,
-      "apr_change_7d": 24.834855255488634,
-      "apr_change_30d": -59.997665460487916,
+      "apr_change_7d": 24.97017702915493,
+      "apr_change_30d": -60.0,
       "tvl_change_24h": 0,
       "tvl_change_7d": 0,
       "tvl_change_30d": 0,
       "active": true,
-      "created_at": "2025-05-04T09:07:55.596497",
-      "updated_at": "2025-05-04T09:07:55.596504",
+      "created_at": "2025-05-04T09:12:06.345266",
+      "updated_at": "2025-05-04T09:12:06.345277",
       "extra_data": {},
       "version": "1.0",
       "prediction_score": 0,
@@ -242,11 +242,11 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "tvl": 2030142.29,
-        "volumeUsd": 4580365.03,
-        "apy24h": 205.88,
-        "apy7d": 257.01,
-        "apy30d": 102.81
+        "tvl": 1993731.6,
+        "volumeUsd": 4578860.9,
+        "apy24h": 209.57,
+        "apy7d": 261.9,
+        "apy30d": 104.76
       },
       "api_response": {
         "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
@@ -256,11 +256,11 @@
         "name": "BOOP-USDC",
         "active": true,
         "metrics": {
-          "tvl": 2030142.29,
-          "volumeUsd": 4580365.03,
-          "apy24h": 205.88,
-          "apy7d": 257.01,
-          "apy30d": 102.81
+          "tvl": 1993731.6,
+          "volumeUsd": 4578860.9,
+          "apy24h": 209.57,
+          "apy7d": 261.9,
+          "apy30d": 104.76
         }
       },
       "token1_price_source": "none",
@@ -295,22 +295,22 @@
       ],
       "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
       "programId": "",
-      "liquidity": 3892654.06,
-      "volume_24h": 14169380.91,
-      "apr": 132.86,
+      "liquidity": 3890762.17,
+      "volume_24h": 14181707.37,
+      "apr": 133.04,
       "fee": 0,
-      "apr_24h": 132.86,
-      "apr_7d": 75.95,
-      "apr_30d": 72.42,
+      "apr_24h": 133.04,
+      "apr_7d": 75.99,
+      "apr_30d": 72.49,
       "apr_change_24h": 0,
-      "apr_change_7d": -42.8345626975764,
-      "apr_change_30d": -4.647794601711654,
+      "apr_change_7d": -42.881840048105836,
+      "apr_change_30d": -4.60586919331491,
       "tvl_change_24h": 0,
       "tvl_change_7d": 0,
       "tvl_change_30d": 0,
       "active": true,
-      "created_at": "2025-05-04T09:07:55.989273",
-      "updated_at": "2025-05-04T09:07:55.989283",
+      "created_at": "2025-05-04T09:12:06.711424",
+      "updated_at": "2025-05-04T09:12:06.711433",
       "extra_data": {},
       "version": "1.0",
       "prediction_score": 0,
@@ -322,11 +322,11 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "tvl": 3892654.06,
-        "volumeUsd": 14169380.91,
-        "apy24h": 132.86,
-        "apy7d": 75.95,
-        "apy30d": 72.42
+        "tvl": 3890762.17,
+        "volumeUsd": 14181707.37,
+        "apy24h": 133.04,
+        "apy7d": 75.99,
+        "apy30d": 72.49
       },
       "api_response": {
         "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
@@ -336,11 +336,11 @@
         "name": "LAYER-SOL",
         "active": true,
         "metrics": {
-          "tvl": 3892654.06,
-          "volumeUsd": 14169380.91,
-          "apy24h": 132.86,
-          "apy7d": 75.95,
-          "apy30d": 72.42
+          "tvl": 3890762.17,
+          "volumeUsd": 14181707.37,
+          "apy24h": 133.04,
+          "apy7d": 75.99,
+          "apy30d": 72.49
         }
       },
       "token1_price_source": "none",
@@ -363,7 +363,7 @@
           "name": "Boop",
           "address": "boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i",
           "decimals": 9,
-          "price": 0.26
+          "price": 0.25
         },
         {
           "symbol": "USDC",
@@ -375,22 +375,22 @@
       ],
       "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
       "programId": "",
-      "liquidity": 2030142.29,
-      "volume_24h": 4580365.03,
-      "apr": 205.88,
+      "liquidity": 1993731.6,
+      "volume_24h": 4578860.9,
+      "apr": 209.57,
       "fee": 0,
-      "apr_24h": 205.88,
-      "apr_7d": 257.01,
-      "apr_30d": 102.81,
+      "apr_24h": 209.57,
+      "apr_7d": 261.9,
+      "apr_30d": 104.76,
       "apr_change_24h": 0,
-      "apr_change_7d": 24.834855255488634,
-      "apr_change_30d": -59.997665460487916,
+      "apr_change_7d": 24.97017702915493,
+      "apr_change_30d": -60.0,
       "tvl_change_24h": 0,
       "tvl_change_7d": 0,
       "tvl_change_30d": 0,
       "active": true,
-      "created_at": "2025-05-04T09:08:00.232702",
-      "updated_at": "2025-05-04T09:08:00.232715",
+      "created_at": "2025-05-04T09:12:10.957243",
+      "updated_at": "2025-05-04T09:12:10.957254",
       "extra_data": {},
       "version": "1.0",
       "prediction_score": 0,
@@ -402,11 +402,11 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "tvl": 2030142.29,
-        "volumeUsd": 4580365.03,
-        "apy24h": 205.88,
-        "apy7d": 257.01,
-        "apy30d": 102.81
+        "tvl": 1993731.6,
+        "volumeUsd": 4578860.9,
+        "apy24h": 209.57,
+        "apy7d": 261.9,
+        "apy30d": 104.76
       },
       "api_response": {
         "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
@@ -416,11 +416,11 @@
         "name": "BOOP-USDC",
         "active": true,
         "metrics": {
-          "tvl": 2030142.29,
-          "volumeUsd": 4580365.03,
-          "apy24h": 205.88,
-          "apy7d": 257.01,
-          "apy30d": 102.81
+          "tvl": 1993731.6,
+          "volumeUsd": 4578860.9,
+          "apy24h": 209.57,
+          "apy7d": 261.9,
+          "apy30d": 104.76
         }
       },
       "token1_price_source": "none",
