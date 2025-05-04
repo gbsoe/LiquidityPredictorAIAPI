@@ -221,14 +221,14 @@ class DefiAggregationAPI:
                                         pool['tokens'] = [
                                             {
                                                 "symbol": token1_symbol,
-                                                "name": token1_symbol,
+                                                "name": self._get_token_name(token1_symbol),
                                                 "address": pool.get('baseMint', ''),
                                                 "decimals": 9,  # Default for Solana
                                                 "price": float(pool.get('price', 0))
                                             },
                                             {
                                                 "symbol": token2_symbol,
-                                                "name": token2_symbol,
+                                                "name": self._get_token_name(token2_symbol),
                                                 "address": pool.get('quoteMint', ''),
                                                 "decimals": 6 if token2_symbol == "USDC" else 9,  # USDC has 6 decimals
                                                 "price": 1.0 if token2_symbol == "USDC" else 0  # USDC price is 1
@@ -1331,3 +1331,50 @@ class DefiAggregationAPI:
         print("\n" + "="*60)
         
         return results
+    
+    def _get_token_name(self, symbol: str) -> str:
+        """
+        Get a proper name for a token based on its symbol.
+        Maps common symbols to their full names.
+        
+        Args:
+            symbol: Token symbol (e.g., "SOL", "USDC")
+            
+        Returns:
+            The full token name
+        """
+        # Dictionary of common Solana tokens with their full names
+        token_names = {
+            "SOL": "Solana",
+            "USDC": "USD Coin",
+            "USDT": "Tether USD",
+            "BTC": "Wrapped Bitcoin (Solana)",
+            "ETH": "Wrapped Ethereum (Solana)",
+            "mSOL": "Marinade Staked SOL",
+            "stSOL": "Lido Staked SOL",
+            "RAY": "Raydium",
+            "BONK": "Bonk",
+            "BOOP": "Boop",
+            "SRM": "Serum",
+            "ORCA": "Orca",
+            "MNGO": "Mango Markets",
+            "SAMO": "Samoyedcoin",
+            "STSOL": "Lido Staked SOL",
+            "JSOL": "JPool Solana",
+            "USDR": "Real USD",
+            "USDH": "USDH Stablecoin",
+            "JTO": "Jito",
+            "WIF": "Dogwifhat",
+            "JUP": "Jupiter",
+            "CLAY": "Clay Nation",
+            "PYTH": "Pyth Network",
+            "BLUR": "Blur",
+            "HPOS": "HPOS10 Index",
+            "LAYER": "Layerhub",
+            "GENE": "Genopets",
+            "HGSOL": "Hedge Sol",
+            "SLND": "Solend",
+        }
+        
+        # If we have a full name, use it, otherwise use the symbol as the name
+        return token_names.get(symbol, symbol)

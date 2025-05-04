@@ -1,19 +1,430 @@
 {
   "stats": {
-    "total_pools": 0,
-    "unique_pools": [],
-    "total_tokens": 0,
-    "unique_tokens": [],
-    "dex_counts": {},
-    "api_calls": 27,
+    "total_pools": 26,
+    "unique_pools": [
+      "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+      "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3"
+    ],
+    "total_tokens": 52,
+    "unique_tokens": [
+      "LAYER",
+      "USDC",
+      "SOL",
+      "BOOP"
+    ],
+    "dex_counts": {
+      "raydium": 26
+    },
+    "api_calls": 13,
     "errors": 0,
-    "db_writes": 0,
-    "start_time": "2025-05-04T08:44:44.205661",
-    "end_time": "2025-05-04T08:45:46.420001",
-    "elapsed_seconds": 62.21417784690857,
-    "pools_per_second": 0.0
+    "db_writes": 26,
+    "start_time": "2025-05-04T08:55:38.019852",
+    "end_time": "2025-05-04T08:56:39.005162",
+    "elapsed_seconds": 60.985126972198486,
+    "pools_per_second": 0.42633345687470187
   },
-  "test_duration": "62.21 seconds",
-  "timestamp": "2025-05-04T08:45:46.420009",
-  "sample_pools": []
+  "test_duration": "60.99 seconds",
+  "timestamp": "2025-05-04T08:56:39.005171",
+  "sample_pools": [
+    {
+      "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+      "name": "BOOP-USDC",
+      "dex": "raydium",
+      "category": "Stablecoin",
+      "token1_symbol": "BOOP",
+      "token2_symbol": "USDC",
+      "token1_address": "boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i",
+      "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "token1_price": 0.0,
+      "token2_price": 0.999959,
+      "tokens": [
+        {
+          "symbol": "BOOP",
+          "name": "BOOP",
+          "address": "boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i",
+          "decimals": 9,
+          "price": 0.26
+        },
+        {
+          "symbol": "USDC",
+          "name": "USDC",
+          "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "decimals": 6,
+          "price": 1.0
+        }
+      ],
+      "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+      "programId": "",
+      "liquidity": 2014312.78,
+      "volume_24h": 4624522.67,
+      "apr": 209.49,
+      "fee": 0,
+      "apr_24h": 209.49,
+      "apr_7d": 258.99,
+      "apr_30d": 103.6,
+      "apr_change_24h": 0,
+      "apr_change_7d": 23.62881283116139,
+      "apr_change_30d": -59.99845553882389,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-05-04T08:55:39.969196",
+      "updated_at": "2025-05-04T08:55:39.969207",
+      "extra_data": {},
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "tvl": 2014312.78,
+        "volumeUsd": 4624522.67,
+        "apy24h": 209.49,
+        "apy7d": 258.99,
+        "apy30d": 103.6
+      },
+      "api_response": {
+        "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+        "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+        "programId": "",
+        "source": "raydium",
+        "name": "BOOP-USDC",
+        "active": true,
+        "metrics": {
+          "tvl": 2014312.78,
+          "volumeUsd": 4624522.67,
+          "apy24h": 209.49,
+          "apy7d": 258.99,
+          "apy30d": 103.6
+        }
+      },
+      "token1_price_source": "none",
+      "token2_price_source": "coingecko"
+    },
+    {
+      "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
+      "name": "LAYER-SOL",
+      "dex": "raydium",
+      "category": "Major",
+      "token1_symbol": "LAYER",
+      "token2_symbol": "SOL",
+      "token1_address": "LAYER4xPpTCb3QL8S9u41EAhAX7mhBn8Q6xMTwY2Yzc",
+      "token2_address": "So11111111111111111111111111111111111111112",
+      "token1_price": 0.0,
+      "token2_price": 145.44,
+      "tokens": [
+        {
+          "symbol": "LAYER",
+          "name": "LAYER",
+          "address": "LAYER4xPpTCb3QL8S9u41EAhAX7mhBn8Q6xMTwY2Yzc",
+          "decimals": 9,
+          "price": 3.24
+        },
+        {
+          "symbol": "SOL",
+          "name": "SOL",
+          "address": "So11111111111111111111111111111111111111112",
+          "decimals": 9,
+          "price": 0
+        }
+      ],
+      "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
+      "programId": "",
+      "liquidity": 3900497.75,
+      "volume_24h": 14158459.85,
+      "apr": 132.49,
+      "fee": 0,
+      "apr_24h": 132.49,
+      "apr_7d": 75.79,
+      "apr_30d": 72.23,
+      "apr_change_24h": 0,
+      "apr_change_7d": -42.795682693033434,
+      "apr_change_30d": -4.697189602849983,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-05-04T08:55:40.335075",
+      "updated_at": "2025-05-04T08:55:40.335083",
+      "extra_data": {},
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "tvl": 3900497.75,
+        "volumeUsd": 14158459.85,
+        "apy24h": 132.49,
+        "apy7d": 75.79,
+        "apy30d": 72.23
+      },
+      "api_response": {
+        "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
+        "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
+        "programId": "",
+        "source": "raydium",
+        "name": "LAYER-SOL",
+        "active": true,
+        "metrics": {
+          "tvl": 3900497.75,
+          "volumeUsd": 14158459.85,
+          "apy24h": 132.49,
+          "apy7d": 75.79,
+          "apy30d": 72.23
+        }
+      },
+      "token1_price_source": "none",
+      "token2_price_source": "coingecko"
+    },
+    {
+      "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+      "name": "BOOP-USDC",
+      "dex": "raydium",
+      "category": "Stablecoin",
+      "token1_symbol": "BOOP",
+      "token2_symbol": "USDC",
+      "token1_address": "boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i",
+      "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "token1_price": 0.0,
+      "token2_price": 0.999959,
+      "tokens": [
+        {
+          "symbol": "BOOP",
+          "name": "BOOP",
+          "address": "boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i",
+          "decimals": 9,
+          "price": 0.26
+        },
+        {
+          "symbol": "USDC",
+          "name": "USDC",
+          "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "decimals": 6,
+          "price": 1.0
+        }
+      ],
+      "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+      "programId": "",
+      "liquidity": 2014312.78,
+      "volume_24h": 4624522.67,
+      "apr": 209.49,
+      "fee": 0,
+      "apr_24h": 209.49,
+      "apr_7d": 258.99,
+      "apr_30d": 103.6,
+      "apr_change_24h": 0,
+      "apr_change_7d": 23.62881283116139,
+      "apr_change_30d": -59.99845553882389,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-05-04T08:55:44.734850",
+      "updated_at": "2025-05-04T08:55:44.734859",
+      "extra_data": {},
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "tvl": 2014312.78,
+        "volumeUsd": 4624522.67,
+        "apy24h": 209.49,
+        "apy7d": 258.99,
+        "apy30d": 103.6
+      },
+      "api_response": {
+        "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+        "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+        "programId": "",
+        "source": "raydium",
+        "name": "BOOP-USDC",
+        "active": true,
+        "metrics": {
+          "tvl": 2014312.78,
+          "volumeUsd": 4624522.67,
+          "apy24h": 209.49,
+          "apy7d": 258.99,
+          "apy30d": 103.6
+        }
+      },
+      "token1_price_source": "none",
+      "token2_price_source": "coingecko"
+    },
+    {
+      "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
+      "name": "LAYER-SOL",
+      "dex": "raydium",
+      "category": "Major",
+      "token1_symbol": "LAYER",
+      "token2_symbol": "SOL",
+      "token1_address": "LAYER4xPpTCb3QL8S9u41EAhAX7mhBn8Q6xMTwY2Yzc",
+      "token2_address": "So11111111111111111111111111111111111111112",
+      "token1_price": 0.0,
+      "token2_price": 145.44,
+      "tokens": [
+        {
+          "symbol": "LAYER",
+          "name": "LAYER",
+          "address": "LAYER4xPpTCb3QL8S9u41EAhAX7mhBn8Q6xMTwY2Yzc",
+          "decimals": 9,
+          "price": 3.24
+        },
+        {
+          "symbol": "SOL",
+          "name": "SOL",
+          "address": "So11111111111111111111111111111111111111112",
+          "decimals": 9,
+          "price": 0
+        }
+      ],
+      "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
+      "programId": "",
+      "liquidity": 3900497.75,
+      "volume_24h": 14158459.85,
+      "apr": 132.49,
+      "fee": 0,
+      "apr_24h": 132.49,
+      "apr_7d": 75.79,
+      "apr_30d": 72.23,
+      "apr_change_24h": 0,
+      "apr_change_7d": -42.795682693033434,
+      "apr_change_30d": -4.697189602849983,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-05-04T08:55:45.090320",
+      "updated_at": "2025-05-04T08:55:45.090329",
+      "extra_data": {},
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "tvl": 3900497.75,
+        "volumeUsd": 14158459.85,
+        "apy24h": 132.49,
+        "apy7d": 75.79,
+        "apy30d": 72.23
+      },
+      "api_response": {
+        "id": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
+        "poolId": "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
+        "programId": "",
+        "source": "raydium",
+        "name": "LAYER-SOL",
+        "active": true,
+        "metrics": {
+          "tvl": 3900497.75,
+          "volumeUsd": 14158459.85,
+          "apy24h": 132.49,
+          "apy7d": 75.79,
+          "apy30d": 72.23
+        }
+      },
+      "token1_price_source": "none",
+      "token2_price_source": "coingecko"
+    },
+    {
+      "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+      "name": "BOOP-USDC",
+      "dex": "raydium",
+      "category": "Stablecoin",
+      "token1_symbol": "BOOP",
+      "token2_symbol": "USDC",
+      "token1_address": "boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i",
+      "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "token1_price": 0.0,
+      "token2_price": 0.999959,
+      "tokens": [
+        {
+          "symbol": "BOOP",
+          "name": "BOOP",
+          "address": "boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i",
+          "decimals": 9,
+          "price": 0.26
+        },
+        {
+          "symbol": "USDC",
+          "name": "USDC",
+          "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "decimals": 6,
+          "price": 1.0
+        }
+      ],
+      "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+      "programId": "",
+      "liquidity": 2014312.78,
+      "volume_24h": 4624522.67,
+      "apr": 209.49,
+      "fee": 0,
+      "apr_24h": 209.49,
+      "apr_7d": 258.99,
+      "apr_30d": 103.6,
+      "apr_change_24h": 0,
+      "apr_change_7d": 23.62881283116139,
+      "apr_change_30d": -59.99845553882389,
+      "tvl_change_24h": 0,
+      "tvl_change_7d": 0,
+      "tvl_change_30d": 0,
+      "active": true,
+      "created_at": "2025-05-04T08:55:49.296881",
+      "updated_at": "2025-05-04T08:55:49.296890",
+      "extra_data": {},
+      "version": "1.0",
+      "prediction_score": 0,
+      "risk_score": 0,
+      "volatility": 0,
+      "dex_specific": {
+        "ammId": "",
+        "concentrationBounds": "",
+        "whirlpoolId": ""
+      },
+      "metrics_data": {
+        "tvl": 2014312.78,
+        "volumeUsd": 4624522.67,
+        "apy24h": 209.49,
+        "apy7d": 258.99,
+        "apy30d": 103.6
+      },
+      "api_response": {
+        "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+        "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
+        "programId": "",
+        "source": "raydium",
+        "name": "BOOP-USDC",
+        "active": true,
+        "metrics": {
+          "tvl": 2014312.78,
+          "volumeUsd": 4624522.67,
+          "apy24h": 209.49,
+          "apy7d": 258.99,
+          "apy30d": 103.6
+        }
+      },
+      "token1_price_source": "none",
+      "token2_price_source": "coingecko"
+    }
+  ]
 }
