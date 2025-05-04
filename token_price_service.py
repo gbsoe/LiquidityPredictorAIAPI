@@ -59,7 +59,7 @@ DEFAULT_TOKEN_MAPPING = {
     "USDH": "usdh",
     
     # Tokens from the screenshot that need specific mappings
-    "SOOMER": "soomer-token",
+    "SOOMER": "soomer", # Updated to match CoinGecko ID 
     "SOGENT": "sogent",
     "SPEC": "spectrecoin",
     
@@ -80,6 +80,7 @@ DEFAULT_TOKEN_MAPPING = {
     "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E": "bitcoin",
     "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs": "ethereum",
     "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263": "ethereum",
+    "CTh5k7EHD2HBX64xZkeBDwmHskWvNq5WB8f4PWuW1hmz": "soomer", # SOOMER token address
 }
 
 class TokenPriceService:
@@ -240,7 +241,26 @@ class TokenPriceService:
         if not coingecko_id:
             # Only log warnings for non-UNKNOWN tokens to reduce noise
             logger.warning(f"No mapping for token: {symbol}")
-            return None
+            
+            # Special case for SOOMER - try to get price by address
+            if symbol.upper() == "SOOMER":
+                # Try direct address lookup for SOOMER which has address CTh5k7EHD2HBX64xZkeBDwmHskWvNq5WB8f4PWuW1hmz
+                logger.info(f"Attempting direct address lookup for SOOMER token")
+                soomer_price = self.get_price_by_token_address("CTh5k7EHD2HBX64xZkeBDwmHskWvNq5WB8f4PWuW1hmz")
+                if soomer_price is not None:
+                    # Update cache
+                    self.cached_prices[symbol.upper()] = soomer_price
+                    if not hasattr(self, 'cache_price_sources'):
+                        self.cache_price_sources = {}
+                    self.cache_price_sources[symbol.upper()] = "coingecko"
+                    
+                    if self.use_cache:
+                        self._save_cache()
+                    
+                    logger.info(f"Retrieved SOOMER price by address: ${soomer_price}")
+                    return (soomer_price, "coingecko") if return_source else soomer_price
+            
+            return (None, "none") if return_source else None
         
         try:
             # Fetch price from CoinGecko
@@ -283,6 +303,66 @@ class TokenPriceService:
                 
         except Exception as e:
             logger.error(f"Error fetching price for {symbol} from CoinGecko: {e}")
+            return None
+            
+    def get_price_by_token_address(self, token_address: str) -> Optional[float]:
+        """
+        Get the price of a token using its address on the Solana blockchain
+        
+        Args:
+            token_address: Solana token address
+            
+        Returns:
+            Current price in USD, or None if not available
+        """
+        try:
+            # Check if we have a CoinGecko API key
+            coingecko_api_key = os.getenv("COINGECKO_API_KEY")
+            if not coingecko_api_key:
+                logger.warning("No CoinGecko API key found for token address lookup")
+                return None
+                
+            # Use the CoinGecko API to get the price by address
+            url = f"{COINGECKO_API_URL}/coins/solana/contract/{token_address}"
+            headers = {
+                "x-cg-pro-api-key": coingecko_api_key,
+                "x-cg-api-key": coingecko_api_key
+            }
+            
+            logger.info(f"Looking up token price by address: {token_address}")
+            response = requests.get(url, headers=headers, timeout=10)
+            
+            # Handle 404 errors (token not found)
+            if response.status_code == 404:
+                logger.warning(f"Token with address {token_address} not found on CoinGecko")
+                return None
+                
+            response.raise_for_status()
+            data = response.json()
+            
+            # Extract the price
+            if "market_data" in data and "current_price" in data["market_data"] and "usd" in data["market_data"]["current_price"]:
+                price = data["market_data"]["current_price"]["usd"]
+                logger.info(f"Retrieved price for token address {token_address}: ${price}")
+                
+                # If we have the token symbol in the response, update our mapping
+                if "symbol" in data:
+                    symbol = data["symbol"].upper()
+                    if "id" in data:
+                        self.token_mapping[symbol] = data["id"]
+                        logger.info(f"Added token mapping: {symbol} -> {data['id']}")
+                        
+                    # Also add address mapping
+                    self.token_mapping[token_address] = data["id"]
+                    logger.info(f"Added address mapping: {token_address} -> {data['id']}")
+                    
+                return price
+            else:
+                logger.warning(f"Price data not found for token address {token_address}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error fetching price for token address {token_address}: {e}")
             return None
     
     def get_multiple_prices_from_defi_api(self, symbols: List[str]) -> Dict[str, float]:
