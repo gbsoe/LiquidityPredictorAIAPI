@@ -1,0 +1,79 @@
+{
+  "summary": {
+    "timestamp": "2025-05-04T08:39:53.424127",
+    "total_runtime": "14.47s",
+    "time_to_data_loaded": "N/A",
+    "time_to_predictions": "N/A",
+    "time_to_ui_ready": "N/A",
+    "peak_memory_mb": "0.00 MB",
+    "memory_growth_mb": "35.58 MB",
+    "final_token_cache_size": 0,
+    "total_pools_loaded": 0
+  },
+  "segments": {
+    "data_collection_init": "0.91s",
+    "app_initialization": "8.56s"
+  },
+  "checkpoints": {
+    "data_loaded": "2025-05-04T08:39:45.772449"
+  },
+  "stats": {
+    "token_cache_size": 0,
+    "token_lookup_times": [],
+    "prediction_times": [],
+    "total_pools_loaded": 0,
+    "tokens_by_symbol": 0,
+    "tokens_by_address": 0,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "api_calls": 0,
+    "peak_memory_mb": 0
+  },
+  "timeline": [
+    {
+      "timestamp": 1746347978.954584,
+      "time": "0.00s",
+      "event": "monitor_initialized",
+      "datetime": "2025-05-04T08:39:38.954591"
+    },
+    {
+      "timestamp": 1746347978.9548278,
+      "time": "0.00s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-04T08:39:38.954830"
+    },
+    {
+      "timestamp": 1746347984.8666408,
+      "time": "5.91s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-04T08:39:44.866648"
+    },
+    {
+      "timestamp": 1746347984.8670115,
+      "time": "5.91s",
+      "event": "data_collection_init_tracking_started",
+      "datetime": "2025-05-04T08:39:44.867014"
+    },
+    {
+      "timestamp": 1746347985.77243,
+      "time": "6.82s",
+      "event": "data_collection_init_tracking_stopped",
+      "datetime": "2025-05-04T08:39:45.772432",
+      "duration": "0.91s"
+    },
+    {
+      "timestamp": 1746347985.772452,
+      "time": "6.82s",
+      "event": "checkpoint_data_loaded",
+      "datetime": "2025-05-04T08:39:45.772453",
+      "time_since_start": "6.82s"
+    },
+    {
+      "timestamp": 1746347993.4233642,
+      "time": "14.47s",
+      "event": "app_initialization_tracking_stopped",
+      "datetime": "2025-05-04T08:39:53.423366",
+      "duration": "8.56s"
+    }
+  ]
+}

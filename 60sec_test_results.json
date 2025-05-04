@@ -5,15 +5,15 @@
     "total_tokens": 0,
     "unique_tokens": [],
     "dex_counts": {},
-    "api_calls": 129,
+    "api_calls": 69,
     "errors": 0,
     "db_writes": 0,
-    "start_time": "2025-05-04T08:35:53.145400",
-    "end_time": "2025-05-04T08:36:53.270548",
-    "elapsed_seconds": 60.12507748603821,
+    "start_time": "2025-05-04T08:39:44.553591",
+    "end_time": "2025-05-04T08:40:44.985101",
+    "elapsed_seconds": 60.43144607543945,
     "pools_per_second": 0.0
   },
-  "test_duration": "60.13 seconds",
-  "timestamp": "2025-05-04T08:36:53.270555",
+  "test_duration": "60.43 seconds",
+  "timestamp": "2025-05-04T08:40:44.985107",
   "sample_pools": []
 }

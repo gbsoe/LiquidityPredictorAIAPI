@@ -60,11 +60,12 @@ class DefiAggregationAPI:
         # Configure request delay for rate limiting (increased to avoid rate limit errors)
         self.request_delay = 0.5  # 500ms delay for 2 requests per second
         
-        # Set authentication headers - use X-API-KEY format (confirmed working with the new API)
-        self.headers = {
-            "X-API-KEY": self.api_key,  # This format is required by the new API endpoint
-            "Content-Type": "application/json"
-        }
+        # Set authentication headers using our helper module for consistent format
+        # Import locally to avoid circular imports
+        from api_auth_helper import get_api_headers
+        
+        # Use the helper to get the most reliable header format
+        self.headers = get_api_headers()
         
         # Track API endpoint structure 
         self.endpoints = {
@@ -563,96 +564,110 @@ class DefiAggregationAPI:
     
     def get_all_tokens(self) -> List[Dict[str, Any]]:
         """
-        Get all available tokens from the API.
+        Get all available tokens from the API or from pools data.
+        
+        Note: The new API doesn't have a /tokens endpoint, so we extract tokens from
+        pool data or return a basic set of common tokens.
         
         Returns:
             List of token data with details
         """
         try:
-            # Log the attempt to get tokens
-            logger.info("Attempting to retrieve tokens from API")
+            # The new API doesn't have a tokens endpoint
+            logger.info("The new API doesn't have a tokens endpoint, extracting from pools or using base set")
             
-            # Make the API call
-            result = self._make_request("tokens")
+            # Try to extract tokens from pools data
+            try:
+                pools_result = self._make_request("pools", {"limit": 20})
+                
+                if isinstance(pools_result, dict) and "pools" in pools_result:
+                    # Found pools data, extract tokens
+                    pools_data = pools_result.get("pools", {})
+                    tokens = []
+                    
+                    # Extract tokens from different categories
+                    if isinstance(pools_data, dict):
+                        for category, pool_list in pools_data.items():
+                            if isinstance(pool_list, list):
+                                for pool in pool_list:
+                                    if "tokenPair" in pool:
+                                        token_pair = pool["tokenPair"].split("/")
+                                        for i, symbol in enumerate(token_pair):
+                                            # Create token data
+                                            token_data = {
+                                                "symbol": symbol,
+                                                "address": pool.get(f"{'base' if i == 0 else 'quote'}Mint", ""),
+                                            }
+                                            
+                                            # Check if this token is already in our list
+                                            if not any(t.get("symbol") == symbol for t in tokens):
+                                                tokens.append(token_data)
+                    
+                    if tokens:
+                        logger.info(f"Extracted {len(tokens)} tokens from pools data")
+                        return tokens
+            except Exception as e:
+                logger.warning(f"Failed to extract tokens from pools: {str(e)}")
             
-            # Log the full response for debugging
-            logger.info(f"Token API response type: {type(result)}")
-            
-            # If the result is a small object, log it entirely for debugging
-            if isinstance(result, (dict, list)) and len(str(result)) < 1000:
-                logger.info(f"Token API response content: {result}")
-            else:
-                # Otherwise just log a sample
-                sample = str(result)[:500] + "..." if len(str(result)) > 500 else str(result)
-                logger.info(f"Token API response sample: {sample}")
-            
-            # Process the result based on its type
-            if isinstance(result, list):
-                logger.info(f"Retrieved {len(result)} tokens from API")
-                return result
-            elif isinstance(result, dict) and "tokens" in result:
-                logger.info(f"Retrieved {len(result.get('tokens', []))} tokens from API dictionary")
-                return result.get("tokens", [])
-            else:
-                # Hard-coded token data from the attachment for testing
-                logger.warning(f"Using hard-coded token data for development purposes")
-                hardcoded_tokens = [
-                    {
-                        "id": 1,
-                        "symbol": "RAY",
-                        "name": "Raydium",
-                        "decimals": 6,
-                        "address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
-                        "active": True,
-                        "price": 1.23
-                    },
-                    {
-                        "id": 2,
-                        "symbol": "SOL",
-                        "name": "Solana",
-                        "decimals": 9,
-                        "address": "So11111111111111111111111111111111111111112",
-                        "active": True,
-                        "price": 143.25
-                    },
-                    {
-                        "id": 3,
-                        "symbol": "USDC",
-                        "name": "USD Coin",
-                        "decimals": 6,
-                        "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-                        "active": True,
-                        "price": 1
-                    },
-                    {
-                        "id": 4,
-                        "symbol": "mSOL",
-                        "name": "Marinade Staked SOL",
-                        "decimals": 9,
-                        "address": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
-                        "active": True,
-                        "price": 152.87
-                    },
-                    {
-                        "id": 5,
-                        "symbol": "BTC",
-                        "name": "Bitcoin (Solana)",
-                        "decimals": 8,
-                        "address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
-                        "active": True,
-                        "price": 68245.12
-                    },
-                    {
-                        "id": 6,
-                        "symbol": "ETH",
-                        "name": "Ethereum (Solana)",
-                        "decimals": 8,
-                        "address": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
-                        "active": True,
-                        "price": 3921.73
-                    }
-                ]
-                return hardcoded_tokens
+            # Return a basic set of common tokens as fallback
+            logger.info("Using basic set of common tokens")
+            hardcoded_tokens = [
+                {
+                    "id": 1,
+                    "symbol": "RAY",
+                    "name": "Raydium",
+                    "decimals": 6,
+                    "address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+                    "active": True,
+                    "price": 1.23
+                },
+                {
+                    "id": 2,
+                    "symbol": "SOL",
+                    "name": "Solana",
+                    "decimals": 9,
+                    "address": "So11111111111111111111111111111111111111112",
+                    "active": True,
+                    "price": 143.25
+                },
+                {
+                    "id": 3,
+                    "symbol": "USDC",
+                    "name": "USD Coin",
+                    "decimals": 6,
+                    "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                    "active": True,
+                    "price": 1
+                },
+                {
+                    "id": 4,
+                    "symbol": "mSOL",
+                    "name": "Marinade Staked SOL",
+                    "decimals": 9,
+                    "address": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+                    "active": True,
+                    "price": 152.87
+                },
+                {
+                    "id": 5,
+                    "symbol": "BTC",
+                    "name": "Bitcoin (Solana)",
+                    "decimals": 8,
+                    "address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
+                    "active": True,
+                    "price": 68245.12
+                },
+                {
+                    "id": 6,
+                    "symbol": "ETH",
+                    "name": "Ethereum (Solana)",
+                    "decimals": 8,
+                    "address": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
+                    "active": True,
+                    "price": 3921.73
+                }
+            ]
+            return hardcoded_tokens
         except Exception as e:
             logger.error(f"Failed to get tokens: {str(e)}")
             return []
