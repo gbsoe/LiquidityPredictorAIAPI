@@ -38,7 +38,9 @@
     "LAYER": 3.28,
     "POOP": 0.00044261,
     "BOOP": 1.588e-05,
-    "LFG": 0.0001749
+    "LFG": 0.0001749,
+    "PYTH": 0.136846,
+    "MNGO": 0.02075428
   },
   "price_sources": {
     "USDC": "coingecko",
@@ -72,7 +74,9 @@
     "LAYER": "coingecko",
     "POOP": "coingecko",
     "BOOP": "coingecko",
-    "LFG": "coingecko"
+    "LFG": "coingecko",
+    "PYTH": "coingecko",
+    "MNGO": "coingecko"
   },
-  "last_update": "2025-05-04T18:32:17.614911"
+  "last_update": "2025-05-04T18:47:29.537885"
 }
