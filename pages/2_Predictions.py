@@ -308,7 +308,7 @@ try:
                 
                 with risk_reward_cols[1]:
                     # Use the advanced data if available
-                    if pool_details and has_advanced_data:
+                    if 'all_pool_data' in locals() and 'has_advanced_data' in locals() and pool_details and has_advanced_data:
                         # High APR pools (very high APR regardless of risk, but with some stability)
                         aggressive_pools = all_pool_data[
                             # Ultra-high APR pools (400%+)
@@ -352,18 +352,51 @@ try:
                         st.info("No pools in this category")
                 
                 with risk_reward_cols[2]:
-                    # Low APR, Low Risk pools
-                    conservative_pools = top_predictions[
-                        (top_predictions['predicted_apr'] < top_predictions['predicted_apr'].median()) & 
-                        (top_predictions['risk_score'] < top_predictions['risk_score'].median())
-                    ]
+                    # Use the advanced data if available
+                    if 'all_pool_data' in locals() and 'has_advanced_data' in locals() and pool_details and has_advanced_data:
+                        # Very low risk pools (focused on capital preservation)
+                        conservative_pools = all_pool_data[
+                            # Very low risk with decent APR
+                            ((all_pool_data['risk_score'] < 0.3) & 
+                             (all_pool_data['predicted_apr'] > 5)) |
+                            # Stablecoin pairs with high TVL stability
+                            ((all_pool_data['category'].str.contains('stablecoin')) & 
+                             (all_pool_data['tvl'] > 1000000) &
+                             (all_pool_data['tvl_stability'] > 0.8))
+                        ]
+                        
+                        # Sort by risk score ascending (lowest risk first)
+                        if not conservative_pools.empty:
+                            conservative_pools = conservative_pools.sort_values('risk_score')
+                    else:
+                        # Fallback to basic criteria
+                        conservative_pools = top_predictions[
+                            (top_predictions['predicted_apr'] < top_predictions['predicted_apr'].median()) & 
+                            (top_predictions['risk_score'] < top_predictions['risk_score'].median())
+                        ]
                     
-                    st.markdown("### 🛡️ Conservative Pools (Lower APR, Low Risk)")
+                    st.markdown("### 🛡️ Conservative Pools (Capital Preservation)")
                     if not conservative_pools.empty:
                         for _, pool in conservative_pools.head(3).iterrows():
-                            st.markdown(f"**{pool['pool_name']}**  \n"
-                                      f"APR: {pool['predicted_apr']:.2f}%  \n"
-                                      f"Risk: {pool['risk_score']:.2f}")
+                            # Check if we have detailed metrics to show
+                            has_tvl = 'tvl' in pool and pool['tvl'] is not None
+                            has_stability = 'tvl_stability' in pool and pool['tvl_stability'] is not None
+                            has_category = 'category' in pool and pool['category'] is not None
+                            
+                            # Basic info about the pool
+                            pool_info = f"**{pool['pool_name']}**  \n" \
+                                      f"APR: {pool['predicted_apr']:.2f}%  \n" \
+                                      f"Risk: {pool['risk_score']:.2f}"
+                            
+                            # Add advanced metrics if available
+                            if has_tvl:
+                                pool_info += f"  \nTVL: ${pool['tvl']/1000000:.2f}M"
+                            if has_stability:
+                                pool_info += f"  \nStability: {pool['tvl_stability']*100:.0f}%"
+                            if has_category:
+                                pool_info += f"  \nType: {pool['category']}"
+                                
+                            st.markdown(pool_info)
                     else:
                         st.info("No pools in this category")
             else:
