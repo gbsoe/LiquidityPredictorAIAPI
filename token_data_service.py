@@ -1,1655 +1,415 @@
 """
-Token Data Service for SolPool Insight.
+Token Data Service
 
-This module provides a service for retrieving, caching, and managing token data.
-It supports:
-- Token metadata retrieval from DeFi Aggregation API
-- Token price tracking
-- Token smart caching with TTL
-- Default token data for common tokens
+This module provides a unified interface for retrieving token information
+from multiple sources, including CoinGecko and the Raydium Trader API.
 """
 
 import os
 import time
-import json
 import logging
-from datetime import datetime
-from typing import Dict, Any, Optional, List
-import threading
+from typing import Dict, List, Any, Optional
+from coingecko_api import get_coingecko_api
+from defi_api_client import DefiApiClient
 
 # Configure logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Import the DeFi Aggregation API client
-from defi_aggregation_api import DefiAggregationAPI
-
-# Import the CoinGecko API client
-try:
-    from coingecko_api import CoinGeckoAPI, coingecko_api
-except ImportError:
-    logger.error("Unable to import CoinGeckoAPI - continuing without CoinGecko integration")
-    coingecko_api = None
-
-# Singleton token data service instance
-_instance = None
-_lock = threading.Lock()
 
 class TokenDataService:
     """
-    Service for retrieving, caching, and managing token data.
-    
-    Features:
-    - Token metadata retrieval
-    - Token price tracking
-    - Smart caching with TTL
-    - Default token data for common tokens
+    Service for retrieving and managing token data
+    from multiple sources, prioritizing authentic data
     """
     
-    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
-        """
-        Initialize the token data service.
+    def __init__(self):
+        """Initialize the token data service"""
+        self.coingecko = get_coingecko_api()
         
-        Args:
-            api_key: API key for the DeFi Aggregation API
-            base_url: Base URL for the DeFi Aggregation API
-        """
-        # Create API client
-        self.api_client = DefiAggregationAPI(api_key=api_key, base_url=base_url)
-        
-        # Initialize token cache
-        self.token_cache: Dict[str, Dict[str, Any]] = {}
-        self.token_cache_ttl = 3600  # 1 hour TTL for token data
-        
-        # Stats tracking
-        self.stats = {
-            "total_requests": 0,
-            "cache_hits": 0,
-            "cache_misses": 0,
-            "api_errors": 0,
-            "last_update": None,
-        }
-        
-        # Initialize CoinGecko with token mappings
+        # Try to initialize DeFi API client (fallback gracefully if not available)
         try:
-            if 'token_mappings' not in globals():
-                # If token_mappings.py is not imported, try to import it now
-                try:
-                    from token_mappings import initialize_coingecko_mappings, get_token_address, DEFAULT_TOKEN_MAPPINGS
-                    logger.info("Successfully imported token_mappings module")
-                except ImportError:
-                    logger.warning("Could not import token_mappings module")
-            
-            # Initialize CoinGecko with mappings if available
-            if coingecko_api is not None and 'initialize_coingecko_mappings' in globals():
-                initialize_coingecko_mappings(coingecko_api)
-                logger.info("Initialized CoinGecko with token mappings")
-            else:
-                logger.warning("Could not initialize CoinGecko with token mappings")
+            api_key = os.getenv("DEFI_API_KEY")
+            self.defi_api = DefiApiClient(api_key=api_key) if api_key else None
         except Exception as e:
-            logger.error(f"Error initializing token mappings: {e}")
-            
-        # Initialize default token data
-        self._init_default_tokens()
+            logger.warning(f"Failed to initialize DeFi API client: {e}")
+            self.defi_api = None
         
-        # Preload all token data from API
-        self.preload_all_tokens()
+        # Token data caches
+        self.token_data: Dict[str, Dict[str, Any]] = {}  # By symbol
+        self.token_address_data: Dict[str, Dict[str, Any]] = {}  # By address
         
-        logger.info("Initialized token data service")
+        # CoinGecko ID mappings
+        self.coingecko_ids: Dict[str, str] = {}  # Symbol -> CoinGecko ID
         
-    def _extract_token_data_from_pool(self, pool):
+        # Last update timestamps
+        self.last_update_time: Dict[str, float] = {}
+    
+    def get_token_price(self, symbol: str, max_age_seconds: int = 300) -> Optional[float]:
         """
-        Extract token data from a pool object.
-        This method handles different pool data formats to extract token information.
+        Get the current price for a token by symbol
         
         Args:
-            pool: Pool data dictionary from the API
+            symbol: Token symbol (e.g., 'SOL', 'BTC')
+            max_age_seconds: Maximum age of cached price in seconds
             
         Returns:
-            List of token data dictionaries
+            Token price in USD or None if not available
         """
-        tokens = []
+        # Normalize symbol
+        symbol = symbol.upper()
+        
+        # Check if we have recent data
+        now = time.time()
+        if (
+            symbol in self.token_data and
+            'price' in self.token_data[symbol] and
+            symbol in self.last_update_time and
+            now - self.last_update_time[symbol] < max_age_seconds
+        ):
+            return self.token_data[symbol]['price']
+        
+        # First try CoinGecko for accurate price
+        price = self._get_price_from_coingecko(symbol)
+        if price is not None:
+            self._update_token_data(symbol, {'price': price})
+            return price
+        
+        # If CoinGecko fails, try DeFi API
+        price = self._get_price_from_defi_api(symbol)
+        if price is not None:
+            self._update_token_data(symbol, {'price': price})
+            return price
+        
+        # No price found
+        logger.warning(f"Could not find price for token: {symbol}")
+        return None
+    
+    def _get_price_from_coingecko(self, symbol: str) -> Optional[float]:
+        """Get price from CoinGecko"""
+        try:
+            price = self.coingecko.get_price_by_symbol(symbol)
+            if price:
+                logger.info(f"Retrieved price for {symbol} by symbol lookup: {price}")
+                
+                # If we found a CoinGecko ID, add it to our mappings
+                if symbol.upper() not in self.coingecko_ids and symbol.upper() in self.coingecko.token_id_mapping:
+                    coin_id = self.coingecko.token_id_mapping[symbol.upper()]
+                    self.coingecko_ids[symbol.upper()] = coin_id
+                    logger.info(f"Added {symbol} to CoinGecko mappings with ID: {coin_id}")
+                
+            return price
+        except Exception as e:
+            logger.error(f"Error getting price from CoinGecko for {symbol}: {e}")
+            return None
+    
+    def _get_price_from_defi_api(self, symbol: str) -> Optional[float]:
+        """Get price from DeFi API"""
+        if not self.defi_api:
+            return None
         
         try:
-            # Check if the pool has tokens array
-            if 'tokens' in pool and isinstance(pool['tokens'], list):
-                for token in pool['tokens']:
-                    if isinstance(token, dict) and 'symbol' in token and token['symbol']:
-                        tokens.append(token)
+            # Try to get token info directly if possible
+            token_info = self.defi_api.get_token_information(symbol)
+            if token_info and 'price' in token_info:
+                price = float(token_info['price'])
+                logger.info(f"Retrieved price for {symbol} from DeFi API: {price}")
+                return price
             
-            # Otherwise, try to extract from token pair, baseMint and quoteMint fields
-            elif 'tokenPair' in pool and '/' in pool['tokenPair']:
-                token1_symbol, token2_symbol = pool['tokenPair'].split('/')
-                
-                # Create token objects
-                token1 = {
-                    'symbol': token1_symbol,
-                    'name': self.api_client._get_token_name(token1_symbol),
-                    'address': pool.get('baseMint', ''),
-                    'decimals': 9  # Default for Solana
-                }
-                
-                token2 = {
-                    'symbol': token2_symbol,
-                    'name': self.api_client._get_token_name(token2_symbol),
-                    'address': pool.get('quoteMint', ''),
-                    'decimals': 6 if token2_symbol == 'USDC' else 9  # USDC has 6 decimals
-                }
-                
-                tokens.append(token1)
-                tokens.append(token2)
-                
-            # Check for token0 and token1 format (common in some APIs)
-            elif all(k in pool for k in ['token0', 'token1']):
-                if isinstance(pool['token0'], dict) and 'symbol' in pool['token0']:
-                    tokens.append(pool['token0'])
-                if isinstance(pool['token1'], dict) and 'symbol' in pool['token1']:
-                    tokens.append(pool['token1'])
+            # If direct lookup fails, try to find the token in pool data
+            pools_response = self.defi_api.get_all_pools(token=symbol, limit=20)
+            pools = pools_response.get('pools', [])
             
-            # Try to handle any other structure with tokens
-            elif 'tokenA' in pool and 'tokenB' in pool:
-                if isinstance(pool['tokenA'], dict) and 'symbol' in pool['tokenA']:
-                    tokens.append(pool['tokenA'])
-                if isinstance(pool['tokenB'], dict) and 'symbol' in pool['tokenB']:
-                    tokens.append(pool['tokenB'])
-        
+            if pools:
+                logger.info(f"Found {len(pools)} pools that might contain token {symbol}")
+                
+                # Look for the token in the pools' tokens
+                for pool in pools:
+                    tokens = pool.get('tokens', [])
+                    for token in tokens:
+                        if token.get('symbol', '').upper() == symbol.upper() and 'price' in token:
+                            price = float(token['price'])
+                            logger.info(f"Found price for {symbol} in pool data: {price}")
+                            return price
+            
+            logger.warning(f"Token {symbol} not found in API")
+            return None
         except Exception as e:
-            logger.warning(f"Error extracting token data from pool: {e}")
-        
-        return tokens
+            logger.error(f"Error getting price from DeFi API for {symbol}: {e}")
+            return None
     
-    def _add_token_to_coingecko(self, token):
+    def get_token_address(self, symbol: str) -> Optional[str]:
         """
-        Attempt to add token to CoinGecko mappings for improved price fetching.
-        This method will try to find appropriate CoinGecko IDs for tokens.
+        Get the blockchain address for a token by symbol
         
         Args:
-            token: Token data dictionary with symbol and address
+            symbol: Token symbol (e.g., 'SOL', 'BTC')
             
         Returns:
-            True if successfully added to mappings, False otherwise
+            Token address or None if not available
         """
-        if coingecko_api is None:
-            return False
-            
-        symbol = token.get('symbol', '').upper()
-        address = token.get('address', '')
+        # Normalize symbol
+        symbol = symbol.upper()
         
-        if not symbol or symbol == 'UNKNOWN' or not address:
-            return False
-            
-        # Check if we already have a mapping
-        token_id = None
+        # Check if we have the data cached
+        if symbol in self.token_data and 'address' in self.token_data[symbol]:
+            return self.token_data[symbol]['address']
         
-        # First try to search for the token by symbol
-        try:
-            search_results = coingecko_api.search_token(symbol)
-            for result in search_results:
-                if result.get('symbol', '').upper() == symbol:
-                    token_id = result.get('id')
-                    if token_id:
-                        # Add to mappings
-                        coingecko_api.add_token_mapping(symbol, token_id)
-                        coingecko_api.add_address_mapping(address, token_id)
-                        logger.info(f"Added {symbol} to CoinGecko mappings with ID: {token_id}")
-                        return True
-        except Exception as e:
-            logger.warning(f"Error searching CoinGecko for {symbol}: {e}")
-            
-        return False
+        # Try to get from DeFi API first
+        address = self._get_address_from_defi_api(symbol)
+        if address:
+            self._update_token_data(symbol, {'address': address})
+            return address
+        
+        # If that fails, try to get from CoinGecko
+        # This is less reliable for Solana tokens
+        address = self._get_address_from_coingecko(symbol)
+        if address:
+            self._update_token_data(symbol, {'address': address})
+            return address
+        
+        # No address found
+        logger.warning(f"Could not find address for token: {symbol}")
+        return None
     
-    def preload_all_tokens(self):
-        """
-        Preload all token data from the API into the cache.
-        This significantly improves token data availability and reduces Unknown token displays.
-        For the new API endpoint that doesn't have a separate tokens endpoint,
-        we extract token data from the pools data.
-        """
-        logger.info("Preloading all token data from API...")
-        try:
-            # The new API endpoint doesn't have a separate tokens endpoint
-            # Instead, we'll extract token data from pools which contains token addresses
-            # First try getting pools from API
-            all_pools = self.api_client.get_pools(limit=50)  # Get a good sample of pools
-            
-            if not all_pools or not isinstance(all_pools, list):
-                logger.warning("Empty or invalid response when preloading pools for token data")
-                return
-                
-            logger.info(f"Retrieved {len(all_pools)} pools to extract token data")
-            
-            # Now, extract token data from pools
-            all_tokens = []
-            for pool in all_pools:
-                tokens_from_pool = self._extract_token_data_from_pool(pool)
-                all_tokens.extend(tokens_from_pool)
-            
-            # Remove duplicates (by symbol)
-            unique_tokens = {}
-            for token in all_tokens:
-                symbol = token.get('symbol', '').upper()
-                if symbol and (symbol not in unique_tokens or not unique_tokens[symbol].get('address')):
-                    unique_tokens[symbol] = token
-            
-            all_tokens = list(unique_tokens.values())
-            logger.info(f"Extracted {len(all_tokens)} unique tokens from pool data")
-            
-            # Track statistics for token data completeness
-            tokens_loaded = 0
-            tokens_with_address = 0
-            tokens_with_name = 0
-            tokens_with_price = 0
-            address_cached = 0
-            
-            # First pass: Process all tokens and add them all to the cache
-            for token in all_tokens:
-                # Skip invalid tokens
-                if not isinstance(token, dict):
-                    continue
-                    
-                symbol = token.get("symbol", "").upper()
-                address = token.get("address", "")
-                
-                # Skip tokens without either symbol or address
-                if not symbol and not address:
-                    continue
-                
-                # Process for consistent format
-                processed_token = self._process_token_data(token)
-                
-                # Try to add token to CoinGecko mappings for better price retrieval
-                if symbol and address:
-                    # This will automatically search CoinGecko and add mappings if found
-                    self._add_token_to_coingecko({
-                        'symbol': symbol,
-                        'address': address
-                    })
-                
-                # Update cache by symbol if available
-                if symbol:
-                    # Only update cache if we have more data than before
-                    current = self.token_cache.get(symbol, {})
-                    
-                    # Decide if we should update the cache
-                    should_update = False
-                    
-                    # If we don't have this token yet, definitely add it
-                    if symbol not in self.token_cache:
-                        should_update = True
-                    # If we have better data (address or name present), update it
-                    elif (not current.get("address") and processed_token.get("address")) or \
-                         (not current.get("name") and processed_token.get("name")):
-                        should_update = True
-                    # If we have a price and the current one doesn't
-                    elif current.get("price", 0) == 0 and processed_token.get("price", 0) > 0:
-                        should_update = True
-                        
-                    if should_update:
-                        self.token_cache[symbol] = processed_token
-                        tokens_loaded += 1
-                        
-                # Always cache by address if available, regardless of symbol
-                address = processed_token.get("address", "")
-                if address and address.strip():
-                    # Add to address-keyed cache
-                    self.token_cache[address] = processed_token
-                    address_cached += 1
-                    
-                    # Update stats
-                    if processed_token.get("name"):
-                        tokens_with_name += 1
-                    if processed_token.get("price", 0) > 0:
-                        tokens_with_price += 1
-                    tokens_with_address += 1
-            
-            # Report results including address-cached tokens
-            logger.info(f"Successfully preloaded {tokens_loaded} tokens by symbol from API")
-            logger.info(f"Additionally cached {address_cached} tokens by address")
-            logger.info(f"Token data completeness: {tokens_with_address}/{tokens_loaded+address_cached} have addresses, " + 
-                       f"{tokens_with_name}/{tokens_loaded+address_cached} have names, {tokens_with_price}/{tokens_loaded+address_cached} have prices")
-            
-            # Start a background thread to fetch prices for the most common tokens
-            # This prevents blocking the UI during initial load
-            self._start_background_price_fetching()
-            
-        except Exception as e:
-            logger.error(f"Error preloading tokens from API: {str(e)}")
-            # Fall back to default tokens which were already loaded
-            
-    def _start_background_price_fetching(self):
-        """Start a background thread to fetch token prices without blocking the UI"""
-        try:
-            # Try to fetch any missing common tokens directly first
-            self._fetch_missing_common_tokens()
-            
-            # Create a comprehensive list of priority tokens to fetch prices for
-            priority_tokens = [
-                "SOL", "USDC", "USDT", "ETH", "BTC", "BONK", "RAY", "ORCA", 
-                "MSOL", "STSOL", "JUP", "JUPY", "ATLAS", "UXD", "HPsQ", 
-                "SRM", "SAMO", "SLND", "mSOL", "stSOL", "MNGO", "COPE",
-                "LDO", "RNDR", "FIDA", "ATLA", "POLI"
-            ]
-            
-            # Start a background thread to fetch prices
-            logger.info("Starting background thread for token price fetching")
-            
-            def fetch_prices_background():
-                logger.info(f"Background price fetching started for {len(priority_tokens)} priority tokens")
-                for symbol in priority_tokens:
-                    if symbol in self.token_cache:
-                        try:
-                            # Check if we already have a price
-                            if self.token_cache[symbol].get("price", 0) > 0:
-                                logger.info(f"Token {symbol} already has price: {self.token_cache[symbol].get('price')}")
-                                continue
-                                
-                            # Fetch price in background
-                            price = None
-                            
-                            # Try to get price from CoinGecko if available
-                            if coingecko_api is not None:
-                                # First try by coingecko_id if available
-                                coingecko_id = self.token_cache[symbol].get("coingecko_id")
-                                if coingecko_id:
-                                    try:
-                                        logger.info(f"Fetching price for {symbol} using CoinGecko ID: {coingecko_id}")
-                                        result = coingecko_api.get_price([coingecko_id], "usd")
-                                        if result and coingecko_id in result:
-                                            price = result[coingecko_id].get("usd", 0)
-                                            logger.info(f"Retrieved price for {symbol} using ID {coingecko_id}: {price}")
-                                        else:
-                                            logger.warning(f"No price data returned for {symbol} with ID {coingecko_id}")
-                                    except Exception as e:
-                                        logger.warning(f"Error fetching price by ID for {symbol}: {e}")
-                                
-                                # If that didn't work, try by symbol
-                                if not price or price == 0:
-                                    logger.info(f"Trying to fetch price for {symbol} by symbol")
-                                    try:
-                                        price = coingecko_api.get_token_price_by_symbol(symbol)
-                                    except Exception as e:
-                                        logger.warning(f"Error fetching price by symbol for {symbol}: {e}")
-                                
-                                # If still no price, try by address
-                                if (not price or price == 0) and self.token_cache[symbol].get("address"):
-                                    address = self.token_cache[symbol].get("address")
-                                    if address:  # Check if address is not None
-                                        logger.info(f"Trying to fetch price for {symbol} by address: {address}")
-                                        try:
-                                            price = coingecko_api.get_token_price_by_address(address)
-                                        except Exception as e:
-                                            logger.warning(f"Error fetching price by address for {symbol}: {e}")
-                            
-                            # Update token cache with price if found
-                            if price and price > 0:
-                                logger.info(f"Updated price for {symbol} in background: {price}")
-                                self.token_cache[symbol]["price"] = price
-                                self.token_cache[symbol]["price_source"] = "coingecko"
-                                self.token_cache[symbol]["last_updated"] = datetime.now().isoformat()
-                                
-                                # If token is also cached by address, update that cache entry too
-                                address = self.token_cache[symbol].get("address")
-                                if address and address in self.token_cache:
-                                    self.token_cache[address]["price"] = price
-                                    self.token_cache[address]["price_source"] = "coingecko"
-                                    self.token_cache[address]["last_updated"] = datetime.now().isoformat()
-                            
-                            # Add a larger delay to avoid rate limits
-                            time.sleep(3)
-                            
-                        except Exception as e:
-                            logger.warning(f"Error fetching price for {symbol}: {str(e)}")
-                
-                logger.info("Background price fetching completed")
-            
-            # Start the background thread
-            price_thread = threading.Thread(target=fetch_prices_background, daemon=True)
-            price_thread.start()
-            
-        except Exception as e:
-            logger.error(f"Error starting background price fetching: {str(e)}")
-            
-    def _fetch_missing_common_tokens(self):
-        """Fetch any missing data for common tokens directly"""
-        # Expanded list of common tokens to ensure better coverage
-        common_tokens = [
-            "SOL", "USDC", "USDT", "ETH", "BTC", "MSOL", "BONK", "RAY", "ORCA", 
-            "STSOL", "ATLA", "POLI", "JSOL", "JUPY", "HPSQ", "MNGO", "SAMO", 
-            "7I5K", "7KBN", "9VMJ", "BSO1", "FWZ2", "J1TO", "MANG", "MPLU",
-            "mSOL", "stSOL", "JUP", "SRM", "ATLAS", "UXD", "SLND", "COPE",
-            "LDO", "RNDR", "FIDA" 
-        ]
+    def _get_address_from_defi_api(self, symbol: str) -> Optional[str]:
+        """Get token address from DeFi API"""
+        if not self.defi_api:
+            return None
         
-        logger.info(f"Fetching missing data for {len(common_tokens)} common tokens")
-        
-        # First try to get them all at once from the API
         try:
-            all_tokens = self.api_client._make_request("tokens")
-            if all_tokens and isinstance(all_tokens, list):
-                for token in all_tokens:
-                    symbol = token.get("symbol", "").upper()
-                    if symbol and symbol in common_tokens:
-                        processed = self._process_token_data(token)
-                        self.token_cache[symbol] = processed
-                        
-                        # Also cache by address if available for direct lookups
-                        address = processed.get("address", "")
-                        if address and address.strip():
-                            self.token_cache[address] = processed
-                            
-                        logger.info(f"Fetched common token from bulk API: {symbol}")
+            # Try to get token info directly if possible
+            token_info = self.defi_api.get_token_information(symbol)
+            if token_info and 'address' in token_info:
+                address = token_info['address']
+                logger.info(f"Retrieved address for {symbol} from DeFi API: {address}")
+                return address
+            
+            # If direct lookup fails, try to find the token in pool data
+            pools_response = self.defi_api.get_all_pools(token=symbol, limit=20)
+            pools = pools_response.get('pools', [])
+            
+            if pools:
+                logger.info(f"Found {len(pools)} pools that might contain token {symbol}")
+                
+                # Look for the token in the pools' tokens
+                for pool in pools:
+                    tokens = pool.get('tokens', [])
+                    for token in tokens:
+                        if token.get('symbol', '').upper() == symbol.upper() and 'address' in token:
+                            address = token['address']
+                            logger.info(f"Found address for {symbol} in pool data: {address}")
+                            return address
+            
+            logger.warning(f"Token {symbol} not found in API")
+            return None
         except Exception as e:
-            logger.warning(f"Error fetching all tokens: {e}")
-        
-        # Now try to fetch any remaining tokens individually
-        for symbol in common_tokens:
-            if symbol not in self.token_cache or not self.token_cache[symbol].get("address"):
-                try:
-                    # Try to fetch directly by symbol
-                    token_data = self.api_client._make_request(f"tokens/{symbol}")
-                    if token_data:
-                        processed = self._process_token_data(token_data)
-                        self.token_cache[symbol] = processed
-                        
-                        # Also cache by address if available for direct lookups
-                        address = processed.get("address", "")
-                        if address and address.strip():
-                            self.token_cache[address] = processed
-                            
-                        logger.info(f"Directly fetched missing token: {symbol}")
-                except Exception as e:
-                    logger.warning(f"Could not fetch missing token {symbol}: {e}")
+            logger.error(f"Error getting address from DeFi API for {symbol}: {e}")
+            return None
     
-    def _init_default_tokens(self):
-        """Initialize default token data for common tokens."""
-        logger.info("Initializing default token data")
-        
-        # Default token data for common tokens
-        default_tokens = {
-            "SOL": {
-                "symbol": "SOL",
-                "name": "Solana",
-                "address": "So11111111111111111111111111111111111111112",
-                "decimals": 9,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
-                "coingecko_id": "solana",
-                "price": 0,   # Price will be fetched from CoinGecko
-                "price_source": "coingecko",  # Force CoinGecko as source
-                "last_updated": datetime.now().isoformat(),
-            },
-            "USDC": {
-                "symbol": "USDC",
-                "name": "USD Coin",
-                "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-                "decimals": 6,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
-                "coingecko_id": "usd-coin",
-                "price": 1.0,
-                "last_updated": datetime.now().isoformat(),
-            },
-            "BONK": {
-                "symbol": "BONK",
-                "name": "Bonk",
-                "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
-                "decimals": 5,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263/logo.png",
-                "coingecko_id": "bonk",
-                "price": 0,
-                "last_updated": datetime.now().isoformat(),
-            },
-            "ORCA": {
-                "symbol": "ORCA",
-                "name": "Orca",
-                "address": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
-                "decimals": 6,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE/logo.png",
-                "coingecko_id": "orca",
-                "price": 0,
-                "last_updated": datetime.now().isoformat(),
-            },
-            "RAY": {
-                "symbol": "RAY",
-                "name": "Raydium",
-                "address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
-                "decimals": 6,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R/logo.png",
-                "coingecko_id": "raydium",
-                "price": 0,
-                "last_updated": datetime.now().isoformat(),
-            },
-            "MSOL": {
-                "symbol": "MSOL",
-                "name": "Marinade Staked SOL",
-                "address": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
-                "decimals": 9,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So/logo.png",
-                "coingecko_id": "marinade-staked-sol",
-                "price": 0,
-                "last_updated": datetime.now().isoformat(),
-            },
-            "STSOL": {
-                "symbol": "STSOL",
-                "name": "Lido Staked SOL",
-                "address": "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj",
-                "decimals": 9,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj/logo.png",
-                "coingecko_id": "lido-staked-sol",
-                "price": 0,
-                "last_updated": datetime.now().isoformat(),
-            },
-            "ETH": {
-                "symbol": "ETH",
-                "name": "Ethereum",
-                "address": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
-                "decimals": 8,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs/logo.png",
-                "coingecko_id": "ethereum",
-                "price": 0,
-                "last_updated": datetime.now().isoformat(),
-            },
-            "ATLAS": {
-                "symbol": "ATLAS",
-                "name": "Star Atlas",
-                "address": "ATLASXmbPQxBUYbxPsV97usA3fPQYEqzQBUHgiFCUsXx",
-                "decimals": 8,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/ATLASXmbPQxBUYbxPsV97usA3fPQYEqzQBUHgiFCUsXx/logo.png",
-                "coingecko_id": "star-atlas",
-                "price": 0,
-                "last_updated": datetime.now().isoformat(),
-            },
-            "UXD": {
-                "symbol": "UXD",
-                "name": "UXD Stablecoin",
-                "address": "7kbnvuGBxxj8AG9qp8Scn56muWGaRaFqxg1FsRp3PaFT",
-                "decimals": 6,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/7kbnvuGBxxj8AG9qp8Scn56muWGaRaFqxg1FsRp3PaFT/logo.png",
-                "coingecko_id": "uxd-stablecoin",
-                "price": 1.0,
-                "last_updated": datetime.now().isoformat(),
-            },
-            "ETH": {
-                "symbol": "ETH",
-                "name": "Wrapped Ethereum (Sollet)",
-                "address": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
-                "decimals": 8,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs/logo.png",
-                "coingecko_id": "ethereum",
-                "price": 0,
-                "last_updated": datetime.now().isoformat(),
-            },
-            "BTC": {
-                "symbol": "BTC",
-                "name": "Wrapped Bitcoin (Sollet)",
-                "address": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
-                "decimals": 6,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E/logo.png",
-                "coingecko_id": "bitcoin",
-                "price": 0,
-                "last_updated": datetime.now().isoformat(),
-            },
-            "USDT": {
-                "symbol": "USDT",
-                "name": "USDT",
-                "address": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-                "decimals": 6,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.png",
-                "coingecko_id": "tether",
-                "price": 1.0,
-                "last_updated": datetime.now().isoformat(),
-            },
-        }
-        
-        # Add default tokens to cache
-        for symbol, token_data in default_tokens.items():
-            self.token_cache[symbol] = token_data
+    def _get_address_from_coingecko(self, symbol: str) -> Optional[str]:
+        """Get token address from CoinGecko"""
+        try:
+            # First, get the CoinGecko ID for this symbol
+            coin_id = self.coingecko.get_token_id(symbol)
+            if not coin_id:
+                return None
             
-            # Also cache by address for direct lookups
-            address = token_data.get("address", "")
-            if address and address.strip():
-                self.token_cache[address] = token_data
-        
-        logger.info(f"Initialized default token cache with {len(default_tokens)} tokens")
+            # Then get detailed token info
+            token_details = self.coingecko.get_token_details(coin_id)
+            if not token_details:
+                return None
+            
+            # Look for Solana platform addresses
+            platforms = token_details.get('platforms', {})
+            if 'solana' in platforms and platforms['solana']:
+                address = platforms['solana']
+                logger.info(f"Retrieved Solana address for {symbol} from CoinGecko: {address}")
+                return address
+            
+            return None
+        except Exception as e:
+            logger.error(f"Error getting address from CoinGecko for {symbol}: {e}")
+            return None
     
-    def get_token_data(self, token_symbol: str, force_refresh: bool = False) -> Dict[str, Any]:
+    def get_token_by_address(self, address: str) -> Dict[str, Any]:
         """
-        Get token data by symbol.
+        Get token information by address
         
         Args:
-            token_symbol: Token symbol (e.g., "SOL", "USDC")
-            force_refresh: Force a refresh from the API
+            address: Token contract address
             
         Returns:
-            Token data or fallback data if not found
+            Dictionary with token information
         """
-        token_symbol = token_symbol.upper()
+        # Check if we have the data cached
+        if address in self.token_address_data:
+            return self.token_address_data[address]
         
-        # Skip processing for UNKNOWN tokens to reduce API calls for non-existent tokens
-        if token_symbol == "UNKNOWN":
-            return {
-                "symbol": "UNKNOWN",
-                "name": "Unknown Token",
-                "address": "",
-                "decimals": 0,
-                "logo": "",
-                "price": 0,
-                "last_updated": datetime.now().isoformat(),
-            }
-        
-        # Update stats
-        self.stats["total_requests"] += 1
-        
-        # Check cache first if not forcing refresh
-        if not force_refresh and token_symbol in self.token_cache:
-            token_data = self.token_cache[token_symbol]
-            cache_time = datetime.fromisoformat(token_data.get("last_updated", "2020-01-01T00:00:00"))
+        # Try to get from DeFi API first
+        token_data = self._get_token_by_address_from_defi_api(address)
+        if token_data:
+            self.token_address_data[address] = token_data
             
-            # Check if cache is still valid
-            if (datetime.now() - cache_time).total_seconds() < self.token_cache_ttl:
-                # Special case for SOL - validate the price
-                if token_symbol == "SOL" and token_data.get("price", 0) > 1000:  # Obviously wrong SOL price
-                    logger.warning(f"Detected incorrect SOL price in cache: ${token_data.get('price')}. Refreshing from CoinGecko.")
-                    # Try to get correct price from CoinGecko
-                    try:
-                        if coingecko_api is not None:
-                            price_data = coingecko_api.get_price(["solana"], "usd")
-                            if price_data and "solana" in price_data and "usd" in price_data["solana"]:
-                                corrected_price = price_data["solana"]["usd"]
-                                logger.info(f"Retrieved corrected SOL price from CoinGecko: ${corrected_price}")
-                                token_data["price"] = corrected_price
-                                token_data["price_source"] = "coingecko"
-                                token_data["last_updated"] = datetime.now().isoformat()
-                                self.token_cache["SOL"] = token_data  # Update cache with correct price
-                                # Also update the cache by address
-                                sol_address = "So11111111111111111111111111111111111111112"
-                                if sol_address in self.token_cache:
-                                    self.token_cache[sol_address]["price"] = corrected_price
-                                    self.token_cache[sol_address]["price_source"] = "coingecko"
-                                    self.token_cache[sol_address]["last_updated"] = datetime.now().isoformat()
-                    except Exception as e:
-                        logger.error(f"Error fetching corrected SOL price from CoinGecko: {e}")
-                
-                self.stats["cache_hits"] += 1
-                logger.debug(f"Token {token_symbol} found in cache")
-                return token_data
+            # Also store by symbol if available
+            if 'symbol' in token_data:
+                symbol = token_data['symbol'].upper()
+                self._update_token_data(symbol, token_data)
+            
+            return token_data
         
-        # Cache miss or forced refresh
-        self.stats["cache_misses"] += 1
+        # If that fails, try to get from CoinGecko
+        token_data = self._get_token_by_address_from_coingecko(address)
+        if token_data:
+            self.token_address_data[address] = token_data
+            
+            # Also store by symbol if available
+            if 'symbol' in token_data:
+                symbol = token_data['symbol'].upper()
+                self._update_token_data(symbol, token_data)
+            
+            return token_data
+        
+        # Return empty data if nothing found
+        logger.warning(f"Could not find token with address: {address}")
+        return {}
+    
+    def _get_token_by_address_from_defi_api(self, address: str) -> Dict[str, Any]:
+        """Get token info by address from DeFi API"""
+        if not self.defi_api:
+            return {}
         
         try:
-            # First try to get the specific token (for backward compatibility)
-            logger.info(f"Making API request for token: {token_symbol}")
-            try:
-                token_data = self.api_client._make_request(f"tokens/{token_symbol}")
-                
-                if token_data:
-                    # Process the token data
-                    processed_data = self._process_token_data(token_data)
-                    
-                    # Update the cache
-                    processed_data["last_updated"] = datetime.now().isoformat()
-                    self.token_cache[token_symbol] = processed_data
-                    
-                    # Also cache by address if available for faster lookups
-                    token_address = processed_data.get("address", "")
-                    if token_address:
-                        self.token_cache[token_address] = processed_data
-                    
-                    self.stats["last_update"] = datetime.now().isoformat()
-                    
-                    return processed_data
-            except Exception as direct_error:
-                logger.info(f"Token {token_symbol} not found via direct lookup, trying token list")
+            # The DeFi API typically doesn't support lookup by address directly
+            # So we need to find the token in the pools
+            # Note: This is inefficient but a workaround for the API limitations
             
-            # If direct token lookup fails, try fetching from the list (for backward compatibility)
-            try:
-                # Get all tokens and find the one we want
-                all_tokens = self.api_client._make_request("tokens")
-                
-                if isinstance(all_tokens, list):
-                    # Find the token in the list
-                    for token in all_tokens:
-                        if token.get("symbol", "").upper() == token_symbol:
-                            # Found the token in the list
-                            processed_data = self._process_token_data(token)
-                            
-                            # Update the cache
-                            processed_data["last_updated"] = datetime.now().isoformat()
-                            self.token_cache[token_symbol] = processed_data
-                            
-                            # Also cache by address if available for faster lookups
-                            token_address = processed_data.get("address", "")
-                            if token_address:
-                                self.token_cache[token_address] = processed_data
-                            
-                            self.stats["last_update"] = datetime.now().isoformat()
-                            logger.info(f"Found token {token_symbol} in tokens list")
-                            
-                            return processed_data
-            except Exception as list_error:
-                logger.warning(f"Failed to get token {token_symbol} from tokens list: {str(list_error)}")
-                
-            # For new API, try to extract token data from pools
-            try:
-                # Try to find pools that might contain this token
-                pools = self.api_client.get_pools_by_token(token_symbol)
-                
-                # Extract token data from pools
-                if pools and isinstance(pools, list):
-                    # Log found pools
-                    logger.info(f"Found {len(pools)} pools that might contain token {token_symbol}")
-                    
-                    # Look for our token in pool token pairs
-                    for pool in pools:
-                        # First check if we have tokens array and get our token
-                        if 'tokens' in pool and isinstance(pool['tokens'], list):
-                            for token in pool['tokens']:
-                                # Check if this is our token
-                                if isinstance(token, dict) and token.get('symbol', '').upper() == token_symbol:
-                                    # Found our token!
-                                    processed_data = self._process_token_data(token)
-                                    
-                                    # Add timestamp
-                                    processed_data["last_updated"] = datetime.now().isoformat()
-                                    
-                                    # Update cache
-                                    self.token_cache[token_symbol] = processed_data
-                                    
-                                    # Also cache by address if available
-                                    token_address = processed_data.get("address", "")
-                                    if token_address:
-                                        self.token_cache[token_address] = processed_data
-                                    
-                                    self.stats["last_update"] = datetime.now().isoformat()
-                                    logger.info(f"Extracted token {token_symbol} data from pool tokens")
-                                    
-                                    return processed_data
-                        
-                        # Otherwise try to get from tokenPair and mint addresses
-                        if 'tokenPair' in pool and '/' in pool['tokenPair']:
-                            token1_symbol, token2_symbol = pool['tokenPair'].split('/')
-                            
-                            # Check if our token is token1
-                            if token1_symbol.upper() == token_symbol:
-                                # Create and return token data
-                                token_data = {
-                                    'symbol': token1_symbol,
-                                    'name': self.api_client._get_token_name(token1_symbol),
-                                    'address': pool.get('baseMint', ''),
-                                    'decimals': 9  # Default for Solana
-                                }
-                                
-                                processed_data = self._process_token_data(token_data)
-                                processed_data["last_updated"] = datetime.now().isoformat()
-                                
-                                # Update cache
-                                self.token_cache[token_symbol] = processed_data
-                                
-                                # Also cache by address if available
-                                token_address = processed_data.get("address", "")
-                                if token_address:
-                                    self.token_cache[token_address] = processed_data
-                                
-                                self.stats["last_update"] = datetime.now().isoformat()
-                                logger.info(f"Extracted token {token_symbol} data from pool token pair (as token1)")
-                                
-                                return processed_data
-                            
-                            # Check if our token is token2
-                            elif token2_symbol.upper() == token_symbol:
-                                # Create and return token data
-                                token_data = {
-                                    'symbol': token2_symbol,
-                                    'name': self.api_client._get_token_name(token2_symbol),
-                                    'address': pool.get('quoteMint', ''),
-                                    'decimals': 6 if token2_symbol == 'USDC' else 9  # USDC has 6 decimals
-                                }
-                                
-                                processed_data = self._process_token_data(token_data)
-                                processed_data["last_updated"] = datetime.now().isoformat()
-                                
-                                # Update cache
-                                self.token_cache[token_symbol] = processed_data
-                                
-                                # Also cache by address if available
-                                token_address = processed_data.get("address", "")
-                                if token_address:
-                                    self.token_cache[token_address] = processed_data
-                                
-                                self.stats["last_update"] = datetime.now().isoformat()
-                                logger.info(f"Extracted token {token_symbol} data from pool token pair (as token2)")
-                                
-                                return processed_data
-            except Exception as pool_error:
-                logger.warning(f"Failed to extract token {token_symbol} from pools: {str(pool_error)}")
+            # Search in all pools (this is relatively expensive)
+            pools_response = self.defi_api.get_all_pools(limit=50)
+            pools = pools_response.get('pools', [])
             
-            # All attempts failed
-            logger.warning(f"Token {token_symbol} not found in API")
-            self.stats["api_errors"] += 1
+            for pool in pools:
+                tokens = pool.get('tokens', [])
+                for token in tokens:
+                    if token.get('address', '') == address:
+                        # Found a match
+                        result = {
+                            'symbol': token.get('symbol', ''),
+                            'name': token.get('name', ''),
+                            'address': address,
+                            'price': token.get('price', 0),
+                            'decimals': token.get('decimals', 9)
+                        }
+                        logger.info(f"Found token with address {address} in pools: {result['symbol']}")
+                        return result
+            
+            logger.warning(f"Token with address {address} not found in DeFi API")
+            return {}
         except Exception as e:
-            logger.error(f"Error retrieving token data for {token_symbol}: {str(e)}")
-            self.stats["api_errors"] += 1
-        
-        # If we get here, API request failed or returned invalid data
-        if token_symbol in self.token_cache:
-            # Use cached data even if expired
-            logger.info(f"Using cached token data for {token_symbol}")
-            return self.token_cache[token_symbol]
-        
-        # Return basic info if token not found
-        return {
-            "symbol": token_symbol,
-            "name": f"{token_symbol} Token",
-            "address": "",
-            "decimals": 6,  # Default to 6 decimals for Solana SPL tokens
-            "logo": "",
-            "price": 0,
-            "chain": "solana",
-            "last_updated": datetime.now().isoformat(),
-        }
+            logger.error(f"Error searching for token address {address} in DeFi API: {e}")
+            return {}
     
-    def get_token_by_address(self, address: str, force_refresh: bool = False) -> Dict[str, Any]:
-        """
-        Get token data by address.
-        
-        Args:
-            address: Token address
-            force_refresh: Force a refresh from the API
+    def _get_token_by_address_from_coingecko(self, address: str) -> Dict[str, Any]:
+        """Get token info by address from CoinGecko"""
+        try:
+            # First, get the CoinGecko ID for this address
+            coin_id = self.coingecko.get_token_id_by_address(address)
+            if not coin_id:
+                return {}
             
-        Returns:
-            Token data or a fallback structure if not found
-        """
-        if not address or not isinstance(address, str):
-            return {
-                "symbol": "UNKNOWN",
-                "name": "Unknown Token",
-                "address": "",
-                "decimals": 6,  # Default to 6 decimals for Solana SPL tokens
-                "logo": "",
-                "price": 0,
-                "chain": "solana",
-                "last_updated": datetime.now().isoformat(),
+            # Then get detailed token info
+            token_details = self.coingecko.get_token_details(coin_id)
+            if not token_details:
+                return {}
+            
+            # Extract basic token info
+            result = {
+                'symbol': token_details.get('symbol', '').upper(),
+                'name': token_details.get('name', ''),
+                'address': address,
+                'decimals': 9  # Default for Solana
             }
             
-        # Update stats
-        self.stats["total_requests"] += 1
+            # Get price
+            market_data = token_details.get('market_data', {})
+            if 'current_price' in market_data and 'usd' in market_data['current_price']:
+                result['price'] = market_data['current_price']['usd']
             
-        # First check if address is directly in cache (from our enhanced preloading)
-        if not force_refresh and address in self.token_cache:
-            self.stats["cache_hits"] += 1
-            
-            # Track direct address cache hits separately for analytics
-            if "direct_address_hits" not in self.stats:
-                self.stats["direct_address_hits"] = 0
-            self.stats["direct_address_hits"] += 1
-            
-            return self.token_cache[address]
-            
-        # Then check by comparing addresses in cache
-        if not force_refresh:
-            for symbol, token_data in self.token_cache.items():
-                if token_data.get("address", "").lower() == address.lower():
-                    self.stats["cache_hits"] += 1
-                    # Also add to cache with address as key for future lookups
-                    self.token_cache[address] = token_data
-                    return token_data
-        
-        # Cache miss, increment stats
-        self.stats["cache_misses"] += 1
-        
-        # If not in cache or forcing refresh, try various API options
-        try:
-            logger.info(f"Making API request for token by address: {address}")
-            
-            # First try direct API lookup (backward compatibility for older APIs)
-            try:
-                token_data = self.api_client._make_request(f"tokens/address/{address}")
-                
-                if token_data:
-                    # Process the token data
-                    processed_data = self._process_token_data(token_data)
-                    
-                    # Update the cache
-                    processed_data["last_updated"] = datetime.now().isoformat()
-                    symbol = processed_data.get("symbol", "UNKNOWN")
-                    self.token_cache[symbol] = processed_data
-                    
-                    # Also cache by address for direct lookups
-                    self.token_cache[address] = processed_data
-                    
-                    self.stats["last_update"] = datetime.now().isoformat()
-                    logger.info(f"Found token with address {address} via direct lookup")
-                    
-                    return processed_data
-            except Exception as direct_error:
-                logger.info(f"Token with address {address} not found via direct lookup, trying token list")
-            
-            # If direct lookup fails, try searching in all tokens list (backward compatibility)
-            try:
-                # Get all tokens and search by address
-                all_tokens = self.api_client._make_request("tokens")
-                
-                if isinstance(all_tokens, list):
-                    for token in all_tokens:
-                        if token.get("address", "").lower() == address.lower():
-                            # Found the token in the list
-                            processed_data = self._process_token_data(token)
-                            
-                            # Update the cache
-                            processed_data["last_updated"] = datetime.now().isoformat()
-                            symbol = processed_data.get("symbol", "UNKNOWN")
-                            self.token_cache[symbol] = processed_data
-                            
-                            # Also cache by address for faster lookups next time
-                            self.token_cache[address] = processed_data
-                            
-                            self.stats["last_update"] = datetime.now().isoformat()
-                            logger.info(f"Found token with address {address} in tokens list")
-                            
-                            return processed_data
-            except Exception as list_error:
-                logger.warning(f"Failed to get token with address {address} from tokens list: {str(list_error)}")
-            
-            # For new API, try to extract token data from pools
-            try:
-                # Fetch pools data
-                pools = self.api_client.get_pools(limit=50)  # Good sample size
-                
-                if pools and isinstance(pools, list):
-                    logger.info(f"Searching for token with address {address} in pool data ({len(pools)} pools)")
-                    
-                    # Check each pool for matching token addresses
-                    for pool in pools:
-                        # Check baseMint and quoteMint fields
-                        if pool.get('baseMint', '').lower() == address.lower():
-                            # Found as base token
-                            if 'tokenPair' in pool and '/' in pool['tokenPair']:
-                                token1_symbol = pool['tokenPair'].split('/')[0]
-                                
-                                # Create token data
-                                token_data = {
-                                    'symbol': token1_symbol,
-                                    'name': self.api_client._get_token_name(token1_symbol),
-                                    'address': address,
-                                    'decimals': 9  # Default for Solana
-                                }
-                                
-                                processed_data = self._process_token_data(token_data)
-                                processed_data["last_updated"] = datetime.now().isoformat()
-                                
-                                # Update cache by symbol and address
-                                self.token_cache[token1_symbol] = processed_data
-                                self.token_cache[address] = processed_data
-                                
-                                self.stats["last_update"] = datetime.now().isoformat()
-                                logger.info(f"Found token with address {address} as base mint in pool")
-                                
-                                return processed_data
-                                
-                        elif pool.get('quoteMint', '').lower() == address.lower():
-                            # Found as quote token
-                            if 'tokenPair' in pool and '/' in pool['tokenPair']:
-                                token2_symbol = pool['tokenPair'].split('/')[1]
-                                
-                                # Create token data
-                                token_data = {
-                                    'symbol': token2_symbol,
-                                    'name': self.api_client._get_token_name(token2_symbol),
-                                    'address': address,
-                                    'decimals': 6 if token2_symbol == 'USDC' else 9  # USDC has 6 decimals
-                                }
-                                
-                                processed_data = self._process_token_data(token_data)
-                                processed_data["last_updated"] = datetime.now().isoformat()
-                                
-                                # Update cache by symbol and address
-                                self.token_cache[token2_symbol] = processed_data
-                                self.token_cache[address] = processed_data
-                                
-                                self.stats["last_update"] = datetime.now().isoformat()
-                                logger.info(f"Found token with address {address} as quote mint in pool")
-                                
-                                return processed_data
-                        
-                        # Also check tokens array if present
-                        if 'tokens' in pool and isinstance(pool['tokens'], list):
-                            for token in pool['tokens']:
-                                if isinstance(token, dict) and token.get('address', '').lower() == address.lower():
-                                    # Found in tokens array
-                                    processed_data = self._process_token_data(token)
-                                    processed_data["last_updated"] = datetime.now().isoformat()
-                                    
-                                    # Get symbol
-                                    symbol = processed_data.get("symbol", "UNKNOWN")
-                                    
-                                    # Update cache by symbol and address
-                                    self.token_cache[symbol] = processed_data
-                                    self.token_cache[address] = processed_data
-                                    
-                                    self.stats["last_update"] = datetime.now().isoformat()
-                                    logger.info(f"Found token with address {address} in pool tokens array")
-                                    
-                                    return processed_data
-            except Exception as pool_error:
-                logger.warning(f"Failed to find token with address {address} in pools: {str(pool_error)}")
-            
-            # All attempts failed
-            logger.warning(f"Token with address {address} not found in API")
-            self.stats["api_errors"] += 1
-            
+            logger.info(f"Retrieved token info for address {address} from CoinGecko: {result['symbol']}")
+            return result
         except Exception as e:
-            # Catch-all for any unexpected errors in the main try block
-            logger.error(f"Unexpected error fetching token by address {address}: {str(e)}")
-            self.stats["api_errors"] += 1
-        
-        # If we get here, API request failed or returned invalid data
-        # Return a minimal token data structure with the address
-        return {
-            "symbol": "UNKNOWN",
-            "name": "Unknown Token",
-            "address": address,
-            "decimals": 6,  # Default to 6 decimals for Solana SPL tokens
-            "logo": "",
-            "price": 0,
-            "chain": "solana",
-            "last_updated": datetime.now().isoformat(),
-        }
+            logger.error(f"Error getting token details for address {address} from CoinGecko: {e}")
+            return {}
     
-    def get_token_metadata(self, symbol: str) -> Dict[str, Any]:
+    def _update_token_data(self, symbol: str, data: Dict[str, Any]) -> None:
+        """Update the token data cache"""
+        # Normalize symbol
+        symbol = symbol.upper()
+        
+        # Initialize if needed
+        if symbol not in self.token_data:
+            self.token_data[symbol] = {}
+        
+        # Update token data
+        for key, value in data.items():
+            self.token_data[symbol][key] = value
+        
+        # Update timestamp
+        self.last_update_time[symbol] = time.time()
+    
+    def preload_token_data(self, symbols: List[str]) -> None:
         """
-        Get token metadata by symbol.
+        Preload token data for a list of symbols
         
         Args:
-            symbol: Token symbol (e.g., "SOL", "USDC")
-            
-        Returns:
-            Token metadata dictionary with symbol, name, address, etc.
+            symbols: List of token symbols to preload
         """
-        # This method uses get_token_data for consistency
-        return self.get_token_data(token_symbol=symbol)
-    
-    def get_tokens_for_pool(self, pool_data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """
-        Get detailed token data for a pool.
-        
-        Args:
-            pool_data: Pool data with token information
-            
-        Returns:
-            List of enriched token data
-        """
-        tokens = []
-        
-        # Check if the pool already has token data in the tokens array
-        if "tokens" in pool_data and isinstance(pool_data["tokens"], list):
-            pool_tokens = pool_data["tokens"]
-            
-            for token_data in pool_tokens:
-                token_symbol = token_data.get("symbol", "")
-                if token_symbol:
-                    # Get detailed token data
-                    detailed_token = self.get_token_data(token_symbol)
-                    
-                    # Merge with pool token data
-                    merged_token = {**token_data, **detailed_token}
-                    
-                    # Ensure price is included
-                    if "price" not in merged_token or not merged_token["price"]:
-                        merged_token["price"] = token_data.get("price", 0)
-                    
-                    tokens.append(merged_token)
-                else:
-                    # If no symbol, see if we can get by address
-                    token_address = token_data.get("address", "")
-                    if token_address:
-                        detailed_token = self.get_token_by_address(token_address)
-                        tokens.append({**token_data, **detailed_token})
-                    else:
-                        # Just use the original token data
-                        tokens.append(token_data)
-        else:
-            # Fallback to legacy token fields
-            token1_symbol = pool_data.get("token1_symbol", "")
-            token2_symbol = pool_data.get("token2_symbol", "")
-            
-            if token1_symbol:
-                token1_data = self.get_token_data(token1_symbol)
-                token1_data["price"] = pool_data.get("token1_price", 0)
-                tokens.append(token1_data)
-            
-            if token2_symbol:
-                token2_data = self.get_token_data(token2_symbol)
-                token2_data["price"] = pool_data.get("token2_price", 0)
-                tokens.append(token2_data)
-        
-        return tokens
-    
-    def update_pool_token_data(self, pool_data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Update a pool with enhanced token data.
-        
-        Args:
-            pool_data: Pool data to enhance
-            
-        Returns:
-            Enhanced pool data with detailed token information
-        """
-        enhanced_pool = pool_data.copy()
-        
-        # Get enhanced token data
-        tokens = self.get_tokens_for_pool(pool_data)
-        
-        # Update the pool with enhanced token data
-        enhanced_pool["tokens"] = tokens
-        
-        # Update legacy token fields for backward compatibility
-        if len(tokens) > 0:
-            enhanced_pool["token1_symbol"] = tokens[0].get("symbol", enhanced_pool.get("token1_symbol", ""))
-            enhanced_pool["token1_address"] = tokens[0].get("address", enhanced_pool.get("token1_address", ""))
-            enhanced_pool["token1_price"] = tokens[0].get("price", enhanced_pool.get("token1_price", 0))
-            enhanced_pool["token1_decimals"] = tokens[0].get("decimals", enhanced_pool.get("token1_decimals", 0))
-            enhanced_pool["token1_logo"] = tokens[0].get("logo", enhanced_pool.get("token1_logo", ""))
-        
-        if len(tokens) > 1:
-            enhanced_pool["token2_symbol"] = tokens[1].get("symbol", enhanced_pool.get("token2_symbol", ""))
-            enhanced_pool["token2_address"] = tokens[1].get("address", enhanced_pool.get("token2_address", ""))
-            enhanced_pool["token2_price"] = tokens[1].get("price", enhanced_pool.get("token2_price", 0))
-            enhanced_pool["token2_decimals"] = tokens[1].get("decimals", enhanced_pool.get("token2_decimals", 0))
-            enhanced_pool["token2_logo"] = tokens[1].get("logo", enhanced_pool.get("token2_logo", ""))
-        
-        return enhanced_pool
-    
-    def _process_token_data(self, token_data: Any) -> Dict[str, Any]:
-        """
-        Process token data from the API.
-        
-        Args:
-            token_data: Raw token data from the API
-            
-        Returns:
-            Processed token data
-        """
-        if isinstance(token_data, dict):
-            # Extract the symbol with proper validation
-            raw_symbol = token_data.get("symbol", "")
-            # Convert to uppercase and remove any whitespace or unwanted characters
-            symbol = raw_symbol.upper().strip() if raw_symbol else "UNKNOWN"
-            
-            # Get token address from various possible sources
-            address = ""
-            for address_key in ["address", "mint", "tokenAddress", "mintAddress"]:
-                if address_key in token_data and token_data[address_key]:
-                    address = token_data[address_key]
-                    break
-            
-            # Get token name with proper validation and formatting
-            raw_name = token_data.get("name", "")
-            if raw_name:
-                name = raw_name.strip()
-            elif symbol and symbol != "UNKNOWN":
-                # If no name but symbol exists, create a readable name from symbol
-                name = f"{symbol} Token"
-            else:
-                # Last resort fallback
-                name = "Unknown Token"
-            
-            # Get decimal places with validation
+        logger.info(f"Preloading token data for {len(symbols)} symbols")
+        for symbol in symbols:
             try:
-                decimals = int(token_data.get("decimals", 0))
-            except (ValueError, TypeError):
-                # Default to 6 decimals for Solana SPL tokens if value is invalid
-                decimals = 6
+                logger.info(f"Making API request for token: {symbol}")
+                # Get token price (this will automatically cache the token data)
+                self.get_token_price(symbol)
                 
-            # Get price with validation
-            try:
-                price = float(token_data.get("price", 0))
+                # Get token address (this will also cache the address)
+                self.get_token_address(symbol)
                 
-                # Special validation for SOL token - unrealistic prices
-                if symbol == "SOL" and price > 1000:
-                    logger.warning(f"Detected unrealistic SOL price: ${price} - rejecting value")
-                    # Try to get price from CoinGecko directly if available
-                    if coingecko_api is not None:
-                        try:
-                            sol_price = coingecko_api.get_token_price_by_symbol("SOL")
-                            if sol_price and sol_price > 0 and sol_price < 1000:  # Sanity check
-                                logger.info(f"Retrieved corrected SOL price from CoinGecko: ${sol_price}")
-                                price = sol_price
-                            else:
-                                logger.warning(f"CoinGecko returned invalid SOL price: ${sol_price}, using 0")
-                                price = 0
-                        except Exception as e:
-                            logger.error(f"Error fetching SOL price from CoinGecko: {e}")
-                            price = 0
-                    else:
-                        price = 0
-            except (ValueError, TypeError):
-                price = 0
-                
-            # Extract token data from the API response
-            processed = {
-                "symbol": symbol,
-                "name": name,
-                "address": address,
-                "decimals": decimals,
-                "logo": token_data.get("logoURI", token_data.get("logo", "")),
-                "price": price,
-                "price_source": token_data.get("price_source", "defi_api"),
-                "coingecko_id": token_data.get("coingeckoId", ""),
-                "last_updated": datetime.now().isoformat(),
-                "id": token_data.get("id", 0),  # Add token ID from the API
-                "active": bool(token_data.get("active", True)),
-            }
-            
-            # Add any additional fields from the API
-            for key, value in token_data.items():
-                if key not in processed:
-                    processed[key] = value
-            
-            # Always prefer CoinGecko for token prices, regardless of whether a price exists
-            # This ensures we're using the most accurate and reliable price source
-            symbol = processed.get("symbol", "").upper()
-            if symbol and symbol != "UNKNOWN":
-                try:
-                    # Handle special token cases
-                    # For MSOL and STSOL, add special handling since these are common problematic tokens
-                    if symbol in ["MSOL", "mSOL"]:
-                        # Set explicit coingecko_id for Marinade Staked SOL
-                        processed["coingecko_id"] = "marinade-staked-sol"
-                        logger.info(f"Using explicit CoinGecko ID mapping for {symbol}: marinade-staked-sol")
-                        # Add to CoinGecko mappings
-                        if coingecko_api is not None:
-                            coingecko_api.add_token_mapping(symbol, "marinade-staked-sol")
-                    elif symbol in ["STSOL", "stSOL"]:
-                        # Set explicit coingecko_id for Lido Staked SOL
-                        processed["coingecko_id"] = "lido-staked-sol"
-                        logger.info(f"Using explicit CoinGecko ID mapping for {symbol}: lido-staked-sol")
-                        # Add to CoinGecko mappings
-                        if coingecko_api is not None:
-                            coingecko_api.add_token_mapping(symbol, "lido-staked-sol")
-                    
-                    # Skip CoinGecko if API client is not available
-                    if coingecko_api is None:
-                        logger.warning(f"CoinGecko API not available, using existing price for {symbol}")
-                        # Keep existing price
-                    else:
-                        price = None
-                        # Try with CoinGecko ID first if available
-                        coingecko_id = processed.get("coingecko_id")
-                        
-                        if coingecko_id:
-                            # Use the ID directly if available
-                            logger.info(f"Fetching price for {symbol} using CoinGecko ID: {coingecko_id}")
-                            result = coingecko_api.get_price([coingecko_id], "usd")
-                            if result and coingecko_id in result:
-                                price = result[coingecko_id].get("usd", 0)
-                                logger.info(f"Retrieved price for {symbol} using coingecko_id {coingecko_id}: {price}")
-                                
-                                # Add successful mapping to CoinGecko cache
-                                coingecko_api.add_token_mapping(symbol, coingecko_id)
-                                
-                                # Add address mapping if available
-                                if processed.get("address"):
-                                    coingecko_api.add_address_mapping(processed.get("address"), coingecko_id)
-                            else:
-                                logger.warning(f"No price data returned for {symbol} with ID {coingecko_id}")
-                        
-                        # If no price from ID, try by symbol
-                        if not price or price == 0:
-                            logger.info(f"Fetching price for {symbol} from CoinGecko by symbol")
-                            price = coingecko_api.get_token_price_by_symbol(symbol)
-                            if price and price > 0:
-                                logger.info(f"Retrieved price for {symbol} by symbol lookup: {price}")
-                                
-                                # Try to get the ID that was used for this symbol
-                                token_id = coingecko_api.get_token_id(symbol)
-                                if token_id:
-                                    # Add address mapping if available
-                                    if processed.get("address"):
-                                        coingecko_api.add_address_mapping(processed.get("address"), token_id)
-                        
-                        # If still no price, try by address
-                        if (not price or price == 0) and processed.get("address"):
-                            address = processed.get("address")
-                            if address and isinstance(address, str):
-                                logger.info(f"Fetching price for {symbol} from CoinGecko by address: {address}")
-                                price = coingecko_api.get_token_price_by_address(address)
-                                if price and price > 0:
-                                    logger.info(f"Retrieved price for {symbol} by address lookup: {price}")
-                                    
-                                    # Try to get the token ID used for this address
-                                    if hasattr(coingecko_api, 'address_to_id') and address.lower() in coingecko_api.address_to_id:
-                                        token_id = coingecko_api.address_to_id[address.lower()]
-                                        coingecko_api.add_token_mapping(symbol, token_id)
-                    
-                        # Special case for staked SOL tokens: if price still not available, 
-                        # use SOL price and slightly adjust it
-                        if (not price or price == 0) and symbol in ["MSOL", "mSOL", "STSOL", "stSOL"]:
-                            logger.info(f"Trying to estimate {symbol} price based on SOL price")
-                            sol_price = 0
-                            
-                            # Try to get SOL price from cache or API
-                            if "SOL" in self.token_cache and self.token_cache["SOL"].get("price", 0) > 0 and self.token_cache["SOL"].get("price", 0) < 1000:
-                                sol_price = self.token_cache["SOL"].get("price", 0)
-                                logger.info(f"Using cached SOL price for {symbol} estimation: {sol_price}")
-                            else:
-                                try:
-                                    # Only fetch SOL price if we're not in a cooldown period
-                                    if not hasattr(coingecko_api, 'rate_limited_until') or time.time() >= coingecko_api.rate_limited_until:
-                                        sol_price_value = coingecko_api.get_token_price_by_symbol("SOL")
-                                        if sol_price_value and sol_price_value > 0:
-                                            sol_price = sol_price_value
-                                            logger.info(f"Using fresh SOL price for {symbol} estimation: {sol_price}")
-                                except Exception as e:
-                                    logger.warning(f"Error fetching SOL price for estimation: {e}")
-                                
-                            # Apply appropriate multiplier based on token
-                            if sol_price and isinstance(sol_price, (int, float)) and sol_price > 0:
-                                if symbol in ["MSOL", "mSOL"]:
-                                    price = sol_price * 1.08  # MSOL typically has ~8% premium
-                                    logger.info(f"Estimated MSOL price from SOL: {price}")
-                                elif symbol in ["STSOL", "stSOL"]:
-                                    price = sol_price * 1.06  # STSOL typically has ~6% premium
-                                    logger.info(f"Estimated STSOL price from SOL: {price}")
-                        
-                        # Update price if found
-                        if price is not None and price > 0:
-                            processed["price"] = price
-                            processed["price_source"] = "coingecko"
-                            logger.info(f"Updated price for {symbol} from CoinGecko: {price}")
-                
-                except Exception as e:
-                    logger.warning(f"Error getting price from CoinGecko for {symbol}: {str(e)}")
-            
-            return processed
-        elif isinstance(token_data, list) and len(token_data) > 0:
-            # If API returned a list, use the first item
-            return self._process_token_data(token_data[0])
-        else:
-            # Invalid token data
-            return {
-                "symbol": "UNKNOWN",
-                "name": "Unknown Token",
-                "address": "",
-                "decimals": 6,  # Default to 6 decimals for Solana SPL tokens
-                "logo": "",
-                "price": 0,
-                "chain": "solana",
-                "last_updated": datetime.now().isoformat(),
-            }
-    
-    def get_all_tokens(self) -> List[Dict[str, Any]]:
-        """
-        Fetch all tokens from the API.
-        
-        Returns:
-            A list of token data dictionaries.
-        """
-        try:
-            # Track request stats
-            self.stats["total_requests"] += 1
-            self.stats["last_update"] = datetime.now().isoformat()
-            
-            # Make API request to get all tokens
-            all_tokens = self.api_client._make_request("tokens")
-            
-            if not all_tokens or not isinstance(all_tokens, list):
-                logger.warning("Empty or invalid response when fetching all tokens")
-                return list(self.token_cache.values())  # Return cached tokens as fallback
-            
-            # Process each token and add to the cache with proper formatting
-            tokens_loaded = 0
-            for token in all_tokens:
-                # Check if token has required fields
-                if "symbol" in token and "address" in token:
-                    symbol = token.get("symbol", "").upper()
-                    
-                    # Process the token using our standard method for consistency
-                    processed_token = self._process_token_data(token)
-                    
-                    # Add to cache
-                    self.token_cache[symbol] = processed_token
-                    tokens_loaded += 1
-            
-            logger.info(f"Loaded and processed {tokens_loaded} tokens from API")
-            
-            # Return processed tokens from cache to ensure consistent formatting
-            return list(self.token_cache.values())
-            
-        except Exception as e:
-            logger.error(f"Error fetching all tokens: {str(e)}")
-            self.stats["api_errors"] += 1
-            
-            # Return cached tokens as fallback
-            if self.token_cache:
-                return list(self.token_cache.values())
-            return []
-    
-    def get_token_categories(self) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        Get token categorization by DEX or platform.
-        
-        Returns:
-            Dictionary with DEX names as keys and lists of tokens as values
-        """
-        try:
-            # Get all tokens
-            tokens = self.get_all_tokens()
-            
-            # Get supported DEXes from the DeFi Aggregation API
-            dexes = self.api_client._make_request("dexes")
-            
-            # Define default categories if API doesn't return them
-            if not dexes or not isinstance(dexes, list):
-                dexes = [
-                    {"name": "Raydium", "id": "raydium"},
-                    {"name": "Orca", "id": "orca"},
-                    {"name": "Meteora", "id": "meteora"}
-                ]
-            
-            # Initialize categories
-            categories = {dex.get("id", "unknown"): [] for dex in dexes}
-            categories["other"] = []  # For tokens not in specific DEX
-            
-            # Get pools to map tokens to DEXes
-            try:
-                all_pools = []
-                # Try to fetch pools from each DEX
-                for dex in dexes:
-                    dex_id = dex.get("id", "")
-                    if dex_id:
-                        pools = self.api_client._make_request(
-                            f"pools?source={dex_id}&limit=100"
-                        )
-                        if pools and isinstance(pools, list):
-                            all_pools.extend(pools)
+                # Add small delay to avoid rate limiting
+                time.sleep(0.5)
             except Exception as e:
-                logger.error(f"Error fetching pools for token categorization: {str(e)}")
-                all_pools = []
-            
-            # Create a mapping of tokens to DEXes
-            token_to_dex_map = {}
-            for pool in all_pools:
-                dex = pool.get("source", "other")
-                # Extract token info (handle different API formats)
-                tokens_in_pool = []
-                if "token1_symbol" in pool:
-                    tokens_in_pool.append(pool.get("token1_symbol", "").upper())
-                    tokens_in_pool.append(pool.get("token2_symbol", "").upper())
-                elif "tokens" in pool and isinstance(pool["tokens"], list):
-                    tokens_in_pool = [t.get("symbol", "").upper() for t in pool["tokens"] 
-                                    if "symbol" in t]
-                
-                # Update token-to-dex mapping
-                for token_symbol in tokens_in_pool:
-                    if token_symbol:
-                        if token_symbol not in token_to_dex_map:
-                            token_to_dex_map[token_symbol] = set()
-                        token_to_dex_map[token_symbol].add(dex)
-            
-            # Categorize tokens by DEX
-            for token in tokens:
-                symbol = token.get("symbol", "").upper()
-                if symbol in token_to_dex_map:
-                    # Add token to each DEX category it belongs to
-                    for dex in token_to_dex_map[symbol]:
-                        if dex in categories:
-                            categories[dex].append(token)
-                else:
-                    # Add to other category if not found in any DEX
-                    categories["other"].append(token)
-            
-            return categories
-            
-        except Exception as e:
-            logger.error(f"Error categorizing tokens: {str(e)}")
-            # Return minimal default categories
-            return {
-                "raydium": self._get_default_tokens_for_dex("raydium"),
-                "orca": self._get_default_tokens_for_dex("orca"),
-                "meteora": self._get_default_tokens_for_dex("meteora"),
-                "other": []
-            }
+                logger.error(f"Error preloading token data for {symbol}: {e}")
     
-    def _get_default_tokens_for_dex(self, dex_name: str) -> List[Dict[str, Any]]:
-        """Helper to get default tokens for a DEX when API fails"""
-        common_tokens = list(self.token_cache.values())
-        
-        # For demo purposes, distribute tokens across DEXes
-        if dex_name == "raydium":
-            return [t for t in common_tokens if t.get("symbol", "").upper() in 
-                   ["SOL", "USDC", "RAY", "ATLAS"]]
-        elif dex_name == "orca":
-            return [t for t in common_tokens if t.get("symbol", "").upper() in 
-                   ["ORCA", "USDT", "BTC", "ETH"]]
-        elif dex_name == "meteora":
-            return [t for t in common_tokens if t.get("symbol", "").upper() in 
-                   ["BONK", "MSOL", "UXD"]]
-        
-        return []
-        
-    def get_tokens_by_dex(self, dex_name: str) -> Dict[str, Dict[str, Any]]:
-        """
-        Get tokens used by a specific DEX.
-        
-        Args:
-            dex_name: Name of the DEX
-            
-        Returns:
-            Dictionary mapping token symbols to token data
-        """
-        logger.info(f"Getting tokens for DEX: {dex_name}")
-        
-        try:
-            # Get categories from token_categories
-            categories = self.get_token_categories()
-            
-            # Get tokens for the requested DEX
-            dex_tokens = categories.get(dex_name, [])
-            
-            # Convert to dictionary keyed by symbol
-            result = {}
-            for token in dex_tokens:
-                symbol = token.get("symbol", "").upper()
-                if symbol:
-                    result[symbol] = token
-                    
-            if not result:
-                logger.warning(f"No tokens found for DEX: {dex_name}, using defaults")
-                # If no tokens found, use defaults
-                default_tokens = self._get_default_tokens_for_dex(dex_name)
-                for token in default_tokens:
-                    symbol = token.get("symbol", "").upper()
-                    if symbol:
-                        result[symbol] = token
-            
-            return result
-            
-        except Exception as e:
-            logger.error(f"Error getting tokens by DEX {dex_name}: {str(e)}")
-            # Return default tokens in case of error
-            default_tokens = self._get_default_tokens_for_dex(dex_name)
-            result = {}
-            for token in default_tokens:
-                symbol = token.get("symbol", "").upper()
-                if symbol:
-                    result[symbol] = token
-                    
-            return result
-    
-    def get_stats(self) -> Dict[str, Any]:
-        """
-        Get token service statistics.
-        
-        Returns:
-            Dictionary with token service statistics
-        """
-        # Calculate hit ratio
-        total = self.stats["cache_hits"] + self.stats["cache_misses"]
-        hit_ratio = self.stats["cache_hits"] / total if total > 0 else 0
-        
-        # Count symbols and addresses in cache
-        symbols = 0
-        addresses = 0
-        
-        for key in self.token_cache.keys():
-            # Heuristic to identify likely addresses vs symbols
-            if len(key) > 30:
-                addresses += 1
-            else:
-                symbols += 1
-        
-        # Add direct address hits to stats if not present
-        if "direct_address_hits" not in self.stats:
-            self.stats["direct_address_hits"] = 0
-        
-        return {
-            "total_requests": self.stats["total_requests"],
-            "cache_hits": self.stats["cache_hits"],
-            "cache_misses": self.stats["cache_misses"],
-            "api_errors": self.stats["api_errors"],
-            "hit_ratio": hit_ratio,
-            "cache_size": len(self.token_cache),
-            "tokens_by_symbol": symbols,
-            "tokens_by_address": addresses,
-            "direct_address_hits": self.stats["direct_address_hits"],
-            "last_update": self.stats["last_update"],
-        }
-    
-    def clear_cache(self):
-        """Clear the token cache."""
-        logger.info("Clearing token cache")
-        
-        # Preserve default tokens
-        default_tokens = {}
-        for symbol, token_data in self.token_cache.items():
-            if symbol in ["SOL", "USDC", "USDT", "ETH", "BTC", "BONK", "ORCA", "RAY", "ATLAS", "UXD"]:
-                default_tokens[symbol] = token_data
-        
-        # Reset cache
-        self.token_cache = default_tokens
-        
-        # Reset stats
-        self.stats["cache_hits"] = 0
-        self.stats["cache_misses"] = 0
-        self.stats["api_errors"] = 0
-        self.stats["last_update"] = datetime.now().isoformat()
-        
-        logger.info(f"Token cache cleared. Retained {len(default_tokens)} default tokens.")
+    def preload_common_tokens(self) -> None:
+        """Preload data for common Solana tokens"""
+        common_tokens = [
+            "SOL", "USDC", "USDT", "ETH", "BTC", "RAY", "BONK", "SAMO", "MNGO", "SRM",
+            "mSOL", "stSOL", "ORCA", "ATLAS", "POLIS", "JTO", "DUST", "GENE", "WIF", "JUP"
+        ]
+        self.preload_token_data(common_tokens)
 
+# Singleton instance
+_instance = None
 
-def get_token_service(api_key: Optional[str] = None, base_url: Optional[str] = None) -> TokenDataService:
+def get_token_data_service() -> TokenDataService:
     """
-    Get the singleton token data service instance.
+    Get a singleton instance of the token data service
     
-    Args:
-        api_key: Optional API key
-        base_url: Optional base URL
-        
     Returns:
-        TokenDataService instance
+        Token data service instance
     """
-    global _instance, _lock
-    
-    with _lock:
-        if _instance is None:
-            _instance = TokenDataService(api_key=api_key, base_url=base_url)
-    
+    global _instance
+    if _instance is None:
+        _instance = TokenDataService()
     return _instance
+
+
+if __name__ == "__main__":
+    # Example usage
+    service = get_token_data_service()
+    service.preload_common_tokens()
+    
+    # Get some token data
+    sol_price = service.get_token_price("SOL")
+    print(f"SOL price: ${sol_price}")
+    
+    usdc_address = service.get_token_address("USDC")
+    print(f"USDC address: {usdc_address}")

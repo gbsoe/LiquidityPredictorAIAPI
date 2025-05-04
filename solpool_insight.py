@@ -32,7 +32,7 @@ loading_start = datetime.now()
 # Import our data service modules
 from data_services.initialize import init_services, get_stats
 from data_services.data_service import get_data_service
-from token_data_service import get_token_service
+from token_data_service import get_token_data_service as get_token_service
 from historical_data_service import get_historical_service
 
 # Configure logging
@@ -47,7 +47,7 @@ import db_handler
 
 # Import token services
 from token_price_service import get_token_price, get_multiple_prices
-from token_data_service import get_token_service
+# Already imported token_data_service above
 
 # Import API key manager
 from api_key_manager import get_defi_api_key, set_defi_api_key, render_api_key_form
@@ -1665,7 +1665,7 @@ def main():
                     token_cols = st.columns(2)
                     
                     # Get token service from session state
-                    from token_data_service import get_token_service, TokenDataService
+                    from token_data_service import get_token_data_service as get_token_service, TokenDataService
                     token_svc = get_token_service()
                     
                     with token_cols[0]:
