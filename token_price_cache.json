@@ -33,7 +33,9 @@
     "MPLU": 0,
     "7KBN": 0,
     "JSOL": 0,
-    "SPEC": 0.00272821
+    "SPEC": 0.00272821,
+    "FARTCOIN": 1.11,
+    "LAYER": 3.2
   },
   "price_sources": {
     "USDC": "coingecko",
@@ -62,7 +64,9 @@
     "JSOL": "defi_api",
     "FWZ2": "defi_api",
     "ATLAS": "coingecko",
-    "SPEC": "coingecko"
+    "SPEC": "coingecko",
+    "FARTCOIN": "coingecko",
+    "LAYER": "coingecko"
   },
-  "last_update": "2025-05-04T14:50:20.396727"
+  "last_update": "2025-05-04T14:52:31.303265"
 }

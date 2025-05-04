@@ -68,6 +68,9 @@ DEFAULT_TOKEN_MAPPING = {
     "ATLAS": "star-atlas",
     "POLIS": "star-atlas-polis",
     "LAYER": "solayer",
+    "BOOP": "boop-2",
+    "LFG": "gamerse",
+    "POOP": "poochain-powering-poo-fun",
     
     # API-specific symbols (important: these match actual token symbols in the API!)
     "So11": "solana",        # Solana

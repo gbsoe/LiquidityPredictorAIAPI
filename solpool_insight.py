@@ -2785,52 +2785,45 @@ def main():
                 st.write(f"Fetching prices for {len(all_symbols)} tokens...")
                 
                 with st.spinner("Fetching real-time token prices..."):
-                    # Let's fetch a few priority tokens explicitly first to ensure we have some real price data
-                    priority_tokens = ["SOL", "BTC", "ETH", "USDC", "MSOL", "STSOL", "RAY", "ORCA", "BONK"]
+                    # Define priority tokens that we want to make sure we get prices for
+                    priority_tokens = ["SOL", "BTC", "ETH", "USDC", "USDT", "MSOL", "STSOL", "RAY", 
+                                      "ORCA", "BONK", "WIF", "FARTCOIN", "LAYER", "ATLAS", "PYTH",
+                                      "POLIS"]
                     
-                    # First get our priority token prices directly from CoinGecko API
-                    from coingecko_api import CoinGeckoAPI
-                    cg_api = CoinGeckoAPI()
+                    # Get our token service instance
+                    token_service = get_token_service()
                     
-                    # Create mapping of symbols to CoinGecko IDs
-                    from token_price_service import DEFAULT_TOKEN_MAPPING
-                    priority_prices = {}
+                    # Initialize price dictionary
+                    token_prices = {}
                     
-                    # Fetch prices for mapped tokens
-                    available_tokens = [t for t in priority_tokens if t in DEFAULT_TOKEN_MAPPING]
+                    # Prioritize main tokens first
+                    for symbol in priority_tokens:
+                        if symbol in all_symbols:
+                            try:
+                                price, source = token_service.get_token_price(symbol, return_source=True)
+                                if price is not None and price > 0:
+                                    token_prices[symbol] = price
+                                    logger.info(f"Retrieved priority token price for {symbol}: ${price} ({source})")
+                            except Exception as e:
+                                logger.warning(f"Error getting price for priority token {symbol}: {e}")
                     
-                    if available_tokens:
-                        # Get API key for CoinGecko 
-                        coingecko_api_key = os.getenv("COINGECKO_API_KEY")
-                        headers = {}
-                        if coingecko_api_key:
-                            # Check if it's a Demo API key (starts with CG-) or Pro API key
-                            if coingecko_api_key.startswith("CG-"):
-                                # For Demo API keys
-                                headers["x-cg-demo-api-key"] = coingecko_api_key
-                            else:
-                                # For Pro API keys (maintain backward compatibility)
-                                headers["x-cg-pro-api-key"] = coingecko_api_key
-                                headers["x-cg-api-key"] = coingecko_api_key
-                            logger.info(f"Using CoinGecko API key for priority tokens")
-                            
-                        ids = [DEFAULT_TOKEN_MAPPING[t] for t in available_tokens]
+                    # Process remaining tokens in smaller batches to avoid rate limits
+                    remaining_tokens = [t for t in all_symbols if t not in token_prices]
+                    
+                    # Process in smaller batches (10 tokens per batch)
+                    batch_size = 10
+                    for i in range(0, len(remaining_tokens), batch_size):
+                        batch = remaining_tokens[i:i+batch_size]
                         try:
-                            # Use direct API call with proper headers
-                            cg_prices = cg_api.get_price(ids, "usd", headers=headers)
-                            for token in available_tokens:
-                                cg_id = DEFAULT_TOKEN_MAPPING[token]
-                                if cg_id in cg_prices and "usd" in cg_prices[cg_id]:
-                                    priority_prices[token] = cg_prices[cg_id]["usd"]
+                            # Use bulk price lookup for efficiency
+                            batch_prices = token_service.get_multiple_prices(batch)
+                            token_prices.update(batch_prices)
+                            
+                            # Add a small delay between batches to avoid rate limits
+                            if i + batch_size < len(remaining_tokens):
+                                time.sleep(0.5)
                         except Exception as e:
-                            st.warning(f"Error fetching priority token prices: {e}")
-                    
-                    # Now get the rest of the tokens using the standard method
-                    # which now includes the proper API key integration
-                    token_prices = get_multiple_prices(all_symbols)
-                    
-                    # Merge in our priority prices
-                    token_prices.update(priority_prices)
+                            logger.warning(f"Error processing token batch {i}-{i+batch_size}: {e}")
                     
                     # Show debug info - number of tokens with prices
                     tokens_with_prices = sum(1 for p in token_prices.values() if p > 0)
