@@ -93,6 +93,7 @@ class CoinGeckoAPI:
             "MNGO": "mango-markets",
             "SAMO": "samoyedcoin",
             "SOOMER": "soomer",  # Added SOOMER token mapping
+            "FARTCOIN": "fartcoin",  # Added FARTCOIN token mapping
             
             # Specific token variations
             "JUP": "jupiter-exchange", 
@@ -150,6 +151,8 @@ class CoinGeckoAPI:
             "CTh5k7EHD2HBX64xZkeBDwmHskWvNq5WB8f4PWuW1hmz".lower(): "soomer",
             # LAYER token address mapping
             "LayerDUjJuZPxiKTfyYYpUM5m3y3gL3nAZL5BQ7uqQb6".lower(): "unilayer",
+            # FARTCOIN token address mapping
+            "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump".lower(): "fartcoin",
             # Additional specific token addresses
             "msolzycxhdygdzu16g5qsh3i5k3z3kzk7ytfqcjm7so".lower(): "marinade-staked-sol",
             "msolzycxhdygdzu16g5qsh3i5k3z3kzk7ytfqcjm7so".upper(): "marinade-staked-sol",
