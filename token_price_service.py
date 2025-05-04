@@ -224,20 +224,65 @@ class TokenPriceService:
         if symbol == "UNKNOWN":
             return (None, "none") if return_source else None
             
-        # Try cache first
+        # Try cache first if it's valid
         if self._is_cache_valid() and symbol in self.cached_prices:
-            # If we're using the cache, we need to check the source from cache_price_sources
-            cache_source = self.cache_price_sources.get(symbol, "none") if hasattr(self, 'cache_price_sources') else "none"
-            return (self.cached_prices[symbol], cache_source) if return_source else self.cached_prices[symbol]
+            # Skip SOL prices from defi_api source even in cache (known error)
+            cache_source = self.cache_price_sources.get(symbol.upper(), "none") if hasattr(self, 'cache_price_sources') else "none"
+            if symbol.upper() == "SOL" and cache_source == "defi_api":
+                # SOL price from defi_api is incorrect, force refresh from CoinGecko
+                logger.info("Skipping cached SOL price from defi_api due to known issue")
+            else:
+                # Use cache for other tokens or SOL prices from CoinGecko
+                return (self.cached_prices[symbol.upper()], cache_source) if return_source else self.cached_prices[symbol.upper()]
+        
+        # For SOL, always try CoinGecko first since the DeFi API has incorrect data
+        if symbol.upper() == "SOL":
+            logger.info("Using CoinGecko as primary source for SOL price")
+            # Convert symbol to CoinGecko ID
+            coingecko_id = self.token_mapping.get(symbol.upper())
+            if coingecko_id:
+                # Try CoinGecko API directly instead of using non-existent method
+                try:
+                    # Use our improved CoinGeckoAPI client
+                    from coingecko_api import CoinGeckoAPI
+                    coingecko_client = CoinGeckoAPI()
+                    price_data = coingecko_client.get_price([coingecko_id], "usd")
+                    if coingecko_id in price_data and "usd" in price_data[coingecko_id]:
+                        price = price_data[coingecko_id]["usd"]
+                        logger.info(f"Retrieved SOL price from CoinGecko client: ${price}")
+                    else:
+                        logger.warning(f"No price data found for SOL in CoinGecko client response")
+                        price = None
+                except Exception as e:
+                    logger.warning(f"Error using CoinGecko client: {e}")
+                    price = None
+                    
+                if price is not None:
+                    # Cache the result
+                    self.cached_prices[symbol.upper()] = price
+                    self.cache_price_sources[symbol.upper()] = "coingecko"
+                    if self.use_cache:
+                        self._save_cache()
+                    return (price, "coingecko") if return_source else price
             
-        # First try the DeFi API as it's most aligned with our data
-        price = self.get_token_price_from_defi_api(symbol)
-        if price is not None:
-            return (price, "defi_api") if return_source else price
-            
-        # If DeFi API fails, try CoinGecko as fallback
-        # Convert symbol to CoinGecko ID
-        coingecko_id = self.token_mapping.get(symbol.upper())
+            # Only fallback to DeFi API if CoinGecko fails
+            price = self.get_token_price_from_defi_api(symbol)
+            if price is not None:
+                # Check for obviously wrong SOL price (over $1000)
+                if price > 1000:
+                    logger.warning(f"Detected potentially incorrect SOL price from DeFi API: ${price}")
+                    return (None, "none") if return_source else None
+                else:
+                    return (price, "defi_api") if return_source else price
+        else:
+            # For other tokens, try DeFi API first
+            price = self.get_token_price_from_defi_api(symbol)
+            if price is not None:
+                return (price, "defi_api") if return_source else price
+                
+            # If DeFi API fails, try CoinGecko as fallback
+            # Convert symbol to CoinGecko ID
+            coingecko_id = self.token_mapping.get(symbol.upper())
         if not coingecko_id:
             # Only log warnings for non-UNKNOWN tokens to reduce noise
             logger.warning(f"No mapping for token: {symbol}")
@@ -263,7 +308,39 @@ class TokenPriceService:
             return (None, "none") if return_source else None
         
         try:
-            # Fetch price from CoinGecko
+            # Import the CoinGeckoAPI client here to avoid circular imports
+            try:
+                from coingecko_api import CoinGeckoAPI
+                # Create a client instance if needed
+                coingecko_api = CoinGeckoAPI()
+                
+                # Use the client to get price data
+                logger.info(f"Using CoinGecko API client to fetch {coingecko_id} price")
+                price_data = coingecko_api.get_price([coingecko_id], "usd")
+                
+                if coingecko_id in price_data and "usd" in price_data[coingecko_id]:
+                    price = price_data[coingecko_id]["usd"]
+                    logger.info(f"Retrieved {symbol} price from CoinGecko client: ${price}")
+                    
+                    # Update cache
+                    self.cached_prices[symbol.upper()] = price
+                    # Store the price source
+                    if not hasattr(self, 'cache_price_sources'):
+                        self.cache_price_sources = {}
+                    self.cache_price_sources[symbol.upper()] = "coingecko"
+                    
+                    if self.use_cache:
+                        self._save_cache()
+                    
+                    return price
+                else:
+                    logger.warning(f"Price data not found for {symbol} (CoinGecko ID: {coingecko_id}) in client response")
+                    # Fall back to direct API call if client fails
+                    
+            except (ImportError, Exception) as e:
+                logger.warning(f"Could not use CoinGecko API client: {e}. Falling back to direct API call.")
+            
+            # Fallback: Direct API call
             url = f"{COINGECKO_API_URL}/simple/price"
             params = {
                 "ids": coingecko_id,
@@ -286,6 +363,7 @@ class TokenPriceService:
                     headers["x-cg-api-key"] = coingecko_api_key
                 logger.info(f"Using CoinGecko API key for {symbol}")
             
+            logger.info(f"Making direct CoinGecko API call for {coingecko_id}")
             response = requests.get(url, params=params, headers=headers, timeout=10)
             response.raise_for_status()
             data = response.json()
@@ -488,10 +566,36 @@ class TokenPriceService:
         
         normalized_symbols = [s.upper() for s in symbols if s != "UNKNOWN"]
         
-        # Use cache first for all symbols
+        # First, handle SOL price specially to ensure accuracy
+        if "SOL" in normalized_symbols:
+            # Always get a fresh SOL price from CoinGecko
+            logger.info("Prioritizing CoinGecko for SOL price in get_multiple_prices")
+            
+            # Use our CoinGeckoAPI client for SOL
+            try:
+                from coingecko_api import CoinGeckoAPI
+                coingecko_client = CoinGeckoAPI()
+                price_data = coingecko_client.get_price(["solana"], "usd")
+                if "solana" in price_data and "usd" in price_data["solana"]:
+                    sol_price = price_data["solana"]["usd"]
+                    logger.info(f"Retrieved SOL price from CoinGecko client: ${sol_price}")
+                    result["SOL"] = sol_price
+                    self.cached_prices["SOL"] = sol_price
+                    self.cache_price_sources["SOL"] = "coingecko"
+                    # Remove SOL from symbols that need fetching
+                    if "SOL" in normalized_symbols:
+                        normalized_symbols.remove("SOL")
+            except Exception as e:
+                logger.warning(f"Error getting SOL price from CoinGecko: {e}")
+                # Will try other methods below
+        
+        # Use cache for remaining tokens
         if self._is_cache_valid():
             for symbol in normalized_symbols:
-                if symbol in self.cached_prices:
+                # Skip SOL in the cache if it's from defi_api (known wrong source)
+                if symbol == "SOL" and self.cache_price_sources.get("SOL") == "defi_api":
+                    symbols_to_fetch.append(symbol)
+                elif symbol in self.cached_prices:
                     result[symbol] = self.cached_prices[symbol]
                 else:
                     symbols_to_fetch.append(symbol)
@@ -722,6 +826,35 @@ def update_pool_with_token_prices(pool: dict) -> dict:
         # Handle case where result is not a tuple
         token2_price = float(token2_result) if token2_result is not None else 0.0
         token2_source = "none"
+    
+    # Check for obviously incorrect SOL price (over $1000 is clearly wrong)
+    if token1.upper() == "SOL" and token1_price > 1000:
+        logger.warning(f"Detected incorrect SOL price for token1: ${token1_price}. Attempting to fix.")
+        # Try to get a correct price from CoinGecko
+        try:
+            from coingecko_api import CoinGeckoAPI
+            coingecko_client = CoinGeckoAPI()
+            price_data = coingecko_client.get_price(["solana"], "usd")
+            if "solana" in price_data and "usd" in price_data["solana"]:
+                token1_price = price_data["solana"]["usd"]
+                token1_source = "coingecko"
+                logger.info(f"Retrieved corrected SOL price from CoinGecko: ${token1_price}")
+        except Exception as e:
+            logger.error(f"Error fetching corrected SOL price: {e}")
+            
+    if token2.upper() == "SOL" and token2_price > 1000:
+        logger.warning(f"Detected incorrect SOL price for token2: ${token2_price}. Attempting to fix.")
+        # Try to get a correct price from CoinGecko
+        try:
+            from coingecko_api import CoinGeckoAPI
+            coingecko_client = CoinGeckoAPI()
+            price_data = coingecko_client.get_price(["solana"], "usd")
+            if "solana" in price_data and "usd" in price_data["solana"]:
+                token2_price = price_data["solana"]["usd"]
+                token2_source = "coingecko"
+                logger.info(f"Retrieved corrected SOL price from CoinGecko: ${token2_price}")
+        except Exception as e:
+            logger.error(f"Error fetching corrected SOL price: {e}")
     
     # Add prices and sources to pool data
     updated_pool["token1_price"] = token1_price
