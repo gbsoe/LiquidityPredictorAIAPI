@@ -69,6 +69,25 @@ class TokenDataService:
             "last_update": None,
         }
         
+        # Initialize CoinGecko with token mappings
+        try:
+            if 'token_mappings' not in globals():
+                # If token_mappings.py is not imported, try to import it now
+                try:
+                    from token_mappings import initialize_coingecko_mappings, get_token_address, DEFAULT_TOKEN_MAPPINGS
+                    logger.info("Successfully imported token_mappings module")
+                except ImportError:
+                    logger.warning("Could not import token_mappings module")
+            
+            # Initialize CoinGecko with mappings if available
+            if coingecko_api is not None and 'initialize_coingecko_mappings' in globals():
+                initialize_coingecko_mappings(coingecko_api)
+                logger.info("Initialized CoinGecko with token mappings")
+            else:
+                logger.warning("Could not initialize CoinGecko with token mappings")
+        except Exception as e:
+            logger.error(f"Error initializing token mappings: {e}")
+            
         # Initialize default token data
         self._init_default_tokens()
         

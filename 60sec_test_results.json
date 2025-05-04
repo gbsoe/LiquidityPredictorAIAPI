@@ -1,50 +1,50 @@
 {
   "stats": {
-    "total_pools": 84,
+    "total_pools": 56,
     "unique_pools": [
-      "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
-      "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
-      "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
-      "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
-      "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
-      "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
       "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
-      "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv",
-      "3nMFwZXwY1s1M5s8vYAHqd4wGs4iSxXE4LRoUMMYqEgF",
       "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
       "AT5uVDVMPKfMcHB3sNgCqGrDRUq5ARgiVx9kwKkabv8F",
-      "61R1ndXxvsWXXkWSyNkCxnzwd3zUNB8Q2ibmkiLPC8ht",
+      "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
+      "G6drsaPCR3pxsEmSTAc81kW1EL3kFAFwtSAkzUZXmgH3",
+      "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2",
+      "3nMFwZXwY1s1M5s8vYAHqd4wGs4iSxXE4LRoUMMYqEgF",
       "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
-      "2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2"
+      "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
+      "7fYfv8wnG2FgP9agpFSdsvcEggadPmsNN9q5sB129x7V",
+      "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
+      "H5rrKufGsB5vtvxJHEErCuqLM45g8JBv6SLa8ux9x4yj",
+      "3ucNos4NbumPLZNWztqGHNFFgkHeRMBQAVemeeomsUxv"
     ],
-    "total_tokens": 168,
+    "total_tokens": 112,
     "unique_tokens": [
-      "LAYER",
-      "SOOMER",
-      "POOP",
-      "RAY",
-      "USDT",
-      "SPEC",
-      "SOGENT",
       "BOOP",
-      "LFG",
+      "FARTCOIN",
+      "SOOMER",
+      "USDT",
       "USDC",
+      "LFG",
+      "SPEC",
       "SOL",
-      "FARTCOIN"
+      "SOGENT",
+      "RAY",
+      "LAYER",
+      "POOP"
     ],
     "dex_counts": {
-      "raydium": 84
+      "raydium": 56
     },
-    "api_calls": 6,
+    "api_calls": 4,
     "errors": 0,
-    "db_writes": 84,
-    "start_time": "2025-05-04T10:35:16.522114",
-    "end_time": "2025-05-04T10:36:21.537793",
-    "elapsed_seconds": 65.01547384262085,
-    "pools_per_second": 1.29200011989967
+    "db_writes": 56,
+    "start_time": "2025-05-04T11:58:16.483519",
+    "end_time": "2025-05-04T11:59:29.405207",
+    "elapsed_seconds": 72.92150497436523,
+    "pools_per_second": 0.7679490435597317
   },
-  "test_duration": "65.02 seconds",
-  "timestamp": "2025-05-04T10:36:21.537802",
+  "test_duration": "72.92 seconds",
+  "timestamp": "2025-05-04T11:59:29.405217",
   "sample_pools": [
     {
       "id": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
@@ -56,7 +56,7 @@
       "token1_address": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
       "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
       "token1_price": 0.0,
-      "token2_price": 0.999995,
+      "token2_price": 1.0,
       "tokens": [
         {
           "symbol": "Fartcoin",
@@ -75,22 +75,22 @@
       ],
       "poolId": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
       "programId": "",
-      "liquidity": 183497.68,
-      "volume_24h": 4807562.47,
-      "apr": 553.3,
+      "liquidity": 184529.67,
+      "volume_24h": 4677258.57,
+      "apr": 538.02,
       "fee": 0,
-      "apr_24h": 553.3,
-      "apr_7d": 421.05,
-      "apr_30d": 233.34,
+      "apr_24h": 538.02,
+      "apr_7d": 419.65,
+      "apr_30d": 233.25,
       "apr_change_24h": 0,
-      "apr_change_7d": -23.902042291704312,
-      "apr_change_30d": -44.58140363377271,
+      "apr_change_7d": -22.00104085349987,
+      "apr_change_30d": -44.417967353747166,
       "tvl_change_24h": 0,
       "tvl_change_7d": 0,
       "tvl_change_30d": 0,
       "active": true,
-      "created_at": "2025-05-04T10:35:18.569599",
-      "updated_at": "2025-05-04T10:35:18.569611",
+      "created_at": "2025-05-04T11:58:18.552336",
+      "updated_at": "2025-05-04T11:58:18.552347",
       "extra_data": {},
       "version": "1.0",
       "prediction_score": 0,
@@ -102,11 +102,11 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "tvl": 183497.68,
-        "volumeUsd": 4807562.47,
-        "apy24h": 553.3,
-        "apy7d": 421.05,
-        "apy30d": 233.34
+        "tvl": 184529.67,
+        "volumeUsd": 4677258.57,
+        "apy24h": 538.02,
+        "apy7d": 419.65,
+        "apy30d": 233.25
       },
       "api_response": {
         "id": "3MjwoqZHAAbCQLBSn6DtmgL6rpazvgYaxBYGHaxiQYTx",
@@ -116,11 +116,11 @@
         "name": "Fartcoin/USDC",
         "active": true,
         "metrics": {
-          "tvl": 183497.68,
-          "volumeUsd": 4807562.47,
-          "apy24h": 553.3,
-          "apy7d": 421.05,
-          "apy30d": 233.34
+          "tvl": 184529.67,
+          "volumeUsd": 4677258.57,
+          "apy24h": 538.02,
+          "apy7d": 419.65,
+          "apy30d": 233.25
         }
       },
       "token1_price_source": "none",
@@ -135,7 +135,7 @@
       "token2_symbol": "POOP",
       "token1_address": "So11111111111111111111111111111111111111112",
       "token2_address": "3j7NqGcHu9biEcq3ioDDXs576gyDNe3tp1ypuSBvpump",
-      "token1_price": 145.08,
+      "token1_price": 145.4,
       "token2_price": 0.0,
       "tokens": [
         {
@@ -143,7 +143,7 @@
           "name": "Solana",
           "address": "So11111111111111111111111111111111111111112",
           "decimals": 9,
-          "price": 18200050.6
+          "price": 18087376.43
         },
         {
           "symbol": "POOP",
@@ -155,22 +155,22 @@
       ],
       "poolId": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
       "programId": "",
-      "liquidity": 381309.01,
-      "volume_24h": 42965902.33,
-      "apr": 411.28,
+      "liquidity": 383529.87,
+      "volume_24h": 45280037.55,
+      "apr": 430.92,
       "fee": 0,
-      "apr_24h": 411.28,
-      "apr_7d": 38.75,
-      "apr_30d": 15.5,
+      "apr_24h": 430.92,
+      "apr_7d": 40.98,
+      "apr_30d": 16.39,
       "apr_change_24h": 0,
-      "apr_change_7d": -90.57819490371523,
-      "apr_change_30d": -60.0,
+      "apr_change_7d": -90.4901141743247,
+      "apr_change_30d": -60.004880429477794,
       "tvl_change_24h": 0,
       "tvl_change_7d": 0,
       "tvl_change_30d": 0,
       "active": true,
-      "created_at": "2025-05-04T10:35:19.003131",
-      "updated_at": "2025-05-04T10:35:19.003141",
+      "created_at": "2025-05-04T11:58:19.437512",
+      "updated_at": "2025-05-04T11:58:19.437524",
       "extra_data": {},
       "version": "1.0",
       "prediction_score": 0,
@@ -182,11 +182,11 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "tvl": 381309.01,
-        "volumeUsd": 42965902.33,
-        "apy24h": 411.28,
-        "apy7d": 38.75,
-        "apy30d": 15.5
+        "tvl": 383529.87,
+        "volumeUsd": 45280037.55,
+        "apy24h": 430.92,
+        "apy7d": 40.98,
+        "apy30d": 16.39
       },
       "api_response": {
         "id": "Fvs9K3oRKzUygQkz4545Vk3k2vNehx4fvudwLxUv6W1y",
@@ -196,11 +196,11 @@
         "name": "SOL/POOP",
         "active": true,
         "metrics": {
-          "tvl": 381309.01,
-          "volumeUsd": 42965902.33,
-          "apy24h": 411.28,
-          "apy7d": 38.75,
-          "apy30d": 15.5
+          "tvl": 383529.87,
+          "volumeUsd": 45280037.55,
+          "apy24h": 430.92,
+          "apy7d": 40.98,
+          "apy30d": 16.39
         }
       },
       "token1_price_source": "coingecko",
@@ -215,7 +215,7 @@
       "token2_symbol": "FARTCOIN",
       "token1_address": "So11111111111111111111111111111111111111112",
       "token2_address": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
-      "token1_price": 145.08,
+      "token1_price": 145.4,
       "token2_price": 0.0,
       "tokens": [
         {
@@ -223,7 +223,7 @@
           "name": "Solana",
           "address": "So11111111111111111111111111111111111111112",
           "decimals": 9,
-          "price": 132.89
+          "price": 132.82
         },
         {
           "symbol": "Fartcoin",
@@ -235,22 +235,22 @@
       ],
       "poolId": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
       "programId": "",
-      "liquidity": 403426.79,
-      "volume_24h": 5107762.25,
-      "apr": 265.24,
+      "liquidity": 404671.3,
+      "volume_24h": 5074776.88,
+      "apr": 263.26,
       "fee": 0,
-      "apr_24h": 265.24,
-      "apr_7d": 222.47,
-      "apr_30d": 128.46,
+      "apr_24h": 263.26,
+      "apr_7d": 221.96,
+      "apr_30d": 128.73,
       "apr_change_24h": 0,
-      "apr_change_7d": -16.12501885085206,
-      "apr_change_30d": -42.257383017935,
+      "apr_change_7d": -15.687913089721182,
+      "apr_change_30d": -42.003063615065784,
       "tvl_change_24h": 0,
       "tvl_change_7d": 0,
       "tvl_change_30d": 0,
       "active": true,
-      "created_at": "2025-05-04T10:35:19.406465",
-      "updated_at": "2025-05-04T10:35:19.406476",
+      "created_at": "2025-05-04T11:58:20.336038",
+      "updated_at": "2025-05-04T11:58:20.336048",
       "extra_data": {},
       "version": "1.0",
       "prediction_score": 0,
@@ -262,11 +262,11 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "tvl": 403426.79,
-        "volumeUsd": 5107762.25,
-        "apy24h": 265.24,
-        "apy7d": 222.47,
-        "apy30d": 128.46
+        "tvl": 404671.3,
+        "volumeUsd": 5074776.88,
+        "apy24h": 263.26,
+        "apy7d": 221.96,
+        "apy30d": 128.73
       },
       "api_response": {
         "id": "6U4TBh3aJgiJ5EqCDEua4rP75HsqcfHapMKhhyuTqGuo",
@@ -276,11 +276,11 @@
         "name": "SOL/Fartcoin",
         "active": true,
         "metrics": {
-          "tvl": 403426.79,
-          "volumeUsd": 5107762.25,
-          "apy24h": 265.24,
-          "apy7d": 222.47,
-          "apy30d": 128.46
+          "tvl": 404671.3,
+          "volumeUsd": 5074776.88,
+          "apy24h": 263.26,
+          "apy7d": 221.96,
+          "apy30d": 128.73
         }
       },
       "token1_price_source": "coingecko",
@@ -296,14 +296,14 @@
       "token1_address": "boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i",
       "token2_address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
       "token1_price": 0.0,
-      "token2_price": 0.999995,
+      "token2_price": 1.0,
       "tokens": [
         {
           "symbol": "BOOP",
           "name": "Boop",
           "address": "boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i",
           "decimals": 9,
-          "price": 0.22
+          "price": 0.23
         },
         {
           "symbol": "USDC",
@@ -315,22 +315,22 @@
       ],
       "poolId": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
       "programId": "",
-      "liquidity": 1868697.91,
-      "volume_24h": 4521346.11,
-      "apr": 220.78,
+      "liquidity": 1887929.26,
+      "volume_24h": 4425428.05,
+      "apr": 213.9,
       "fee": 0,
-      "apr_24h": 220.78,
-      "apr_7d": 280.53,
-      "apr_30d": 112.21,
+      "apr_24h": 213.9,
+      "apr_7d": 278.63,
+      "apr_30d": 111.45,
       "apr_change_24h": 0,
-      "apr_change_7d": 27.063139777153715,
-      "apr_change_30d": -60.00071293622786,
+      "apr_change_7d": 30.261804581580172,
+      "apr_change_30d": -60.00071779779637,
       "tvl_change_24h": 0,
       "tvl_change_7d": 0,
       "tvl_change_30d": 0,
       "active": true,
-      "created_at": "2025-05-04T10:35:19.801751",
-      "updated_at": "2025-05-04T10:35:19.801780",
+      "created_at": "2025-05-04T11:58:21.168357",
+      "updated_at": "2025-05-04T11:58:21.168368",
       "extra_data": {},
       "version": "1.0",
       "prediction_score": 0,
@@ -342,11 +342,11 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "tvl": 1868697.91,
-        "volumeUsd": 4521346.11,
-        "apy24h": 220.78,
-        "apy7d": 280.53,
-        "apy30d": 112.21
+        "tvl": 1887929.26,
+        "volumeUsd": 4425428.05,
+        "apy24h": 213.9,
+        "apy7d": 278.63,
+        "apy30d": 111.45
       },
       "api_response": {
         "id": "x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH",
@@ -356,11 +356,11 @@
         "name": "BOOP/USDC",
         "active": true,
         "metrics": {
-          "tvl": 1868697.91,
-          "volumeUsd": 4521346.11,
-          "apy24h": 220.78,
-          "apy7d": 280.53,
-          "apy30d": 112.21
+          "tvl": 1887929.26,
+          "volumeUsd": 4425428.05,
+          "apy24h": 213.9,
+          "apy7d": 278.63,
+          "apy30d": 111.45
         }
       },
       "token1_price_source": "none",
@@ -375,7 +375,7 @@
       "token2_symbol": "SOGENT",
       "token1_address": "So11111111111111111111111111111111111111112",
       "token2_address": "2sXsiQDXiEG2c8VitBbt4CnGSDGjLt4P3dn81Hto7csF",
-      "token1_price": 145.08,
+      "token1_price": 145.4,
       "token2_price": 0.0,
       "tokens": [
         {
@@ -383,7 +383,7 @@
           "name": "Solana",
           "address": "So11111111111111111111111111111111111111112",
           "decimals": 9,
-          "price": 23686.14
+          "price": 23371.29
         },
         {
           "symbol": "SOGENT",
@@ -395,22 +395,22 @@
       ],
       "poolId": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
       "programId": "",
-      "liquidity": 507476.47,
-      "volume_24h": 27737545.08,
-      "apr": 199.5,
+      "liquidity": 509897.68,
+      "volume_24h": 25107983.29,
+      "apr": 179.73,
       "fee": 0,
-      "apr_24h": 199.5,
-      "apr_7d": 28.78,
-      "apr_30d": 11.51,
+      "apr_24h": 179.73,
+      "apr_7d": 28.7,
+      "apr_30d": 11.48,
       "apr_change_24h": 0,
-      "apr_change_7d": -85.57393483709274,
-      "apr_change_30d": -60.00694927032663,
+      "apr_change_7d": -84.03160295999555,
+      "apr_change_30d": -60.0,
       "tvl_change_24h": 0,
       "tvl_change_7d": 0,
       "tvl_change_30d": 0,
       "active": true,
-      "created_at": "2025-05-04T10:35:20.171217",
-      "updated_at": "2025-05-04T10:35:20.171227",
+      "created_at": "2025-05-04T11:58:21.935210",
+      "updated_at": "2025-05-04T11:58:21.935215",
       "extra_data": {},
       "version": "1.0",
       "prediction_score": 0,
@@ -422,11 +422,11 @@
         "whirlpoolId": ""
       },
       "metrics_data": {
-        "tvl": 507476.47,
-        "volumeUsd": 27737545.08,
-        "apy24h": 199.5,
-        "apy7d": 28.78,
-        "apy30d": 11.51
+        "tvl": 509897.68,
+        "volumeUsd": 25107983.29,
+        "apy24h": 179.73,
+        "apy7d": 28.7,
+        "apy30d": 11.48
       },
       "api_response": {
         "id": "3AG2dF4u9dChcg2qmfpxGcE7SQyEUZGfimqjmqxojMgC",
@@ -436,11 +436,11 @@
         "name": "SOL/SOGENT",
         "active": true,
         "metrics": {
-          "tvl": 507476.47,
-          "volumeUsd": 27737545.08,
-          "apy24h": 199.5,
-          "apy7d": 28.78,
-          "apy30d": 11.51
+          "tvl": 509897.68,
+          "volumeUsd": 25107983.29,
+          "apy24h": 179.73,
+          "apy7d": 28.7,
+          "apy30d": 11.48
         }
       },
       "token1_price_source": "coingecko",
