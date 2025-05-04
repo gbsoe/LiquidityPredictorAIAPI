@@ -2670,18 +2670,67 @@ def main():
                 # List of tokens with selection
                 selected_token = st.selectbox("Select a token", filtered_tokens)
                 
-                # Get token price
-                token_price = get_token_price(selected_token)
-                
-                # Show current price in a big metric
-                if token_price:
-                    st.metric(
-                        f"{selected_token} Price",
-                        f"${token_price:,.4f}",
-                        delta=None  # We don't have historical data for delta yet
-                    )
-                else:
-                    st.warning(f"Could not retrieve price for {selected_token}")
+                # Get token price with improved error handling and logging
+                try:
+                    token_price, price_source = get_token_price(selected_token, return_source=True)
+                    logger.info(f"Retrieved price for {selected_token}: ${token_price} (source: {price_source})")
+                    
+                    # Show current price in a big metric
+                    if token_price and token_price > 0:
+                        # Format display based on price magnitude
+                        if token_price < 0.01:
+                            price_display = f"${token_price:,.6f}"
+                        else:
+                            price_display = f"${token_price:,.4f}"
+                            
+                        st.metric(
+                            f"{selected_token} Price",
+                            price_display,
+                            delta=None,  # We don't have historical data for delta yet
+                            help=f"Price source: {price_source}"
+                        )
+                    else:
+                        # Try using a direct API call with the token mapping
+                        from token_price_service import DEFAULT_TOKEN_MAPPING
+                        if selected_token.upper() in DEFAULT_TOKEN_MAPPING:
+                            # Get more detailed logging about why the fetch failed
+                            coingecko_api_key = os.getenv("COINGECKO_API_KEY")
+                            st.info(f"Attempting direct CoinGecko lookup for {selected_token}...")
+                            
+                            from coingecko_api import CoinGeckoAPI
+                            cg_api = CoinGeckoAPI()
+                            
+                            cg_id = DEFAULT_TOKEN_MAPPING[selected_token.upper()]
+                            headers = {}
+                            if coingecko_api_key:
+                                headers["x-cg-pro-api-key"] = coingecko_api_key
+                                headers["x-cg-api-key"] = coingecko_api_key
+                                
+                            try:
+                                cg_prices = cg_api.get_price([cg_id], "usd", headers=headers)
+                                if cg_id in cg_prices and "usd" in cg_prices[cg_id]:
+                                    direct_price = cg_prices[cg_id]["usd"]
+                                    
+                                    # Format display based on price magnitude
+                                    if direct_price < 0.01:
+                                        price_display = f"${direct_price:,.6f}"
+                                    else:
+                                        price_display = f"${direct_price:,.4f}"
+                                        
+                                    st.metric(
+                                        f"{selected_token} Price", 
+                                        price_display,
+                                        delta=None,
+                                        help="Price source: direct coingecko"
+                                    )
+                                else:
+                                    st.warning(f"Could not retrieve price for {selected_token}")
+                            except Exception as e:
+                                st.warning(f"Error in direct price lookup: {e}")
+                        else:
+                            st.warning(f"Could not retrieve price for {selected_token}")
+                except Exception as e:
+                    st.warning(f"Error retrieving price for {selected_token}: {e}")
             
             with col_select:
                 # Multiple token selection for comparison

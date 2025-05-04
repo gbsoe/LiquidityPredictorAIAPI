@@ -141,12 +141,13 @@ class CoinGeckoAPI:
         
         self.last_request_time = time.time()
     
-    def _make_request(self, endpoint: str) -> Any:
+    def _make_request(self, endpoint: str, headers: Optional[Dict[str, str]] = None) -> Any:
         """
         Make a rate-limited request to the CoinGecko API.
         
         Args:
             endpoint: API endpoint to call
+            headers: Optional request headers (including API key)
             
         Returns:
             JSON response from API or None on error
@@ -162,8 +163,20 @@ class CoinGeckoAPI:
         url = f"{self.base_url}/{endpoint}"
         logger.info(f"Making CoinGecko API request to URL: {url}")
         
+        # Create default headers if none provided
+        if headers is None:
+            headers = {}
+            
+        # Add API key from environment if available and not already in headers
+        api_key = os.getenv("COINGECKO_API_KEY")
+        if api_key and "x-cg-pro-api-key" not in headers:
+            headers["x-cg-pro-api-key"] = api_key
+            headers["x-cg-api-key"] = api_key
+            logger.info("Using CoinGecko API key from environment")
+            
         try:
-            response = requests.get(url, timeout=10)
+            logger.debug(f"Request headers: {headers}")
+            response = requests.get(url, headers=headers, timeout=10)
             
             if response.status_code == 200:
                 logger.info(f"Received successful response from CoinGecko API: {url}")
@@ -185,18 +198,19 @@ class CoinGeckoAPI:
             logger.error(f"Exception during CoinGecko API request: {str(e)}")
             return None
     
-    def search_token(self, query: str) -> List[Dict[str, Any]]:
+    def search_token(self, query: str, headers: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
         """
         Search for tokens on CoinGecko by name or symbol.
         
         Args:
             query: Token name or symbol to search for
+            headers: Optional API headers
             
         Returns:
             List of matching tokens with ID, symbol, and name
         """
         endpoint = f"search?query={query}"
-        result = self._make_request(endpoint)
+        result = self._make_request(endpoint, headers=headers)
         
         if result and "coins" in result:
             return result["coins"]
@@ -235,13 +249,14 @@ class CoinGeckoAPI:
         logger.warning(f"Could not find CoinGecko ID for token: {symbol}")
         return None
     
-    def get_price(self, token_ids: List[str], vs_currency: str = "usd") -> Dict[str, Dict[str, float]]:
+    def get_price(self, token_ids: List[str], vs_currency: str = "usd", headers: Optional[Dict[str, str]] = None) -> Dict[str, Dict[str, float]]:
         """
         Get prices for multiple token IDs from CoinGecko.
         
         Args:
             token_ids: List of token IDs
             vs_currency: Currency to get price in (default: USD)
+            headers: Optional request headers for authentication
             
         Returns:
             Dictionary of token IDs -> price data
@@ -278,7 +293,8 @@ class CoinGeckoAPI:
         ids_str = ",".join(tokens_to_fetch)
         endpoint = f"simple/price?ids={ids_str}&vs_currencies={vs_currency}"
         
-        result = self._make_request(endpoint)
+        # Make the API request with authentication headers
+        result = self._make_request(endpoint, headers=headers)
         current_time = time.time()
         
         if result:
@@ -427,7 +443,7 @@ class CoinGeckoAPI:
         
         return result
     
-    def get_token_price_by_address(self, address: str, platform: str = "solana", vs_currency: str = "usd") -> Optional[float]:
+    def get_token_price_by_address(self, address: str, platform: str = "solana", vs_currency: str = "usd", headers: Optional[Dict[str, str]] = None) -> Optional[float]:
         """
         Get price for a token by address.
         
@@ -435,6 +451,7 @@ class CoinGeckoAPI:
             address: Token address (e.g., Solana token address)
             platform: Blockchain platform (default: solana)
             vs_currency: Currency to get price in (default: USD)
+            headers: Optional headers for authentication
             
         Returns:
             Token price or None if not found
@@ -442,6 +459,16 @@ class CoinGeckoAPI:
         if not address:
             logger.warning("Empty address passed to get_token_price_by_address")
             return None
+            
+        # Create headers with API key if not provided
+        if headers is None:
+            headers = {}
+            # Add API key from environment if available
+            api_key = os.getenv("COINGECKO_API_KEY")
+            if api_key:
+                headers["x-cg-pro-api-key"] = api_key
+                headers["x-cg-api-key"] = api_key
+                logger.info("Using CoinGecko API key from environment for address lookup")
         
         # First, check if we have the address in our address-to-id mapping
         address_lower = address.lower()
@@ -450,7 +477,7 @@ class CoinGeckoAPI:
             logger.info(f"Using cached token ID mapping for address {address}: {token_id}")
             
             # Get price using the token ID
-            result = self.get_price([token_id], vs_currency)
+            result = self.get_price([token_id], vs_currency, headers=headers)
             if result and token_id in result:
                 price_data = result[token_id]
                 price = price_data.get(vs_currency, 0)
@@ -460,7 +487,8 @@ class CoinGeckoAPI:
         # If we don't have a mapping or it failed, try the direct API endpoint
         endpoint = f"simple/token_price/{platform}?contract_addresses={address}&vs_currencies={vs_currency}"
         
-        result = self._make_request(endpoint)
+        # Make the API request with authentication headers
+        result = self._make_request(endpoint, headers=headers)
         
         if result and address in result:
             price_data = result[address]
