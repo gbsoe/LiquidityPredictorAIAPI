@@ -77,6 +77,107 @@ class TokenDataService:
         
         logger.info("Initialized token data service")
         
+    def _extract_token_data_from_pool(self, pool):
+        """
+        Extract token data from a pool object.
+        This method handles different pool data formats to extract token information.
+        
+        Args:
+            pool: Pool data dictionary from the API
+            
+        Returns:
+            List of token data dictionaries
+        """
+        tokens = []
+        
+        try:
+            # Check if the pool has tokens array
+            if 'tokens' in pool and isinstance(pool['tokens'], list):
+                for token in pool['tokens']:
+                    if isinstance(token, dict) and 'symbol' in token and token['symbol']:
+                        tokens.append(token)
+            
+            # Otherwise, try to extract from token pair, baseMint and quoteMint fields
+            elif 'tokenPair' in pool and '/' in pool['tokenPair']:
+                token1_symbol, token2_symbol = pool['tokenPair'].split('/')
+                
+                # Create token objects
+                token1 = {
+                    'symbol': token1_symbol,
+                    'name': self.api_client._get_token_name(token1_symbol),
+                    'address': pool.get('baseMint', ''),
+                    'decimals': 9  # Default for Solana
+                }
+                
+                token2 = {
+                    'symbol': token2_symbol,
+                    'name': self.api_client._get_token_name(token2_symbol),
+                    'address': pool.get('quoteMint', ''),
+                    'decimals': 6 if token2_symbol == 'USDC' else 9  # USDC has 6 decimals
+                }
+                
+                tokens.append(token1)
+                tokens.append(token2)
+                
+            # Check for token0 and token1 format (common in some APIs)
+            elif all(k in pool for k in ['token0', 'token1']):
+                if isinstance(pool['token0'], dict) and 'symbol' in pool['token0']:
+                    tokens.append(pool['token0'])
+                if isinstance(pool['token1'], dict) and 'symbol' in pool['token1']:
+                    tokens.append(pool['token1'])
+            
+            # Try to handle any other structure with tokens
+            elif 'tokenA' in pool and 'tokenB' in pool:
+                if isinstance(pool['tokenA'], dict) and 'symbol' in pool['tokenA']:
+                    tokens.append(pool['tokenA'])
+                if isinstance(pool['tokenB'], dict) and 'symbol' in pool['tokenB']:
+                    tokens.append(pool['tokenB'])
+        
+        except Exception as e:
+            logger.warning(f"Error extracting token data from pool: {e}")
+        
+        return tokens
+    
+    def _add_token_to_coingecko(self, token):
+        """
+        Attempt to add token to CoinGecko mappings for improved price fetching.
+        This method will try to find appropriate CoinGecko IDs for tokens.
+        
+        Args:
+            token: Token data dictionary with symbol and address
+            
+        Returns:
+            True if successfully added to mappings, False otherwise
+        """
+        if coingecko_api is None:
+            return False
+            
+        symbol = token.get('symbol', '').upper()
+        address = token.get('address', '')
+        
+        if not symbol or symbol == 'UNKNOWN' or not address:
+            return False
+            
+        # Check if we already have a mapping
+        token_id = None
+        
+        # First try to search for the token by symbol
+        try:
+            search_results = coingecko_api.search_token(symbol)
+            for result in search_results:
+                if result.get('symbol', '').upper() == symbol:
+                    token_id = result.get('id')
+                    if token_id:
+                        # Add to mappings
+                        coingecko_api.add_token_mapping(symbol, token_id)
+                        coingecko_api.add_address_mapping(address, token_id)
+                        logger.info(f"Added {symbol} to CoinGecko mappings with ID: {token_id}")
+                        return True
+        except Exception as e:
+            logger.warning(f"Error searching CoinGecko for {symbol}: {e}")
+            
+        return False
+    
     def preload_all_tokens(self):
         """
         Preload all token data from the API into the cache.
@@ -100,32 +201,8 @@ class TokenDataService:
             # Now, extract token data from pools
             all_tokens = []
             for pool in all_pools:
-                # Check if the pool has tokens array
-                if 'tokens' in pool and isinstance(pool['tokens'], list):
-                    for token in pool['tokens']:
-                        if isinstance(token, dict) and 'symbol' in token and token['symbol']:
-                            all_tokens.append(token)
-                # Otherwise, try to extract from token pair, baseMint and quoteMint fields
-                elif 'tokenPair' in pool and '/' in pool['tokenPair']:
-                    token1_symbol, token2_symbol = pool['tokenPair'].split('/')
-                    
-                    # Create token objects
-                    token1 = {
-                        'symbol': token1_symbol,
-                        'name': self.api_client._get_token_name(token1_symbol),
-                        'address': pool.get('baseMint', ''),
-                        'decimals': 9  # Default for Solana
-                    }
-                    
-                    token2 = {
-                        'symbol': token2_symbol,
-                        'name': self.api_client._get_token_name(token2_symbol),
-                        'address': pool.get('quoteMint', ''),
-                        'decimals': 6 if token2_symbol == 'USDC' else 9  # USDC has 6 decimals
-                    }
-                    
-                    all_tokens.append(token1)
-                    all_tokens.append(token2)
+                tokens_from_pool = self._extract_token_data_from_pool(pool)
+                all_tokens.extend(tokens_from_pool)
             
             # Remove duplicates (by symbol)
             unique_tokens = {}
@@ -159,6 +236,14 @@ class TokenDataService:
                 
                 # Process for consistent format
                 processed_token = self._process_token_data(token)
+                
+                # Try to add token to CoinGecko mappings for better price retrieval
+                if symbol and address:
+                    # This will automatically search CoinGecko and add mappings if found
+                    self._add_token_to_coingecko({
+                        'symbol': symbol,
+                        'address': address
+                    })
                 
                 # Update cache by symbol if available
                 if symbol:
@@ -1098,7 +1183,7 @@ class TokenDataService:
             
             # Get token price from CoinGecko if price is 0 or missing
             symbol = processed.get("symbol", "").upper()
-            if symbol and symbol != "UNKNOWN" and processed.get("price", 0) == 0:
+            if symbol and symbol != "UNKNOWN":
                 try:
                     # Handle special token cases
                     # For MSOL and STSOL, add special handling since these are common problematic tokens
@@ -1106,10 +1191,16 @@ class TokenDataService:
                         # Set explicit coingecko_id for Marinade Staked SOL
                         processed["coingecko_id"] = "marinade-staked-sol"
                         logger.info(f"Using explicit CoinGecko ID mapping for {symbol}: marinade-staked-sol")
+                        # Add to CoinGecko mappings
+                        if coingecko_api is not None:
+                            coingecko_api.add_token_mapping(symbol, "marinade-staked-sol")
                     elif symbol in ["STSOL", "stSOL"]:
                         # Set explicit coingecko_id for Lido Staked SOL
                         processed["coingecko_id"] = "lido-staked-sol"
                         logger.info(f"Using explicit CoinGecko ID mapping for {symbol}: lido-staked-sol")
+                        # Add to CoinGecko mappings
+                        if coingecko_api is not None:
+                            coingecko_api.add_token_mapping(symbol, "lido-staked-sol")
                     
                     # Skip CoinGecko if API client is not available
                     if coingecko_api is None:
@@ -1127,24 +1218,43 @@ class TokenDataService:
                             if result and coingecko_id in result:
                                 price = result[coingecko_id].get("usd", 0)
                                 logger.info(f"Retrieved price for {symbol} using coingecko_id {coingecko_id}: {price}")
+                                
+                                # Add successful mapping to CoinGecko cache
+                                coingecko_api.add_token_mapping(symbol, coingecko_id)
+                                
+                                # Add address mapping if available
+                                if processed.get("address"):
+                                    coingecko_api.add_address_mapping(processed.get("address"), coingecko_id)
                             else:
                                 logger.warning(f"No price data returned for {symbol} with ID {coingecko_id}")
                         
                         # If no price or no coingecko_id, try by symbol
-                        if not price or price == 0:
+                        if processed.get("price", 0) == 0 and (not price or price == 0):
                             logger.info(f"Fetching price for {symbol} from CoinGecko by symbol")
                             price = coingecko_api.get_token_price_by_symbol(symbol)
                             if price and price > 0:
                                 logger.info(f"Retrieved price for {symbol} by symbol lookup: {price}")
+                                
+                                # Try to get the ID that was used for this symbol
+                                token_id = coingecko_api.get_token_id(symbol)
+                                if token_id:
+                                    # Add address mapping if available
+                                    if processed.get("address"):
+                                        coingecko_api.add_address_mapping(processed.get("address"), token_id)
                         
                         # If still no price, try by address
-                        if (not price or price == 0) and processed.get("address"):
+                        if processed.get("price", 0) == 0 and (not price or price == 0) and processed.get("address"):
                             address = processed.get("address")
                             if address and isinstance(address, str):
                                 logger.info(f"Fetching price for {symbol} from CoinGecko by address: {address}")
                                 price = coingecko_api.get_token_price_by_address(address)
                                 if price and price > 0:
                                     logger.info(f"Retrieved price for {symbol} by address lookup: {price}")
+                                    
+                                    # Try to get the token ID used for this address
+                                    if hasattr(coingecko_api, 'address_to_id') and address.lower() in coingecko_api.address_to_id:
+                                        token_id = coingecko_api.address_to_id[address.lower()]
+                                        coingecko_api.add_token_mapping(symbol, token_id)
                     
                     # Special case for staked SOL tokens: if price still not available, 
                     # use SOL price and slightly adjust it

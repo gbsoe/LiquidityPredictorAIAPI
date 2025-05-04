@@ -301,6 +301,59 @@ class CoinGeckoAPI:
             # If API failed, return whatever we had in cache
             return {token_id: data["price_data"] for token_id, data in cached_results.items()}
     
+    def add_token_mapping(self, symbol: str, token_id: str) -> bool:
+        """
+        Add a new token mapping from symbol to CoinGecko ID.
+        This is used to enhance price fetching capabilities.
+        
+        Args:
+            symbol: Token symbol (e.g., "SOL", "BTC")
+            token_id: CoinGecko ID (e.g., "solana", "bitcoin")
+            
+        Returns:
+            True if the mapping was added, False otherwise
+        """
+        if not symbol or not token_id:
+            logger.warning("Empty symbol or token_id passed to add_token_mapping")
+            return False
+            
+        # Normalize symbol to uppercase
+        symbol = symbol.upper()
+        
+        # Add to token_id_cache
+        self.token_id_cache[symbol] = token_id
+        logger.info(f"Added token mapping: {symbol} -> {token_id}")
+        
+        return True
+        
+    def add_address_mapping(self, address: str, token_id: str) -> bool:
+        """
+        Add a new token mapping from address to CoinGecko ID.
+        This is used to enhance price fetching capabilities.
+        
+        Args:
+            address: Token address (e.g., Solana token address)
+            token_id: CoinGecko ID (e.g., "solana", "bitcoin")
+            
+        Returns:
+            True if the mapping was added, False otherwise
+        """
+        if not address or not token_id:
+            logger.warning("Empty address or token_id passed to add_address_mapping")
+            return False
+            
+        # Normalize address to lowercase for consistent lookup
+        address_lower = address.lower()
+        
+        # Add to address-to-id mapping
+        if hasattr(self, 'address_to_id'):
+            self.address_to_id[address_lower] = token_id
+            logger.info(f"Added address mapping: {address} -> {token_id}")
+            return True
+        else:
+            logger.warning("address_to_id mapping not available")
+            return False
+
     def get_token_price_by_symbol(self, symbol: str, vs_currency: str = "usd") -> Optional[float]:
         """
         Get price for a token symbol.
