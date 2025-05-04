@@ -60,6 +60,7 @@ class CoinGeckoAPI:
             "USDC": "usd-coin",
             "USDT": "tether",
             "BONK": "bonk",
+            "BOOP": "boop",  # Added BOOP token mapping
             "RAY": "raydium",
             "ORCA": "orca",
             "MSOL": "marinade-staked-sol",
@@ -108,6 +109,7 @@ class CoinGeckoAPI:
             "epjfwdd5aufqssqem2qn1xzybapC8G4wegGkzwyTDt1v".lower(): "usd-coin",
             "es9vmfrzacermjfrf4h2fyd4kconky11mcce8bennybe".lower(): "tether",
             "dezxaz8z7pnrnrjjz3wxborgixca6xjnb7yab1ppb263".lower(): "bonk",
+            "boopkpwqe68msxlqbgogs8zbugn4gxalhfwnp7mpp1i".lower(): "boop",  # Added BOOP token address mapping
             "orcaektdk7lkz57vaayr9qensvepfiu6qemu1kektze".lower(): "orca", 
             "4k3dyjzvzp8emzwuxbbcjevwskkk59s5icnly3qrkx6r".lower(): "raydium",
             "msolzycxhdygdzu16g5qsh3i5k3z3kzk7ytfqcjm7so".lower(): "marinade-staked-sol",
