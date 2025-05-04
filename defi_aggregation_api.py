@@ -60,9 +60,9 @@ class DefiAggregationAPI:
         # Configure request delay for rate limiting (10 req/sec)
         self.request_delay = 0.1  # 100ms delay for 10 requests per second 
         
-        # Set authentication headers - use x-api-key format for the new API endpoint
+        # Set authentication headers - use X-API-KEY format (confirmed working with the new API)
         self.headers = {
-            "x-api-key": self.api_key,
+            "X-API-KEY": self.api_key,  # This format is required by the new API endpoint
             "Content-Type": "application/json"
         }
         
@@ -155,11 +155,19 @@ class DefiAggregationAPI:
         Returns:
             List of pool data
         """
-        # Updated params based on API docs
-        params: Dict[str, Any] = {"limit": limit, "offset": offset}
+        # Adjusted for the new API: the source parameter may not be needed or might use different name
+        # Let's only pass parameters that are explicitly specified
+        params: Dict[str, Any] = {}
         
+        # Only add parameters that have values
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
         if source:
+            # Try both parameter naming conventions
             params["source"] = source.lower()  # API expects lowercase DEX names
+            params["dex"] = source.lower()     # Alternative parameter name
         if token:
             params["token"] = token
         if sort:
@@ -168,13 +176,27 @@ class DefiAggregationAPI:
             params["order"] = order
         
         try:
-            # Based on updated docs, API returns dict with 'pools' property
+            # Based on testing, we get a dict with 'pools' and 'timestamp' keys
             result = self._make_request("pools", params)
             
             # Handle different response formats
             if isinstance(result, dict) and "pools" in result:
-                logger.info(f"Received {len(result.get('pools', []))} pools from API")
-                return result.get("pools", [])
+                pools_data = result.get("pools", [])
+                # Check if pools is a dict with categories (bestPerformance, topStable, etc.)
+                if isinstance(pools_data, dict):
+                    # Flatten the categorized pools into a single list
+                    all_pools = []
+                    for category, pool_list in pools_data.items():
+                        if isinstance(pool_list, list):
+                            all_pools.extend(pool_list)
+                    logger.info(f"Received {len(all_pools)} pools from API (across {len(pools_data)} categories)")
+                    return all_pools
+                elif isinstance(pools_data, list):
+                    logger.info(f"Received {len(pools_data)} pools from API")
+                    return pools_data
+                else:
+                    logger.warning(f"Unexpected pools data format: {type(pools_data)}")
+                    return []
             elif isinstance(result, list):
                 logger.info(f"Received {len(result)} pools directly as list")
                 return result
