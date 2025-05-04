@@ -385,6 +385,87 @@ class TokenDataService:
             "mSOL", "stSOL", "ORCA", "ATLAS", "POLIS", "JTO", "DUST", "GENE", "WIF", "JUP"
         ]
         self.preload_token_data(common_tokens)
+        
+    def preload_all_tokens(self) -> None:
+        """Preload data for all common tokens plus additional popular ones"""
+        # Start with common tokens
+        self.preload_common_tokens()
+        
+        # Then try to load additional tokens if we have access to the DeFi API
+        if self.defi_api:
+            try:
+                # Get some popular pools
+                pools_response = self.defi_api.get_all_pools(limit=50, sort="tvl", order="desc")
+                pools = pools_response.get('pools', [])
+                
+                # Extract token symbols from pools
+                symbols = set()
+                for pool in pools:
+                    tokens = pool.get('tokens', [])
+                    for token in tokens:
+                        if 'symbol' in token:
+                            symbols.add(token['symbol'].upper())
+                
+                # Preload data for these tokens (excluding ones we've already loaded)
+                common_set = {token.upper() for token in [
+                    "SOL", "USDC", "USDT", "ETH", "BTC", "RAY", "BONK", "SAMO", "MNGO", "SRM",
+                    "mSOL", "stSOL", "ORCA", "ATLAS", "POLIS", "JTO", "DUST", "GENE", "WIF", "JUP"
+                ]}
+                additional_tokens = symbols - common_set
+                
+                logger.info(f"Preloading data for {len(additional_tokens)} additional tokens")
+                self.preload_token_data(list(additional_tokens))
+                logger.info(f"Completed preloading additional token data")
+                
+            except Exception as e:
+                logger.error(f"Error preloading additional tokens: {e}")
+                
+    def get_token_data(self, symbol: str, force_refresh: bool = False) -> Dict[str, Any]:
+        """
+        Get comprehensive token data by symbol
+        
+        Args:
+            symbol: Token symbol (e.g., 'SOL', 'BTC')
+            force_refresh: Whether to force a refresh from API
+            
+        Returns:
+            Dictionary with token data
+        """
+        symbol = symbol.upper()
+        
+        # Check if we need to refresh the data
+        if force_refresh or symbol not in self.token_data:
+            # Get price
+            price = self.get_token_price(symbol)
+            
+            # Get address
+            address = self.get_token_address(symbol)
+            
+            # Create token data object
+            token_data = {
+                'symbol': symbol,
+                'price': price,
+                'address': address,
+                'updated_at': time.time()
+            }
+            
+            # Update cache
+            self._update_token_data(symbol, token_data)
+            
+        return self.token_data.get(symbol, {})
+        
+    def get_token_metadata(self, symbol: str) -> Dict[str, Any]:
+        """
+        Get token metadata by symbol
+        
+        Args:
+            symbol: Token symbol (e.g., 'SOL', 'BTC')
+            
+        Returns:
+            Dictionary with token metadata
+        """
+        # This is just an alias for get_token_data for backward compatibility
+        return self.get_token_data(symbol)
 
 # Singleton instance
 _instance = None
