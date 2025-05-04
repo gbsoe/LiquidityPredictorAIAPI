@@ -375,15 +375,9 @@ def create_prediction_chart(df, metric='predicted_apr'):
     if 'prediction_timestamp' in df.columns:
         df = df.sort_values('prediction_timestamp')
     
-    # Handle unrealistic APR values if present
+    # No capping of APR values - show exact values
     display_df = df.copy()
     max_apr_warning = None
-    
-    if metric == 'predicted_apr':
-        max_apr = df[metric].max()
-        if max_apr > 50:
-            max_apr_warning = f"Capping unrealistically high APR values ({max_apr:.2f}%) to 50% for visualization."
-            display_df[metric] = display_df[metric].clip(upper=50)
     
     # Create the line chart
     fig = px.line(
@@ -408,24 +402,15 @@ def create_prediction_chart(df, metric='predicted_apr'):
         height=400
     )
     
-    # Set appropriate y-axis limits
+    # Set appropriate y-axis limits for risk score only
+    # For APR, allow any value to be displayed
     if metric == 'predicted_apr':
-        # Set y-axis to max out at 50% or the actual maximum if lower
-        ymax = min(50, display_df[metric].max() * 1.1)  # Add 10% padding
+        # Dynamic y-axis based on actual data (with 10% padding)
+        ymax = display_df[metric].max() * 1.1  # Add 10% padding
         fig.update_layout(yaxis=dict(range=[0, ymax]))
     elif metric == 'risk_score':
         # Risk is always 0-1
         fig.update_layout(yaxis=dict(range=[0, 1]))
-    
-    # Add warning annotation if needed
-    if max_apr_warning:
-        fig.add_annotation(
-            text=max_apr_warning,
-            xref="paper", yref="paper",
-            x=0.5, y=-0.15,
-            showarrow=False,
-            font=dict(color="red", size=10)
-        )
     
     return fig
 

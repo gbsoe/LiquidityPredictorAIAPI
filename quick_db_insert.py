@@ -75,20 +75,47 @@ def create_test_data():
         # Insert current predictions for all pools
         logger.info("Inserting current predictions")
         for pool_id, name, _, _, _ in pools:
-            # Generate realistic APR (between 3% and 35%)
-            apr = random.uniform(3.0, 35.0)
+            # Generate APR with a wide range (including some high-APR pools)
+            # Pool 1: Low to medium APR (5-25%)
+            # Pool 2: Medium to high APR (15-80%)
+            # Pool 3: Very high APR (100-550%)
+            # Pool 4: Extremely high APR (400-999%)
+            # Pool 5: Normal range APR (5-35%)
+            if pool_id == "pool1":
+                apr = random.uniform(5.0, 25.0)
+            elif pool_id == "pool2":
+                apr = random.uniform(15.0, 80.0)
+            elif pool_id == "pool3":
+                apr = random.uniform(100.0, 550.0)
+            elif pool_id == "pool4":
+                apr = random.uniform(400.0, 999.0)
+            else:  # pool5
+                apr = random.uniform(5.0, 35.0)
             
             # Risk score (0-1, lower is better)
-            risk = min(0.9, apr / 50.0 + random.uniform(-0.1, 0.1))
-            risk = max(0.1, risk)
-            
-            # Performance class
-            if apr > 20:
-                perf_class = 3  # high
-            elif apr > 10:
-                perf_class = 2  # medium
+            # Higher APR typically means higher risk
+            if apr > 100:
+                # High APR pools have high risk
+                risk = random.uniform(0.7, 0.95)
+            elif apr > 50:
+                # Medium-high APR pools have medium-high risk
+                risk = random.uniform(0.5, 0.8)
             else:
-                perf_class = 1  # low
+                # Lower APR pools have lower risk
+                risk = random.uniform(0.1, 0.5)
+            
+            # Performance class - based on both APR and risk
+            # Very high APR can be high performance despite high risk
+            if apr > 200:
+                perf_class = 3  # high performance regardless of risk (high reward)
+            elif apr > 50 and risk < 0.7:
+                perf_class = 3  # high performance (good balance of risk/reward)
+            elif apr > 20 and risk < 0.5:
+                perf_class = 3  # high performance (good risk/reward)
+            elif apr > 10 or (apr > 5 and risk < 0.3):
+                perf_class = 2  # medium performance
+            else:
+                perf_class = 1  # low performance
                 
             cursor.execute("""
             INSERT INTO predictions (
@@ -98,29 +125,53 @@ def create_test_data():
         
         conn.commit()
         
-        # Generate historical data for first 3 pools
+        # Generate historical data for all pools
         logger.info("Inserting historical predictions")
-        for pool_id, name, _, _, _ in pools[:3]:
-            # Base APR
-            base_apr = random.uniform(10.0, 25.0)
+        for pool_id, name, _, _, _ in pools:
+            # Set base APR according to pool category
+            if pool_id == "pool1":
+                base_apr = random.uniform(5.0, 25.0)
+                max_fluctuation = 5.0
+            elif pool_id == "pool2":
+                base_apr = random.uniform(15.0, 80.0)
+                max_fluctuation = 15.0
+            elif pool_id == "pool3":
+                base_apr = random.uniform(100.0, 550.0)
+                max_fluctuation = 100.0
+            elif pool_id == "pool4":
+                base_apr = random.uniform(400.0, 999.0)
+                max_fluctuation = 150.0
+            else:  # pool5
+                base_apr = random.uniform(5.0, 35.0)
+                max_fluctuation = 8.0
             
             # Historical data for last 14 days
             for day in range(14, 0, -1):
-                # Vary APR over time with trend
-                apr = base_apr + (day * 0.3 * random.choice([-1, 1])) + random.uniform(-2.0, 2.0)
-                apr = max(3.0, min(35.0, apr))
+                # Vary APR over time with trend - larger fluctuations for higher APR pools
+                apr = base_apr + (day * max_fluctuation/10 * random.choice([-1, 1])) + random.uniform(-max_fluctuation, max_fluctuation)
+                # No max capping - allow APR to be as high as market conditions dictate
+                apr = max(3.0, apr)  # Only enforce minimum APR
                 
-                # Risk follows APR
-                risk = min(0.9, apr / 50.0 + random.uniform(-0.1, 0.1))
-                risk = max(0.1, risk)
-                
-                # Performance class
-                if apr > 20:
-                    perf_class = 3  # high
-                elif apr > 10:
-                    perf_class = 2  # medium
+                # Risk follows APR - higher APR means higher risk
+                if apr > 100:
+                    risk = random.uniform(0.7, 0.95)
+                elif apr > 50:
+                    risk = random.uniform(0.5, 0.8)
                 else:
-                    perf_class = 1  # low
+                    risk = random.uniform(0.1, 0.5)
+                
+                # Performance class - based on both APR and risk
+                # Very high APR can be high performance despite high risk
+                if apr > 200:
+                    perf_class = 3  # high performance regardless of risk (high reward)
+                elif apr > 50 and risk < 0.7:
+                    perf_class = 3  # high performance (good balance of risk/reward)
+                elif apr > 20 and risk < 0.5:
+                    perf_class = 3  # high performance (good risk/reward)
+                elif apr > 10 or (apr > 5 and risk < 0.3):
+                    perf_class = 2  # medium performance
+                else:
+                    perf_class = 1  # low performance
                 
                 # Format the interval properly
                 interval = f"{day} days"
