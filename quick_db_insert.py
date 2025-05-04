@@ -49,21 +49,24 @@ def create_test_data():
         cursor.execute("DELETE FROM pools")
         conn.commit()
         
-        # Insert 5 test pools
+        # Insert 5 test pools with TVL and stability metrics
         logger.info("Inserting test pools")
+        # Format: (pool_id, name, dex, token1, token2, category, tvl, tvl_stability, liquidity_depth)
+        # tvl_stability: 0-1 score where 1 is most stable
+        # liquidity_depth: 0-1 score where 1 is deepest liquidity
         pools = [
-            ("pool1", "SOL/USDC", "Raydium", "SOL", "USDC"),
-            ("pool2", "BTC/USDC", "Orca", "BTC", "USDC"),
-            ("pool3", "ETH/SOL", "Raydium", "ETH", "SOL"),
-            ("pool4", "BONK/USDC", "Meteor", "BONK", "USDC"),
-            ("pool5", "RAY/USDC", "Raydium", "RAY", "USDC")
+            ("pool1", "SOL/USDC", "Raydium", "SOL", "USDC", "stablecoin-bluechip", 3500000.0, 0.92, 0.88),
+            ("pool2", "BTC/USDC", "Orca", "BTC", "USDC", "stablecoin-bluechip", 2800000.0, 0.85, 0.76),
+            ("pool3", "ETH/SOL", "Raydium", "ETH", "SOL", "bluechip", 1200000.0, 0.65, 0.58),
+            ("pool4", "BONK/USDC", "Meteor", "BONK", "USDC", "meme-stablecoin", 850000.0, 0.42, 0.37),
+            ("pool5", "RAY/USDC", "Raydium", "RAY", "USDC", "defi-stablecoin", 1750000.0, 0.78, 0.69)
         ]
         
-        for pool_id, name, dex, token1, token2 in pools:
+        for pool_id, name, dex, token1, token2, category, tvl, tvl_stability, liquidity_depth in pools:
             cursor.execute("""
-            INSERT INTO pools (pool_id, name, dex, token1, token2)
-            VALUES (%s, %s, %s, %s, %s)
-            """, (pool_id, name, dex, token1, token2))
+            INSERT INTO pools (pool_id, name, dex, token1, token2, category, tvl, tvl_stability, liquidity_depth)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (pool_id, name, dex, token1, token2, category, tvl, tvl_stability, liquidity_depth))
         
         conn.commit()
         
@@ -74,7 +77,7 @@ def create_test_data():
         
         # Insert current predictions for all pools
         logger.info("Inserting current predictions")
-        for pool_id, name, _, _, _ in pools:
+        for pool_id, name, dex, token1, token2, category, tvl, tvl_stability, liquidity_depth in pools:
             # Generate APR with a wide range (including some high-APR pools)
             # Pool 1: Low to medium APR (5-25%)
             # Pool 2: Medium to high APR (15-80%)
@@ -127,7 +130,7 @@ def create_test_data():
         
         # Generate historical data for all pools
         logger.info("Inserting historical predictions")
-        for pool_id, name, _, _, _ in pools:
+        for pool_id, name, dex, token1, token2, category, tvl, tvl_stability, liquidity_depth in pools:
             # Set base APR according to pool category
             if pool_id == "pool1":
                 base_apr = random.uniform(5.0, 25.0)

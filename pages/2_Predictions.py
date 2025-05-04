@@ -214,34 +214,140 @@ try:
                 risk_reward_cols = st.columns(3)
                 
                 with risk_reward_cols[0]:
-                    # High APR, Low Risk pools (ideal)
-                    ideal_pools = top_predictions[
-                        (top_predictions['predicted_apr'] > top_predictions['predicted_apr'].median()) & 
-                        (top_predictions['risk_score'] < top_predictions['risk_score'].median())
-                    ]
+                    # Get pool details for additional metrics
+                    pool_details = []
+                    for _, row in top_predictions.iterrows():
+                        try:
+                            # Get additional pool data
+                            pool_data = db.get_pool_details(row['pool_id'])
+                            if pool_data is not None and isinstance(pool_data, dict):
+                                # Combine with prediction data
+                                combined_data = {**row.to_dict(), **pool_data}
+                                pool_details.append(combined_data)
+                        except Exception as e:
+                            st.warning(f"Error fetching pool details: {e}")
                     
-                    st.markdown("### 🌟 Optimal Pools (High APR, Low Risk)")
+                    # Create DataFrame if we have data
+                    if pool_details:
+                        all_pool_data = pd.DataFrame(pool_details)
+                        
+                        # Define optimal pools based on sophisticated criteria:
+                        # 1. High TVL (>1M) with good stability (>0.7)
+                        # 2. Reasonable APR, allowing higher APRs (up to 200%) for stable pools
+                        # 3. Either stablecoin pair OR low risk score
+                        # 4. Good liquidity depth (>0.6)
+                        
+                        # First check if we have the required columns
+                        required_cols = ['tvl', 'tvl_stability', 'category', 'liquidity_depth']
+                        has_advanced_data = all(col in all_pool_data.columns for col in required_cols)
+                        
+                        if has_advanced_data:
+                            # Advanced optimal pool criteria
+                            ideal_pools = all_pool_data[
+                                # High TVL with stability
+                                ((all_pool_data['tvl'] > 2000000) & (all_pool_data['tvl_stability'] > 0.7)) |
+                                # OR medium TVL but very stable
+                                ((all_pool_data['tvl'] > 1000000) & (all_pool_data['tvl_stability'] > 0.85)) |
+                                # OR medium TVL with stablecoin and good APR
+                                ((all_pool_data['tvl'] > 1000000) & 
+                                 (all_pool_data['category'].str.contains('stablecoin')) &
+                                 (all_pool_data['predicted_apr'] > 15))
+                            ]
+                            
+                            # Further filter by risk or liquidity depth
+                            ideal_pools = ideal_pools[
+                                # Either low risk
+                                (ideal_pools['risk_score'] < 0.4) |
+                                # OR stablecoin pair with acceptable risk
+                                ((ideal_pools['category'].str.contains('stablecoin')) & 
+                                 (ideal_pools['risk_score'] < 0.7)) |
+                                # OR very high APR (100%+) with manageable risk
+                                ((ideal_pools['predicted_apr'] > 100) & 
+                                 (ideal_pools['risk_score'] < 0.8) &
+                                 (ideal_pools['tvl_stability'] > 0.7)) |
+                                # OR excellent liquidity depth
+                                (ideal_pools['liquidity_depth'] > 0.8)
+                            ]
+                        else:
+                            # Fallback to basic criteria if advanced data isn't available
+                            ideal_pools = all_pool_data[
+                                (all_pool_data['predicted_apr'] > all_pool_data['predicted_apr'].median()) & 
+                                (all_pool_data['risk_score'] < all_pool_data['risk_score'].median())
+                            ]
+                    else:
+                        # If we couldn't get pool details, use the original approach
+                        ideal_pools = top_predictions[
+                            (top_predictions['predicted_apr'] > top_predictions['predicted_apr'].median()) & 
+                            (top_predictions['risk_score'] < top_predictions['risk_score'].median())
+                        ]
+                    
+                    st.markdown("### 🌟 Optimal Pools (Precision Investing)")
                     if not ideal_pools.empty:
                         for _, pool in ideal_pools.head(3).iterrows():
-                            st.markdown(f"**{pool['pool_name']}**  \n"
-                                      f"APR: {pool['predicted_apr']:.2f}%  \n"
-                                      f"Risk: {pool['risk_score']:.2f}")
+                            # Check if we have detailed metrics to show
+                            has_tvl = 'tvl' in pool and pool['tvl'] is not None
+                            has_stability = 'tvl_stability' in pool and pool['tvl_stability'] is not None
+                            has_category = 'category' in pool and pool['category'] is not None
+                            
+                            # Basic info about the pool
+                            pool_info = f"**{pool['pool_name']}**  \n" \
+                                      f"APR: {pool['predicted_apr']:.2f}%  \n" \
+                                      f"Risk: {pool['risk_score']:.2f}"
+                            
+                            # Add advanced metrics if available
+                            if has_tvl:
+                                pool_info += f"  \nTVL: ${pool['tvl']/1000000:.2f}M"
+                            if has_stability:
+                                pool_info += f"  \nStability: {pool['tvl_stability']*100:.0f}%"
+                            if has_category:
+                                pool_info += f"  \nType: {pool['category']}"
+                                
+                            st.markdown(pool_info)
                     else:
                         st.info("No pools in this category")
                 
                 with risk_reward_cols[1]:
-                    # High APR, High Risk pools
-                    aggressive_pools = top_predictions[
-                        (top_predictions['predicted_apr'] > top_predictions['predicted_apr'].median()) & 
-                        (top_predictions['risk_score'] > top_predictions['risk_score'].median())
-                    ]
+                    # Use the advanced data if available
+                    if pool_details and has_advanced_data:
+                        # High APR pools (very high APR regardless of risk, but with some stability)
+                        aggressive_pools = all_pool_data[
+                            # Ultra-high APR pools (400%+)
+                            ((all_pool_data['predicted_apr'] > 400) & 
+                             (all_pool_data['tvl_stability'] > 0.4)) |
+                            # Very high APR pools (200%+) with some stability
+                            ((all_pool_data['predicted_apr'] > 200) & 
+                             (all_pool_data['tvl_stability'] > 0.5)) |
+                            # High APR pools (100%+) with decent fundamentals
+                            ((all_pool_data['predicted_apr'] > 100) & 
+                             (all_pool_data['tvl'] > 500000) &
+                             (all_pool_data['tvl_stability'] > 0.6))
+                        ]
+                    else:
+                        # Fallback to basic criteria
+                        aggressive_pools = top_predictions[
+                            (top_predictions['predicted_apr'] > top_predictions['predicted_apr'].median()) & 
+                            (top_predictions['risk_score'] > top_predictions['risk_score'].median())
+                        ]
                     
-                    st.markdown("### 🔥 Aggressive Pools (High APR, High Risk)")
+                    st.markdown("### 🔥 High-Yield Pools (High APR)")
                     if not aggressive_pools.empty:
                         for _, pool in aggressive_pools.head(3).iterrows():
-                            st.markdown(f"**{pool['pool_name']}**  \n"
-                                      f"APR: {pool['predicted_apr']:.2f}%  \n"
-                                      f"Risk: {pool['risk_score']:.2f}")
+                            # Check if we have detailed metrics to show
+                            has_tvl = 'tvl' in pool and pool['tvl'] is not None
+                            has_stability = 'tvl_stability' in pool and pool['tvl_stability'] is not None
+                            
+                            # Basic info about the pool
+                            pool_info = f"**{pool['pool_name']}**  \n" \
+                                      f"APR: {pool['predicted_apr']:.2f}%  \n" \
+                                      f"Risk: {pool['risk_score']:.2f}"
+                            
+                            # Add advanced metrics if available
+                            if has_tvl:
+                                pool_info += f"  \nTVL: ${pool['tvl']/1000000:.2f}M"
+                            if has_stability:
+                                pool_info += f"  \nStability: {pool['tvl_stability']*100:.0f}%"
+                                
+                            st.markdown(pool_info)
                     else:
                         st.info("No pools in this category")
                 
