@@ -917,35 +917,43 @@ class DefiAggregationAPI:
             
             # List of known meme tokens
             meme_tokens = ["BONK", "BOOP", "WIF", "DOGE", "PEPE", "SHIB", "FLOKI", "CORG", "PUSSY", 
-                          "ANDY", "SAMO", "POPCAT", "SLOTH", "MYRO", "TOAD", "KITTY", "PUPPY", "DOGWIFHAT"]
+                          "ANDY", "SAMO", "POPCAT", "SLOTH", "MYRO", "TOAD", "KITTY", "PUPPY", "DOGWIFHAT",
+                          "POOP", "SHIT", "FART", "SOOMER", "LFG", "COPE", "ASS", "BUTT", "CUM", "BOOBA", "COCK",
+                          "MEME", "CHAD", "NOOT", "SNEK", "BANANA", "APE", "KONG", "BABYDOGE", "TOMO", "CHEEMS",
+                          "RABBIT", "BUNNY", "MONKE", "SNAIL", "TURTLE", "SHARK", "CRAB", "FROG", "GORILLA", "CHICKEN",
+                          "CUMGPT", "MILADY", "DEGEN", "WEN", "NYAN"]
             
             # List of known DeFi protocol tokens
             defi_tokens = ["RAY", "MNGO", "ORCA", "JTO", "STSOL", "MSOL", "JUP", "PYTH", "PORT", "SLND",
                           "TULIP", "ATLAS", "STEP", "SRM", "LIDO", "AURY", "LDO", "MEAN", "RENDER", "RENDER"]
             
-            # Check for stablecoin pairs
-            if token1_symbol in stablecoins or token2_symbol in stablecoins:
-                category = "Stablecoin"
+            # First priority: Check for meme tokens (these take precedence)
+            meme_keywords = ['dog', 'doge', 'pepe', 'shib', 'cat', 'meme', 'inu', 'frog', 'poop', 'shit', 
+                            'cum', 'pussy', 'cock', 'ass', 'butt', 'fart', 'baby', 'ape', 'moon', 'chad', 
+                            'degen', 'wojak', 'milady', 'monkey', 'chimp', 'gorilla', 'whale', 'bird', 
+                            'bear', 'bull', 'fish', 'crab', 'rabbit', 'bunny', 'shiba', 'nyan', 'noot']
             
-            # Check for major token pairs that are not stablecoins
-            elif (token1_symbol in major_tokens and token2_symbol not in stablecoins) or \
-                 (token2_symbol in major_tokens and token1_symbol not in stablecoins):
-                category = "Major Token"
-            
-            # Check for meme tokens
-            elif token1_symbol in meme_tokens or token2_symbol in meme_tokens or \
-                 any(meme in token1_symbol.lower() or meme in token2_symbol.lower() 
-                     for meme in ['dog', 'doge', 'pepe', 'shib', 'cat', 'meme', 'inu', 'frog']):
+            if token1_symbol in meme_tokens or token2_symbol in meme_tokens or \
+               any(meme in token1_symbol.lower() or meme in token2_symbol.lower() 
+                   for meme in meme_keywords):
                 category = "Meme Token"
             
-            # Check for DeFi protocols
+            # Second priority: For tokens like SOL paired with stablecoins, classify as Blue Chip
+            elif ((token1_symbol in major_tokens and token2_symbol in stablecoins) or 
+                 (token2_symbol in major_tokens and token1_symbol in stablecoins)):
+                category = "Blue Chip"
+                
+            # Third priority: Check for other stablecoin pairs 
+            elif token1_symbol in stablecoins or token2_symbol in stablecoins:
+                category = "Stablecoin"
+            
+            # Fourth priority: Check for DeFi protocols
             elif token1_symbol in defi_tokens or token2_symbol in defi_tokens:
                 category = "DeFi"
-                
-            # For tokens like SOL paired with stablecoins, classify as Blue Chip
-            elif (token1_symbol in major_tokens and token2_symbol in stablecoins) or \
-                 (token2_symbol in major_tokens and token1_symbol in stablecoins):
-                category = "Blue Chip"
+            
+            # Fifth priority: Check for major token pairs (that aren't with stablecoins)
+            elif (token1_symbol in major_tokens or token2_symbol in major_tokens):
+                category = "Major Token"
                 
             # Default for unknown pairs
             else:
