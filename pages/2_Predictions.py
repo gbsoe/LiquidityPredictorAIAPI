@@ -291,6 +291,8 @@ try:
                             
                             # Basic info about the pool
                             pool_info = f"**{pool['pool_name']}**  \n" \
+                                      f"Pool ID: {pool['pool_id']}\
+" \
                                       f"APR: {pool['predicted_apr']:.2f}%  \n" \
                                       f"Risk: {pool['risk_score']:.2f}"
                             
@@ -336,7 +338,7 @@ try:
                             has_tvl = 'tvl' in pool and pool['tvl'] is not None
                             has_stability = 'tvl_stability' in pool and pool['tvl_stability'] is not None
                             
-                            # Basic info about the pool
+                            # Basic info about the pool with Pool ID
                             pool_info = f"**{pool['pool_name']}**  \n" \
                                       f"APR: {pool['predicted_apr']:.2f}%  \n" \
                                       f"Risk: {pool['risk_score']:.2f}"
@@ -383,7 +385,7 @@ try:
                             has_stability = 'tvl_stability' in pool and pool['tvl_stability'] is not None
                             has_category = 'category' in pool and pool['category'] is not None
                             
-                            # Basic info about the pool
+                            # Basic info about the pool with Pool ID
                             pool_info = f"**{pool['pool_name']}**  \n" \
                                       f"APR: {pool['predicted_apr']:.2f}%  \n" \
                                       f"Risk: {pool['risk_score']:.2f}"
