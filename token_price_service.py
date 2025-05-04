@@ -61,7 +61,13 @@ DEFAULT_TOKEN_MAPPING = {
     # Tokens from the screenshot that need specific mappings
     "SOOMER": "soomer", # Updated to match CoinGecko ID 
     "SOGENT": "sogent",
-    "SPEC": "spectrecoin",
+    "SPEC": "spectral", # Updated to correct CoinGecko ID (was 'spectrecoin')
+    "FARTCOIN": "fartcoin", # Added FARTCOIN mapping
+    "BONK": "bonk-token",
+    "WIF": "dogwifhat", 
+    "ATLAS": "star-atlas",
+    "POLIS": "star-atlas-polis",
+    "LAYER": "solayer",
     
     # API-specific symbols (important: these match actual token symbols in the API!)
     "So11": "solana",        # Solana
