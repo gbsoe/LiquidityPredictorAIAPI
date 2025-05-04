@@ -64,6 +64,7 @@ DEFAULT_TOKEN_MAPPING = {
     "SPEC": "spectral", # Updated to correct CoinGecko ID (was 'spectrecoin')
     "FARTCOIN": "fartcoin", # Added FARTCOIN mapping
     "BONK": "bonk-token",
+    # Using consistent ID for WIF across both entries
     "WIF": "dogwifhat", 
     "ATLAS": "star-atlas",
     "POLIS": "star-atlas-polis",
@@ -90,6 +91,7 @@ DEFAULT_TOKEN_MAPPING = {
     "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs": "ethereum",
     "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263": "ethereum",
     "CTh5k7EHD2HBX64xZkeBDwmHskWvNq5WB8f4PWuW1hmz": "soomer", # SOOMER token address
+    "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm": "dogwifhat", # WIF token address
 }
 
 class TokenPriceService:
@@ -333,6 +335,47 @@ class TokenPriceService:
                     
                     logger.info(f"Retrieved SOOMER price by address: ${soomer_price}")
                     return (soomer_price, "coingecko") if return_source else soomer_price
+            
+            # Special case for WIF - try to get price by address
+            elif symbol.upper() == "WIF":
+                # Try direct address lookup for WIF token address
+                logger.info(f"Attempting direct address lookup for WIF token")
+                wif_price = self.get_price_by_token_address("EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm")
+                if wif_price is not None:
+                    # Update cache
+                    self.cached_prices[symbol.upper()] = wif_price
+                    if not hasattr(self, 'cache_price_sources'):
+                        self.cache_price_sources = {}
+                    self.cache_price_sources[symbol.upper()] = "coingecko"
+                    
+                    if self.use_cache:
+                        self._save_cache()
+                        
+                    logger.info(f"Retrieved WIF price by address: ${wif_price}")
+                    return (wif_price, "coingecko") if return_source else wif_price
+                    
+                # Direct call to CoinGecko API for WIF
+                logger.info("Attempting direct CoinGecko lookup for WIF...")
+                try:
+                    from coingecko_api import CoinGeckoAPI
+                    coingecko_client = CoinGeckoAPI()
+                    wif_data = coingecko_client.get_price(["dogwifhat"], "usd")
+                    if wif_data and "dogwifhat" in wif_data and "usd" in wif_data["dogwifhat"]:
+                        wif_price = wif_data["dogwifhat"]["usd"]
+                        
+                        # Update cache
+                        self.cached_prices[symbol.upper()] = wif_price
+                        if not hasattr(self, 'cache_price_sources'):
+                            self.cache_price_sources = {}
+                        self.cache_price_sources[symbol.upper()] = "coingecko"
+                        
+                        if self.use_cache:
+                            self._save_cache()
+                            
+                        logger.info(f"Retrieved WIF price from direct CoinGecko call: ${wif_price}")
+                        return (wif_price, "coingecko") if return_source else wif_price
+                except Exception as e:
+                    logger.warning(f"Could not retrieve price for WIF: {e}")
             
             return (None, "none") if return_source else None
         

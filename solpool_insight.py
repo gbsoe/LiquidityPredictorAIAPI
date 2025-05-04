@@ -2790,23 +2790,23 @@ def main():
                                       "ORCA", "BONK", "WIF", "FARTCOIN", "LAYER", "ATLAS", "PYTH",
                                       "POLIS"]
                     
-                    # Get our token service instance
-                    token_service = get_token_service()
-                    
                     # Initialize price dictionary
                     token_prices = {}
                     
-                    # Import the appropriate token price functions
-                    from token_price_service import get_token_price, get_multiple_prices
+                    # Direct access to token price service functions at the global scope
+                    # (these are imported at the top of the file)
                     
                     # Prioritize main tokens first
                     for symbol in priority_tokens:
                         if symbol in all_symbols:
                             try:
-                                price, source = get_token_price(symbol, return_source=True)
-                                if price is not None and price > 0:
-                                    token_prices[symbol] = price
-                                    logger.info(f"Retrieved priority token price for {symbol}: ${price} ({source})")
+                                # Direct call to the global function
+                                price_result = get_token_price(symbol, return_source=True)
+                                if isinstance(price_result, tuple):
+                                    price, source = price_result
+                                    if price is not None and price > 0:
+                                        token_prices[symbol] = price
+                                        logger.info(f"Retrieved priority token price for {symbol}: ${price} ({source})")
                             except Exception as e:
                                 logger.warning(f"Error getting price for priority token {symbol}: {e}")
                     
@@ -2818,10 +2818,11 @@ def main():
                     for i in range(0, len(remaining_tokens), batch_size):
                         batch = remaining_tokens[i:i+batch_size]
                         try:
-                            # Use bulk price lookup for efficiency
-                            batch_prices = get_multiple_prices(batch)
-                            token_prices.update(batch_prices)
-                            
+                            # Direct call to the global function
+                            prices_dict = get_multiple_prices(batch)
+                            if isinstance(prices_dict, dict):
+                                token_prices.update(prices_dict)
+                                
                             # Add a small delay between batches to avoid rate limits
                             if i + batch_size < len(remaining_tokens):
                                 time.sleep(0.5)
