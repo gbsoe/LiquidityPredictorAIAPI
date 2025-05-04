@@ -1,9 +1,9 @@
 {
   "prices": {
-    "ATLAS": 0.00132277,
-    "SOL": 148.71,
-    "BTC": 97080,
-    "ETH": 1832.56,
+    "ATLAS": 0.00122813,
+    "SOL": 145.44,
+    "BTC": 95668,
+    "ETH": 1833.29,
     "EPJF": 0,
     "4K3D": 0,
     "SO11": 0,
@@ -59,7 +59,8 @@
     "7KBN": "defi_api",
     "6DAZ": "defi_api",
     "JSOL": "defi_api",
-    "FWZ2": "defi_api"
+    "FWZ2": "defi_api",
+    "ATLAS": "coingecko"
   },
-  "last_update": "2025-05-02T19:23:03.802846"
+  "last_update": "2025-05-04T08:49:45.164930"
 }

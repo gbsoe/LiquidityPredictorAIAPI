@@ -203,6 +203,49 @@ class DefiAggregationAPI:
                     all_pools = []
                     for category, pool_list in pools_data.items():
                         if isinstance(pool_list, list):
+                            # Enhance pool data with category information
+                            for pool in pool_list:
+                                # Add category to each pool for classification
+                                pool['category'] = category
+                                # Add a source field if not present (needed for our data model)
+                                if 'source' not in pool:
+                                    # Default to "raydium" as it's the most common
+                                    pool['source'] = "raydium"
+                                # Add tokens array if not present
+                                if 'tokens' not in pool and 'tokenPair' in pool:
+                                    # Create token objects from tokenPair (e.g., "BOOP/USDC")
+                                    token_pair = pool.get('tokenPair', '')
+                                    if '/' in token_pair:
+                                        token1_symbol, token2_symbol = token_pair.split('/')
+                                        # Create basic token objects with symbols
+                                        pool['tokens'] = [
+                                            {
+                                                "symbol": token1_symbol,
+                                                "name": token1_symbol,
+                                                "address": pool.get('baseMint', ''),
+                                                "decimals": 9,  # Default for Solana
+                                                "price": float(pool.get('price', 0))
+                                            },
+                                            {
+                                                "symbol": token2_symbol,
+                                                "name": token2_symbol,
+                                                "address": pool.get('quoteMint', ''),
+                                                "decimals": 6 if token2_symbol == "USDC" else 9,  # USDC has 6 decimals
+                                                "price": 1.0 if token2_symbol == "USDC" else 0  # USDC price is 1
+                                            }
+                                        ]
+                                        
+                                # Add metrics object if not present (needed for our data model)
+                                if 'metrics' not in pool:
+                                    metrics = {
+                                        "tvl": float(pool.get('liquidityUsd', 0)),
+                                        "volumeUsd": float(pool.get('volume24h', 0)),
+                                        "apy24h": float(pool.get('apr24h', 0)),
+                                        "apy7d": float(pool.get('apr7d', 0)),
+                                        "apy30d": float(pool.get('apr30d', 0)),
+                                    }
+                                    pool['metrics'] = metrics
+                                
                             all_pools.extend(pool_list)
                     logger.info(f"Received {len(all_pools)} pools from API (across {len(pools_data)} categories)")
                     return all_pools
@@ -789,6 +832,8 @@ class DefiAggregationAPI:
             
             # If tokens were found/created, use them
             token1 = tokens[0] if len(tokens) > 0 else {}
+            # Make sure token2 is defined even if there's only one token
+            token2 = tokens[1] if len(tokens) > 1 else {}
             
             # Extract metrics from the metrics object with improved handling
             metrics = pool.get('metrics', {})
