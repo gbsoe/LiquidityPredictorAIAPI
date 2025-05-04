@@ -144,6 +144,8 @@ class CoinGeckoAPI:
             "jsol21f4hvbzfgxvjw4rtrnuhvqyjyd5axkpbgm".lower(): "jsol",
             # SOOMER token with specific address provided by user
             "CTh5k7EHD2HBX64xZkeBDwmHskWvNq5WB8f4PWuW1hmz".lower(): "soomer",
+            # LAYER token address mapping
+            "LayerDUjJuZPxiKTfyYYpUM5m3y3gL3nAZL5BQ7uqQb6".lower(): "unilayer",
             # Additional specific token addresses
             "msolzycxhdygdzu16g5qsh3i5k3z3kzk7ytfqcjm7so".lower(): "marinade-staked-sol",
             "msolzycxhdygdzu16g5qsh3i5k3z3kzk7ytfqcjm7so".upper(): "marinade-staked-sol",

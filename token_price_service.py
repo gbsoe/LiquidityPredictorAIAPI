@@ -274,8 +274,16 @@ class TokenPriceService:
             coingecko_api_key = os.getenv("COINGECKO_API_KEY")
             headers = {}
             if coingecko_api_key:
-                headers["x-cg-pro-api-key"] = coingecko_api_key
-                headers["x-cg-api-key"] = coingecko_api_key
+                # Check if it's a Demo API key (starts with CG-) or Pro API key
+                if coingecko_api_key.startswith("CG-"):
+                    # For Demo API keys
+                    headers["x-cg-demo-api-key"] = coingecko_api_key
+                    # Also add as query parameter for some endpoints
+                    params["x_cg_demo_api_key"] = coingecko_api_key
+                else:
+                    # For Pro API keys (maintain backward compatibility)
+                    headers["x-cg-pro-api-key"] = coingecko_api_key
+                    headers["x-cg-api-key"] = coingecko_api_key
                 logger.info(f"Using CoinGecko API key for {symbol}")
             
             response = requests.get(url, params=params, headers=headers, timeout=10)
@@ -324,10 +332,19 @@ class TokenPriceService:
                 
             # Use the CoinGecko API to get the price by address
             url = f"{COINGECKO_API_URL}/coins/solana/contract/{token_address}"
-            headers = {
-                "x-cg-pro-api-key": coingecko_api_key,
-                "x-cg-api-key": coingecko_api_key
-            }
+            headers = {}
+            params = {}
+            
+            # Check if it's a Demo API key (starts with CG-) or Pro API key
+            if coingecko_api_key.startswith("CG-"):
+                # For Demo API keys
+                headers["x-cg-demo-api-key"] = coingecko_api_key
+                # Also add as query parameter
+                params["x_cg_demo_api_key"] = coingecko_api_key
+            else:
+                # For Pro API keys (maintain backward compatibility)
+                headers["x-cg-pro-api-key"] = coingecko_api_key
+                headers["x-cg-api-key"] = coingecko_api_key
             
             logger.info(f"Looking up token price by address: {token_address}")
             response = requests.get(url, headers=headers, timeout=10)
