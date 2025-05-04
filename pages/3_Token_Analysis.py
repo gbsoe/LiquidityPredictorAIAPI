@@ -104,6 +104,11 @@ def main():
         # Process and enrich tokens before creating DataFrame
         enriched_tokens = []
         
+        # Import token price service to get direct CoinGecko prices
+        import sys
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from token_price_service import get_token_price
+        
         # First, filter out tokens with no symbol
         filtered_tokens = [t for t in tokens if t.get("symbol")]
         
@@ -123,7 +128,19 @@ def main():
                             t["price"] = fresh_token["price"]
                             t["price_source"] = fresh_token.get("price_source", "defi_api")
                     except Exception as e:
-                        st.error(f"Error refreshing token {symbol}: {e}")
+                        # Don't show error, just continue with direct price fetch
+                        pass
+                
+                # If token still doesn't have a price, try CoinGecko directly
+                if t.get("price", 0) == 0:
+                    try:
+                        # Using direct CoinGecko price fetching for tokens shown in UI
+                        price, source = get_token_price(symbol, return_source=True)
+                        if price and price > 0:
+                            t["price"] = float(price)
+                            t["price_source"] = source
+                    except Exception as e:
+                        st.error(f"Error getting CoinGecko price for {symbol}: {e}")
                 
                 enriched_tokens.append(t)
         
@@ -221,7 +238,19 @@ def main():
                             enhanced_token["price"] = fresh_token["price"]
                             enhanced_token["price_source"] = fresh_token.get("price_source", "defi_api")
                     except Exception as e:
-                        st.error(f"Error refreshing token {symbol}: {e}")
+                        # Don't show error, just continue with direct price fetch
+                        pass
+                
+                # If token still doesn't have a price, try CoinGecko directly
+                if enhanced_token.get("price", 0) == 0:
+                    try:
+                        # Using direct CoinGecko price fetching for tokens shown in UI
+                        price, source = get_token_price(symbol, return_source=True)
+                        if price and price > 0:
+                            enhanced_token["price"] = float(price)
+                            enhanced_token["price_source"] = source
+                    except Exception as e:
+                        st.error(f"Error getting CoinGecko price for {symbol}: {e}")
                 
                 enhanced_dex_tokens[symbol] = enhanced_token
             

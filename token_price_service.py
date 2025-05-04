@@ -58,10 +58,10 @@ DEFAULT_TOKEN_MAPPING = {
     "BUSD": "binance-usd",
     "USDH": "usdh",
     
-    # Additional tokens seen in the app
-    "SOOMER": "soomer",
+    # Tokens from the screenshot that need specific mappings
+    "SOOMER": "soomer-token",
     "SOGENT": "sogent",
-    "SPEC": "spectrum-token",
+    "SPEC": "spectrecoin",
     
     # API-specific symbols (important: these match actual token symbols in the API!)
     "So11": "solana",        # Solana
@@ -254,6 +254,7 @@ class TokenPriceService:
             coingecko_api_key = os.getenv("COINGECKO_API_KEY")
             headers = {}
             if coingecko_api_key:
+                headers["x-cg-pro-api-key"] = coingecko_api_key
                 headers["x-cg-api-key"] = coingecko_api_key
                 logger.info(f"Using CoinGecko API key for {symbol}")
             
@@ -431,6 +432,7 @@ class TokenPriceService:
             coingecko_api_key = os.getenv("COINGECKO_API_KEY")
             headers = {}
             if coingecko_api_key:
+                headers["x-cg-pro-api-key"] = coingecko_api_key
                 headers["x-cg-api-key"] = coingecko_api_key
                 logger.info(f"Using CoinGecko API key for multiple tokens")
             
