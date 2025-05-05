@@ -79,12 +79,18 @@ class HistoricalDataService:
             if 'timestamp' not in metrics:
                 metrics['timestamp'] = datetime.now().isoformat()
             
+            # Ensure timestamp is a string for consistent handling
+            if isinstance(metrics['timestamp'], datetime):
+                metrics['timestamp'] = metrics['timestamp'].isoformat()
+            elif not isinstance(metrics['timestamp'], str):
+                metrics['timestamp'] = str(metrics['timestamp'])
+                
             # Convert to DataFrame format for consistency
             metrics_df = pd.DataFrame([metrics])
             
             # Handle timestamp format
-            if not isinstance(metrics['timestamp'], datetime):
-                metrics_df['timestamp'] = pd.to_datetime(metrics_df['timestamp'])
+            # We'll only convert to datetime when actually needed for filtering or display
+            # Avoid conversion at this stage to prevent dt accessor issues
             
             # Update in-memory cache
             if pool_id in self.metrics_cache:
@@ -109,8 +115,21 @@ class HistoricalDataService:
                 # Convert to list of dictionaries for JSON serialization
                 metrics_data = self.metrics_cache[pool_id].copy()
                 
-                # Convert datetime to string
-                metrics_data['timestamp'] = metrics_data['timestamp'].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                # Convert timestamp to datetime if needed, then to string
+                try:
+                    # Check if the timestamp column is already in datetime format
+                    if pd.api.types.is_datetime64_dtype(metrics_data['timestamp']):
+                        metrics_data['timestamp'] = metrics_data['timestamp'].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                    else:
+                        # Try to convert to datetime first
+                        metrics_data['timestamp'] = pd.to_datetime(metrics_data['timestamp'])
+                        metrics_data['timestamp'] = metrics_data['timestamp'].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                except Exception as e:
+                    # If conversion fails, use a simpler approach
+                    logger.warning(f"Timestamp conversion error: {e}, using direct string conversion instead")
+                    # Create a timestamp_str column instead of modifying the original
+                    metrics_data['timestamp_str'] = metrics_data['timestamp'].astype(str)
+                    metrics_data = metrics_data.rename(columns={'timestamp_str': 'timestamp'})
                 
                 metrics_list = metrics_data.to_dict(orient='records')
                 

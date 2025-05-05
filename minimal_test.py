@@ -1,6 +1,11 @@
 import streamlit as st
 
-st.title("Minimal Streamlit Test")
-st.write("This is a minimal test app to verify Streamlit is working correctly.")
+st.set_page_config(
+    page_title="Minimal Test",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-st.success("If you can see this, Streamlit is working!")
+st.title("Minimal Streamlit Test")
+st.write("Hello world!")
