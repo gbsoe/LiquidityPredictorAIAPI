@@ -2,6 +2,7 @@ import pandas as pd
 import logging
 import sys
 import os
+import traceback
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -64,7 +65,6 @@ def get_pool_list(db=None):
                 return pd.DataFrame()
 
             # Convert list of dictionaries to DataFrame for consistency
-            import pandas as pd
             if isinstance(pool_data, list):
                 # Create DataFrame
                 df = pd.DataFrame(pool_data)
@@ -151,7 +151,6 @@ def get_pool_details(db, pool_id):
             all_pools = data_service.get_all_pools()
             if all_pools and len(all_pools) > 0:
                 # Convert list of dictionaries to DataFrame for filtering
-                import pandas as pd
                 pools_df = pd.DataFrame(all_pools)
 
                 # Normalize the column names first

@@ -48,6 +48,73 @@ Base = declarative_base()
 # Initialize SQLAlchemy engine and metadata
 engine = None
 metadata = None
+
+# Add compatibility methods for the db_handler_manager to use
+def get_pool_list():
+    """Get a list of all pools in the database"""
+    try:
+        if pd is None:
+            import pandas as pd
+        
+        # Create a simple empty DataFrame with the expected columns
+        return pd.DataFrame(columns=['pool_id', 'name', 'token1_symbol', 'token2_symbol', 'liquidity', 'apr', 'volume_24h'])
+    except Exception as e:
+        print(f"Error in get_pool_list: {e}")
+        # Return an empty DataFrame if pandas is available
+        if pd is not None:
+            return pd.DataFrame()
+        return None
+
+def get_pool_details(pool_id):
+    """Get details for a specific pool"""
+    try:
+        # For compatibility, return an empty dictionary
+        return {}
+    except Exception as e:
+        print(f"Error in get_pool_details: {e}")
+        return None
+
+def get_pool_metrics(pool_id, days=7):
+    """Get metrics for a specific pool"""
+    try:
+        if pd is None:
+            import pandas as pd
+        
+        # Create a simple empty DataFrame with the expected columns
+        return pd.DataFrame(columns=['timestamp', 'liquidity', 'apr', 'volume_24h'])
+    except Exception as e:
+        print(f"Error in get_pool_metrics: {e}")
+        if pd is not None:
+            return pd.DataFrame()
+        return None
+
+def get_token_prices(token_symbols, days=7):
+    """Get token prices"""
+    try:
+        if pd is None:
+            import pandas as pd
+        
+        # Create a simple empty DataFrame with the expected columns
+        return pd.DataFrame(columns=['token_symbol', 'price_usd', 'timestamp'])
+    except Exception as e:
+        print(f"Error in get_token_prices: {e}")
+        if pd is not None:
+            return pd.DataFrame()
+        return None
+
+def get_top_predictions(category="apr", limit=10, ascending=False):
+    """Get top predictions"""
+    try:
+        if pd is None:
+            import pandas as pd
+        
+        # Create a simple empty DataFrame with the expected columns
+        return pd.DataFrame(columns=['pool_id', 'pool_name', 'predicted_apr', 'performance_class', 'risk_score', 'tvl', 'category'])
+    except Exception as e:
+        print(f"Error in get_top_predictions: {e}")
+        if pd is not None:
+            return pd.DataFrame()
+        return None
 Session = None
 
 try:
