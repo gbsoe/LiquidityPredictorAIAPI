@@ -33,6 +33,9 @@ class DefiApiClient:
         
         self.base_url = base_url or "https://raydium-trader-filot.replit.app"
         
+        # Add API key to environment for other components to use
+        os.environ["DEFI_API_KEY"] = self.api_key
+        
         # Create a session for better performance
         self.session = requests.Session()
         self.session.headers.update({
@@ -156,7 +159,39 @@ class DefiApiClient:
         Returns:
             Dictionary with token details
         """
-        return self._make_request(f"/api/tokens/{token_symbol}")
+        try:
+            # The API may not support /api/tokens endpoint, try custom heuristics
+            # Try to find the token in pools that contain it
+            pools = self.get_all_pools(token=token_symbol, limit=5)
+            
+            if 'pools' in pools and pools['pools']:
+                for pool in pools['pools']:
+                    tokens = pool.get('tokens', [])
+                    for token in tokens:
+                        if token.get('symbol') == token_symbol:
+                            # Found the token in a pool
+                            return {
+                                'symbol': token_symbol,
+                                'name': token.get('name', token_symbol),
+                                'address': token.get('address', ''),
+                                'price': token.get('price', 0),
+                                'decimals': token.get('decimals', 9),
+                                'found_in_pool': pool.get('poolId', '')
+                            }
+            
+            # If we can't find in pools or the API doesn't support pools endpoint
+            # Fall back to direct endpoint call
+            return self._make_request(f"/api/tokens/{token_symbol}")
+            
+        except Exception as e:
+            logger.warning(f"Error getting token information for {token_symbol}: {str(e)}")
+            # Return minimal info rather than failing
+            return {
+                'symbol': token_symbol,
+                'price': 0,
+                'address': '',
+                'error': str(e)
+            }
     
     def get_top_pools_by_apr(self, limit: int = 10) -> Dict[str, Any]:
         """

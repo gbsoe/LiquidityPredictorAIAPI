@@ -6,6 +6,8 @@ across various DEXes, with robust filtering, visualizations, and predictions.
 """
 
 import streamlit as st
+import os
+from api_auth_helper import set_api_key, get_api_key
 import pandas as pd
 import json
 import os
@@ -182,9 +184,24 @@ def preload_tokens_background():
     except Exception as e:
         logger.error(f"Error in background token preloading: {str(e)}")
 
+# Initialize API key with correct value
+def initialize_api_key():
+    """Initialize API key from environment variable or session state"""
+    api_key = os.getenv("DEFI_API_KEY") or "9feae0d0af47e4948e061f2d7820461e374e040c21cf65c087166d7ed18f5ed6"
+    
+    # Store the API key in our auth helper for consistent access across components
+    set_api_key(api_key)
+    logger.info(f"API key initialized: {api_key[:5]}...")
+    return api_key
+
 # Run initialization if this is the first time
 if 'initialized_data_collection' not in st.session_state:
     perf_monitor.start_tracking("data_collection_init")
+    
+    # Initialize API key first so services can use it
+    api_key = initialize_api_key()
+    
+    # Initialize data collection services
     st.session_state.initialized_data_collection = initialize_continuous_data_collection()
     
     # Start token preloading in a background thread

@@ -20,6 +20,7 @@ import logging
 import requests
 from typing import Dict, List, Any, Optional
 from datetime import datetime
+from api_auth_helper import get_api_headers, get_api_key
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -43,11 +44,11 @@ class DefiAggregationAPI:
             api_key: API key for authentication (defaults to DEFI_API_KEY env var)
             base_url: Base URL for the API (defaults to standard URL)
         """
-        # Use provided API key or get from environment
-        self.api_key = api_key or os.getenv("DEFI_API_KEY")
+        # Use provided API key or get from our centralized helper
+        self.api_key = api_key or get_api_key()
         
         # Warn about missing API key but don't raise exception to avoid breaking the app
-        if not self.api_key:
+        if not self.api_key or self.api_key == "API_KEY_MISSING":
             logger.warning("No DeFi API key provided. API calls may fail. Please configure API key via the UI or set the DEFI_API_KEY environment variable.")
             # Use a placeholder value that will be detected later for proper error handling
             self.api_key = "API_KEY_MISSING"
@@ -60,12 +61,13 @@ class DefiAggregationAPI:
         # Configure request delay for rate limiting (increased to avoid rate limit errors)
         self.request_delay = 0.5  # 500ms delay for 2 requests per second
         
-        # Set authentication headers using our helper module for consistent format
-        # Import locally to avoid circular imports
-        from api_auth_helper import get_api_headers
-        
         # Use the helper to get the most reliable header format
         self.headers = get_api_headers()
+        
+        # Add API key to the headers explicitly
+        if self.api_key and self.api_key != "API_KEY_MISSING":
+            self.headers["x-api-key"] = self.api_key
+            logger.info(f"Using API key: {self.api_key[:5]}...")
         
         # Track API endpoint structure 
         self.endpoints = {
