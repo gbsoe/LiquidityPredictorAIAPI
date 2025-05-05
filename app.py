@@ -1050,5 +1050,13 @@ st.markdown('<div class="footer">', unsafe_allow_html=True)
 st.markdown(f"""
 <div>Solana Liquidity Pool Analysis System v1.0 | Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</div>
 <div>Powered by: PostgreSQL • Python • Streamlit • TensorFlow • XGBoost • Pandas • Plotly • Solana</div>
+<div style="margin-top: 15px; display: flex; align-items: center; justify-content: center;">
+    <span style="margin-right: 5px;">FiLot is part of </span>
+    <a href="https://crazyrichla.replit.app/" target="_blank" style="display: flex; align-items: center; text-decoration: none;">
+        <img src="static/images/la-token-logo.png" alt="LA! Token" style="height: 30px; margin-right: 5px;"> 
+        <span style="color: #FFC107; font-weight: bold;">LA! Token</span>
+    </a>
+    <span style="margin-left: 5px;">ecosystem</span>
+</div>
 """, unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
