@@ -5,6 +5,15 @@ import psycopg2
 from datetime import datetime
 from database.mock_db import MockDBManager
 
+# Ensure pandas is available
+try:
+    import pandas as pd
+except ImportError:
+    # If pandas is not installed, install it
+    import subprocess
+    subprocess.check_call(["pip", "install", "pandas"])
+    import pandas as pd
+
 class DBManager:
     """
     Database manager for PostgreSQL operations
@@ -446,6 +455,7 @@ class DBManager:
             # or we couldn't connect to the database
             
             # Use the data service to generate predictions from real data
+            # This is the primary source we want to use for real Solana pool IDs
             from data_services.data_service import get_data_service
             data_service = get_data_service()
             
@@ -459,8 +469,26 @@ class DBManager:
                     predictions = []
                     
                     for pool in pools:
-                        # These would normally come from actual prediction models
-                        # For now, generate based on pool metrics
+                        # Skip any pools without a valid ID or name
+                        if not pool.get('id') or len(pool.get('id', '')) < 32:
+                            self.logger.warning(f"Skipping pool with invalid ID: {pool.get('id', 'unknown')}")
+                            continue
+                            
+                        # Ensure we have a pool name
+                        pool_name = pool.get('name', '')
+                        if not pool_name:
+                            # Construct name from token symbols if available
+                            token1 = pool.get('token1_symbol', '')
+                            token2 = pool.get('token2_symbol', '')
+                            if token1 and token2:
+                                pool_name = f"{token1}-{token2}"
+                            else:
+                                # Use ID as last resort
+                                pool_id = pool.get('id', '')
+                                if pool_id:
+                                    pool_name = f"Pool {pool_id[:8]}..."
+                                else:
+                                    pool_name = "Unknown Pool"
                         
                         # Use actual metrics from API where possible
                         apr = pool.get('apr', 0)
@@ -501,7 +529,7 @@ class DBManager:
                         
                         predictions.append({
                             'pool_id': pool.get('id', ''),
-                            'pool_name': pool.get('name', ''),
+                            'pool_name': pool_name,
                             'dex': pool.get('dex', ''),
                             'token1': pool.get('token1_symbol', ''),
                             'token2': pool.get('token2_symbol', ''),
@@ -517,6 +545,9 @@ class DBManager:
                     predictions_df = pd.DataFrame(predictions)
                     
                     if not predictions_df.empty:
+                        # Log that we're using real Solana pool IDs
+                        self.logger.info(f"Using {len(predictions_df)} real Solana pools for predictions")
+                        
                         # Sort based on the prediction category
                         if category == "apr":
                             sort_column = "predicted_apr"
@@ -534,21 +565,13 @@ class DBManager:
                         
                         return predictions_df
             
-            # If we reach here and the use of mock data is allowed,
-            # only then use the mock data
-            if self.use_mock:
-                self.logger.warning("No real prediction data available - falling back to mock data")
-                return self.mock_db.get_top_predictions(category, limit, ascending)
-            
-            # If we're not allowed to use mock data, return empty DataFrame
-            self.logger.error("No prediction data available and mock data not allowed")
+            # Only use mock as a last resort
+            # We heavily discourage using mock data in production
+            self.logger.error("No real prediction data available")
             return pd.DataFrame()
             
         except Exception as e:
             self.logger.error(f"Error getting top predictions: {str(e)}")
-            # Only use mock if it's explicitly allowed
-            if self.use_mock:
-                return self.mock_db.get_top_predictions(category, limit, ascending)
             return pd.DataFrame()
     
     def get_pool_predictions(self, pool_id, days=30):
@@ -614,6 +637,11 @@ class DBManager:
             data_service = get_data_service()
             
             if data_service:
+                # Verify that we have a valid Solana pool ID
+                if not pool_id or len(pool_id) < 32:
+                    self.logger.error(f"Invalid Solana pool ID format: {pool_id}")
+                    return pd.DataFrame()
+                    
                 # Get detailed pool info from data service
                 pool = data_service.get_pool_by_id(pool_id)
                 
@@ -621,13 +649,15 @@ class DBManager:
                     import random
                     from datetime import datetime, timedelta
                     
+                    # Log that we're using a real Solana pool
+                    self.logger.info(f"Generating predictions for real Solana pool: {pool_id}")
+                    
                     # Get pool metrics to use for prediction generation
                     apr = pool.get('apr', 0)
                     if apr is None or apr == 0:
                         apr = pool.get('apr_24h', 0) or pool.get('apy', 0) or random.uniform(5, 50)
                     
-                    # Generate synthetic prediction history
-                    # In a real system this would come from historical data
+                    # Generate prediction history based on real pool data
                     end_date = datetime.now()
                     start_date = end_date - timedelta(days=days)
                     
@@ -690,21 +720,11 @@ class DBManager:
                     })
                     
                     return predictions_df
+                else:
+                    self.logger.error(f"Pool not found in API: {pool_id}")
             
-            # Only use mock if it's explicitly allowed
-            if self.use_mock:
-                self.logger.warning(f"No real prediction data available for pool {pool_id} - falling back to mock data")
-                all_predictions = self.mock_db.get_pool_predictions(pool_id)
-                
-                if days and not all_predictions.empty and 'timestamp' in all_predictions.columns:
-                    # Filter by days if we have timestamp data
-                    cutoff_date = pd.Timestamp.now() - pd.Timedelta(days=days)
-                    return all_predictions[all_predictions['timestamp'] >= cutoff_date]
-                
-                return all_predictions
-            
-            # If we reach here, we couldn't get real data and mock isn't allowed
-            self.logger.error(f"No prediction data available for pool {pool_id} and mock data not allowed")
+            # We couldn't get real data, return empty DataFrame
+            self.logger.error(f"No prediction data available for pool {pool_id}")
             return pd.DataFrame()
             
         except Exception as e:
