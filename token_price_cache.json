@@ -11,7 +11,7 @@
     "9N4N": 0,
     "7VFC": 0,
     "DEZX": 0,
-    "MSOL": 0,
+    "MSOL": 188.95,
     "USDC": 1.0,
     "HPSQ": 0,
     "JUPY": 0,
@@ -22,7 +22,7 @@
     "7I5K": 0,
     "ORCA": 2.81,
     "MANG": 0,
-    "STSOL": 0,
+    "STSOL": 177.43,
     "BSO1": 0,
     "J1TO": 0,
     "BONK": 1.855e-05,
@@ -42,7 +42,13 @@
     "PYTH": 0.136846,
     "MNGO": 0.02075428,
     "SAMO": 0.00291803,
-    "SRM": 0.01235495
+    "SRM": 0.01235495,
+    "POLIS": 0.00427837,
+    "JUP": 0.00043317,
+    "JTO": 1.61,
+    "DUST": 0.04178551,
+    "GENE": 0.097297,
+    "WIF": 0.559512
   },
   "price_sources": {
     "USDC": "defi_api",
@@ -53,11 +59,11 @@
     "RAY": "coingecko",
     "USDH": "coingecko",
     "BTC": "coingecko",
-    "STSOL": "defi_api",
+    "STSOL": "coingecko",
     "BONK": "coingecko",
     "HPSQ": "defi_api",
     "JUPY": "defi_api",
-    "MSOL": "defi_api",
+    "MSOL": "coingecko",
     "POLI": "defi_api",
     "ATLA": "defi_api",
     "7I5K": "defi_api",
@@ -80,7 +86,13 @@
     "PYTH": "coingecko",
     "MNGO": "coingecko",
     "SAMO": "coingecko",
-    "SRM": "coingecko"
+    "SRM": "coingecko",
+    "POLIS": "coingecko",
+    "JUP": "coingecko",
+    "JTO": "coingecko",
+    "DUST": "coingecko",
+    "GENE": "coingecko",
+    "WIF": "coingecko"
   },
-  "last_update": "2025-05-05T05:11:45.898235"
+  "last_update": "2025-05-05T05:19:39.362323"
 }

@@ -58,10 +58,17 @@ def load_token_data():
         token_symbols = token_df['symbol'].tolist()
         price_data = get_multiple_prices(token_symbols)
         
-        # Add price to dataframe
+        # Add price to dataframe with source information
         token_df['current_price'] = token_df['symbol'].apply(
             lambda x: price_data.get(x, 0) if x in price_data else 0
         )
+        
+        # Add price_source and address_source columns if they don't exist
+        if 'price_source' not in token_df.columns:
+            token_df['price_source'] = 'coingecko'  # Default source
+        
+        if 'address_source' not in token_df.columns:
+            token_df['address_source'] = 'coingecko'  # Default source
         
         return token_df
     except Exception as e:

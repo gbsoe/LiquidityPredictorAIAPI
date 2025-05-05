@@ -816,33 +816,59 @@ class TokenDataService:
             except Exception as e:
                 logger.error(f"Error getting pools for token {symbol} from DeFi API: {e}")
         
-        # If we have no pools, check our static mappings
-        if not pools and symbol in ['SOL', 'USDC', 'BTC', 'ETH', 'MSOL', 'BONK', 'SAMO', 'JUP', 'ORCA', 'RAY']:
-            # Add some common pairs for these major tokens
-            common_pairs = {
-                'SOL': ['USDC', 'BTC', 'ETH', 'MSOL', 'BONK'],
-                'USDC': ['SOL', 'BTC', 'ETH', 'SAMO', 'JUP'],
-                'BTC': ['SOL', 'USDC', 'ETH'],
-                'ETH': ['SOL', 'USDC', 'BTC'],
-                'MSOL': ['SOL', 'USDC'],
-                'BONK': ['SOL', 'USDC'],
-                'SAMO': ['SOL', 'USDC'],
-                'JUP': ['SOL', 'USDC'],
-                'ORCA': ['SOL', 'USDC'],
-                'RAY': ['SOL', 'USDC']
-            }
-            
-            pairs = common_pairs.get(symbol, [])
-            for pair in pairs:
-                # Get price data for tokens to estimate liquidity
-                pools.append({
-                    'id': f"{symbol}_{pair}_pool",
-                    'dex': 'Raydium',
-                    'token1_symbol': symbol,
-                    'token2_symbol': pair,
-                    'liquidity': 1000000 if pair in ['USDC', 'SOL'] else 500000,  # Estimated value
-                    'volume_24h': 500000 if pair in ['USDC', 'SOL'] else 100000   # Estimated value
-                })
+        # If we have no pools, try to get them from the data service
+        if not pools:
+            try:
+                # Import here to avoid circular dependencies
+                from data_services.data_service import DataService
+                data_service = DataService()
+                
+                # Get the latest pool data
+                all_pools = data_service.get_latest_pools()
+                
+                # Filter pools containing this token
+                for pool in all_pools:
+                    token1 = pool.get('token1', {})
+                    token2 = pool.get('token2', {})
+                    
+                    token1_symbol = token1.get('symbol', '') if isinstance(token1, dict) else str(token1)
+                    token2_symbol = token2.get('symbol', '') if isinstance(token2, dict) else str(token2)
+                    
+                    # Check if this pool contains our token
+                    if token1_symbol.upper() == symbol.upper() or token2_symbol.upper() == symbol.upper():
+                        clean_pool = {
+                            'id': pool.get('pool_id', pool.get('id', '')),
+                            'dex': pool.get('dex', 'Unknown'),
+                            'token1_symbol': token1_symbol,
+                            'token2_symbol': token2_symbol
+                        }
+                        
+                        # Extract numerical metrics
+                        try:
+                            liquidity = pool.get('liquidity', 0)
+                            if isinstance(liquidity, dict):
+                                clean_pool['liquidity'] = float(liquidity.get('usd', 0))
+                            else:
+                                clean_pool['liquidity'] = float(liquidity) if liquidity else 0
+                        except (TypeError, ValueError):
+                            clean_pool['liquidity'] = 0
+                            
+                        try:
+                            volume = pool.get('volume', {})
+                            if isinstance(volume, dict):
+                                clean_pool['volume_24h'] = float(volume.get('h24', volume.get('usd', 0)))
+                            else:
+                                clean_pool['volume_24h'] = float(volume) if volume else 0
+                        except (TypeError, ValueError):
+                            clean_pool['volume_24h'] = 0
+                        
+                        pools.append(clean_pool)
+                
+                logger.info(f"Retrieved {len(pools)} pools for token {symbol} from data service")
+                
+            except Exception as e:
+                logger.error(f"Error getting pools from data service: {e}")
+                # No fallback to static data - we use only authentic data
         
         return pools
 
