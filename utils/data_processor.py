@@ -3,6 +3,7 @@ import logging
 import sys
 import os
 import traceback
+from datetime import datetime
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -255,7 +256,7 @@ def get_token_prices(db, token_symbols, days=7):
                         'token_symbol': token,
                         'price_usd': float(price),
                         'price_source': 'token_service',
-                        'timestamp': pd.Timestamp.now()
+                        'timestamp': datetime.now()
                     })
 
             if price_data:
@@ -279,7 +280,7 @@ def get_token_prices(db, token_symbols, days=7):
                         'token_symbol': token,
                         'price_usd': float(price),
                         'price_source': source,
-                        'timestamp': pd.Timestamp.now()
+                        'timestamp': datetime.now()
                     })
             elif price_result and float(price_result) > 0:
                 # Handle case when only price is returned
@@ -287,7 +288,7 @@ def get_token_prices(db, token_symbols, days=7):
                     'token_symbol': token,
                     'price_usd': float(price_result),
                     'price_source': 'coingecko',
-                    'timestamp': pd.Timestamp.now()
+                    'timestamp': datetime.now()
                 })
 
         if price_data:
