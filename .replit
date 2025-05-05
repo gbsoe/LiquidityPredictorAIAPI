@@ -26,7 +26,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "streamlit run test_app.py --server.port 5000 --server.headless=true"
+args = "streamlit run solpool_fixed.py --server.port 5000 --server.headless=true"
 waitForPort = 5000
 
 [[ports]]
