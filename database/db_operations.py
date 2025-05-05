@@ -2,6 +2,7 @@ import logging
 import os
 import pandas as pd
 import psycopg2
+import json
 from datetime import datetime
 from database.mock_db import MockDBManager
 
@@ -379,6 +380,108 @@ class DBManager:
         except Exception as e:
             self.logger.error(f"Error getting token prices from database: {str(e)}")
             return self.mock_db.get_token_prices(token_symbols, days)
+    
+    def store_pool_snapshot(self, pool_data):
+        """
+        Store a snapshot of pool data for historical tracking.
+        
+        Args:
+            pool_data: Dictionary containing pool data fields including id, metrics, timestamps
+                     Must include: pool_id, liquidity, volume, apr
+                     
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            if not pool_data or 'id' not in pool_data:
+                self.logger.error("Invalid pool data: missing required fields")
+                return False
+                
+            pool_id = pool_data.get('id')
+            timestamp = pool_data.get('timestamp', datetime.now())
+            
+            # First ensure the pool exists in the pools table
+            conn = psycopg2.connect(**self.db_params)
+            cursor = conn.cursor()
+            
+            # Check if pool exists
+            cursor.execute("SELECT 1 FROM pools WHERE pool_id = %s", (pool_id,))
+            pool_exists = cursor.fetchone()
+            
+            if not pool_exists:
+                # Need to insert the pool first
+                pool_insert = """
+                INSERT INTO pools (pool_id, name, dex, token1, token2, token1_address, token2_address, category)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (pool_id) DO NOTHING
+                """
+                
+                cursor.execute(pool_insert, (
+                    pool_id,
+                    pool_data.get('name', f"{pool_data.get('token1_symbol', '')}/{pool_data.get('token2_symbol', '')}"),
+                    pool_data.get('dex', 'unknown'),
+                    pool_data.get('token1_symbol', ''),
+                    pool_data.get('token2_symbol', ''),
+                    pool_data.get('token1_address', ''),
+                    pool_data.get('token2_address', ''),
+                    pool_data.get('category', '')
+                ))
+            
+            # Now store the metrics snapshot
+            metrics_insert = """
+            INSERT INTO pool_metrics (pool_id, timestamp, liquidity, volume, apr, fee, tvl_change_24h, apr_change_24h)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            
+            cursor.execute(metrics_insert, (
+                pool_id,
+                timestamp,
+                pool_data.get('liquidity', 0),
+                pool_data.get('volume_24h', 0),
+                pool_data.get('apr', 0),
+                pool_data.get('fee', 0),
+                pool_data.get('tvl_change_24h', 0),
+                pool_data.get('apr_change_24h', 0)
+            ))
+            
+            # Update the token price information if available
+            if pool_data.get('token1_price') and pool_data.get('token1_symbol'):
+                self._store_token_price(cursor, pool_data.get('token1_symbol'), pool_data.get('token1_price'), timestamp)
+                
+            if pool_data.get('token2_price') and pool_data.get('token2_symbol'):
+                self._store_token_price(cursor, pool_data.get('token2_symbol'), pool_data.get('token2_price'), timestamp)
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            
+            self.logger.info(f"Stored pool snapshot for {pool_id} at {timestamp}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error storing pool snapshot: {str(e)}")
+            return False
+            
+    def _store_token_price(self, cursor, token_symbol, price, timestamp=None):
+        """
+        Store token price information.
+        
+        Args:
+            cursor: Database cursor
+            token_symbol: Token symbol
+            price: Price in USD
+            timestamp: Timestamp (default: now)
+        """
+        if timestamp is None:
+            timestamp = datetime.now()
+            
+        # Insert the token price
+        token_price_insert = """
+        INSERT INTO token_prices (token_symbol, price_usd, timestamp)
+        VALUES (%s, %s, %s)
+        """
+        
+        cursor.execute(token_price_insert, (token_symbol, price, timestamp))
     
     def save_prediction(self, pool_id, predicted_apr, performance_class, risk_score, model_version=None):
         """
