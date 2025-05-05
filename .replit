@@ -6,7 +6,7 @@ packages = ["cairo", "ffmpeg-full", "freetype", "ghostscript", "glibcLocales", "
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["streamlit", "run", "app.py", "--server.port", "5000"]
+run = ["sh", "-c", "streamlit run solpool_insight.py --server.port 5000 --server.address 0.0.0.0 --server.headless true --server.enableCORS false"]
 
 [workflows]
 runButton = "Project"
