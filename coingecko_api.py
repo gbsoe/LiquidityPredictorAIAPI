@@ -29,11 +29,12 @@ class CoinGeckoAPI:
         self.api_key = api_key
         
         # Set base URL based on whether we have a Pro API key
-        if api_key:
-            logger.info("Initializing CoinGecko API client with API key")
+        # Note: Demo API keys must use api.coingecko.com, not pro-api.coingecko.com
+        if api_key and "demo" not in api_key.lower():
+            logger.info("Initializing CoinGecko API client with Pro API key")
             self.base_url = "https://pro-api.coingecko.com/api/v3"
         else:
-            logger.info("Initializing CoinGecko API client without API key (limited rate)")
+            logger.info("Initializing CoinGecko API client with Demo key or without API key")
             self.base_url = "https://api.coingecko.com/api/v3"
             
         self.session = requests.Session()
@@ -87,8 +88,13 @@ class CoinGeckoAPI:
             params = {}
             
         if self.api_key:
-            # Add API key to headers as recommended in CoinGecko docs
-            headers = {"x-cg-pro-api-key": self.api_key}
+            if "demo" in self.api_key.lower() or self.base_url == "https://api.coingecko.com/api/v3":
+                # For demo or free API keys, add as query parameter
+                params["x_cg_demo_api_key"] = self.api_key
+                headers = {}
+            else:
+                # For Pro API keys, add to headers as recommended in CoinGecko docs
+                headers = {"x-cg-pro-api-key": self.api_key}
         else:
             headers = {}
         
