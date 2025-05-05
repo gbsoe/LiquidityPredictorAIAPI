@@ -156,6 +156,7 @@ def main():
                 "Decimals": t.get("decimals", 0),
                 "Price": format_price(float(t.get("price", 0))),
                 "Price Source": "CoinGecko" if t.get("price_source", "") == "coingecko" else ("DeFi API" if t.get("price", 0) > 0 else "None"),
+                "Address Source": "CoinGecko" if t.get("address_source", "").startswith("coingecko") else ("DeFi API" if t.get("address", "") else "None"),
                 "Active": "✓" if t.get("active", False) else "✗"
             }
             for t in enriched_tokens

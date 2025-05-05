@@ -154,17 +154,16 @@ class TokenDataService:
         if symbol in self.token_data and 'address' in self.token_data[symbol]:
             return self.token_data[symbol]['address']
         
-        # Try to get from DeFi API first
-        address = self._get_address_from_defi_api(symbol)
-        if address:
-            self._update_token_data(symbol, {'address': address})
-            return address
-        
-        # If that fails, try to get from CoinGecko
-        # This is less reliable for Solana tokens
+        # Try to get from CoinGecko first for authenticity
         address = self._get_address_from_coingecko(symbol)
         if address:
-            self._update_token_data(symbol, {'address': address})
+            self._update_token_data(symbol, {'address': address, 'address_source': 'coingecko'})
+            return address
+        
+        # If that fails, try to get from DeFi API as fallback
+        address = self._get_address_from_defi_api(symbol)
+        if address:
+            self._update_token_data(symbol, {'address': address, 'address_source': 'defi_api'})
             return address
         
         # No address found
@@ -219,12 +218,20 @@ class TokenDataService:
             if not token_details:
                 return None
             
-            # Look for Solana platform addresses
+            # Look for platform addresses
             platforms = token_details.get('platforms', {})
+            
+            # First priority: Solana platform
             if 'solana' in platforms and platforms['solana']:
                 address = platforms['solana']
                 logger.info(f"Retrieved Solana address for {symbol} from CoinGecko: {address}")
                 return address
+            
+            # Second priority: Any other platform with a valid address
+            for platform, address in platforms.items():
+                if address and len(address) > 10:  # Basic check for valid address
+                    logger.info(f"Retrieved {platform} address for {symbol} from CoinGecko: {address}")
+                    return address
             
             return None
         except Exception as e:
@@ -245,9 +252,14 @@ class TokenDataService:
         if address in self.token_address_data:
             return self.token_address_data[address]
         
-        # Try to get from DeFi API first
-        token_data = self._get_token_by_address_from_defi_api(address)
+        # Try to get from CoinGecko first for authenticity
+        token_data = self._get_token_by_address_from_coingecko(address)
         if token_data:
+            # Add source information
+            token_data['data_source'] = 'coingecko'
+            token_data['price_source'] = 'coingecko' if 'price' in token_data else 'none'
+            token_data['address_source'] = 'coingecko'
+            
             self.token_address_data[address] = token_data
             
             # Also store by symbol if available
@@ -257,9 +269,14 @@ class TokenDataService:
             
             return token_data
         
-        # If that fails, try to get from CoinGecko
-        token_data = self._get_token_by_address_from_coingecko(address)
+        # If that fails, try to get from DeFi API as fallback
+        token_data = self._get_token_by_address_from_defi_api(address)
         if token_data:
+            # Add source information
+            token_data['data_source'] = 'defi_api'
+            token_data['price_source'] = 'defi_api' if 'price' in token_data else 'none'
+            token_data['address_source'] = 'defi_api'
+            
             self.token_address_data[address] = token_data
             
             # Also store by symbol if available
