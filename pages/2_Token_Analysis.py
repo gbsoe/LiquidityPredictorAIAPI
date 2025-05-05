@@ -15,8 +15,9 @@ from typing import Dict, List, Any, Optional, Tuple
 import sys
 import os
 import logging
+import traceback
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -47,25 +48,65 @@ token_service = get_token_service()
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_token_data():
     try:
-        # Get all pools to extract actual tokens used in the system
-        all_pools = data_service.get_all_pools()
+        # Create a placeholder for pool data in case we can't get it
+        token_df = pd.DataFrame()
         
-        # Extract unique tokens from all pools
-        token_symbols = set()
-        for pool in all_pools:
-            # Extract token symbols
-            token1 = pool.get('token1', {})
-            token2 = pool.get('token2', {})
-            
-            token1_symbol = token1.get('symbol', '') if isinstance(token1, dict) else str(token1)
-            token2_symbol = token2.get('symbol', '') if isinstance(token2, dict) else str(token2)
-            
-            if token1_symbol and len(token1_symbol) > 0:
-                token_symbols.add(token1_symbol)
-            if token2_symbol and len(token2_symbol) > 0:
-                token_symbols.add(token2_symbol)
-        
-        logger.info(f"Found {len(token_symbols)} unique tokens in pool data")
+        # First, try to get pools from data service
+        try:
+            # Get all pools to extract actual tokens used in the system
+            all_pools = data_service.get_all_pools()
+            if not all_pools or len(all_pools) == 0:
+                logger.warning("No pools returned from data service")
+                st.warning("No pool data is available. Using static token list instead.")
+                # Use the common token list as fallback
+                common_tokens = ["SOL", "USDC", "USDT", "ETH", "BTC", "RAY", "ORCA"]
+                token_symbols = set(common_tokens)
+            else:
+                # Extract unique tokens from all pools
+                token_symbols = set()
+                for pool in all_pools:
+                    # Extract token symbols
+                    token1 = pool.get('token1', {})
+                    token2 = pool.get('token2', {})
+                    
+                    token1_symbol = token1.get('symbol', '') if isinstance(token1, dict) else str(token1)
+                    token2_symbol = token2.get('symbol', '') if isinstance(token2, dict) else str(token2)
+                    
+                    if token1_symbol and len(token1_symbol) > 0:
+                        token_symbols.add(token1_symbol)
+                    if token2_symbol and len(token2_symbol) > 0:
+                        token_symbols.add(token2_symbol)
+                        
+                logger.info(f"Found {len(token_symbols)} unique tokens in pool data")
+                
+                # Create a mapping of tokens to pools for quick lookup
+                token_pools_map = {}
+                for pool in all_pools:
+                    # Extract token symbols
+                    token1 = pool.get('token1', {})
+                    token2 = pool.get('token2', {})
+                    
+                    token1_symbol = token1.get('symbol', '') if isinstance(token1, dict) else str(token1)
+                    token2_symbol = token2.get('symbol', '') if isinstance(token2, dict) else str(token2)
+                    
+                    if token1_symbol and len(token1_symbol) > 0:
+                        if token1_symbol not in token_pools_map:
+                            token_pools_map[token1_symbol] = []
+                        token_pools_map[token1_symbol].append(pool)
+                        
+                    if token2_symbol and len(token2_symbol) > 0:
+                        if token2_symbol not in token_pools_map:
+                            token_pools_map[token2_symbol] = []
+                        token_pools_map[token2_symbol].append(pool)
+                        
+                # Store in session state for quick access
+                st.session_state.token_pools_map = token_pools_map
+        except Exception as e:
+            logger.error(f"Error getting pools: {e}")
+            st.warning("Could not fetch pool data. Using static token list instead.")
+            # Use the common token list as fallback
+            common_tokens = ["SOL", "USDC", "USDT", "ETH", "BTC", "RAY", "ORCA"]
+            token_symbols = set(common_tokens)
         
         # Create a list to hold detailed token data
         token_data_list = []
@@ -74,10 +115,21 @@ def load_token_data():
         for symbol in token_symbols:
             try:
                 token_data = token_service.get_token_data(symbol)
-                if token_data:
+                if token_data and isinstance(token_data, dict):
+                    # Ensure the symbol is in the dictionary
+                    if 'symbol' not in token_data:
+                        token_data['symbol'] = symbol
                     token_data_list.append(token_data)
             except Exception as e:
                 logger.warning(f"Could not get data for token {symbol}: {e}")
+                # Add a minimal entry so the token still appears
+                token_data_list.append({
+                    'symbol': symbol,
+                    'name': symbol,
+                    'address': '',
+                    'price_source': 'unknown',
+                    'address_source': 'unknown'
+                })
         
         # Convert to DataFrame
         if token_data_list:
@@ -87,20 +139,26 @@ def load_token_data():
             token_df = pd.DataFrame(columns=['symbol', 'name', 'address', 'price_source', 'address_source'])
         
         # Add price data
-        price_data = get_multiple_prices(list(token_symbols))
-        
-        # Ensure symbol column exists
-        if 'symbol' not in token_df.columns and token_df.empty:
-            token_df['symbol'] = list(token_symbols)
+        try:
+            price_data = get_multiple_prices(list(token_symbols))
             
-        # Add name column if it doesn't exist
-        if 'name' not in token_df.columns:
-            token_df['name'] = token_df['symbol']
-        
-        # Add price to dataframe with source information
-        token_df['current_price'] = token_df['symbol'].apply(
-            lambda x: price_data.get(x, 0) if x in price_data else 0
-        )
+            # Ensure symbol column exists
+            if 'symbol' not in token_df.columns or token_df.empty:
+                token_df['symbol'] = list(token_symbols)
+                
+            # Add name column if it doesn't exist
+            if 'name' not in token_df.columns:
+                token_df['name'] = token_df['symbol']
+            
+            # Add price to dataframe with source information
+            token_df['current_price'] = token_df['symbol'].apply(
+                lambda x: price_data.get(x, 0) if x in price_data else 0
+            )
+        except Exception as e:
+            logger.error(f"Error getting price data: {e}")
+            # Ensure we have a current_price column even if price fetching fails
+            if 'current_price' not in token_df.columns:
+                token_df['current_price'] = 0
         
         # Add price_source and address_source columns if they don't exist
         if 'price_source' not in token_df.columns:
@@ -109,23 +167,56 @@ def load_token_data():
         if 'address_source' not in token_df.columns:
             token_df['address_source'] = 'coingecko'  # Default source
         
+        # Log the outcome
+        if not token_df.empty:
+            logger.info(f"Successfully loaded data for {len(token_df)} tokens")
+        else:
+            logger.warning("No token data was loaded")
+            
         return token_df
     except Exception as e:
         logger.error(f"Error loading token data: {e}")
-        st.error(f"Error loading token data: {e}")
-        return pd.DataFrame()
+        logger.error(f"Stack trace: {traceback.format_exc()}")
+        
+        # Create a minimal dataframe with common tokens to avoid complete failure
+        common_tokens = ["SOL", "USDC", "USDT", "ETH", "BTC"]
+        backup_data = [{
+            'symbol': symbol,
+            'name': symbol,
+            'current_price': 0,
+            'price_source': 'unknown',
+            'address_source': 'unknown'
+        } for symbol in common_tokens]
+        
+        return pd.DataFrame(backup_data)
 
 # Function to load liquidity pools for a specific token
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_token_pools(token_symbol: str):
     try:
-        # First try directly from data service
-        pools = data_service.get_pools_by_token(token_symbol)
+        pools = []
+        
+        # First check session state for cached pool data
+        if 'token_pools_map' in st.session_state and token_symbol in st.session_state.token_pools_map:
+            logger.info(f"Using cached pool data for {token_symbol}")
+            pools = st.session_state.token_pools_map[token_symbol]
+            
+        if not pools or len(pools) == 0:
+            # Try data service next
+            try:
+                pools = data_service.get_pools_by_token(token_symbol)
+                logger.info(f"Got {len(pools) if pools else 0} pools for {token_symbol} from data service")
+            except Exception as e:
+                logger.error(f"Error getting pools from data service: {e}")
         
         if not pools or len(pools) == 0:
             # Fall back to token service if needed
-            pools = token_service.get_pools_for_token(token_symbol)
-            
+            try:
+                pools = token_service.get_pools_for_token(token_symbol)
+                logger.info(f"Got {len(pools) if pools else 0} pools for {token_symbol} from token service")
+            except Exception as e:
+                logger.error(f"Error getting pools from token service: {e}")
+                
         if not pools or len(pools) == 0:
             logger.warning(f"No pools found for token {token_symbol}")
             return pd.DataFrame()
@@ -375,15 +466,48 @@ def create_chart_from_df(df, token_symbol, current_price, source):
 st.title("🪙 Token Analysis")
 st.markdown("Explore detailed information about tokens trading on Solana DEXes")
 
-# Load token data
-with st.spinner("Loading token data..."):
-    token_df = load_token_data()
+# Status indicator in sidebar
+with st.sidebar:
+    st.subheader("Status")
+    status_container = st.empty()
 
-if token_df.empty:
-    st.error("Unable to load token data. Please try again later.")
-else:
+# Load token data with better error handling
+try:
+    with st.spinner("Loading token data..."):
+        token_df = load_token_data()
+        
+    if token_df.empty:
+        status_container.error("No token data available. Using common tokens as fallback.")
+        # Create a minimal fallback for display
+        token_df = pd.DataFrame({
+            'symbol': ["SOL", "USDC", "USDT", "ETH", "BTC"],
+            'name': ["Solana", "USD Coin", "Tether", "Ethereum", "Bitcoin"],
+            'current_price': [0, 0, 0, 0, 0],
+            'price_source': ['unknown'] * 5,
+            'address_source': ['unknown'] * 5
+        })
+        
+        # Try to get prices for these common tokens
+        try:
+            price_data = get_multiple_prices(token_df['symbol'].tolist())
+            token_df['current_price'] = token_df['symbol'].apply(
+                lambda x: price_data.get(x, 0) if x in price_data else 0
+            )
+            if any(token_df['current_price'] > 0):
+                status_container.warning("Limited token data loaded with prices.")
+        except Exception as e:
+            logger.error(f"Error getting fallback prices: {e}")
+    else:
+        status_container.success(f"Loaded data for {len(token_df)} tokens")
+        
     # Create tabs for different views
-    tab1, tab2, tab3 = st.tabs(["Token Explorer", "DEX Categorization", "Data Sources"])
+    tab1, tab2, tab3 = st.tabs(["Token Explorer", "DEX Categorization", "Data Sources"])    
+except Exception as e:
+    st.error(f"An error occurred while loading token data: {str(e)}")
+    logger.error(f"Critical error in Token Analysis page: {traceback.format_exc()}")
+    # Minimal UI even in case of catastrophic failure
+    tab1, tab2, tab3 = st.tabs(["Token Explorer", "DEX Categorization", "Data Sources"])  
+    token_df = pd.DataFrame()  # Empty DataFrame
     
     with tab1:
         col1, col2 = st.columns([1, 3])
