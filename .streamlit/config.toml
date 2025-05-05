@@ -4,8 +4,17 @@ address = "0.0.0.0"
 port = 5000
 
 [theme]
-primaryColor = "#4361ee"
-backgroundColor = "#f8f9fa"
-secondaryBackgroundColor = "#e9ecef"
-textColor = "#212529"
-font = "sans-serif"
+primaryColor = "#FF4B4B"
+backgroundColor = "#0E1117"
+secondaryBackgroundColor = "#1E2533"
+textColor = "#FAFAFA"
+
+[browser]
+gatherUsageStats = false
+
+[ui]
+hideTopBar = false
+
+# Hide specific pages from the sidebar
+[pages]
+hidePage = ["/Token_Analysis", "/Token_Analysis_old"]
