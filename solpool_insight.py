@@ -904,7 +904,14 @@ def fetch_live_data_from_blockchain():
         return None
 
 @handle_exception
-def load_data():
+def load_data(force_price_update=False):
+    # Only update prices every 5 minutes
+    if not force_price_update and 'last_price_update' in st.session_state:
+        time_since_update = datetime.now() - st.session_state['last_price_update']
+        if time_since_update.total_seconds() < 300:  # 5 minutes
+            return st.session_state.get('pool_data', [])
+            
+    st.session_state['last_price_update'] = datetime.now()
     """Load pool data with a prioritized strategy: data service, live API, or cached"""
     
     # Check if data service is initialized
