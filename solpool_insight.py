@@ -1276,11 +1276,8 @@ def main():
                     st.image(la_token_logo, width=50)
                 
                 with la_token_col2:
-                    st.markdown(
-                        "<a href='https://crazyrichla.replit.app/' target='_blank' style='text-decoration:none;'>"
-                        "<span style='color:#FFD700;font-weight:bold;'>LA! Token</span></a> Ecosystem",
-                        unsafe_allow_html=True
-                    )
+                    # Use Streamlit's built-in link functionality
+                    st.markdown("**[LA! Token](https://crazyrichla.replit.app/) Ecosystem**")
                 
                 st.sidebar.markdown(
                     "<div style='font-size:small;color:#888;'>FiLot is part of the LA! Token project family</div>",

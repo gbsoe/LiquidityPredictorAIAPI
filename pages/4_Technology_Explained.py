@@ -99,15 +99,25 @@ if os.path.exists(la_token_logo_path):
         st.image(la_token_logo, width=80)
     
     with la_token_col2:
-        st.markdown(
-            "<div style='margin-left: 20px;'>"
-            "<h3 style='margin: 0; padding: 0;'>FiLot is part of the "
-            "<a href='https://crazyrichla.replit.app/' target='_blank' style='text-decoration:none;'>"
-            "<span style='color:#FFD700;font-weight:bold;'>LA! Token</span></a> Ecosystem</h3>"
-            "<p style='margin-top: 5px;'>Providing advanced liquidity pool analytics for the LA! Token community</p>"
-            "</div>",
-            unsafe_allow_html=True
-        )
+        # Use st.markdown for the static text and st.write for the link
+        col2_left, col2_right = st.columns([2, 3])
+        with col2_left:
+            st.markdown(
+                "<div style='margin-left: 20px;'>"
+                "<h3 style='margin: 0; padding: 0;'>FiLot is part of the "
+                "<span style='color:#FFD700;font-weight:bold;'>LA! Token</span> Ecosystem</h3>"
+                "</div>",
+                unsafe_allow_html=True
+            )
+            # Add clickable link with Streamlit's built-in functionality
+            st.markdown("[Visit LA! Token Website](https://crazyrichla.replit.app/)")
+        with col2_right:
+            st.markdown(
+                "<div style='margin-left: 20px;'>"
+                "<p style='margin-top: 5px;'>Providing advanced liquidity pool analytics for the LA! Token community</p>"
+                "</div>",
+                unsafe_allow_html=True
+            )
 
 st.markdown("""</div></div>""", unsafe_allow_html=True)
 
