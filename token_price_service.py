@@ -623,24 +623,6 @@ class TokenPriceService:
             return result
             
     def get_multiple_prices(self, symbols: List[str]) -> Dict[str, float]:
-    # Set default stablecoin prices to reduce API calls
-    result = {
-        "USDC": 1.0,
-        "USDT": 1.0,
-        "UST": 1.0,
-        "BUSD": 1.0,
-        "DAI": 1.0,
-        "USDH": 1.0,
-        "TUSD": 1.0,
-    }
-    
-    # Filter out stablecoins and unknown tokens
-    symbols_to_fetch = [s for s in symbols if s not in result and s != "UNKNOWN"]
-    if not symbols_to_fetch:
-        return result
-        
-    # Add delay between API calls
-    time.sleep(1.2)
         """
         Get prices for multiple tokens at once, prioritizing CoinGecko as the source
         
@@ -650,11 +632,27 @@ class TokenPriceService:
         Returns:
             Dictionary mapping symbols to prices
         """
-        # Check which symbols we need to fetch
-        symbols_to_fetch = []
-        result = {}
+        # Set default stablecoin prices to reduce API calls
+        result = {
+            "USDC": 1.0,
+            "USDT": 1.0,
+            "UST": 1.0,
+            "BUSD": 1.0,
+            "DAI": 1.0,
+            "USDH": 1.0,
+            "TUSD": 1.0,
+        }
         
-        normalized_symbols = [s.upper() for s in symbols if s != "UNKNOWN"]
+        # Filter out stablecoins and unknown tokens
+        symbols_to_fetch = [s for s in symbols if s not in result and s != "UNKNOWN"]
+        if not symbols_to_fetch:
+            return result
+            
+        # Add delay between API calls
+        time.sleep(1.2)
+            
+        # Check which symbols we need to fetch
+        normalized_symbols = [s.upper() for s in symbols_to_fetch if s != "UNKNOWN"]
         
         # Try cache first for CoinGecko prices only
         if self._is_cache_valid():
