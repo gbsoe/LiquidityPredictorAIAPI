@@ -454,6 +454,11 @@ def pools_to_dataframe(pools):
     return pd.DataFrame(pools)
 
 # Function to backup data to JSON file
+def get_db_handler():
+    """Return the database handler module itself so functions can be called directly"""
+    return sys.modules[__name__]
+
+
 def backup_to_json(pools, filename='extracted_pools.json'):
     """
     Save pool data to JSON file as backup
