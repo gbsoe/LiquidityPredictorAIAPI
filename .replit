@@ -24,10 +24,6 @@ args = "SolPool Insight"
 task = "workflow.run"
 args = "Database Test"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Minimal Test"
-
 [[workflows.workflow]]
 name = "SolPool Insight"
 author = "agent"
@@ -44,15 +40,6 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "streamlit run simple_test.py --server.port 5000"
-waitForPort = 5000
-
-[[workflows.workflow]]
-name = "Minimal Test"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "streamlit run minimal_test.py --server.port 5000"
 waitForPort = 5000
 
 [[ports]]
