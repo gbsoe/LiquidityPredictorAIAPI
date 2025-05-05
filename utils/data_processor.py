@@ -520,7 +520,7 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                         'risk_score': risk_score,
                         'performance_class': performance_class,
                         'category': pool_category,  # Add category/type field using consistent helper
-                        'prediction_timestamp': pd.Timestamp.now()
+                        'prediction_timestamp': datetime.now()
                     })
 
                 # Convert to DataFrame and sort
