@@ -2,12 +2,15 @@ import pandas as pd
 import logging
 import sys
 import os
+import numpy as np
+from datetime import datetime, timedelta
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import the data service directly for consistent data sources
 from data_services.data_service import get_data_service
+from data_services.initialize import get_stats
 
 logger = logging.getLogger(__name__)
 
@@ -284,6 +287,157 @@ def get_token_prices(db, token_symbols, days=7):
     # Return empty DataFrame if all sources fail
     logger.error("Failed to get token prices from all sources")
     return pd.DataFrame(columns=['token_symbol', 'price_usd', 'timestamp'])
+
+def get_top_pools(limit=10, sort_by='liquidity', ascending=False):
+    """
+    Get top pools from the database service using data service for consistency.
+    This function is used by the main page to display top pools.
+    
+    Args:
+        limit: Number of pools to return
+        sort_by: Field to sort by ('liquidity', 'apr', 'volume')
+        ascending: Sort order, True for ascending, False for descending
+        
+    Returns:
+        DataFrame with top pools or empty DataFrame if fails
+    """
+    try:
+        # Get the data service instance
+        data_service = get_data_service()
+        if not data_service:
+            logger.error("No data service available")
+            return pd.DataFrame()
+            
+        # Get all pools from the service
+        pools = data_service.get_all_pools()
+        if not pools or len(pools) == 0:
+            logger.error("No pools found in data service")
+            return pd.DataFrame()
+            
+        # Convert to DataFrame
+        df = pd.DataFrame(pools)
+        
+        # Normalize column names
+        if 'pool_id' not in df.columns and 'id' in df.columns:
+            df['pool_id'] = df['id']
+        
+        # Handle different field names for metrics
+        sort_field = sort_by
+        if sort_by == 'apr':
+            if 'apr' in df.columns:
+                sort_field = 'apr'
+            elif 'apr24h' in df.columns:
+                sort_field = 'apr24h'
+            elif 'apy' in df.columns:
+                sort_field = 'apy'
+        elif sort_by == 'liquidity':
+            if 'liquidity' in df.columns:
+                sort_field = 'liquidity'
+            elif 'liquidityUsd' in df.columns:
+                sort_field = 'liquidityUsd'
+            elif 'tvl' in df.columns:
+                sort_field = 'tvl'
+        elif sort_by == 'volume':
+            if 'volume' in df.columns:
+                sort_field = 'volume'
+            elif 'volume24h' in df.columns:
+                sort_field = 'volume24h'
+            elif 'volume_24h' in df.columns:
+                sort_field = 'volume_24h'
+        
+        # Make sure sort field exists
+        if sort_field not in df.columns:
+            logger.warning(f"Sort field {sort_field} not found in data")
+            if len(df) > limit:
+                return df.head(limit)
+            return df
+            
+        # Sort and return top pools
+        df = df.sort_values(by=sort_field, ascending=ascending)
+        if len(df) > limit:
+            return df.head(limit)
+        return df
+    except Exception as e:
+        logger.error(f"Error getting top pools: {str(e)}")
+        return pd.DataFrame()
+
+def get_blockchain_stats():
+    """
+    Get general statistics about the Solana blockchain.
+    This function is used by the main page to display stats.
+    
+    Returns:
+        Dictionary with blockchain statistics
+    """
+    try:
+        # Get stats from the data services module
+        stats = get_stats()
+        if stats:
+            return stats
+            
+        # Fallback to basic stats if service fails
+        return {
+            'total_pools': 0,
+            'total_liquidity': 0,
+            'total_volume_24h': 0,
+            'avg_apr': 0,
+            'active_dexes': 0,
+            'timestamp': datetime.now()
+        }
+    except Exception as e:
+        logger.error(f"Error getting blockchain stats: {str(e)}")
+        return {
+            'total_pools': 0,
+            'total_liquidity': 0,
+            'total_volume_24h': 0,
+            'avg_apr': 0,
+            'active_dexes': 0,
+            'timestamp': datetime.now(),
+            'error': str(e)
+        }
+
+def get_prediction_metrics(db=None):
+    """
+    Get prediction metrics and performance indicators.
+    This function is used by the main page to display prediction performance.
+    
+    Args:
+        db: Optional database connection
+    
+    Returns:
+        Dictionary with prediction metrics
+    """
+    try:
+        # Try to use the data service first
+        data_service = get_data_service()
+        if data_service and hasattr(data_service, 'get_prediction_metrics'):
+            metrics = data_service.get_prediction_metrics()
+            if metrics:
+                return metrics
+                
+        # If the data service doesn't have this method, try the DB
+        if db is not None and hasattr(db, 'get_prediction_metrics'):
+            metrics = db.get_prediction_metrics()
+            if metrics:
+                return metrics
+                
+        # Fallback to default metrics structure
+        return {
+            'prediction_count': 0,
+            'accuracy': 0.0,
+            'avg_confidence': 0.0,
+            'last_update': datetime.now() - timedelta(days=1),  # Yesterday
+            'metrics_available': False
+        }
+    except Exception as e:
+        logger.error(f"Error getting prediction metrics: {str(e)}")
+        return {
+            'prediction_count': 0,
+            'accuracy': 0.0,
+            'avg_confidence': 0.0,
+            'error': str(e),
+            'metrics_available': False
+        }
 
 def get_top_predictions(db, category="apr", limit=10, ascending=False):
     """
