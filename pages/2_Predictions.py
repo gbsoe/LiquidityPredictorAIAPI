@@ -32,10 +32,15 @@ from data_services.data_service import get_data_service
 from api_auth_helper import set_api_key
 set_api_key('9feae0d0af47e4948e061f2d7820461e374e040c21cf65c087166d7ed18f5ed6')
 
+# Explicitly disable all mock data
+from utils.disable_mock_data import disable_all_mock_data
+disable_all_mock_data()
+
 # Initialize database connection
 @st.cache_resource
 def get_db_connection():
-    return DBManager()
+    # Don't use mock data for database operations
+    return DBManager(use_mock=False)
 
 db = get_db_connection()
 
