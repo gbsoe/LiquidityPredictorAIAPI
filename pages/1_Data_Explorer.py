@@ -37,7 +37,7 @@ st.title("Data Explorer")
 st.markdown("Explore detailed metrics and historical data for Solana liquidity pools.")
 
 st.image("https://images.unsplash.com/photo-1542744173-05336fcc7ad4", 
-         caption="Financial Data Visualization")
+         caption="Financial Data")
 
 # Sidebar for pool selection
 st.sidebar.header("Pool Selection")

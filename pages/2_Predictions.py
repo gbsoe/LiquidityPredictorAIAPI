@@ -49,7 +49,7 @@ st.title("Machine Learning Predictions")
 st.markdown("View ML-powered predictions for APR, performance classification, and risk assessment.")
 
 st.image("https://images.unsplash.com/photo-1516534775068-ba3e7458af70", 
-         caption="Machine Learning Concept")
+         caption="Machine Learning Powered")
 
 # Initialize prediction system
 @st.cache_resource

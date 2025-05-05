@@ -34,7 +34,7 @@ st.title("Risk Assessment")
 st.markdown("Advanced risk metrics and analysis for Solana liquidity pools.")
 
 st.image("https://images.unsplash.com/photo-1472220625704-91e1462799b2", 
-         caption="Risk Assessment Visualization")
+         caption="Risk Assessment")
 
 # Get pool data
 @st.cache_data(ttl=300)  # Cache for 5 minutes
