@@ -1,0 +1,81 @@
+{
+  "summary": {
+    "timestamp": "2025-05-05T21:17:44.865719",
+    "total_runtime": "4.89s",
+    "time_to_data_loaded": "N/A",
+    "time_to_predictions": "N/A",
+    "time_to_ui_ready": "N/A",
+    "peak_memory_mb": "0.00 MB",
+    "memory_growth_mb": "38.75 MB",
+    "final_token_cache_size": 0,
+    "total_pools_loaded": 0
+  },
+  "segments": {
+    "data_collection_init": "0.04s",
+    "app_initialization": "4.89s"
+  },
+  "checkpoints": {
+    "data_loaded": "2025-05-05T21:17:44.734921",
+    "ui_ready": "2025-05-05T21:17:44.865129"
+  },
+  "stats": {
+    "token_cache_size": 0,
+    "token_lookup_times": [],
+    "prediction_times": [],
+    "total_pools_loaded": 0,
+    "tokens_by_symbol": 0,
+    "tokens_by_address": 0,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "api_calls": 0,
+    "peak_memory_mb": 0
+  },
+  "timeline": [
+    {
+      "timestamp": 1746479859.975867,
+      "time": "0.00s",
+      "event": "monitor_initialized",
+      "datetime": "2025-05-05T21:17:39.975873"
+    },
+    {
+      "timestamp": 1746479859.9761229,
+      "time": "0.00s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-05T21:17:39.976125"
+    },
+    {
+      "timestamp": 1746479864.696529,
+      "time": "4.72s",
+      "event": "data_collection_init_tracking_started",
+      "datetime": "2025-05-05T21:17:44.696537"
+    },
+    {
+      "timestamp": 1746479864.734908,
+      "time": "4.76s",
+      "event": "data_collection_init_tracking_stopped",
+      "datetime": "2025-05-05T21:17:44.734909",
+      "duration": "0.04s"
+    },
+    {
+      "timestamp": 1746479864.7349238,
+      "time": "4.76s",
+      "event": "checkpoint_data_loaded",
+      "datetime": "2025-05-05T21:17:44.734925",
+      "time_since_start": "4.76s"
+    },
+    {
+      "timestamp": 1746479864.8651364,
+      "time": "4.89s",
+      "event": "checkpoint_ui_ready",
+      "datetime": "2025-05-05T21:17:44.865139",
+      "time_since_start": "4.89s"
+    },
+    {
+      "timestamp": 1746479864.8651881,
+      "time": "4.89s",
+      "event": "app_initialization_tracking_stopped",
+      "datetime": "2025-05-05T21:17:44.865189",
+      "duration": "4.89s"
+    }
+  ]
+}
