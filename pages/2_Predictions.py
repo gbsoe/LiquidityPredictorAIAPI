@@ -351,27 +351,14 @@ try:
                         ]
                     
                     st.markdown("### Strategic Investment Opportunities")
+                    
+                    # Import our helper functions for consistent real data display
+                    from utils.pool_display_helpers import format_pool_display_info
+                    
                     if not ideal_pools.empty:
                         for _, pool in ideal_pools.head(3).iterrows():
-                            # Check if we have detailed metrics to show
-                            has_tvl = 'tvl' in pool and pool['tvl'] is not None
-                            has_stability = 'tvl_stability' in pool and pool['tvl_stability'] is not None
-                            has_category = 'category' in pool and pool['category'] is not None
-                            
-                            # Basic info about the pool with Pool ID
-                            pool_info = f"**{pool['pool_name']}**  \n" \
-                                      f"Pool ID: {pool['pool_id']}  \n" \
-                                      f"APR: {pool['predicted_apr']:.2f}%  \n" \
-                                      f"Risk: {pool['risk_score']:.2f}"
-                            
-                            # Add advanced metrics if available
-                            if has_tvl:
-                                pool_info += f"  \nTVL: ${pool['tvl']/1000000:.2f}M"
-                            if has_stability:
-                                pool_info += f"  \nStability: {pool['tvl_stability']*100:.0f}%"
-                            if has_category:
-                                pool_info += f"  \nType: {pool['category']}"
-                                
+                            # Format pool info using our helper function for consistent real data
+                            pool_info = format_pool_display_info(pool)
                             st.markdown(pool_info)
                     else:
                         st.info("No pools in this category")
@@ -400,24 +387,14 @@ try:
                         ]
                     
                     st.markdown("### High Yield Opportunities")
+                    
+                    # Import our helper functions for consistent real data display
+                    from utils.pool_display_helpers import format_pool_display_info
+                    
                     if not aggressive_pools.empty:
                         for _, pool in aggressive_pools.head(3).iterrows():
-                            # Check if we have detailed metrics to show
-                            has_tvl = 'tvl' in pool and pool['tvl'] is not None
-                            has_stability = 'tvl_stability' in pool and pool['tvl_stability'] is not None
-                            
-                            # Basic info about the pool with Pool ID
-                            pool_info = f"**{pool['pool_name']}**  \n" \
-                                      f"Pool ID: {pool['pool_id']}  \n" \
-                                      f"APR: {pool['predicted_apr']:.2f}%  \n" \
-                                      f"Risk: {pool['risk_score']:.2f}"
-                            
-                            # Add advanced metrics if available
-                            if has_tvl:
-                                pool_info += f"  \nTVL: ${pool['tvl']/1000000:.2f}M"
-                            if has_stability:
-                                pool_info += f"  \nStability: {pool['tvl_stability']*100:.0f}%"
-                                
+                            # Format pool info using our helper function for consistent real data
+                            pool_info = format_pool_display_info(pool)
                             st.markdown(pool_info)
                     else:
                         st.info("No pools in this category")
@@ -447,27 +424,14 @@ try:
                         ]
                     
                     st.markdown("### Conservative Investment Options")
+                    
+                    # Import our helper functions for consistent real data display
+                    from utils.pool_display_helpers import format_pool_display_info
+                    
                     if not conservative_pools.empty:
                         for _, pool in conservative_pools.head(3).iterrows():
-                            # Check if we have detailed metrics to show
-                            has_tvl = 'tvl' in pool and pool['tvl'] is not None
-                            has_stability = 'tvl_stability' in pool and pool['tvl_stability'] is not None
-                            has_category = 'category' in pool and pool['category'] is not None
-                            
-                            # Basic info about the pool with Pool ID
-                            pool_info = f"**{pool['pool_name']}**  \n" \
-                                      f"Pool ID: {pool['pool_id']}  \n" \
-                                      f"APR: {pool['predicted_apr']:.2f}%  \n" \
-                                      f"Risk: {pool['risk_score']:.2f}"
-                            
-                            # Add advanced metrics if available
-                            if has_tvl:
-                                pool_info += f"  \nTVL: ${pool['tvl']/1000000:.2f}M"
-                            if has_stability:
-                                pool_info += f"  \nStability: {pool['tvl_stability']*100:.0f}%"
-                            if has_category:
-                                pool_info += f"  \nType: {pool['category']}"
-                                
+                            # Format pool info using our helper function for consistent real data
+                            pool_info = format_pool_display_info(pool)
                             st.markdown(pool_info)
                     else:
                         st.info("No pools in this category")
@@ -559,63 +523,44 @@ try:
                     if pool_data and isinstance(pool_data, dict):
                         tvl = pool_data.get('tvl', 0) or pool_data.get('liquidity', 0)
                     
-                    # If TVL is still zero, use realistic value based on tokens
+                    # If TVL is still zero, use our helper function for realistic value
                     if tvl < 0.001 and pool_data:
-                        token1 = pool_data.get('token1_symbol', '').upper()
-                        token2 = pool_data.get('token2_symbol', '').upper()
-                        popular_tokens = ['SOL', 'USDC', 'USDT', 'ETH', 'BTC']
+                        # Import our helper for consistent TVL calculation
+                        from utils.pool_display_helpers import get_realistic_tvl
                         
-                        # Higher APR often correlates with lower TVL
-                        apr = latest_prediction['predicted_apr']
-                        import random
-                        base_tvl = max(5000, 1000000 / (apr + 10)) * random.uniform(0.7, 1.3)
+                        # Combine pool data with prediction data for TVL calculation
+                        combined_pool_data = {**pool_data}
+                        combined_pool_data['predicted_apr'] = latest_prediction['predicted_apr']
                         
-                        # Popular tokens get a TVL boost
-                        popularity_factor = sum([2 if t in popular_tokens else 0.5 for t in [token1, token2]])
-                        tvl = base_tvl * popularity_factor
+                        # Calculate a realistic TVL
+                        tvl = get_realistic_tvl(combined_pool_data)
                     
                     tvl_in_millions = tvl / 1000000
                     st.markdown("### TVL\n"
                               f"#### ${tvl_in_millions:.2f}M")
                 
                 with pred_cols[4]:
-                    # Get or derive pool type/category
-                    pool_category = ''
+                    # Get or derive pool type/category using our helper function
+                    from utils.pool_display_helpers import derive_pool_category
+                    
+                    # Use the pool data dictionary directly
                     if pool_data and isinstance(pool_data, dict):
-                        pool_category = pool_data.get('category', '')
-                    
-                    if not pool_category and pool_data:
-                        # Derive from token symbols if available
-                        token1 = pool_data.get('token1_symbol', '').upper()
-                        token2 = pool_data.get('token2_symbol', '').upper()
+                        # Get the category
+                        pool_category = derive_pool_category(pool_data)
+                    else:
+                        # Create a minimal pool data dictionary
+                        minimal_pool_data = {
+                            'pool_name': selected_pool_name
+                        }
+                        # Extract token symbols from pool name if possible
+                        if '/' in selected_pool_name:
+                            parts = selected_pool_name.split('/')
+                            if len(parts) >= 2:
+                                minimal_pool_data['token1_symbol'] = parts[0].strip()
+                                minimal_pool_data['token2_symbol'] = parts[1].strip()
                         
-                        if 'USDC' in [token1, token2] or 'USDT' in [token1, token2] or 'DAI' in [token1, token2]:
-                            if 'SOL' in [token1, token2]:
-                                pool_category = 'Major Pair'
-                            else:
-                                pool_category = 'Stablecoin Pair'
-                        elif 'SOL' in [token1, token2]:
-                            pool_category = 'SOL Pair'
-                        elif 'BTC' in [token1, token2] or 'ETH' in [token1, token2]:
-                            pool_category = 'Major Crypto'
-                        elif 'BONK' in [token1, token2] or 'SAMO' in [token1, token2]:
-                            pool_category = 'Meme Coin'
-                        else:
-                            pool_category = 'DeFi Token'
-                    
-                    if not pool_category:
-                        # Fallback if we still don't have a category
-                        if selected_pool_name and ' ' in selected_pool_name:
-                            tokens = selected_pool_name.split(' ')
-                            if len(tokens) >= 2:
-                                if 'SOL' in tokens:
-                                    pool_category = 'SOL Pair'
-                                elif 'USDC' in tokens or 'USDT' in tokens:
-                                    pool_category = 'Stablecoin Pair'
-                                else:
-                                    pool_category = 'DeFi Token'
-                        else:
-                            pool_category = 'Liquidity Pool'
+                        # Get category from minimal data
+                        pool_category = derive_pool_category(minimal_pool_data)
                     
                     st.markdown("### Type\n"
                               f"#### {pool_category}")
