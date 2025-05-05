@@ -72,20 +72,31 @@ def update_pool_with_token_prices(pool):
 # Utility functions
 def format_currency(value):
     """Format a value as currency"""
-    if value >= 1_000_000_000:
-        return f"${value/1_000_000_000:.2f}B"
-    elif value >= 1_000_000:
-        return f"${value/1_000_000:.2f}M"
-    elif value >= 1_000:
-        return f"${value/1_000:.2f}K"
-    else:
-        return f"${value:.2f}"
+    if value is None:
+        return "N/A"
+    
+    try:
+        value = float(value)
+        if value >= 1_000_000_000:
+            return f"${value/1_000_000_000:.2f}B"
+        elif value >= 1_000_000:
+            return f"${value/1_000_000:.2f}M"
+        elif value >= 1_000:
+            return f"${value/1_000:.2f}K"
+        else:
+            return f"${value:.2f}"
+    except (ValueError, TypeError):
+        return "N/A"
 
 def format_percentage(value):
     """Format a value as percentage"""
     if value is None:
         return "N/A"
-    return f"{value:.2f}%"
+    
+    try:
+        return f"{float(value):.2f}%"
+    except (ValueError, TypeError):
+        return "N/A"
 
 def get_trend_icon(value):
     """Return an arrow icon based on trend direction"""
@@ -331,14 +342,27 @@ def main():
             # Apply filters
             filtered_df = df.copy()
             
+            # Add debug information
+            st.write("DataFrame columns:", list(df.columns))
+            
             if dex_filter:
                 filtered_df = filtered_df[filtered_df["dex"].isin(dex_filter)]
             
-            if min_liquidity > 0:
-                filtered_df = filtered_df[filtered_df["liquidity"] >= min_liquidity]
+            # Check if liquidity column exists and has correct type
+            if "liquidity" in filtered_df.columns:
+                # Convert to numeric if needed
+                filtered_df["liquidity"] = pd.to_numeric(filtered_df["liquidity"], errors="coerce")
+                
+                if min_liquidity > 0:
+                    filtered_df = filtered_df[filtered_df["liquidity"] >= min_liquidity]
             
-            if min_apr > 0:
-                filtered_df = filtered_df[filtered_df["apr"] >= min_apr]
+            # Check if apr column exists and has correct type
+            if "apr" in filtered_df.columns:
+                # Convert to numeric if needed
+                filtered_df["apr"] = pd.to_numeric(filtered_df["apr"], errors="coerce")
+                
+                if min_apr > 0:
+                    filtered_df = filtered_df[filtered_df["apr"] >= min_apr]
             
             # Display pools
             st.subheader("Pools")
