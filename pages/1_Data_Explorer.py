@@ -7,6 +7,9 @@ from datetime import datetime, timedelta
 import plotly.express as px
 import plotly.graph_objects as go
 
+# Import the historical data service
+from historical_data_service import get_historical_service
+
 # Add project directories to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.visualization import create_metrics_chart, create_liquidity_volume_chart, create_token_price_chart, create_pool_comparison_chart
@@ -151,8 +154,18 @@ try:
             # Load pool metrics
             pool_metrics = get_pool_metrics(db, selected_pool_id, days)
             
+            # Add collection status and timing info
+            historical_service = get_historical_service()
+            collection_status = historical_service.get_collection_status()
+            collection_active = collection_status.get("collection_active", False)
+            collection_hours = collection_status.get("collection_duration_hours", 0)
+            pools_tracked = collection_status.get("pools_tracked", 0)
+            
             if not pool_metrics.empty:
                 st.subheader("Historical Metrics")
+                
+                # Show collection info with small text
+                st.caption(f"Data collection active: {collection_active}. Collecting for: {collection_hours:.2f} hours. Pools tracked: {pools_tracked}")
                 
                 # Create tabs for different visualizations
                 metrics_tabs = st.tabs(["APR", "Liquidity & Volume", "Token Prices"])
@@ -216,7 +229,30 @@ try:
                         use_container_width=True
                     )
             else:
-                st.info(f"No historical metrics available for this pool over the selected time period ({time_period}).")
+                st.subheader("Historical Metrics")
+                
+                # Show collection info with small text
+                st.caption(f"Data collection active: {collection_active}. Collecting for: {collection_hours:.2f} hours. Pools tracked: {pools_tracked}")
+                
+                # Show info message with progress indicator
+                st.info(
+                    f"No historical metrics available yet for this pool over the selected time period ({time_period}). " +
+                    "Historical data collection is in progress. Data points will accumulate over time. " +
+                    "The system will automatically collect metrics at regular intervals."
+                )
+                
+                # Show a progress bar to indicate data collection is in progress
+                if collection_active:
+                    days_progress = min(collection_hours / (24 * 7), 1.0)  # Progress towards 7 days of data
+                    st.progress(days_progress, text=f"Collecting data: {days_progress*100:.1f}% towards 7 days of historical data")
+                    
+                    # Display expected time until meaningful data is available
+                    if days_progress < 1.0:
+                        hours_remaining = (24 * 7) - collection_hours
+                        st.caption(f"Estimated time until 7 days of data: {hours_remaining:.1f} hours")
+                else:
+                    st.warning("Historical data collection is not currently active. Check system logs for details.")
+                    st.caption("Contact system administrator if this persists.")
         else:
             st.error(f"Error loading details for pool: {selected_pool_id}")
     else:
@@ -305,7 +341,30 @@ try:
                     use_container_width=True
                 )
             else:
-                st.info("No data available for the selected pools and time period.")
+                # Get historical collection status
+                historical_service = get_historical_service()
+                collection_status = historical_service.get_collection_status()
+                collection_active = collection_status.get("collection_active", False)
+                collection_hours = collection_status.get("collection_duration_hours", 0)
+                pools_tracked = collection_status.get("pools_tracked", 0)
+                
+                # Show info message with progress indicator
+                st.info(
+                    f"No historical metrics available yet for the selected pools over the selected time period. " +
+                    "Historical data collection is in progress. Data points will accumulate over time."
+                )
+                
+                # Show a progress bar to indicate data collection is in progress
+                if collection_active:
+                    days_progress = min(collection_hours / (24 * 7), 1.0)  # Progress towards 7 days of data
+                    st.progress(days_progress, text=f"Collecting data: {days_progress*100:.1f}% towards 7 days of historical data")
+                    
+                    # Display expected time until meaningful data is available
+                    if days_progress < 1.0:
+                        hours_remaining = (24 * 7) - collection_hours
+                        st.caption(f"Estimated time until 7 days of data: {hours_remaining:.1f} hours")
+                else:
+                    st.warning("Historical data collection is not currently active. Check system logs for details.")
         else:
             st.info("Select pools to compare.")
     else:

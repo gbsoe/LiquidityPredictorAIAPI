@@ -1,0 +1,154 @@
+{
+  "summary": {
+    "timestamp": "2025-05-05T03:07:38.118607",
+    "total_runtime": "180.89s",
+    "time_to_data_loaded": "N/A",
+    "time_to_predictions": "N/A",
+    "time_to_ui_ready": "N/A",
+    "peak_memory_mb": "0.00 MB",
+    "memory_growth_mb": "58.48 MB",
+    "final_token_cache_size": 0,
+    "total_pools_loaded": 0
+  },
+  "segments": {
+    "data_collection_init": "0.00s",
+    "app_initialization": "7.48s",
+    "prediction_generation": "3.50s"
+  },
+  "checkpoints": {
+    "data_loaded": "2025-05-05T03:07:03.041474",
+    "ui_ready": "2025-05-05T03:07:38.117348"
+  },
+  "stats": {
+    "token_cache_size": 0,
+    "token_lookup_times": [],
+    "prediction_times": [],
+    "total_pools_loaded": 0,
+    "tokens_by_symbol": 0,
+    "tokens_by_address": 0,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "api_calls": 0,
+    "peak_memory_mb": 0
+  },
+  "timeline": [
+    {
+      "timestamp": 1746414277.2325695,
+      "time": "0.00s",
+      "event": "monitor_initialized",
+      "datetime": "2025-05-05T03:04:37.232577"
+    },
+    {
+      "timestamp": 1746414277.2328064,
+      "time": "0.00s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-05T03:04:37.232809"
+    },
+    {
+      "timestamp": 1746414283.8151681,
+      "time": "6.58s",
+      "event": "data_collection_init_tracking_started",
+      "datetime": "2025-05-05T03:04:43.815173"
+    },
+    {
+      "timestamp": 1746414283.8178635,
+      "time": "6.59s",
+      "event": "data_collection_init_tracking_stopped",
+      "datetime": "2025-05-05T03:04:43.817864",
+      "duration": "0.00s"
+    },
+    {
+      "timestamp": 1746414283.8178747,
+      "time": "6.59s",
+      "event": "checkpoint_data_loaded",
+      "datetime": "2025-05-05T03:04:43.817875",
+      "time_since_start": "6.59s"
+    },
+    {
+      "timestamp": 1746414288.627085,
+      "time": "11.39s",
+      "event": "prediction_generation_tracking_started",
+      "datetime": "2025-05-05T03:04:48.627087"
+    },
+    {
+      "timestamp": 1746414297.5180333,
+      "time": "20.29s",
+      "event": "checkpoint_ui_ready",
+      "datetime": "2025-05-05T03:04:57.518035",
+      "time_since_start": "20.29s"
+    },
+    {
+      "timestamp": 1746414297.5186856,
+      "time": "20.29s",
+      "event": "app_initialization_tracking_stopped",
+      "datetime": "2025-05-05T03:04:57.518687",
+      "duration": "20.29s"
+    },
+    {
+      "timestamp": 1746414297.5193605,
+      "time": "20.29s",
+      "event": "prediction_generation_tracking_stopped",
+      "datetime": "2025-05-05T03:04:57.519361",
+      "duration": "8.89s"
+    },
+    {
+      "timestamp": 1746414423.0401776,
+      "time": "145.81s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-05T03:07:03.040184"
+    },
+    {
+      "timestamp": 1746414423.0403972,
+      "time": "145.81s",
+      "event": "data_collection_init_tracking_started",
+      "datetime": "2025-05-05T03:07:03.040399"
+    },
+    {
+      "timestamp": 1746414423.0414646,
+      "time": "145.81s",
+      "event": "data_collection_init_tracking_stopped",
+      "datetime": "2025-05-05T03:07:03.041466",
+      "duration": "0.00s"
+    },
+    {
+      "timestamp": 1746414423.0414767,
+      "time": "145.81s",
+      "event": "checkpoint_data_loaded",
+      "datetime": "2025-05-05T03:07:03.041477",
+      "time_since_start": "145.81s"
+    },
+    {
+      "timestamp": 1746414450.6372075,
+      "time": "173.40s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-05T03:07:30.637213"
+    },
+    {
+      "timestamp": 1746414454.6157663,
+      "time": "177.38s",
+      "event": "prediction_generation_tracking_started",
+      "datetime": "2025-05-05T03:07:34.615769"
+    },
+    {
+      "timestamp": 1746414458.1173532,
+      "time": "180.88s",
+      "event": "checkpoint_ui_ready",
+      "datetime": "2025-05-05T03:07:38.117355",
+      "time_since_start": "180.88s"
+    },
+    {
+      "timestamp": 1746414458.1180215,
+      "time": "180.89s",
+      "event": "app_initialization_tracking_stopped",
+      "datetime": "2025-05-05T03:07:38.118022",
+      "duration": "7.48s"
+    },
+    {
+      "timestamp": 1746414458.1185987,
+      "time": "180.89s",
+      "event": "prediction_generation_tracking_stopped",
+      "datetime": "2025-05-05T03:07:38.118599",
+      "duration": "3.50s"
+    }
+  ]
+}

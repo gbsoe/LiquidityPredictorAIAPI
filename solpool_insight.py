@@ -28,6 +28,9 @@ import sys
 from performance_monitor import get_performance_monitor
 perf_monitor = get_performance_monitor()
 perf_monitor.start_tracking("app_initialization")
+
+# Import the historical data service
+from historical_data_service import get_historical_service, start_historical_collection
 start_time = time.time()
 loading_start = datetime.now()
 

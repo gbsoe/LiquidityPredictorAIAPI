@@ -1,536 +1,250 @@
-"""
-Historical Data Service for SolPool Insight.
-
-This module provides a service for storing and retrieving historical pool data.
-It supports:
-- Time-series storage of pool data
-- Trend analysis
-- Comparison of metrics over time
-- Disk-based storage with SQLite
-"""
-
+import logging
 import os
 import json
-import logging
-import sqlite3
-from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional, Tuple
-import threading
 import time
+from datetime import datetime, timedelta
+import threading
+import pandas as pd
+import numpy as np
+from typing import Dict, List, Optional, Any, Tuple
 
 # Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Singleton service instance
-_instance = None
-_lock = threading.Lock()
-
+# Singleton pattern for historical data service
+_service_instance = None
 
 class HistoricalDataService:
-    """
-    Service for storing and retrieving historical pool data.
+    """Service for storing and retrieving historical pool data"""
     
-    Features:
-    - Time-series storage of pool data
-    - Trend analysis
-    - Comparison of metrics over time
-    - Disk-based storage with SQLite
-    """
+    def __init__(self):
+        """Initialize the historical data service"""
+        self.data_dir = "data/historical"
+        self.pools_cache = {}
+        self.metrics_cache = {}
+        self.last_updated = {}
+        self.initialized = False
+        self.collection_start_time = datetime.now()
+        
+        # Create the data directory if it doesn't exist
+        os.makedirs(self.data_dir, exist_ok=True)
+        
+        # Load any existing data from disk
+        self._load_data()
+        
+        # Start the background thread for data collection
+        self.collection_thread = None
+        self.stop_collection = False
+        self.initialized = True
+        logger.info("Historical data service initialized")
     
-    def __init__(self, db_path: str = "data/historical_pools.db"):
-        """
-        Initialize the historical data service.
-        
-        Args:
-            db_path: Path to the SQLite database file
-        """
-        # Ensure the data directory exists
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
-        
-        # Initialize the database
-        self.db_path = db_path
-        self._init_database()
-        
-        # Stats tracking
-        self.stats = {
-            "total_snapshots": 0,
-            "last_snapshot": None,
-            "pools_tracked": 0,
-            "metrics_tracked": 0
-        }
-        
-        logger.info(f"Initialized historical data service with database at {db_path}")
-    
-    def _init_database(self):
-        """Initialize the SQLite database."""
+    def _load_data(self):
+        """Load historical data from disk"""
         try:
-            # Connect to the database
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
+            # Look for pool metrics files in the data directory
+            metrics_files = [f for f in os.listdir(self.data_dir) if f.endswith('_metrics.json')]
             
-            # Create the pools table if it doesn't exist
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS pools (
-                pool_id TEXT,
-                timestamp TEXT,
-                data TEXT,
-                PRIMARY KEY (pool_id, timestamp)
-            )
-            ''')
+            for file_name in metrics_files:
+                pool_id = file_name.split('_metrics.json')[0]
+                file_path = os.path.join(self.data_dir, file_name)
+                
+                try:
+                    with open(file_path, 'r') as f:
+                        metrics_data = json.load(f)
+                    
+                    # Convert to DataFrame for easier processing
+                    if metrics_data and len(metrics_data) > 0:
+                        # Convert string dates to datetime
+                        for entry in metrics_data:
+                            entry['timestamp'] = datetime.fromisoformat(entry['timestamp'].replace('Z', '+00:00'))
+                        
+                        self.metrics_cache[pool_id] = pd.DataFrame(metrics_data)
+                        logger.debug(f"Loaded historical metrics for pool {pool_id}")
+                except Exception as e:
+                    logger.error(f"Error loading metrics for pool {pool_id}: {str(e)}")
             
-            # Create the metrics table if it doesn't exist
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS metrics (
-                pool_id TEXT,
-                timestamp TEXT,
-                metric TEXT,
-                value REAL,
-                PRIMARY KEY (pool_id, timestamp, metric)
-            )
-            ''')
-            
-            # Create the snapshots table if it doesn't exist
-            cursor.execute('''
-            CREATE TABLE IF NOT EXISTS snapshots (
-                timestamp TEXT PRIMARY KEY,
-                pool_count INTEGER,
-                pools TEXT
-            )
-            ''')
-            
-            # Create indexes for faster querying
-            cursor.execute('CREATE INDEX IF NOT EXISTS idx_pools_id ON pools (pool_id)')
-            cursor.execute('CREATE INDEX IF NOT EXISTS idx_pools_timestamp ON pools (timestamp)')
-            cursor.execute('CREATE INDEX IF NOT EXISTS idx_metrics_id ON metrics (pool_id)')
-            cursor.execute('CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON metrics (timestamp)')
-            cursor.execute('CREATE INDEX IF NOT EXISTS idx_metrics_name ON metrics (metric)')
-            
-            # Commit the changes
-            conn.commit()
-            
-            # Close the connection
-            conn.close()
-            
-            logger.info("Database initialized successfully")
+            logger.info(f"Loaded historical data for {len(self.metrics_cache)} pools")
         except Exception as e:
-            logger.error(f"Error initializing database: {str(e)}")
+            logger.error(f"Error loading historical data: {str(e)}")
     
-    def store_pool_snapshot(self, pools: List[Dict[str, Any]]) -> bool:
-        """
-        Store a snapshot of pool data.
-        
-        Args:
-            pools: List of pool data to store
-            
-        Returns:
-            True if successful, False otherwise
-        """
-        if not pools:
-            logger.warning("No pools provided for snapshot storage")
-            return False
+    def save_pool_metrics(self, pool_id: str, metrics: Dict[str, Any]):
+        """Save a single data point of pool metrics"""
+        if not self.initialized:
+            logger.warning("Historical data service not initialized yet")
+            return
         
         try:
-            # Connect to the database
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
+            # Add timestamp if not present
+            if 'timestamp' not in metrics:
+                metrics['timestamp'] = datetime.now().isoformat()
             
-            # Get the current timestamp
+            # Convert to DataFrame format for consistency
+            metrics_df = pd.DataFrame([metrics])
+            
+            # Handle timestamp format
+            if not isinstance(metrics['timestamp'], datetime):
+                metrics_df['timestamp'] = pd.to_datetime(metrics_df['timestamp'])
+            
+            # Update in-memory cache
+            if pool_id in self.metrics_cache:
+                self.metrics_cache[pool_id] = pd.concat([self.metrics_cache[pool_id], metrics_df])
+            else:
+                self.metrics_cache[pool_id] = metrics_df
+            
+            # Update last_updated timestamp
+            self.last_updated[pool_id] = datetime.now()
+            
+            # Save to disk (could optimize to batch writes)
+            self._save_pool_metrics(pool_id)
+            
+            logger.debug(f"Saved metrics for pool {pool_id}")
+        except Exception as e:
+            logger.error(f"Error saving metrics for pool {pool_id}: {str(e)}")
+    
+    def _save_pool_metrics(self, pool_id: str):
+        """Save pool metrics to disk"""
+        try:
+            if pool_id in self.metrics_cache:
+                # Convert to list of dictionaries for JSON serialization
+                metrics_data = self.metrics_cache[pool_id].copy()
+                
+                # Convert datetime to string
+                metrics_data['timestamp'] = metrics_data['timestamp'].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                
+                metrics_list = metrics_data.to_dict(orient='records')
+                
+                # Save to disk
+                file_path = os.path.join(self.data_dir, f"{pool_id}_metrics.json")
+                with open(file_path, 'w') as f:
+                    json.dump(metrics_list, f)
+        except Exception as e:
+            logger.error(f"Error saving metrics to disk for pool {pool_id}: {str(e)}")
+    
+    def get_pool_metrics(self, pool_id: str, days: int = 7) -> pd.DataFrame:
+        """Get historical metrics for a specific pool"""
+        if not self.initialized:
+            logger.warning("Historical data service not initialized yet")
+            return pd.DataFrame()
+        
+        try:
+            if pool_id in self.metrics_cache:
+                # Filter for the requested time period
+                cutoff_date = datetime.now() - timedelta(days=days)
+                metrics_df = self.metrics_cache[pool_id]
+                
+                # Make sure timestamp is datetime format
+                if not pd.api.types.is_datetime64_dtype(metrics_df['timestamp']):
+                    metrics_df['timestamp'] = pd.to_datetime(metrics_df['timestamp'])
+                
+                # Filter by date
+                recent_metrics = metrics_df[metrics_df['timestamp'] >= cutoff_date]
+                
+                # Sort by timestamp
+                return recent_metrics.sort_values('timestamp')
+            else:
+                logger.debug(f"No metrics found for pool {pool_id}")
+                return pd.DataFrame()
+        except Exception as e:
+            logger.error(f"Error getting metrics for pool {pool_id}: {str(e)}")
+            return pd.DataFrame()
+    
+    def collect_pool_data(self, pool_data: List[Dict[str, Any]]):
+        """Store the current state of multiple pools for historical tracking"""
+        if not pool_data or len(pool_data) == 0:
+            logger.warning("No pool data provided for collection")
+            return
+        
+        try:
             timestamp = datetime.now().isoformat()
-            
-            # Process each pool
-            for pool in pools:
-                # Ensure pool has required fields
-                if 'id' not in pool and 'poolId' not in pool:
-                    logger.warning("Pool missing identifier, skipping")
+            for pool in pool_data:
+                # Skip pools without valid IDs
+                pool_id = pool.get('id', '') or pool.get('poolId', '') or pool.get('pool_id', '')
+                if not pool_id:
                     continue
                 
-                # Get the pool ID
-                pool_id = pool.get('id', pool.get('poolId', ''))
-                
-                # Store the full pool data
-                pool_data = json.dumps(pool)
-                cursor.execute(
-                    'INSERT OR REPLACE INTO pools (pool_id, timestamp, data) VALUES (?, ?, ?)',
-                    (pool_id, timestamp, pool_data)
-                )
-                
-                # Extract important metrics for time-series analysis
-                metrics = pool.get('metrics', {})
-                
-                # Store key metrics separately for easier querying
-                metric_data = [
-                    (pool_id, timestamp, 'liquidity', metrics.get('tvl', 0)),
-                    (pool_id, timestamp, 'volume_24h', metrics.get('volumeUsd', 0)),
-                    (pool_id, timestamp, 'apr_24h', metrics.get('apy24h', metrics.get('apr24h', 0))),
-                    (pool_id, timestamp, 'apr_7d', metrics.get('apy7d', metrics.get('apr7d', 0))),
-                    (pool_id, timestamp, 'apr_30d', metrics.get('apy30d', metrics.get('apr30d', 0))),
-                    (pool_id, timestamp, 'token1_price', pool.get('token1_price', 0)),
-                    (pool_id, timestamp, 'token2_price', pool.get('token2_price', 0))
-                ]
-                
-                # Insert metric data
-                cursor.executemany(
-                    'INSERT OR REPLACE INTO metrics (pool_id, timestamp, metric, value) VALUES (?, ?, ?, ?)',
-                    metric_data
-                )
-            
-            # Store summary snapshot information
-            pool_ids = json.dumps([p.get('id', p.get('poolId', '')) for p in pools])
-            cursor.execute(
-                'INSERT OR REPLACE INTO snapshots (timestamp, pool_count, pools) VALUES (?, ?, ?)',
-                (timestamp, len(pools), pool_ids)
-            )
-            
-            # Commit the changes
-            conn.commit()
-            
-            # Close the connection
-            conn.close()
-            
-            # Update stats
-            self.stats["total_snapshots"] += 1
-            self.stats["last_snapshot"] = timestamp
-            self.stats["pools_tracked"] = len(self._get_unique_pool_ids())
-            self.stats["metrics_tracked"] = self._count_metrics_stored()
-            
-            logger.info(f"Stored snapshot of {len(pools)} pools at {timestamp}")
-            return True
-        except Exception as e:
-            logger.error(f"Error storing pool snapshot: {str(e)}")
-            return False
-    
-    def get_pool_history(self, pool_id: str, days: int = 30) -> List[Dict[str, Any]]:
-        """
-        Get historical data for a specific pool.
-        
-        Args:
-            pool_id: Pool ID to get history for
-            days: Number of days of history to retrieve
-            
-        Returns:
-            List of historical pool data
-        """
-        try:
-            # Connect to the database
-            conn = sqlite3.connect(self.db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            
-            # Calculate the start date
-            start_date = (datetime.now() - timedelta(days=days)).isoformat()
-            
-            # Query for pool data
-            cursor.execute(
-                'SELECT timestamp, data FROM pools WHERE pool_id = ? AND timestamp >= ? ORDER BY timestamp ASC',
-                (pool_id, start_date)
-            )
-            
-            # Get the results
-            rows = cursor.fetchall()
-            
-            # Close the connection
-            conn.close()
-            
-            # Process the results
-            history = []
-            for row in rows:
-                timestamp = row['timestamp']
-                data = json.loads(row['data'])
-                
-                # Add the timestamp to the data
-                data['snapshot_timestamp'] = timestamp
-                
-                history.append(data)
-            
-            return history
-        except Exception as e:
-            logger.error(f"Error getting pool history: {str(e)}")
-            return []
-    
-    def get_metric_history(self, pool_id: str, metric: str, days: int = 30) -> List[Tuple[str, float]]:
-        """
-        Get historical data for a specific metric.
-        
-        Args:
-            pool_id: Pool ID to get history for
-            metric: Metric to get history for
-            days: Number of days of history to retrieve
-            
-        Returns:
-            List of (timestamp, value) tuples
-        """
-        try:
-            # Connect to the database
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            # Calculate the start date
-            start_date = (datetime.now() - timedelta(days=days)).isoformat()
-            
-            # Query for metric data
-            cursor.execute(
-                'SELECT timestamp, value FROM metrics WHERE pool_id = ? AND metric = ? AND timestamp >= ? ORDER BY timestamp ASC',
-                (pool_id, metric, start_date)
-            )
-            
-            # Get the results
-            rows = cursor.fetchall()
-            
-            # Close the connection
-            conn.close()
-            
-            return rows
-        except Exception as e:
-            logger.error(f"Error getting metric history: {str(e)}")
-            return []
-    
-    def get_metric_trends(self, pool_ids: List[str], metric: str, days: int = 30) -> Dict[str, Dict[str, Any]]:
-        """
-        Get trend analysis for a specific metric across multiple pools.
-        
-        Args:
-            pool_ids: List of pool IDs to analyze
-            metric: Metric to analyze
-            days: Number of days of history to analyze
-            
-        Returns:
-            Dictionary mapping pool IDs to trend statistics
-        """
-        trends = {}
-        
-        for pool_id in pool_ids:
-            # Get the metric history
-            history = self.get_metric_history(pool_id, metric, days)
-            
-            if not history:
-                trends[pool_id] = {
-                    "trend": "unknown",
-                    "change": 0,
-                    "volatility": 0,
-                    "data_points": 0
+                # Extract key metrics
+                metrics = {
+                    'timestamp': timestamp,
+                    'liquidity': pool.get('liquidity', 0) or pool.get('tvl', 0) or pool.get('liquidityUsd', 0) or 0,
+                    'volume': pool.get('volume_24h', 0) or pool.get('volume24h', 0) or pool.get('volume', 0) or 0,
+                    'apr': pool.get('apr', 0) or pool.get('apr24h', 0) or pool.get('apy', 0) or 0
                 }
-                continue
-            
-            # Calculate trend statistics
-            values = [value for _, value in history]
-            timestamps = [ts for ts, _ in history]
-            
-            if len(values) < 2:
-                # Not enough data points for trend analysis
-                trends[pool_id] = {
-                    "trend": "unknown",
-                    "change": 0,
-                    "volatility": 0,
-                    "data_points": len(values)
-                }
-                continue
-            
-            # Calculate overall change
-            start_value = values[0]
-            end_value = values[-1]
-            
-            if start_value == 0:
-                change_pct = 0
-            else:
-                change_pct = ((end_value - start_value) / start_value) * 100
-            
-            # Determine trend direction
-            if change_pct > 5:
-                trend = "increasing"
-            elif change_pct < -5:
-                trend = "decreasing"
-            else:
-                trend = "stable"
-            
-            # Calculate volatility (standard deviation of changes)
-            changes = []
-            for i in range(1, len(values)):
-                if values[i-1] == 0:
-                    continue
                 
-                change = ((values[i] - values[i-1]) / values[i-1]) * 100
-                changes.append(change)
+                # Save the metrics for this pool
+                self.save_pool_metrics(pool_id, metrics)
             
-            volatility = 0
-            if changes:
-                volatility = sum(abs(c) for c in changes) / len(changes)
-            
-            # Store the trend statistics
-            trends[pool_id] = {
-                "trend": trend,
-                "change": change_pct,
-                "volatility": volatility,
-                "data_points": len(values),
-                "first_timestamp": timestamps[0],
-                "last_timestamp": timestamps[-1],
-                "first_value": values[0],
-                "last_value": values[-1]
-            }
-        
-        return trends
-    
-    def get_snapshots(self, limit: int = 10) -> List[Dict[str, Any]]:
-        """
-        Get recent snapshots.
-        
-        Args:
-            limit: Maximum number of snapshots to retrieve
-            
-        Returns:
-            List of snapshot metadata
-        """
-        try:
-            # Connect to the database
-            conn = sqlite3.connect(self.db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            
-            # Query for snapshots
-            cursor.execute(
-                'SELECT timestamp, pool_count FROM snapshots ORDER BY timestamp DESC LIMIT ?',
-                (limit,)
-            )
-            
-            # Get the results
-            rows = cursor.fetchall()
-            
-            # Close the connection
-            conn.close()
-            
-            # Process the results
-            snapshots = []
-            for row in rows:
-                snapshots.append(dict(row))
-            
-            return snapshots
+            logger.info(f"Collected historical data for {len(pool_data)} pools")
         except Exception as e:
-            logger.error(f"Error getting snapshots: {str(e)}")
-            return []
+            logger.error(f"Error collecting pool data: {str(e)}")
     
-    def purge_old_data(self, days_to_keep: int = 90) -> bool:
-        """
-        Purge old data from the database.
+    def start_data_collection(self, data_service, interval_minutes: int = 60):
+        """Start a background thread to collect data at regular intervals"""
+        if self.collection_thread is not None and self.collection_thread.is_alive():
+            logger.info("Data collection already running")
+            return
         
-        Args:
-            days_to_keep: Number of days of data to keep
+        def collection_worker():
+            logger.info(f"Starting historical data collection every {interval_minutes} minutes")
             
-        Returns:
-            True if successful, False otherwise
-        """
-        try:
-            # Connect to the database
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
+            while not self.stop_collection:
+                try:
+                    # Get all pools from the data service
+                    pools = data_service.get_all_pools()
+                    
+                    if pools and len(pools) > 0:
+                        # Collect data for all pools
+                        self.collect_pool_data(pools)
+                    else:
+                        logger.warning("No pools returned from data service for historical collection")
+                except Exception as e:
+                    logger.error(f"Error in historical data collection: {str(e)}")
+                
+                # Sleep for the interval (but check stop flag more frequently)
+                for _ in range(interval_minutes * 60 // 10):  # Check every 10 seconds
+                    if self.stop_collection:
+                        break
+                    time.sleep(10)
             
-            # Calculate the cutoff date
-            cutoff_date = (datetime.now() - timedelta(days=days_to_keep)).isoformat()
-            
-            # Delete old data from pools table
-            cursor.execute(
-                'DELETE FROM pools WHERE timestamp < ?',
-                (cutoff_date,)
-            )
-            pools_deleted = cursor.rowcount
-            
-            # Delete old data from metrics table
-            cursor.execute(
-                'DELETE FROM metrics WHERE timestamp < ?',
-                (cutoff_date,)
-            )
-            metrics_deleted = cursor.rowcount
-            
-            # Delete old data from snapshots table
-            cursor.execute(
-                'DELETE FROM snapshots WHERE timestamp < ?',
-                (cutoff_date,)
-            )
-            snapshots_deleted = cursor.rowcount
-            
-            # Commit the changes
-            conn.commit()
-            
-            # Vacuum the database to reclaim space
-            cursor.execute('VACUUM')
-            
-            # Close the connection
-            conn.close()
-            
-            logger.info(f"Purged old data: {pools_deleted} pools, {metrics_deleted} metrics, {snapshots_deleted} snapshots")
-            return True
-        except Exception as e:
-            logger.error(f"Error purging old data: {str(e)}")
-            return False
-    
-    def _get_unique_pool_ids(self) -> List[str]:
-        """Get a list of unique pool IDs in the database."""
-        try:
-            # Connect to the database
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            # Query for unique pool IDs
-            cursor.execute('SELECT DISTINCT pool_id FROM pools')
-            
-            # Get the results
-            rows = cursor.fetchall()
-            
-            # Close the connection
-            conn.close()
-            
-            return [row[0] for row in rows]
-        except Exception as e:
-            logger.error(f"Error getting unique pool IDs: {str(e)}")
-            return []
-    
-    def _count_metrics_stored(self) -> int:
-        """Count the total number of metrics stored."""
-        try:
-            # Connect to the database
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            # Query for metric count
-            cursor.execute('SELECT COUNT(*) FROM metrics')
-            
-            # Get the result
-            count = cursor.fetchone()[0]
-            
-            # Close the connection
-            conn.close()
-            
-            return count
-        except Exception as e:
-            logger.error(f"Error counting metrics: {str(e)}")
-            return 0
-    
-    def get_stats(self) -> Dict[str, Any]:
-        """
-        Get service statistics.
+            logger.info("Historical data collection stopped")
         
-        Returns:
-            Dictionary with service statistics
-        """
-        # Update pools tracked count
-        self.stats["pools_tracked"] = len(self._get_unique_pool_ids())
-        self.stats["metrics_tracked"] = self._count_metrics_stored()
-        
-        return self.stats
+        # Start the collection thread
+        self.stop_collection = False
+        self.collection_thread = threading.Thread(target=collection_worker, daemon=True)
+        self.collection_thread.start()
+    
+    def stop_data_collection(self):
+        """Stop the background data collection thread"""
+        if self.collection_thread is not None and self.collection_thread.is_alive():
+            logger.info("Stopping historical data collection")
+            self.stop_collection = True
+            self.collection_thread.join(timeout=30)  # Wait up to 30 seconds
+            logger.info("Historical data collection stopped")
+        else:
+            logger.info("No data collection running")
+    
+    def get_collection_status(self) -> Dict[str, Any]:
+        """Get the status of historical data collection"""
+        status = {
+            "initialized": self.initialized,
+            "collection_active": self.collection_thread is not None and self.collection_thread.is_alive(),
+            "pools_tracked": len(self.metrics_cache),
+            "collection_start_time": self.collection_start_time.isoformat(),
+            "collection_duration_hours": (datetime.now() - self.collection_start_time).total_seconds() / 3600
+        }
+        return status
 
+# Singleton accessor function
+def get_historical_service() -> HistoricalDataService:
+    global _service_instance
+    
+    if _service_instance is None:
+        _service_instance = HistoricalDataService()
+    
+    return _service_instance
 
-def get_historical_service(db_path: str = "data/historical_pools.db") -> HistoricalDataService:
-    """
-    Get the singleton historical data service instance.
-    
-    Args:
-        db_path: Path to the SQLite database file
-        
-    Returns:
-        HistoricalDataService instance
-    """
-    global _instance, _lock
-    
-    with _lock:
-        if _instance is None:
-            _instance = HistoricalDataService(db_path)
-    
-    return _instance
+# Function to start collection from outside this module
+def start_historical_collection(data_service, interval_minutes: int = 60):
+    service = get_historical_service()
+    service.start_data_collection(data_service, interval_minutes)
+    return service
