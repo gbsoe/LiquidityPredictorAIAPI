@@ -162,8 +162,7 @@ class DefiAggregationAPI:
     
     def get_pools(self, limit: int = 50, offset: int = 0, 
                  source: Optional[str] = None, token: Optional[str] = None,
-                 sort: Optional[str] = None, order: Optional[str] = None,
-                 dex: Optional[str] = None) -> List[Dict[str, Any]]:
+                 sort: Optional[str] = None, order: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Get liquidity pools with optional filtering.
         
@@ -174,7 +173,6 @@ class DefiAggregationAPI:
             token: Filter by token symbol
             sort: Field to sort by (e.g., "tvl", "apy")
             order: Sort order ("asc" or "desc")
-            dex: Filter by DEX name (usually set to the same value as source)
             
         Returns:
             List of pool data
@@ -188,16 +186,10 @@ class DefiAggregationAPI:
             params["limit"] = limit
         if offset is not None:
             params["offset"] = offset
-            
-        # Always set both source and dex parameters for reliable API results
         if source:
-            # Use the provided source value
+            # Try both parameter naming conventions
             params["source"] = source.lower()  # API expects lowercase DEX names
-            params["dex"] = source.lower()    # Always set both parameters together
-        else:
-            # Default to raydium if no source specified
-            params["source"] = "raydium"
-            params["dex"] = "raydium"
+            params["dex"] = source.lower()     # Alternative parameter name
         if token:
             params["token"] = token
         if sort:
@@ -323,9 +315,8 @@ class DefiAggregationAPI:
         Returns:
             List of pool data
         """
-        # Use the general pool endpoint with source and dex filter parameters
-        # API requires both source and dex parameters to be set for reliable results
-        return self.get_pools(limit=limit, source=dex, dex=dex, offset=offset)
+        # Use the general pool endpoint with source filter and pagination parameters
+        return self.get_pools(limit=limit, source=dex, offset=offset)
         
     def get_pools_by_token(self, token: str, limit: int = 20, offset: int = 0) -> List[Dict[str, Any]]:
         """
@@ -340,8 +331,7 @@ class DefiAggregationAPI:
             List of pool data
         """
         # Use the general pool endpoint with token filter and pagination
-        # Always include source and dex parameters to ensure reliable API results
-        return self.get_pools(limit=limit, token=token, offset=offset, source='raydium', dex='raydium')
+        return self.get_pools(limit=limit, token=token, offset=offset)
         
     def get_all_pools_by_token(self, token: str, max_pools: int = 100) -> List[Dict[str, Any]]:
         """
@@ -403,11 +393,6 @@ class DefiAggregationAPI:
         
         logger.info(f"Fetching up to {max_pools} pools with rate limiting...")
         
-        # Ensure we have a source/dex parameter for reliable API results
-        if 'source' not in kwargs:
-            # Default to raydium if no source specified
-            kwargs['source'] = 'raydium'
-            
         while len(all_pools) < max_pools:
             try:
                 # Get a batch of pools using offset-based pagination
