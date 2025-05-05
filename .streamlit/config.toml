@@ -1,11 +1,4 @@
 
-[server]
-port = 5000
-address = "0.0.0.0"
-maxUploadSize = 200
-enableCORS = false
-headless = true
-
 [theme]
 primaryColor = "#1FB2A6"
 backgroundColor = "#FFFFFF"

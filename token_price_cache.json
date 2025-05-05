@@ -1,7 +1,7 @@
 {
   "prices": {
     "ATLAS": 0.00120595,
-    "SOL": 145.14,
+    "SOL": 144.47,
     "BTC": 95668,
     "ETH": 1833.29,
     "EPJF": 0,
@@ -12,10 +12,10 @@
     "7VFC": 0,
     "DEZX": 0,
     "MSOL": 188.95,
-    "USDC": 1.0,
+    "USDC": 0.999944,
     "HPSQ": 0,
     "JUPY": 0,
-    "RAY": 2.65,
+    "RAY": 2.66,
     "USDT": 1.0,
     "POLI": 0.00022913,
     "ATLA": 0,
@@ -33,11 +33,11 @@
     "MPLU": 0,
     "7KBN": 0,
     "JSOL": 185.37,
-    "SPEC": 2.22,
-    "FARTCOIN": 1.091,
-    "LAYER": 3.28,
+    "SPEC": 1.89,
+    "FARTCOIN": 1.1,
+    "LAYER": 3.11,
     "POOP": 0.00042109,
-    "BOOP": 1.738e-05,
+    "BOOP": 1.611e-05,
     "LFG": 0.0001749,
     "PYTH": 0.136846,
     "MNGO": 0.02075428,
@@ -51,7 +51,7 @@
     "WIF": 0.559512
   },
   "price_sources": {
-    "USDC": "defi_api",
+    "USDC": "coingecko",
     "SOL": "coingecko",
     "USDT": "defi_api",
     "ETH": "coingecko",
@@ -94,5 +94,5 @@
     "GENE": "coingecko",
     "WIF": "coingecko"
   },
-  "last_update": "2025-05-05T10:07:16.360752"
+  "last_update": "2025-05-05T12:18:47.289178"
 }
