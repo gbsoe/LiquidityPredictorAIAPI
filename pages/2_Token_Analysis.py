@@ -43,24 +43,59 @@ st.set_page_config(
 # Initialize the token service
 token_service = get_token_service()
 
-# Function to load token data
+# Function to load token data from actual pools
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_token_data():
     try:
-        # Get all available tokens
-        tokens = token_service.get_all_tokens()
+        # Get all pools to extract actual tokens used in the system
+        all_pools = data_service.get_all_pools()
         
-        # Check if tokens is a list or dictionary and convert accordingly
-        if isinstance(tokens, dict):
-            # It's a dictionary, use the values
-            token_df = pd.DataFrame(tokens.values())
+        # Extract unique tokens from all pools
+        token_symbols = set()
+        for pool in all_pools:
+            # Extract token symbols
+            token1 = pool.get('token1', {})
+            token2 = pool.get('token2', {})
+            
+            token1_symbol = token1.get('symbol', '') if isinstance(token1, dict) else str(token1)
+            token2_symbol = token2.get('symbol', '') if isinstance(token2, dict) else str(token2)
+            
+            if token1_symbol and len(token1_symbol) > 0:
+                token_symbols.add(token1_symbol)
+            if token2_symbol and len(token2_symbol) > 0:
+                token_symbols.add(token2_symbol)
+        
+        logger.info(f"Found {len(token_symbols)} unique tokens in pool data")
+        
+        # Create a list to hold detailed token data
+        token_data_list = []
+        
+        # Get detailed information for each token
+        for symbol in token_symbols:
+            try:
+                token_data = token_service.get_token_data(symbol)
+                if token_data:
+                    token_data_list.append(token_data)
+            except Exception as e:
+                logger.warning(f"Could not get data for token {symbol}: {e}")
+        
+        # Convert to DataFrame
+        if token_data_list:
+            token_df = pd.DataFrame(token_data_list)
         else:
-            # It's already a list
-            token_df = pd.DataFrame(tokens)
+            # Create empty DataFrame with expected columns if no tokens found
+            token_df = pd.DataFrame(columns=['symbol', 'name', 'address', 'price_source', 'address_source'])
         
         # Add price data
-        token_symbols = token_df['symbol'].tolist()
-        price_data = get_multiple_prices(token_symbols)
+        price_data = get_multiple_prices(list(token_symbols))
+        
+        # Ensure symbol column exists
+        if 'symbol' not in token_df.columns and token_df.empty:
+            token_df['symbol'] = list(token_symbols)
+            
+        # Add name column if it doesn't exist
+        if 'name' not in token_df.columns:
+            token_df['name'] = token_df['symbol']
         
         # Add price to dataframe with source information
         token_df['current_price'] = token_df['symbol'].apply(
@@ -76,6 +111,7 @@ def load_token_data():
         
         return token_df
     except Exception as e:
+        logger.error(f"Error loading token data: {e}")
         st.error(f"Error loading token data: {e}")
         return pd.DataFrame()
 
@@ -424,14 +460,30 @@ else:
                     
                     st.subheader(f"{token_data.get('name', selected_token)} ({selected_token})")
                     
+                    # Load pools for this token to calculate metrics
+                    with st.spinner(f"Loading metrics for {selected_token}..."):
+                        pool_df = load_token_pools(selected_token)
+                    
+                    # Calculate token metrics
+                    total_tvl = 0
+                    total_volume = 0
+                    dex_list = set()
+                    pool_count = 0
+                    
+                    if not pool_df.empty:
+                        total_tvl = pool_df['liquidity'].sum() if 'liquidity' in pool_df.columns else 0
+                        total_volume = pool_df['volume_24h'].sum() if 'volume_24h' in pool_df.columns else 0
+                        dex_list = set(pool_df['dex'].unique()) if 'dex' in pool_df.columns else set()
+                        pool_count = len(pool_df)
+                    
                     # Token details in columns
-                    detail_col1, detail_col2, detail_col3 = st.columns(3)
+                    detail_col1, detail_col2 = st.columns(2)
                     
                     with detail_col1:
                         st.markdown(f"**Price:** ${price:.6f} USD")
                         st.markdown(f"**Price Source:** {price_source.capitalize() if price_source else 'Unknown'}")
-                    
-                    with detail_col2:
+                        
+                        # Show address with copy functionality
                         address = token_data.get('address', 'Unknown')
                         if address and len(address) > 10:
                             short_address = address[:6] + '...' + address[-4:]
@@ -441,10 +493,14 @@ else:
                         
                         st.markdown(f"**Address Source:** {token_data.get('address_source', 'Unknown')}")
                     
-                    with detail_col3:
-                        dexes = token_data.get('dexes', [])
-                        if dexes:
-                            st.markdown(f"**Found on:** {', '.join(dexes)}")
+                    with detail_col2:
+                        # Show liquidity pools info
+                        st.markdown(f"**Total TVL:** ${total_tvl:,.2f} USD")
+                        st.markdown(f"**24h Volume:** ${total_volume:,.2f} USD")
+                        st.markdown(f"**Pool Count:** {pool_count}")
+                        
+                        if dex_list:
+                            st.markdown(f"**Found on:** {', '.join(sorted(dex_list))}")
                         else:
                             st.markdown("**Found on:** No DEX information available")
                     
@@ -509,12 +565,30 @@ else:
         # Get all pools to build DEX categorization
         with st.spinner("Loading DEX data..."):
             try:
+                # Get all pools directly from the data service to guarantee we use only real data
                 all_pools = data_service.get_all_pools()
+                
+                # Count pools by DEX
+                pool_counts = {}
                 
                 # Group tokens by DEX
                 dex_tokens = {}
+                dex_pool_data = {}
+                
+                # Process each pool
                 for pool in all_pools:
                     dex = pool.get('dex', 'Unknown')
+                    pool_id = pool.get('pool_id', pool.get('id', 'unknown'))
+                    
+                    # Count pools by DEX
+                    if dex not in pool_counts:
+                        pool_counts[dex] = 0
+                    pool_counts[dex] += 1
+                    
+                    # Store pool data by DEX for more detailed analysis
+                    if dex not in dex_pool_data:
+                        dex_pool_data[dex] = []
+                    dex_pool_data[dex].append(pool)
                     
                     # Extract token symbols
                     token1 = pool.get('token1', {})
@@ -538,18 +612,24 @@ else:
                 dex_tokens = {dex: list(tokens) for dex, tokens in dex_tokens.items()}
                 
                 logger.info(f"Loaded token categorization for {len(dex_tokens)} DEXes")
+                
+                # Calculate total TVL by DEX
+                dex_tvl = {}
+                for dex, pools in dex_pool_data.items():
+                    total_liquidity = 0
+                    for pool in pools:
+                        liquidity = pool.get('liquidity', 0)
+                        if isinstance(liquidity, dict):
+                            total_liquidity += float(liquidity.get('usd', 0))
+                        else:
+                            total_liquidity += float(liquidity) if liquidity else 0
+                    dex_tvl[dex] = total_liquidity
+                    
             except Exception as e:
                 logger.error(f"Error loading DEX data: {e}")
                 dex_tokens = {}
-                
-                # Fall back to token service data
-                for _, token_data in token_df.iterrows():
-                    dexes = token_data.get('dexes', [])
-                    if isinstance(dexes, list) and dexes:
-                        for dex in dexes:
-                            if dex not in dex_tokens:
-                                dex_tokens[dex] = []
-                            dex_tokens[dex].append(token_data['symbol'])
+                pool_counts = {}
+                dex_tvl = {}
         
         # Display tokens by DEX
         if dex_tokens:
@@ -578,28 +658,63 @@ else:
                 # DEX comparison
                 st.subheader("DEX Comparison")
                 
-                # Count tokens by DEX
-                dex_counts = {dex: len(tokens) for dex, tokens in dex_tokens.items()}
-                dex_count_df = pd.DataFrame(list(dex_counts.items()), columns=['DEX', 'Token Count'])
-                dex_count_df = dex_count_df.sort_values(by='Token Count', ascending=False)
+                # Prepare comparison data
+                comparison_data = []
+                for dex in dex_tokens.keys():
+                    entry = {
+                        'DEX': dex,
+                        'Token Count': len(dex_tokens.get(dex, [])),
+                        'Pool Count': pool_counts.get(dex, 0),
+                        'TVL (USD)': dex_tvl.get(dex, 0)
+                    }
+                    comparison_data.append(entry)
                 
-                # Create a bar chart
+                # Create dataframe
+                comparison_df = pd.DataFrame(comparison_data)
+                comparison_df = comparison_df.sort_values(by='TVL (USD)', ascending=False)
+                
+                # Format the TVL column for display
+                display_df = comparison_df.copy()
+                display_df['TVL (USD)'] = display_df['TVL (USD)'].apply(
+                    lambda x: f"${x:,.2f}" if pd.notnull(x) and x > 0 else "-"
+                )
+                
+                # Show the table
+                st.dataframe(display_df, use_container_width=True)
+                
+                # Create a bar chart for token count
                 fig = px.bar(
-                    dex_count_df, 
+                    comparison_df, 
                     x='DEX', 
-                    y='Token Count',
-                    title='Number of Tokens by DEX',
-                    color='Token Count',
-                    color_continuous_scale='blues'
+                    y=['Token Count', 'Pool Count'],
+                    title='Tokens and Pools by DEX',
+                    barmode='group',
+                    color_discrete_sequence=['#2E86C1', '#85C1E9']
                 )
                 
                 fig.update_layout(
                     xaxis_title="DEX",
-                    yaxis_title="Number of Tokens",
-                    height=400
+                    yaxis_title="Count",
+                    height=400,
+                    legend_title="Metric"
                 )
                 
                 st.plotly_chart(fig, use_container_width=True)
+                
+                # Create a pie chart for TVL
+                if any(comparison_df['TVL (USD)'] > 0):
+                    fig2 = px.pie(
+                        comparison_df, 
+                        values='TVL (USD)', 
+                        names='DEX',
+                        title='Total Value Locked (TVL) by DEX',
+                        color_discrete_sequence=px.colors.sequential.Blues_r
+                    )
+                    
+                    fig2.update_traces(textposition='inside', textinfo='percent+label')
+                    fig2.update_layout(height=400)
+                    
+                    st.plotly_chart(fig2, use_container_width=True)
         else:
             st.info("No DEX categorization data available")
     
