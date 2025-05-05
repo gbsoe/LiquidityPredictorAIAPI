@@ -1319,6 +1319,19 @@ def main():
                     st.sidebar.info("No legacy cache file found")
             except Exception as e:
                 st.sidebar.error(f"Error clearing legacy cache: {e}")
+        
+        # Add button to clear the session state cache to force data reload
+        if st.sidebar.button("Reload Pool Data", help="Clear cached pool data and reload from sources"):
+            try:
+                if 'pool_data_cache' in st.session_state:
+                    del st.session_state['pool_data_cache']
+                    st.sidebar.success("Pool data cache cleared. Data will be reloaded.")
+                    # Force a rerun to reload data immediately
+                    st.rerun()
+                else:
+                    st.sidebar.info("No pool data cache to clear")
+            except Exception as e:
+                st.sidebar.error(f"Error clearing pool data cache: {e}")
                 
         
         # Display legacy cache update time if available
@@ -1400,8 +1413,12 @@ def main():
             "Data Explorer", "Advanced Filtering", "Predictions", "Risk Assessment", "NLP Reports", "Token Explorer"
         ])
         
-        # Load data
-        pool_data = load_data()
+        # Use session state to cache the pool data and avoid reloading it when changing pages
+        if 'pool_data_cache' not in st.session_state:
+            st.session_state['pool_data_cache'] = load_data()
+        
+        # Use the cached data if available, otherwise load it
+        pool_data = st.session_state['pool_data_cache']
         
         if not pool_data or len(pool_data) == 0:
             st.error("No pool data available. Please check your data sources.")
