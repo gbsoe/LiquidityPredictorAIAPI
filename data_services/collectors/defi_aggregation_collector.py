@@ -269,8 +269,13 @@ class DefiAggregationCollector(BaseCollector):
         # If we didn't get any pools from DEX-specific requests, try the general endpoint
         if not all_pools:
             try:
-                logger.info("Falling back to general pools endpoint")
-                all_pools = self.api_client.get_all_pools(max_pools=self.max_pools_per_collection)
+                logger.info("Falling back to general pools endpoint with source parameter")
+                # Explicitly specify source and dex parameters based on API requirements
+                all_pools = self.api_client.get_all_pools(
+                    max_pools=self.max_pools_per_collection,
+                    source='raydium',
+                    dex='raydium'
+                )
                 
                 # Add collection metadata to each pool
                 for pool in all_pools:
