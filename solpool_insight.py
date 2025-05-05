@@ -33,11 +33,19 @@ perf_monitor.start_tracking("app_initialization")
 # Initialize API key with default value to avoid welcome screen
 from api_auth_helper import set_api_key
 api_key = os.getenv("DEFI_API_KEY") or "9feae0d0af47e4948e061f2d7820461e374e040c21cf65c087166d7ed18f5ed6"
+print(f"Using API key: {api_key[:8]}...")
 set_api_key(api_key)
 
 # Initialize data services before starting
-from data_services.initialize import init_services
-init_services()
+try:
+    print("Initializing data services...")
+    from data_services.initialize import init_services
+    init_services()
+    print("Data services initialized successfully")
+except Exception as e:
+    print(f"Error initializing data services: {str(e)}")
+    import traceback
+    print(traceback.format_exc())
 
 # Import the historical data service
 from historical_data_service import get_historical_service, start_historical_collection
@@ -58,7 +66,14 @@ logging.basicConfig(
 logger = logging.getLogger('solpool_insight')
 
 # Import our database handler
-import db_handler
+try:
+    print("Attempting to import db_handler...")
+    import db_handler
+    print("Successfully imported db_handler")
+except Exception as e:
+    print(f"Error importing db_handler: {str(e)}")
+    import traceback
+    print(traceback.format_exc())
 
 # Import token services
 from token_price_service import get_token_price, get_multiple_prices
