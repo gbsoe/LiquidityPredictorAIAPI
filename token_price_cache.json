@@ -1,7 +1,7 @@
 {
   "prices": {
     "ATLAS": 0.00120595,
-    "SOL": 146.95,
+    "SOL": 145.14,
     "BTC": 95668,
     "ETH": 1833.29,
     "EPJF": 0,
@@ -36,16 +36,16 @@
     "SPEC": 2.22,
     "FARTCOIN": 1.091,
     "LAYER": 3.28,
-    "POOP": 0.00042458,
+    "POOP": 0.00042109,
     "BOOP": 1.738e-05,
     "LFG": 0.0001749,
     "PYTH": 0.136846,
     "MNGO": 0.02075428
   },
   "price_sources": {
-    "USDC": "coingecko",
+    "USDC": "defi_api",
     "SOL": "coingecko",
-    "USDT": "coingecko",
+    "USDT": "defi_api",
     "ETH": "coingecko",
     "ORCA": "coingecko",
     "RAY": "coingecko",
@@ -78,5 +78,5 @@
     "PYTH": "coingecko",
     "MNGO": "coingecko"
   },
-  "last_update": "2025-05-04T23:15:13.476122"
+  "last_update": "2025-05-05T00:44:12.250852"
 }
