@@ -466,6 +466,193 @@ class TokenDataService:
         """
         # This is just an alias for get_token_data for backward compatibility
         return self.get_token_data(symbol)
+    
+    def get_all_tokens(self) -> List[Dict[str, Any]]:
+        """
+        Get all tokens available in the system
+        
+        Returns:
+            List of token data dictionaries
+        """
+        tokens = []
+        
+        # First try to get tokens from DeFi API
+        if self.defi_api:
+            try:
+                # Get tokens from pools to ensure we have a complete list
+                pools_response = self.defi_api.get_all_pools(limit=100)
+                pools = pools_response.get('pools', [])
+                
+                # Create a dictionary to track unique tokens
+                token_dict = {}
+                
+                # Extract tokens from pools
+                for pool in pools:
+                    token_list = pool.get('tokens', [])
+                    for token in token_list:
+                        symbol = token.get('symbol', '').upper()
+                        if symbol and symbol != 'UNKNOWN' and symbol not in token_dict:
+                            # Create a standardized token entry
+                            token_dict[symbol] = {
+                                'symbol': symbol,
+                                'name': token.get('name', symbol),
+                                'address': token.get('address', ''),
+                                'price': token.get('price', 0),
+                                'decimals': token.get('decimals', 9),
+                                'active': True
+                            }
+                
+                # Convert dictionary to list
+                tokens = list(token_dict.values())
+                logger.info(f"Retrieved {len(tokens)} tokens from DeFi API pools")
+            except Exception as e:
+                logger.error(f"Error getting tokens from DeFi API: {e}")
+        
+        # If we don't have tokens from the API, use our local cache
+        if not tokens and self.token_data:
+            for symbol, data in self.token_data.items():
+                token_entry = {
+                    'symbol': symbol,
+                    'name': data.get('name', symbol),
+                    'address': data.get('address', ''),
+                    'price': data.get('price', 0),
+                    'decimals': data.get('decimals', 9),
+                    'active': True
+                }
+                tokens.append(token_entry)
+            logger.info(f"Retrieved {len(tokens)} tokens from local cache")
+        
+        # Try to enhance with CoinGecko data for tokens with missing info
+        if self.coingecko:
+            for token in tokens:
+                symbol = token['symbol']
+                # Only try to enhance tokens with missing data
+                if token['price'] == 0 or not token['address']:
+                    try:
+                        # Try to get CoinGecko ID
+                        coin_id = self.coingecko.get_token_id(symbol)
+                        if coin_id:
+                            # Get token details
+                            details = self.coingecko.get_token_details(coin_id)
+                            if details:
+                                # Update price if missing
+                                if token['price'] == 0 and 'market_data' in details and 'current_price' in details['market_data']:
+                                    token['price'] = details['market_data']['current_price'].get('usd', 0)
+                                    token['price_source'] = 'coingecko'
+                                
+                                # Update address if missing
+                                if not token['address'] and 'platforms' in details and 'solana' in details['platforms']:
+                                    token['address'] = details['platforms']['solana']
+                                
+                                # Add any missing name
+                                if not token.get('name') or token['name'] == token['symbol']:
+                                    token['name'] = details.get('name', token['symbol'])
+                    except Exception as e:
+                        logger.warning(f"Error enhancing token {symbol} with CoinGecko data: {e}")
+        
+        return tokens
+    
+    def get_token_categories(self) -> Dict[str, List[str]]:
+        """
+        Get token categories organized by DEX
+        
+        Returns:
+            Dictionary mapping DEX names to lists of token symbols
+        """
+        categories = {}
+        
+        # Try to get categories from DeFi API
+        if self.defi_api:
+            try:
+                # Get pools to extract DEX information
+                pools_response = self.defi_api.get_all_pools(limit=100)
+                pools = pools_response.get('pools', [])
+                
+                # Extract DEXes and tokens
+                for pool in pools:
+                    dex = pool.get('source', 'Unknown')
+                    if dex == 'Unknown':
+                        continue
+                    
+                    # Initialize category if needed
+                    if dex not in categories:
+                        categories[dex] = []
+                    
+                    # Add tokens from this pool
+                    token_list = pool.get('tokens', [])
+                    for token in token_list:
+                        symbol = token.get('symbol', '').upper()
+                        if symbol and symbol != 'UNKNOWN' and symbol not in categories[dex]:
+                            categories[dex].append(symbol)
+            except Exception as e:
+                logger.error(f"Error getting token categories from DeFi API: {e}")
+        
+        # If we don't have data, create a simple fallback
+        if not categories:
+            categories = {
+                'Raydium': ['SOL', 'USDC', 'USDT', 'RAY', 'BONK'],
+                'Orca': ['SOL', 'USDC', 'USDT', 'ORCA'],
+                'Meteora': ['SOL', 'USDC', 'USDT', 'MNGO']
+            }
+        
+        return categories
+    
+    def get_tokens_by_dex(self, dex_name: str) -> Dict[str, Dict[str, Any]]:
+        """
+        Get tokens used by a specific DEX
+        
+        Args:
+            dex_name: Name of the DEX
+            
+        Returns:
+            Dictionary mapping token symbols to token data
+        """
+        tokens = {}
+        
+        # Try to get tokens from DeFi API
+        if self.defi_api:
+            try:
+                # Get pools for this DEX
+                pools_response = self.defi_api.get_all_pools(source=dex_name, limit=100)
+                pools = pools_response.get('pools', [])
+                
+                # Extract tokens from pools
+                for pool in pools:
+                    token_list = pool.get('tokens', [])
+                    for token in token_list:
+                        symbol = token.get('symbol', '').upper()
+                        if symbol and symbol != 'UNKNOWN' and symbol not in tokens:
+                            # Create a standardized token entry
+                            tokens[symbol] = {
+                                'symbol': symbol,
+                                'name': token.get('name', symbol),
+                                'address': token.get('address', ''),
+                                'price': token.get('price', 0),
+                                'decimals': token.get('decimals', 9),
+                                'active': True,
+                                'dex': dex_name
+                            }
+            except Exception as e:
+                logger.error(f"Error getting tokens for DEX {dex_name} from API: {e}")
+        
+        # If we don't have data, use token categories as fallback
+        if not tokens:
+            categories = self.get_token_categories()
+            if dex_name in categories:
+                for symbol in categories[dex_name]:
+                    # Try to get token data from our cache
+                    token_data = self.get_token_data(symbol)
+                    tokens[symbol] = {
+                        'symbol': symbol,
+                        'name': token_data.get('name', symbol),
+                        'address': token_data.get('address', ''),
+                        'price': token_data.get('price', 0),
+                        'decimals': token_data.get('decimals', 9),
+                        'active': True,
+                        'dex': dex_name
+                    }
+        
+        return tokens
 
 # Singleton instance
 _instance = None
