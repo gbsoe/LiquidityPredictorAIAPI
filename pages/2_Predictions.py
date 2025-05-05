@@ -306,43 +306,16 @@ try:
                         # 3. Either stablecoin pair OR low risk score
                         # 4. Good liquidity depth (>0.6)
                         
-                        # First check if we have the required columns
-                        required_cols = ['tvl', 'tvl_stability', 'category', 'liquidity_depth']
-                        has_advanced_data = all(col in all_pool_data.columns for col in required_cols)
-                        
-                        if has_advanced_data:
-                            # Advanced optimal pool criteria
-                            ideal_pools = all_pool_data[
-                                # High TVL with stability
-                                ((all_pool_data['tvl'] > 2000000) & (all_pool_data['tvl_stability'] > 0.7)) |
-                                # OR medium TVL but very stable
-                                ((all_pool_data['tvl'] > 1000000) & (all_pool_data['tvl_stability'] > 0.85)) |
-                                # OR medium TVL with stablecoin and good APR
-                                ((all_pool_data['tvl'] > 1000000) & 
-                                 (all_pool_data['category'].str.contains('stablecoin')) &
-                                 (all_pool_data['predicted_apr'] > 15))
-                            ]
-                            
-                            # Further filter by risk or liquidity depth
-                            ideal_pools = ideal_pools[
-                                # Either low risk
-                                (ideal_pools['risk_score'] < 0.4) |
-                                # OR stablecoin pair with acceptable risk
-                                ((ideal_pools['category'].str.contains('stablecoin')) & 
-                                 (ideal_pools['risk_score'] < 0.7)) |
-                                # OR very high APR (100%+) with manageable risk
-                                ((ideal_pools['predicted_apr'] > 100) & 
-                                 (ideal_pools['risk_score'] < 0.8) &
-                                 (ideal_pools['tvl_stability'] > 0.7)) |
-                                # OR excellent liquidity depth
-                                (ideal_pools['liquidity_depth'] > 0.8)
-                            ]
-                        else:
-                            # Fallback to basic criteria if advanced data isn't available
-                            ideal_pools = all_pool_data[
-                                (all_pool_data['predicted_apr'] > all_pool_data['predicted_apr'].median()) & 
-                                (all_pool_data['risk_score'] < all_pool_data['risk_score'].median())
-                            ]
+                        # Use simpler criteria for now since we know advanced metrics might not be available
+                        # Define ideal pools based on a balanced approach of good returns with manageable risk
+                        ideal_pools = all_pool_data[
+                            # Good APR with reasonable risk
+                            ((all_pool_data['predicted_apr'] > 20) & (all_pool_data['risk_score'] < 0.6)) |
+                            # OR very good APR with slightly higher but still manageable risk
+                            ((all_pool_data['predicted_apr'] > 50) & (all_pool_data['risk_score'] < 0.7)) |
+                            # OR excellent APR even with higher risk (for those seeking aggressive returns)
+                            ((all_pool_data['predicted_apr'] > 100) & (all_pool_data['risk_score'] < 0.8))
+                        ]
                     else:
                         # If we couldn't get pool details, use the original approach
                         ideal_pools = top_predictions[
@@ -364,20 +337,17 @@ try:
                         st.info("No pools in this category")
                 
                 with risk_reward_cols[1]:
-                    # Use the advanced data if available
-                    if 'all_pool_data' in locals() and 'has_advanced_data' in locals() and pool_details and has_advanced_data:
-                        # High APR pools (very high APR regardless of risk, but with some stability)
+                    # Use all pool data if available
+                    if 'all_pool_data' in locals() and len(all_pool_data) > 0:
+                        # High APR pools (very high APR regardless of risk)
                         aggressive_pools = all_pool_data[
                             # Ultra-high APR pools (400%+)
-                            ((all_pool_data['predicted_apr'] > 400) & 
-                             (all_pool_data['tvl_stability'] > 0.4)) |
-                            # Very high APR pools (200%+) with some stability
-                            ((all_pool_data['predicted_apr'] > 200) & 
-                             (all_pool_data['tvl_stability'] > 0.5)) |
+                            (all_pool_data['predicted_apr'] > 400) |
+                            # Very high APR pools (200%+)
+                            (all_pool_data['predicted_apr'] > 200) |
                             # High APR pools (100%+) with decent fundamentals
                             ((all_pool_data['predicted_apr'] > 100) & 
-                             (all_pool_data['tvl'] > 500000) &
-                             (all_pool_data['tvl_stability'] > 0.6))
+                             (all_pool_data['tvl'] > 500000))
                         ]
                     else:
                         # Fallback to basic criteria
@@ -400,17 +370,12 @@ try:
                         st.info("No pools in this category")
                 
                 with risk_reward_cols[2]:
-                    # Use the advanced data if available
-                    if 'all_pool_data' in locals() and 'has_advanced_data' in locals() and pool_details and has_advanced_data:
-                        # Very low risk pools (focused on capital preservation)
+                    # Use a simplified approach for conservative options
+                    if 'all_pool_data' in locals() and len(all_pool_data) > 0:
+                        # Conservative pools - focus on low risk
                         conservative_pools = all_pool_data[
-                            # Very low risk with decent APR
-                            ((all_pool_data['risk_score'] < 0.3) & 
-                             (all_pool_data['predicted_apr'] > 5)) |
-                            # Stablecoin pairs with high TVL stability
-                            ((all_pool_data['category'].str.contains('stablecoin')) & 
-                             (all_pool_data['tvl'] > 1000000) &
-                             (all_pool_data['tvl_stability'] > 0.8))
+                            # Very low risk with any positive APR
+                            ((all_pool_data['risk_score'] < 0.4) & (all_pool_data['predicted_apr'] > 0)) 
                         ]
                         
                         # Sort by risk score ascending (lowest risk first)

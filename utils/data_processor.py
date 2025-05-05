@@ -241,6 +241,11 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                     # Skip any pools without a valid ID
                     if not pool.get('id') or len(pool.get('id', '')) < 32:
                         continue
+                        
+                    # Log the pool structure for debugging
+                    logger.debug(f"Processing pool: {pool.get('name', 'Unknown')} with ID: {pool.get('id', 'Unknown')}")
+                    logger.debug(f"Pool data keys: {pool.keys()}")
+                    logger.debug(f"Pool fields - apr24h: {pool.get('apr24h')}, metrics.apy24h: {pool.get('metrics', {}).get('apy24h')}, liquidityUsd: {pool.get('liquidityUsd')}")
                     
                     # Ensure we have a pool name
                     pool_name = pool.get('name', '')
@@ -259,11 +264,23 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                                 continue  # Skip pools with no way to identify them
                     
                     # Use actual metrics from API where possible
-                    apr = pool.get('apr', 0)
-                    if apr is None or apr == 0:
-                        apr = pool.get('apr_24h', 0) or pool.get('apy', 0) or 0
-                        if apr == 0:
-                            continue  # Skip pools with no APR data
+                    # Try all possible APR/APY field names from different data sources
+                    apr = pool.get('apr', 0) or pool.get('apr24h', 0) or pool.get('apy', 0)
+                    
+                    # Also try metrics substructure
+                    if (apr is None or apr == 0) and 'metrics' in pool:
+                        apr = pool['metrics'].get('apy24h', 0) or pool['metrics'].get('apr', 0) or pool['metrics'].get('apy', 0) or 0
+                        
+                    # Convert from string to float if needed
+                    if isinstance(apr, str):
+                        try:
+                            apr = float(apr)
+                        except (ValueError, TypeError):
+                            apr = 0
+                            
+                    if apr == 0:
+                        logger.debug(f"Skipping pool {pool.get('id', 'Unknown')} due to zero APR")
+                        continue  # Skip pools with no APR data
                     
                     # For APR prediction, use actual APR with small variation
                     predicted_apr = apr * (1 + random.uniform(-0.05, 0.1))
@@ -272,20 +289,55 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                     risk_factors = []
                     
                     # Higher volume/TVL ratio means higher risk (liquidity can drain faster)
-                    volume = pool.get('volume_24h', 0) or 0
-                    liquidity = pool.get('liquidity', 0) or pool.get('tvl', 0) or 0
+                    volume = pool.get('volume_24h', 0) or pool.get('volume24h', 0) or pool.get('volume7d', 0) or 0
+                    liquidity = pool.get('liquidity', 0) or pool.get('tvl', 0) or pool.get('liquidityUsd', 0) or 0
                     
+                    # Convert to float if needed
+                    if isinstance(volume, str):
+                        try:
+                            volume = float(volume)
+                        except (ValueError, TypeError):
+                            volume = 0
+                            
+                    if isinstance(liquidity, str):
+                        try:
+                            liquidity = float(liquidity)
+                        except (ValueError, TypeError):
+                            liquidity = 0
+                            
                     if volume > 0 and liquidity > 0:
                         vol_liq_ratio = min(1.0, volume / (liquidity * 10))  # Cap at 1.0
                         risk_factors.append(vol_liq_ratio)
                     
                     # APR volatility indicates risk
-                    apr_change = abs(pool.get('apr_change_24h', 0) or 0)
+                    apr_change = 0
+                    if 'apr24h' in pool and 'apr7d' in pool:
+                        try:
+                            apr24h = float(pool.get('apr24h', 0) or 0)
+                            apr7d = float(pool.get('apr7d', 0) or 0)
+                            if apr24h > 0 and apr7d > 0:
+                                apr_change = abs(apr24h - apr7d)
+                        except (ValueError, TypeError):
+                            pass
+                    
                     if apr_change > 0:
                         risk_factors.append(min(1.0, apr_change / 100))
+                        
+                    # Add base risk factor based on APR - higher APR generally means higher risk
+                    if apr > 100:  # Very high APR
+                        risk_factors.append(0.8)  # Higher base risk
+                    elif apr > 50:  # High APR
+                        risk_factors.append(0.6)
+                    elif apr > 20:  # Medium APR
+                        risk_factors.append(0.4)
+                    else:  # Low APR
+                        risk_factors.append(0.2)
                     
                     # Average risk factors, default to mid-range if none
                     risk_score = sum(risk_factors) / len(risk_factors) if risk_factors else 0.5
+                    
+                    # Log the risk calculation for debugging
+                    logger.debug(f"Risk score for {pool.get('id', '')}: {risk_score} (factors: {risk_factors})")
                     
                     # Performance class (high, medium, low)
                     # Based on APR and risk score
@@ -300,16 +352,56 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                     pool_category = derive_pool_category(pool)
                     
                     # Get TVL - ensure it's a real value
-                    tvl = pool.get('liquidity', 0) or pool.get('tvl', 0)
+                    tvl = pool.get('liquidity', 0) or pool.get('tvl', 0) or pool.get('liquidityUsd', 0)
+                    
+                    # Also try metrics substructure
+                    if (tvl is None or tvl == 0) and 'metrics' in pool:
+                        tvl = pool['metrics'].get('tvl', 0) or 0
+                        
+                    # Convert from string to float if needed
+                    if isinstance(tvl, str):
+                        try:
+                            tvl = float(tvl)
+                        except (ValueError, TypeError):
+                            tvl = 0
+                            
                     if tvl <= 0:
+                        logger.debug(f"Skipping pool {pool.get('id', 'Unknown')} due to zero TVL")
                         continue  # Skip pools with no TVL data
+                    
+                    # Extract token symbols from different possible structures
+                    token1 = ''
+                    token2 = ''
+                    
+                    # Try to get tokens from direct fields first
+                    if pool.get('token1_symbol'):
+                        token1 = pool.get('token1_symbol', '')
+                    if pool.get('token2_symbol'):
+                        token2 = pool.get('token2_symbol', '')
+                        
+                    # Try to get from tokens array if available
+                    if not token1 and not token2 and 'tokens' in pool and isinstance(pool['tokens'], list) and len(pool['tokens']) >= 2:
+                        if 'symbol' in pool['tokens'][0]:
+                            token1 = pool['tokens'][0].get('symbol', '')
+                        if 'symbol' in pool['tokens'][1]:
+                            token2 = pool['tokens'][1].get('symbol', '')
+                            
+                    # Try to parse from tokenPair field
+                    if not token1 and not token2 and pool.get('tokenPair') and '/' in pool.get('tokenPair', ''):
+                        tokens = pool.get('tokenPair', '').split('/')
+                        if len(tokens) >= 2:
+                            token1 = tokens[0]
+                            token2 = tokens[1]
+                    
+                    # Determine DEX source
+                    dex = pool.get('dex', '') or pool.get('source', '') or ''
                     
                     predictions.append({
                         'pool_id': pool.get('id', ''),  # Use real Solana pool ID
                         'pool_name': pool_name,
-                        'dex': pool.get('dex', ''),
-                        'token1': pool.get('token1_symbol', ''),
-                        'token2': pool.get('token2_symbol', ''),
+                        'dex': dex,
+                        'token1': token1,
+                        'token2': token2,
                         'tvl': tvl,
                         'current_apr': apr,
                         'predicted_apr': predicted_apr,
