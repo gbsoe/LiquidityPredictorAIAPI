@@ -12,7 +12,7 @@ from plotly.subplots import make_subplots
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.visualization import create_risk_heat_map, create_impermanent_loss_chart
 from utils.data_processor import get_pool_list, get_top_predictions, get_pool_metrics, get_token_prices
-from database.db_operations import DBManager
+from db_handler_manager import get_db_handler, is_db_connected
 
 # Page configuration
 st.set_page_config(
@@ -22,12 +22,19 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialize database connection
+# Initialize database connection using the robust db_handler_manager
 @st.cache_resource
 def get_db_connection():
-    return DBManager()
+    return get_db_handler()
 
 db = get_db_connection()
+
+# Check database connection and show status
+db_connected = is_db_connected()
+if not db_connected:
+    st.sidebar.warning("⚠️ Database connection issue detected. Using fallback data sources.")
+else:
+    st.sidebar.success("✅ Database connected and operational.")
 
 # Header
 st.title("Risk Assessment")

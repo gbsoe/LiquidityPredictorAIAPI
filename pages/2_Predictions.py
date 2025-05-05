@@ -13,7 +13,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.visualization import create_prediction_chart, create_performance_distribution_chart
 from utils.data_processor import get_pool_list, get_pool_metrics, get_pool_predictions, get_top_predictions
-from database.db_operations import DBManager
+from db_handler_manager import get_db_handler, is_db_connected
 # Modified to use direct DB access instead of ML models that require TensorFlow
 # from eda.ml_models import APRPredictionModel, PoolPerformanceClassifier, RiskAssessmentModel
 
@@ -36,13 +36,19 @@ set_api_key('9feae0d0af47e4948e061f2d7820461e374e040c21cf65c087166d7ed18f5ed6')
 from utils.disable_mock_data import disable_all_mock_data
 disable_all_mock_data()
 
-# Initialize database connection
+# Initialize database connection using the robust db_handler_manager
 @st.cache_resource
 def get_db_connection():
-    # Don't use mock data for database operations
-    return DBManager(use_mock=False)
+    return get_db_handler()
 
 db = get_db_connection()
+
+# Check database connection and show status
+db_connected = is_db_connected()
+if not db_connected:
+    st.sidebar.warning("⚠️ Database connection issue detected. Using fallback data sources.")
+else:
+    st.sidebar.success("✅ Database connected and operational.")
 
 # Header
 st.title("Machine Learning Predictions")

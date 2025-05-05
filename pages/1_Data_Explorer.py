@@ -25,12 +25,19 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialize database connection
+# Initialize database connection using the robust db_handler_manager
 @st.cache_resource
 def get_db_connection():
-    return DBManager()
+    return get_db_handler()
 
 db = get_db_connection()
+
+# Check database connection and show status
+db_connected = is_db_connected()
+if not db_connected:
+    st.sidebar.warning("⚠️ Database connection issue detected. Using fallback data sources.")
+else:
+    st.sidebar.success("✅ Database connected and operational.")
 
 # Header
 st.title("Data Explorer")
