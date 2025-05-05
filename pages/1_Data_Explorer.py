@@ -71,10 +71,10 @@ try:
         try:
             selected_pool_id = selected_pool_option.split("(")[-1].split(")")[0]
             st.session_state['selected_pool_id'] = selected_pool_id  # Cache the ID in session state
-        except:
-            # If we can't parse the ID, show an error
+        except Exception as e:
+            # If we can't parse the ID, show an error but don't return since we're not in a function
             st.error("Could not extract pool ID from selection")
-            return
+            selected_pool_id = ""  # Use empty ID instead of returning
         
         # Time period selection
         time_period = st.sidebar.selectbox(
@@ -96,31 +96,55 @@ try:
         
         if pool_details is not None:
             # Pool details section
-            st.header(f"Pool Details: {pool_details['name']}")
+            pool_name = pool_details.get('name', 'Unknown')
+            # If name is not there, try to construct it
+            if pool_name == 'Unknown':
+                token1 = pool_details.get('token1_symbol', '')
+                token2 = pool_details.get('token2_symbol', '')
+                if token1 and token2:
+                    pool_name = f"{token1}/{token2}"
+                else:
+                    # Use a truncated ID
+                    pool_id_short = selected_pool_id[:8] + '...' if len(selected_pool_id) > 8 else selected_pool_id
+                    pool_name = f"Pool {pool_id_short}"
+            
+            st.header(f"Pool Details: {pool_name}")
             
             # Pool summary metrics
             col1, col2, col3, col4 = st.columns(4)
             
+            # Use get() method with defaults to handle missing fields
             with col1:
-                st.metric("Liquidity", f"${pool_details['liquidity']:,.2f}")
+                liquidity = pool_details.get('liquidity', 0) or pool_details.get('tvl', 0) or pool_details.get('liquidityUsd', 0) or 0
+                st.metric("Liquidity", f"${float(liquidity):,.2f}")
                 
             with col2:
-                st.metric("24h Volume", f"${pool_details['volume_24h']:,.2f}")
+                volume = pool_details.get('volume_24h', 0) or pool_details.get('volume24h', 0) or pool_details.get('volume', 0) or 0
+                st.metric("24h Volume", f"${float(volume):,.2f}")
                 
             with col3:
-                st.metric("APR", f"{pool_details['apr']:.2f}%")
+                apr = pool_details.get('apr', 0) or pool_details.get('apr24h', 0) or pool_details.get('apy', 0) or 0
+                st.metric("APR", f"{float(apr):.2f}%")
             
             with col4:
-                # Calculate time since last update
-                last_updated = datetime.fromisoformat(pool_details['timestamp'].replace('Z', '+00:00'))
-                time_diff = datetime.now() - last_updated
-                
-                if time_diff < timedelta(hours=1):
-                    time_str = f"{int(time_diff.total_seconds() / 60)} minutes ago"
-                elif time_diff < timedelta(days=1):
-                    time_str = f"{int(time_diff.total_seconds() / 3600)} hours ago"
+                # Handle missing timestamp
+                timestamp = pool_details.get('timestamp', None)
+                if timestamp:
+                    # Calculate time since last update
+                    try:
+                        last_updated = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                        time_diff = datetime.now() - last_updated
+                        
+                        if time_diff < timedelta(hours=1):
+                            time_str = f"{int(time_diff.total_seconds() / 60)} minutes ago"
+                        elif time_diff < timedelta(days=1):
+                            time_str = f"{int(time_diff.total_seconds() / 3600)} hours ago"
+                        else:
+                            time_str = f"{int(time_diff.days)} days ago"
+                    except Exception as e:
+                        time_str = "Unknown"
                 else:
-                    time_str = f"{int(time_diff.days)} days ago"
+                    time_str = "Unknown"
                 
                 st.metric("Last Updated", time_str)
             
@@ -149,12 +173,22 @@ try:
                 
                 # Token Prices Tab
                 with metrics_tabs[2]:
-                    # Extract token symbols from pool name
-                    if '/' in pool_details['name']:
-                        token_symbols = pool_details['name'].split('/')
-                        token_symbol1 = token_symbols[0].strip()
-                        token_symbol2 = token_symbols[1].strip()
-                        
+                    # Extract token symbols from pool name or directly from token fields
+                    pool_name = pool_details.get('name', '')
+                    
+                    # Try to get token symbols from various fields
+                    token_symbol1 = pool_details.get('token1_symbol', '') or pool_details.get('baseSymbol', '') or ''
+                    token_symbol2 = pool_details.get('token2_symbol', '') or pool_details.get('quoteSymbol', '') or ''
+                    
+                    # If we don't have token symbols directly, try to extract from name
+                    if (not token_symbol1 or not token_symbol2) and '/' in pool_name:
+                        token_parts = pool_name.split('/')
+                        if len(token_parts) >= 2:
+                            token_symbol1 = token_symbol1 or token_parts[0].strip()
+                            token_symbol2 = token_symbol2 or token_parts[1].strip()
+                    
+                    # Only proceed if we have both token symbols
+                    if token_symbol1 and token_symbol2:
                         # Get token prices
                         token_prices = get_token_prices(db, [token_symbol1, token_symbol2], days)
                         
@@ -216,11 +250,11 @@ try:
         
         if selected_pools:
             # Extract pool IDs with error handling
+            pool_ids = []
             try:
                 pool_ids = [pool.split("(")[-1].split(")")[0] for pool in selected_pools]
             except Exception as e:
                 st.error(f"Could not extract pool IDs from selection: {str(e)}")
-                return
             
             # Metric to compare
             compare_metric = st.selectbox(
@@ -246,7 +280,19 @@ try:
                 
                 if pool_details is not None and not pool_metrics.empty:
                     pool_data = pool_metrics[['timestamp', db_metric]].copy()
-                    pool_data['pool_name'] = pool_details['name']
+                    # Get pool name with fallback
+                    pool_name = pool_details.get('name', 'Unknown')
+                    if pool_name == 'Unknown':
+                        # Try to construct from token symbols
+                        token1 = pool_details.get('token1_symbol', '')
+                        token2 = pool_details.get('token2_symbol', '')
+                        if token1 and token2:
+                            pool_name = f"{token1}/{token2}"
+                        else:
+                            # Use a truncated ID
+                            pool_id_short = pool_id[:8] + '...' if len(pool_id) > 8 else pool_id
+                            pool_name = f"Pool {pool_id_short}"
+                    pool_data['pool_name'] = pool_name
                     comparison_data.append(pool_data)
             
             if comparison_data:

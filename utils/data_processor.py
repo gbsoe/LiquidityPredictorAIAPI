@@ -42,10 +42,60 @@ def get_pool_list(db=None):
             # Convert list of dictionaries to DataFrame for consistency
             import pandas as pd
             if isinstance(pool_data, list):
-                return pd.DataFrame(pool_data)
+                # Create DataFrame
+                df = pd.DataFrame(pool_data)
+                
+                # Normalize column names to ensure 'pool_id' exists
+                # Some APIs return 'id' or 'poolId' instead of 'pool_id'
+                if 'pool_id' not in df.columns:
+                    if 'id' in df.columns:
+                        df['pool_id'] = df['id']
+                    elif 'poolId' in df.columns:
+                        df['pool_id'] = df['poolId']
+                        
+                # Ensure the pool has a name column
+                if 'name' not in df.columns:
+                    # Try to create name from token symbols
+                    if 'token1_symbol' in df.columns and 'token2_symbol' in df.columns:
+                        df['name'] = df['token1_symbol'] + '/' + df['token2_symbol']
+                    # Or from token pair if available
+                    elif 'tokenPair' in df.columns:
+                        df['name'] = df['tokenPair']
+                    else:
+                        # Last resort - use a placeholder with the pool ID
+                        if 'pool_id' in df.columns:
+                            df['name'] = 'Pool ' + df['pool_id'].astype(str).str[:8] + '...'
+                        else:
+                            df['name'] = 'Unknown Pool'
+                
+                return df
             else:
-                # If it's already a DataFrame, return as is
-                return pool_data
+                # If it's already a DataFrame, make sure it has the right columns
+                df = pool_data.copy()
+                
+                # Normalize column names
+                if 'pool_id' not in df.columns:
+                    if 'id' in df.columns:
+                        df['pool_id'] = df['id']
+                    elif 'poolId' in df.columns:
+                        df['pool_id'] = df['poolId']
+                        
+                # Ensure the pool has a name column
+                if 'name' not in df.columns:
+                    # Try to create name from token symbols
+                    if 'token1_symbol' in df.columns and 'token2_symbol' in df.columns:
+                        df['name'] = df['token1_symbol'] + '/' + df['token2_symbol']
+                    # Or from token pair if available
+                    elif 'tokenPair' in df.columns:
+                        df['name'] = df['tokenPair']
+                    else:
+                        # Last resort - use a placeholder with the pool ID
+                        if 'pool_id' in df.columns:
+                            df['name'] = 'Pool ' + df['pool_id'].astype(str).str[:8] + '...'
+                        else:
+                            df['name'] = 'Unknown Pool'
+                
+                return df
         elif db is not None:
             # Fallback to database if data service isn't available
             pool_list = db.get_pool_list()
@@ -80,12 +130,32 @@ def get_pool_details(db, pool_id):
                 import pandas as pd
                 pools_df = pd.DataFrame(all_pools)
                 
+                # Normalize the column names first
+                if 'pool_id' not in pools_df.columns:
+                    if 'id' in pools_df.columns:
+                        pools_df['pool_id'] = pools_df['id']
+                    elif 'poolId' in pools_df.columns:
+                        pools_df['pool_id'] = pools_df['poolId']
+                
                 # Filter for the specific pool ID if we have a DataFrame
                 if not pools_df.empty and 'pool_id' in pools_df.columns:
+                    # Try to find by pool_id field
                     pool_data = pools_df[pools_df['pool_id'] == pool_id]
+                    
+                    # If not found, also check 'id' and 'poolId' fields directly
+                    if pool_data.empty and 'id' in pools_df.columns:
+                        pool_data = pools_df[pools_df['id'] == pool_id]
+                    if pool_data.empty and 'poolId' in pools_df.columns:
+                        pool_data = pools_df[pools_df['poolId'] == pool_id]
+                    
                     if not pool_data.empty:
+                        # Add pool_id field if not present
+                        result = pool_data.iloc[0].to_dict()
+                        if 'pool_id' not in result:
+                            result['pool_id'] = pool_id
+                        
                         # Return the first row as a dictionary
-                        return pool_data.iloc[0].to_dict()
+                        return result
         
         # If data service fails or pool not found, try the database
         if db is not None:
