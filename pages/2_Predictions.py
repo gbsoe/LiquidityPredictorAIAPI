@@ -25,6 +25,13 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Add the data service for direct access to real Solana pool data
+from data_services.data_service import get_data_service
+
+# Initialize API key
+from api_auth_helper import set_api_key
+set_api_key('9feae0d0af47e4948e061f2d7820461e374e040c21cf65c087166d7ed18f5ed6')
+
 # Initialize database connection
 @st.cache_resource
 def get_db_connection():
