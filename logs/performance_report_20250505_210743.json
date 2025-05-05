@@ -1,0 +1,81 @@
+{
+  "summary": {
+    "timestamp": "2025-05-05T21:07:43.366808",
+    "total_runtime": "6.67s",
+    "time_to_data_loaded": "N/A",
+    "time_to_predictions": "N/A",
+    "time_to_ui_ready": "N/A",
+    "peak_memory_mb": "0.00 MB",
+    "memory_growth_mb": "37.62 MB",
+    "final_token_cache_size": 0,
+    "total_pools_loaded": 0
+  },
+  "segments": {
+    "data_collection_init": "0.04s",
+    "app_initialization": "6.66s"
+  },
+  "checkpoints": {
+    "data_loaded": "2025-05-05T21:07:42.965204",
+    "ui_ready": "2025-05-05T21:07:43.366022"
+  },
+  "stats": {
+    "token_cache_size": 0,
+    "token_lookup_times": [],
+    "prediction_times": [],
+    "total_pools_loaded": 0,
+    "tokens_by_symbol": 0,
+    "tokens_by_address": 0,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "api_calls": 0,
+    "peak_memory_mb": 0
+  },
+  "timeline": [
+    {
+      "timestamp": 1746479256.701777,
+      "time": "0.00s",
+      "event": "monitor_initialized",
+      "datetime": "2025-05-05T21:07:36.701786"
+    },
+    {
+      "timestamp": 1746479256.7020915,
+      "time": "0.00s",
+      "event": "app_initialization_tracking_started",
+      "datetime": "2025-05-05T21:07:36.702094"
+    },
+    {
+      "timestamp": 1746479262.925764,
+      "time": "6.22s",
+      "event": "data_collection_init_tracking_started",
+      "datetime": "2025-05-05T21:07:42.925772"
+    },
+    {
+      "timestamp": 1746479262.9651892,
+      "time": "6.26s",
+      "event": "data_collection_init_tracking_stopped",
+      "datetime": "2025-05-05T21:07:42.965191",
+      "duration": "0.04s"
+    },
+    {
+      "timestamp": 1746479262.9652066,
+      "time": "6.26s",
+      "event": "checkpoint_data_loaded",
+      "datetime": "2025-05-05T21:07:42.965207",
+      "time_since_start": "6.26s"
+    },
+    {
+      "timestamp": 1746479263.3660307,
+      "time": "6.66s",
+      "event": "checkpoint_ui_ready",
+      "datetime": "2025-05-05T21:07:43.366034",
+      "time_since_start": "6.66s"
+    },
+    {
+      "timestamp": 1746479263.3660812,
+      "time": "6.66s",
+      "event": "app_initialization_tracking_stopped",
+      "datetime": "2025-05-05T21:07:43.366082",
+      "duration": "6.66s"
+    }
+  ]
+}
