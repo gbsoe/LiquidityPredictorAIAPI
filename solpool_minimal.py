@@ -386,6 +386,15 @@ def main():
             
             # Format columns for display
             if not display_df.empty:
+                # Check and ensure all required columns exist
+                for col in ["liquidity", "volume_24h", "apr", "fee"]:
+                    if col not in display_df.columns:
+                        display_df[col] = 0
+                    else:
+                        # Convert to numeric to ensure they are numbers
+                        display_df[col] = pd.to_numeric(display_df[col], errors="coerce").fillna(0)
+                
+                # Format columns for display
                 display_df["liquidity_fmt"] = display_df["liquidity"].apply(format_currency)
                 display_df["volume_24h_fmt"] = display_df["volume_24h"].apply(format_currency)
                 display_df["apr_fmt"] = display_df["apr"].apply(format_percentage)
