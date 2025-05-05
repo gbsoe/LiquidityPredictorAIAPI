@@ -14,14 +14,14 @@ from plotly.subplots import make_subplots
 # Add project directories to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils.visualization import create_metrics_chart, create_pool_comparison_chart
-from utils.data_processor import get_top_pools, get_blockchain_stats, get_prediction_metrics
+from utils.data_processor import get_pool_list, get_pool_details, get_pool_metrics
 from database.db_operations import DBManager
 from data_ingestion.raydium_api_client import RaydiumAPIClient
 import config
 
 # Page configuration
 st.set_page_config(
-    page_title="Solana Liquidity Pool Analysis System",
+    page_title="SolPool Insight",
     page_icon="🌊",
     layout="wide",
     initial_sidebar_state="expanded"
