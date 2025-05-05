@@ -730,6 +730,43 @@ class DBManager:
             self.logger.error(f"Error getting top predictions: {str(e)}")
             return pd.DataFrame()
     
+    def get_unique_tokens(self):
+        """
+        Get unique token symbols from all pools in the database
+        
+        Returns:
+            List of unique token symbols
+        """
+        try:
+            if self.use_mock:
+                # In mock mode, return a list of common tokens
+                return ['SOL', 'USDC', 'BTC', 'ETH', 'USDT', 'BONK', 'SAMO', 'RAY']
+                
+            conn = psycopg2.connect(**self.db_params)
+            cursor = conn.cursor()
+            
+            query = """
+            SELECT DISTINCT token1 FROM pools WHERE token1 IS NOT NULL AND token1 != ''
+            UNION
+            SELECT DISTINCT token2 FROM pools WHERE token2 IS NOT NULL AND token2 != ''
+            """
+            
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            
+            cursor.close()
+            conn.close()
+            
+            # Extract token symbols from query results
+            tokens = [row[0] for row in rows if row[0]]
+            self.logger.info(f"Retrieved {len(tokens)} unique tokens from database")
+            return tokens
+            
+        except Exception as e:
+            self.logger.error(f"Error getting unique tokens: {str(e)}")
+            # Return a default list of common tokens as fallback
+            return ['SOL', 'USDC', 'BTC', 'ETH', 'USDT']
+    
     def get_pool_predictions(self, pool_id, days=30):
         """
         Get prediction history for a specific pool
@@ -889,6 +926,229 @@ class DBManager:
             if self.use_mock:
                 return self.mock_db.get_pool_predictions(pool_id)
             return pd.DataFrame()
+    
+    def vacuum_database(self):
+        """
+        Optimize the database by vacuuming (reclaiming space and optimizing indexes)
+        
+        Returns:
+            bool: True if successful
+        """
+        try:
+            if self.use_mock:
+                self.logger.info("Mock vacuum database operation (no action taken)")
+                return True
+                
+            conn = psycopg2.connect(**self.db_params)
+            # Need to set isolation level for vacuum to work
+            conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+            cursor = conn.cursor()
+            
+            # Vacuum analyze each table
+            tables = ['pools', 'pool_metrics', 'token_prices', 'predictions']
+            for table in tables:
+                cursor.execute(f"VACUUM ANALYZE {table}")
+                self.logger.info(f"Vacuumed table: {table}")
+            
+            cursor.close()
+            conn.close()
+            
+            self.logger.info("Database vacuum completed successfully")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error vacuuming database: {str(e)}")
+            return False
+    
+    def clean_old_metrics(self, days_to_keep=90):
+        """
+        Delete old metrics records beyond the specified retention period
+        
+        Args:
+            days_to_keep: Number of days of data to retain
+            
+        Returns:
+            int: Number of records deleted
+        """
+        try:
+            if self.use_mock:
+                self.logger.info(f"Mock clean old metrics operation (would keep {days_to_keep} days)")
+                return 0
+                
+            conn = psycopg2.connect(**self.db_params)
+            cursor = conn.cursor()
+            
+            # Delete old metrics records
+            metrics_query = """
+            DELETE FROM pool_metrics
+            WHERE timestamp < NOW() - INTERVAL %s DAY
+            RETURNING pool_id
+            """
+            
+            cursor.execute(metrics_query, (days_to_keep,))
+            metrics_deleted = cursor.rowcount
+            
+            # Delete old price records
+            prices_query = """
+            DELETE FROM token_prices
+            WHERE timestamp < NOW() - INTERVAL %s DAY
+            RETURNING token_symbol
+            """
+            
+            cursor.execute(prices_query, (days_to_keep,))
+            prices_deleted = cursor.rowcount
+            
+            # Delete old predictions
+            predictions_query = """
+            DELETE FROM predictions
+            WHERE prediction_timestamp < NOW() - INTERVAL %s DAY
+            RETURNING pool_id
+            """
+            
+            cursor.execute(predictions_query, (days_to_keep,))
+            predictions_deleted = cursor.rowcount
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            
+            total_deleted = metrics_deleted + prices_deleted + predictions_deleted
+            self.logger.info(f"Cleaned up {total_deleted} old records ({metrics_deleted} metrics, {prices_deleted} prices, {predictions_deleted} predictions)")
+            return total_deleted
+            
+        except Exception as e:
+            self.logger.error(f"Error cleaning old metrics: {str(e)}")
+            return 0
+    
+    def get_database_stats(self):
+        """
+        Get statistics about the database tables
+        
+        Returns:
+            dict: Statistics about the database
+        """
+        try:
+            if self.use_mock:
+                # Return mock stats
+                return {
+                    "pools": 100,
+                    "pool_metrics": 5000,
+                    "token_prices": 2000,
+                    "predictions": 3000,
+                    "db_size_mb": 25
+                }
+                
+            conn = psycopg2.connect(**self.db_params)
+            cursor = conn.cursor()
+            
+            stats = {}
+            
+            # Count rows in each table
+            tables = ['pools', 'pool_metrics', 'token_prices', 'predictions']
+            for table in tables:
+                cursor.execute(f"SELECT COUNT(*) FROM {table}")
+                count = cursor.fetchone()[0]
+                stats[table] = count
+            
+            # Get database size
+            cursor.execute("""
+            SELECT pg_size_pretty(pg_database_size(current_database())),
+                   pg_database_size(current_database()) / 1024 / 1024 AS size_mb
+            FROM current_database()
+            """)
+            size_info = cursor.fetchone()
+            stats["db_size_pretty"] = size_info[0]
+            stats["db_size_mb"] = size_info[1]
+            
+            # Get table sizes
+            cursor.execute("""
+            SELECT
+                table_name,
+                pg_size_pretty(pg_total_relation_size(quote_ident(table_name))) as size,
+                pg_total_relation_size(quote_ident(table_name)) / 1024 / 1024 AS size_mb
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            ORDER BY pg_total_relation_size(quote_ident(table_name)) DESC
+            """)
+            
+            table_sizes = {}
+            for row in cursor.fetchall():
+                table_sizes[row[0]] = {"pretty": row[1], "mb": row[2]}
+            
+            stats["table_sizes"] = table_sizes
+            
+            cursor.close()
+            conn.close()
+            
+            return stats
+            
+        except Exception as e:
+            self.logger.error(f"Error getting database stats: {str(e)}")
+            return {"error": str(e)}
+    
+    def export_pool_data(self, filepath):
+        """
+        Export pool data to a CSV file
+        
+        Args:
+            filepath: Path to the output file
+            
+        Returns:
+            bool: True if successful
+        """
+        try:
+            if self.use_mock:
+                self.logger.info(f"Mock export to {filepath} (no action taken)")
+                return True
+                
+            # First get the latest pool metrics
+            conn = psycopg2.connect(**self.db_params)
+            cursor = conn.cursor()
+            
+            query = """
+            WITH latest_metrics AS (
+                SELECT DISTINCT ON (pool_id) *
+                FROM pool_metrics
+                ORDER BY pool_id, timestamp DESC
+            )
+            SELECT p.pool_id, p.name, p.dex, p.token1, p.token2,
+                   p.token1_address, p.token2_address, p.category,
+                   m.liquidity, m.volume, m.apr, m.fee,
+                   m.tvl_change_24h, m.apr_change_24h, m.timestamp
+            FROM pools p
+            JOIN latest_metrics m ON p.pool_id = m.pool_id
+            ORDER BY m.liquidity DESC
+            """
+            
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            
+            if not rows:
+                self.logger.warning("No data available for export")
+                return False
+                
+            # Define column names for the CSV
+            columns = [
+                'pool_id', 'name', 'dex', 'token1', 'token2',
+                'token1_address', 'token2_address', 'category',
+                'liquidity', 'volume', 'apr', 'fee',
+                'tvl_change_24h', 'apr_change_24h', 'timestamp'
+            ]
+            
+            # Create DataFrame and export to CSV
+            import pandas as pd
+            df = pd.DataFrame(rows, columns=columns)
+            df.to_csv(filepath, index=False)
+            
+            cursor.close()
+            conn.close()
+            
+            self.logger.info(f"Exported {len(df)} pool records to {filepath}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error exporting pool data: {str(e)}")
+            return False
 
 # Global DB Manager instance
 _db_manager = None
@@ -914,3 +1174,67 @@ def store_pool_snapshot(pool_data):
     """
     db = get_db_manager()
     return db.store_pool_snapshot(pool_data)
+
+def get_unique_tokens():
+    """
+    Global function to get unique token symbols from the database
+    
+    Returns:
+        List of unique token symbols
+    """
+    db = get_db_manager()
+    return db.get_unique_tokens()
+
+def vacuum_database():
+    """
+    Global function to vacuum the database (optimize and clean up)
+    
+    Returns:
+        bool: True if successful
+    """
+    db = get_db_manager()
+    if hasattr(db, 'vacuum_database') and callable(db.vacuum_database):
+        return db.vacuum_database()
+    return False
+
+def clean_old_metrics(days_to_keep=90):
+    """
+    Global function to clean up old metrics data
+    
+    Args:
+        days_to_keep: Number of days of data to keep
+        
+    Returns:
+        int: Number of records deleted
+    """
+    db = get_db_manager()
+    if hasattr(db, 'clean_old_metrics') and callable(db.clean_old_metrics):
+        return db.clean_old_metrics(days_to_keep)
+    return 0
+
+def get_database_stats():
+    """
+    Global function to get database statistics
+    
+    Returns:
+        dict: Database statistics
+    """
+    db = get_db_manager()
+    if hasattr(db, 'get_database_stats') and callable(db.get_database_stats):
+        return db.get_database_stats()
+    return {}
+
+def export_pool_data(filepath):
+    """
+    Global function to export pool data to a CSV file
+    
+    Args:
+        filepath: Path to the output file
+        
+    Returns:
+        bool: True if successful
+    """
+    db = get_db_manager()
+    if hasattr(db, 'export_pool_data') and callable(db.export_pool_data):
+        return db.export_pool_data(filepath)
+    return False
