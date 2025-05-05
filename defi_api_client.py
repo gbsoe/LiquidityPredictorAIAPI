@@ -67,6 +67,15 @@ class DefiApiClient:
                 # Parse the JSON response
                 result = response.json()
                 
+                # Ensure we always return a dictionary
+                if isinstance(result, str):
+                    try:
+                        result = json.loads(result)
+                    except:
+                        result = {"error": result}
+                elif result is None:
+                    result = {}
+                
                 # Rate-limit ourselves to respect the 10 req/sec API limit
                 time.sleep(0.1)
                 
