@@ -1128,10 +1128,32 @@ def load_data(force_price_update=False):
 # Legacy data loading method for fallback
 @handle_exception
 def _load_data_legacy():
-    """Legacy method to load pool data from file cache"""
-    logger.info("Using legacy data loading method")
+    """Legacy method to load pool data with enhanced database handling"""
+    logger.info("Using legacy data loading method with enhanced database access")
     
-    # Load from cached file
+    # First try to load from the database using our improved db_handler_manager
+    try:
+        from db_handler_manager import get_pools
+        logger.info("Attempting to load pools from database via db_handler_manager")
+        
+        pools = get_pools()  # This automatically falls back to JSON if needed
+        
+        if pools and len(pools) > 0:
+            logger.info(f"Successfully retrieved {len(pools)} pools from database via manager")
+            
+            # Ensure all required fields are present
+            pools = ensure_all_fields(pools)
+            
+            st.info(f"✓ Retrieved {len(pools)} pools from database storage")
+            st.session_state['data_source'] = "Database storage"
+            return pools
+        else:
+            logger.warning("No pools found in database via manager")
+    except Exception as e:
+        logger.error(f"Error accessing database via manager: {str(e)}")
+        logger.debug(traceback.format_exc())
+    
+    # If database access failed, try direct JSON loading
     cache_file = "extracted_pools.json"
     if os.path.exists(cache_file):
         try:
@@ -1155,15 +1177,17 @@ def _load_data_legacy():
                 else:
                     age_str = f"{mod_time_diff.seconds // 60} minutes old"
                 
-                st.info(f"ℹ️ Using legacy cached data from {mod_time_str} ({age_str})")
-                st.session_state['data_source'] = f"Legacy cached data ({age_str})"
+                logger.info(f"Found {len(pools)} pools in JSON cache from {mod_time_str}")
+                st.info(f"ℹ️ Using cached data from {mod_time_str} ({age_str})")
+                st.session_state['data_source'] = f"Cached data ({age_str})"
                 return pools
         except Exception as e:
-            st.warning(f"Error loading legacy cached data: {e}")
+            logger.error(f"Error loading JSON cached data: {str(e)}")
+            st.warning(f"Error loading cached data: {e}")
     
     # If all else fails, show a helpful error message
-    st.error("No pool data available. Please configure a valid DeFi API key to fetch authentic data.")
-    st.info("Check the 'API Key Configuration' section to set up your API key.")
+    st.error("No pool data available. Please check your data sources.")
+    st.info("Configure your API key in the sidebar under API Key Configuration to fetch fresh data.")
     
     # Return an empty list to avoid errors
     return []
