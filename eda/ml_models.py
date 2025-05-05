@@ -46,6 +46,229 @@ logger = logging.getLogger('ml_models')
 MODELS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
 os.makedirs(MODELS_DIR, exist_ok=True)
 
+# Global instance of the prediction model
+_prediction_model = None
+
+def get_prediction_model():
+    """
+    Get or create the global prediction model instance.
+    This function returns a PoolPredictionEngine that combines
+    multiple models to produce comprehensive predictions.
+    
+    Returns:
+        PoolPredictionEngine: An instance of the prediction engine
+    """
+    global _prediction_model
+    if _prediction_model is None:
+        logger.info("Initializing prediction model")
+        _prediction_model = PoolPredictionEngine()
+    return _prediction_model
+
+class PoolPredictionEngine:
+    """
+    Prediction engine that combines multiple models to generate
+    comprehensive pool performance predictions.
+    """
+    
+    def __init__(self):
+        """Initialize the prediction engine with required models"""
+        self.apr_model = APRPredictionModel()
+        self.risk_model = RiskAssessmentModel()
+        self.performance_classifier = PoolPerformanceClassifier() if 'PoolPerformanceClassifier' in globals() else None
+        self.model_version = datetime.now().strftime("%Y%m%d")
+        self.logger = logging.getLogger('prediction_engine')
+    
+    def predict_pool_performance(self, pool_id, historical_data, current_pool_data):
+        """
+        Generate comprehensive predictions for a pool's performance
+        
+        Args:
+            pool_id: The pool ID to generate predictions for
+            historical_data: DataFrame with historical metrics for this pool
+            current_pool_data: Dictionary with current pool data
+            
+        Returns:
+            dict: Prediction results including APR, risk score, and performance class
+        """
+        try:
+            self.logger.info(f"Generating predictions for pool {pool_id}")
+            
+            # Prepare prediction results
+            prediction = {
+                'pool_id': pool_id,
+                'model_version': self.model_version,
+                'prediction_timestamp': datetime.now()
+            }
+            
+            # Convert current pool data to DataFrame if it's a dict
+            if isinstance(current_pool_data, dict):
+                current_df = pd.DataFrame([current_pool_data])
+            else:
+                current_df = current_pool_data
+            
+            # Add historical metrics to the current data
+            if not historical_data.empty:
+                # Calculate trend features
+                trend_features = self._calculate_trend_features(historical_data)
+                
+                # Add trend features to current data
+                for feature, value in trend_features.items():
+                    current_df[feature] = value
+            
+            # Generate APR prediction
+            try:
+                apr_prediction = self.apr_model.predict(current_df)
+                if apr_prediction is not None and 'predicted_apr' in apr_prediction.columns:
+                    prediction['predicted_apr'] = float(apr_prediction['predicted_apr'].iloc[0])
+                else:
+                    # If model prediction fails, use the current APR as prediction
+                    apr = current_pool_data.get('apr', 0) or current_pool_data.get('apr_24h', 0) or current_pool_data.get('apy', 0)
+                    prediction['predicted_apr'] = float(apr)
+                    self.logger.warning(f"Using current APR as prediction: {apr}")
+            except Exception as e:
+                self.logger.error(f"Error predicting APR: {str(e)}")
+                # Fallback to current APR
+                apr = current_pool_data.get('apr', 0) or current_pool_data.get('apr_24h', 0) or current_pool_data.get('apy', 0)
+                prediction['predicted_apr'] = float(apr)
+            
+            # Generate risk assessment
+            try:
+                risk_prediction = self.risk_model.predict(current_df)
+                if risk_prediction is not None and 'risk_score' in risk_prediction.columns:
+                    prediction['risk_score'] = float(risk_prediction['risk_score'].iloc[0])
+                else:
+                    # If model prediction fails, use a default risk score
+                    prediction['risk_score'] = 0.5
+                    self.logger.warning("Using default risk score: 0.5")
+            except Exception as e:
+                self.logger.error(f"Error predicting risk score: {str(e)}")
+                # Fallback to calculated risk
+                prediction['risk_score'] = self._calculate_fallback_risk(current_pool_data)
+            
+            # Determine performance class based on APR and risk
+            prediction['performance_class'] = self._determine_performance_class(
+                prediction['predicted_apr'],
+                prediction['risk_score']
+            )
+            
+            self.logger.info(f"Prediction complete for {pool_id}: APR={prediction['predicted_apr']:.2f}%, " \
+                          f"Risk={prediction['risk_score']:.2f}, Class={prediction['performance_class']}")
+            
+            return prediction
+            
+        except Exception as e:
+            self.logger.error(f"Error generating prediction for pool {pool_id}: {str(e)}")
+            # Return a fallback prediction with default values
+            return {
+                'pool_id': pool_id,
+                'predicted_apr': 0.0,
+                'risk_score': 0.5,
+                'performance_class': 'medium',
+                'model_version': self.model_version,
+                'prediction_timestamp': datetime.now()
+            }
+    
+    def _calculate_trend_features(self, historical_data):
+        """Calculate trend features from historical data"""
+        try:
+            # Ensure data is sorted by time
+            historical_data = historical_data.sort_values('timestamp')
+            
+            # Calculate trends for key metrics
+            trends = {}
+            
+            if 'apr' in historical_data.columns:
+                trends['apr_trend_7d'] = self._calculate_metric_trend(historical_data, 'apr', days=7)
+                trends['apr_trend_30d'] = self._calculate_metric_trend(historical_data, 'apr', days=30)
+                trends['apr_volatility'] = historical_data['apr'].std() / historical_data['apr'].mean() if historical_data['apr'].mean() > 0 else 0
+            
+            if 'liquidity' in historical_data.columns:
+                trends['liquidity_trend_7d'] = self._calculate_metric_trend(historical_data, 'liquidity', days=7)
+                trends['liquidity_trend_30d'] = self._calculate_metric_trend(historical_data, 'liquidity', days=30)
+            
+            if 'volume' in historical_data.columns:
+                trends['volume_trend_7d'] = self._calculate_metric_trend(historical_data, 'volume', days=7)
+                trends['volume_trend_30d'] = self._calculate_metric_trend(historical_data, 'volume', days=30)
+            
+            return trends
+            
+        except Exception as e:
+            self.logger.error(f"Error calculating trend features: {str(e)}")
+            return {}
+    
+    def _calculate_metric_trend(self, df, metric, days=7):
+        """Calculate trend for a specific metric over a time period"""
+        try:
+            # Get recent data points
+            if len(df) <= 1:
+                return 0.0
+                
+            # Calculate the percentage change over the period
+            earliest = df[metric].iloc[0]
+            latest = df[metric].iloc[-1]
+            
+            if earliest == 0:
+                return 0.0
+                
+            return (latest - earliest) / earliest
+        except Exception as e:
+            self.logger.error(f"Error calculating {metric} trend: {str(e)}")
+            return 0.0
+    
+    def _calculate_fallback_risk(self, pool_data):
+        """Calculate a fallback risk score based on pool data"""
+        try:
+            # Start with a base risk
+            risk_score = 0.5
+            
+            # Higher APR often means higher risk
+            apr = pool_data.get('apr', 0) or pool_data.get('apr_24h', 0) or pool_data.get('apy', 0)
+            if apr > 100:
+                risk_score += 0.3
+            elif apr > 50:
+                risk_score += 0.15
+            elif apr > 20:
+                risk_score += 0.05
+            
+            # Higher liquidity usually means lower risk
+            liquidity = pool_data.get('liquidity', 0) or pool_data.get('tvl', 0)
+            if liquidity > 1000000:  # >$1M
+                risk_score -= 0.2
+            elif liquidity > 100000:  # >$100k
+                risk_score -= 0.1
+            
+            # Higher volume usually means lower risk
+            volume = pool_data.get('volume', 0) or pool_data.get('volume_24h', 0)
+            if volume > 100000:  # >$100k
+                risk_score -= 0.1
+            
+            # Normalize to 0-1 range
+            risk_score = max(0.1, min(0.9, risk_score))
+            
+            return risk_score
+            
+        except Exception as e:
+            self.logger.error(f"Error calculating fallback risk: {str(e)}")
+            return 0.5
+    
+    def _determine_performance_class(self, predicted_apr, risk_score):
+        """Determine performance class based on predicted APR and risk score"""
+        try:
+            # High performance: high APR and acceptable risk
+            if predicted_apr > 30 and risk_score < 0.6:
+                return 'high'
+            
+            # Low performance: low APR or high risk
+            if predicted_apr < 10 or risk_score > 0.7:
+                return 'low'
+            
+            # Medium performance: everything else
+            return 'medium'
+            
+        except Exception as e:
+            self.logger.error(f"Error determining performance class: {str(e)}")
+            return 'medium'
+
 class APRPredictionModel:
     """
     Random Forest Regressor for predicting APR
