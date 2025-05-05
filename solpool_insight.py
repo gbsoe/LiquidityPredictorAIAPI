@@ -146,7 +146,7 @@ def initialize_continuous_data_collection():
         logger.error(traceback.format_exc())
         return False
         
-# Enhanced token preloading function
+# Enhanced token preloading function with pool data awareness
 def preload_tokens_background():
     """
     Preload token data in a background thread to keep UI responsive.
@@ -160,35 +160,112 @@ def preload_tokens_background():
         token_service = st.session_state.get("token_service")
         if not token_service:
             token_service = get_token_service()
-            
-        # Preload all tokens
-        token_service.preload_all_tokens()
         
-        # Fetch prices for common tokens
-        common_tokens = [
-            "SOL", "USDC", "USDT", "ETH", "BTC", "MSOL", "BONK", "RAY", "ORCA", 
-            "STSOL", "ATLA", "POLI", "JSOL", "JUPY", "HPSQ", "MNGO", "SAMO"
-        ]
-        
-        # Process in smaller batches to avoid rate limits
-        batch_size = 5
-        for i in range(0, len(common_tokens), batch_size):
-            batch = common_tokens[i:i+batch_size]
-            logger.info(f"Fetching prices for token batch: {batch}")
+        # Get data service to access pool information
+        try:
+            data_service = get_data_service()
+            all_pools = data_service.get_all_pools()
+            logger.info(f"Retrieved {len(all_pools) if all_pools else 0} pools for token extraction")
             
-            for symbol in batch:
-                try:
-                    # Get token data to ensure it's in cache
-                    token_data = token_service.get_token_data(symbol, force_refresh=True)
-                    logger.info(f"Preloaded token data for {symbol}")
+            # Extract tokens from pools
+            token_symbols = set()
+            token_pools_map = {}
+            
+            if all_pools and len(all_pools) > 0:
+                # Create token-to-pool mapping for relationship data
+                for pool in all_pools:
+                    # Extract token symbols
+                    token1 = pool.get('token1', {})
+                    token2 = pool.get('token2', {})
                     
-                    # Sleep briefly to avoid hitting API rate limits
-                    time.sleep(1)
-                except Exception as e:
-                    logger.warning(f"Error preloading token {symbol}: {str(e)}")
+                    token1_symbol = token1.get('symbol', '') if isinstance(token1, dict) else str(token1)
+                    token2_symbol = token2.get('symbol', '') if isinstance(token2, dict) else str(token2)
+                    
+                    # Add to set of tokens
+                    if token1_symbol and len(token1_symbol) > 0:
+                        token_symbols.add(token1_symbol)
+                        
+                        # Map token to this pool
+                        if token1_symbol not in token_pools_map:
+                            token_pools_map[token1_symbol] = []
+                        token_pools_map[token1_symbol].append(pool)
+                    
+                    # Add to set of tokens
+                    if token2_symbol and len(token2_symbol) > 0:
+                        token_symbols.add(token2_symbol)
+                        
+                        # Map token to this pool
+                        if token2_symbol not in token_pools_map:
+                            token_pools_map[token2_symbol] = []
+                        token_pools_map[token2_symbol].append(pool)
+                
+                # Save the token-pool mapping to session state for quick access
+                st.session_state.token_pools_map = token_pools_map
+                logger.info(f"Created token-pool relationships for {len(token_symbols)} tokens")
+                
+                # Ensure common tokens are included in the list
+                common_tokens = [
+                    "SOL", "USDC", "USDT", "ETH", "BTC", "MSOL", "BONK", "RAY", "ORCA", 
+                    "STSOL", "ATLA", "POLI", "JSOL", "JUPY", "HPSQ", "MNGO", "SAMO"
+                ]
+                for token in common_tokens:
+                    token_symbols.add(token)
+                
+                # Convert to list for batch processing
+                token_symbols = list(token_symbols)
+                logger.info(f"Preloading price data for {len(token_symbols)} tokens")
+                
+                # Process in smaller batches to avoid rate limits
+                batch_size = 5
+                for i in range(0, len(token_symbols), batch_size):
+                    batch = token_symbols[i:i+batch_size]
+                    logger.info(f"Fetching prices for token batch: {batch}")
+                    
+                    for symbol in batch:
+                        try:
+                            # Get token data to ensure it's in cache
+                            token_data = token_service.get_token_data(symbol, force_refresh=True)
+                            logger.info(f"Preloaded token data for {symbol}")
+                            
+                            # Sleep briefly to avoid hitting API rate limits
+                            time.sleep(1)
+                        except Exception as e:
+                            logger.warning(f"Error preloading token {symbol}: {str(e)}")
+                    
+                    # Add a delay between batches
+                    time.sleep(2)
+            else:
+                logger.warning("No pools found for token extraction, using common tokens only")
+                # Preload common tokens as a fallback
+                token_service.preload_common_tokens()
+        except Exception as e:
+            logger.error(f"Error preloading additional tokens: {str(e)}")
+            # Fallback to common tokens
+            # Fetch prices for common tokens
+            common_tokens = [
+                "SOL", "USDC", "USDT", "ETH", "BTC", "MSOL", "BONK", "RAY", "ORCA", 
+                "STSOL", "ATLA", "POLI", "JSOL", "JUPY", "HPSQ", "MNGO", "SAMO"
+            ]
             
-            # Add a delay between batches
-            time.sleep(2)
+            # Process in smaller batches to avoid rate limits
+            batch_size = 5
+            for i in range(0, len(common_tokens), batch_size):
+                batch = common_tokens[i:i+batch_size]
+                logger.info(f"Fetching prices for token batch: {batch}")
+                
+                for symbol in batch:
+                    try:
+                        # Get token data to ensure it's in cache
+                        token_data = token_service.get_token_data(symbol, force_refresh=True)
+                        logger.info(f"Preloaded token data for {symbol}")
+                        
+                        # Sleep briefly to avoid hitting API rate limits
+                        time.sleep(1)
+                    except Exception as e:
+                        logger.warning(f"Error preloading token {symbol}: {str(e)}")
+                
+                # Add a delay between batches
+                time.sleep(2)
             
         logger.info("Completed token preloading in background")
     except Exception as e:

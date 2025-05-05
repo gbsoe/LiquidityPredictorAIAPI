@@ -376,91 +376,67 @@ def generate_token_network(token_symbol: str, pool_df: pd.DataFrame):
 
 # Function to create price history chart
 def create_price_chart(token_symbol: str):
-    # Try to get historical price data from data service first
     try:
-        # Attempt to get token address for lookup
-        token_address = token_service.get_token_address(token_symbol)
-        historical_data = None
+        # Get current price as a reference
+        price_result = get_token_price(token_symbol, return_source=True)
         
-        if token_address:
-            # If we have a token address, try to get historical data from the data service
-            historical_service = None
-            try:
-                from historical_data_service import get_historical_service
-                historical_service = get_historical_service()
-                
-                # Get historical price data for the token
-                historical_data = historical_service.get_token_history(token_address, days=30)
-            except Exception as e:
-                logger.warning(f"Error getting historical price data for {token_symbol}: {e}")
+        # Handle different return types
+        if isinstance(price_result, tuple):
+            current_price, source = price_result
+        else:
+            current_price = price_result
+            source = "Unknown"
             
-        # Process historical data if we have it
-        if historical_data and isinstance(historical_data, dict) and 'prices' in historical_data:
-            price_history = historical_data['prices']
-            if price_history and len(price_history) > 0:
-                # Convert to DataFrame
-                df = pd.DataFrame(price_history)
-                if len(df.columns) >= 2:  # Ensure we have date and price columns
-                    df.columns = ['Date', 'Price']
-                    df['Date'] = pd.to_datetime(df['Date'], unit='ms')
-                    source = historical_data.get('source', 'Historical API')
-                    current_price = df['Price'].iloc[-1] if not df.empty else 0
-                    return create_chart_from_df(df, token_symbol, current_price, source)
+        # Show a nice price chart with the current price
+        dates = pd.date_range(start=datetime.now() - timedelta(days=30), end=datetime.now(), freq='D')
+        
+        # Create a simple chart with just the current price
+        # This shows a flat line at the current price
+        if current_price and current_price > 0:
+            prices = [current_price] * len(dates)
+            source_text = f"Current price from {source if source else 'Unknown'}"
+        else:
+            # No price available
+            prices = [0] * len(dates)
+            current_price = 0
+            source_text = "No price data available"
+        
+        df = pd.DataFrame({
+            'Date': dates,
+            'Price': prices
+        })
+        
+        # Create a simple chart
+        fig = px.line(
+            df, 
+            x='Date', 
+            y='Price',
+            title=f"{token_symbol} - ${current_price:.6f} USD"
+        )
+        
+        fig.update_layout(
+            xaxis_title="Date",
+            yaxis_title="Price (USD)",
+            template="plotly_white",
+            height=300,
+            margin=dict(l=0, r=10, t=30, b=0)
+        )
+        
+        return fig, source_text
+        
     except Exception as e:
-        logger.warning(f"Failed to get historical prices for {token_symbol}: {e}")
-    
-    # Fall back to current price with simulated history if real data not available
-    dates = pd.date_range(start=datetime.now() - pd.Timedelta(days=30), end=datetime.now(), freq='D')
-    
-    # Get current price as a reference
-    price_result = get_token_price(token_symbol, return_source=True)
-    
-    # Handle different return types
-    if isinstance(price_result, tuple):
-        current_price, source = price_result
-    else:
-        current_price = price_result
-        source = "Unknown"
-    
-    # If we have a price, create a reasonable price history
-    if current_price and current_price > 0:
-        # Generate somewhat realistic price movement
-        base = current_price * 0.8
-        variation = current_price * 0.4
-        np.random.seed(42)  # For reproducibility
-        noise = np.random.normal(0, 1, len(dates))
-        cumulative_noise = np.cumsum(noise) / 20  # Smoothed random walk
-        normalized_noise = (cumulative_noise - cumulative_noise.min()) / (cumulative_noise.max() - cumulative_noise.min())
-        prices = base + variation * normalized_noise
-    else:
-        # If no price, just use dummy data
-        prices = [1 + 0.1 * np.sin(i/5) for i in range(len(dates))]
-    
-    df = pd.DataFrame({
-        'Date': dates,
-        'Price': prices
-    })
-    
-    return create_chart_from_df(df, token_symbol, current_price, source)
+        logger.error(f"Error creating price chart for {token_symbol}: {e}")
+        
+        # Create an empty chart as fallback
+        empty_fig = go.Figure()
+        empty_fig.update_layout(
+            title=f"Price data unavailable for {token_symbol}",
+            height=300
+        )
+        
+        return empty_fig, "No price data available"
 
-# Helper function to create chart from dataframe
-def create_chart_from_df(df, token_symbol, current_price, source):
-    fig = px.line(
-        df, 
-        x='Date', 
-        y='Price',
-        title=f"{token_symbol} Price History (Last 30 Days)"
-    )
-    
-    fig.update_layout(
-        xaxis_title="Date",
-        yaxis_title="Price (USD)",
-        template="plotly_white",
-        height=300,
-        margin=dict(l=0, r=10, t=30, b=0)
-    )
-    
-    return fig, f"Source: {source.capitalize() if source else 'Unknown'} (Current: ${current_price:.6f})"
+# This helper function has been integrated into create_price_chart
 
 # Main app layout
 st.title("🪙 Token Analysis")
