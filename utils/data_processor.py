@@ -232,7 +232,7 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                 logger.info(f"Using {len(pools)} real Solana pools for predictions")
                 
                 # Import our standard pool display helpers for consistency
-                from utils.pool_display_helpers import format_tvl, derive_pool_category
+                from utils.pool_display_helpers import derive_pool_category, get_realistic_tvl
                 import random
                 
                 predictions = []
@@ -377,7 +377,7 @@ def get_pool_predictions(db, pool_id, days=30):
             return pd.DataFrame()
         
         # Import the pool display helpers for consistency
-        from utils.pool_display_helpers import format_tvl, derive_pool_category
+        from utils.pool_display_helpers import derive_pool_category, get_realistic_tvl
         
         # Try to get data directly from the data service first
         data_service = get_data_service()
