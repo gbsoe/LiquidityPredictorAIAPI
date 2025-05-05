@@ -1597,10 +1597,10 @@ def main():
             
             # Get watchlists for filtering with enhanced error handling
             try:
-                # Use our safe database call function from the manager
-                from db_handler_manager import safe_db_call
+                # Use our improved get_watchlists function from the db_handler_manager
+                from db_handler_manager import get_watchlists, get_pools_in_watchlist
                 
-                watchlists = safe_db_call('get_watchlists')
+                watchlists = get_watchlists() # This returns an empty list on error instead of raising an exception
                 if watchlists:
                     # Allow filtering by watchlist
                     watchlist_options = ["All Pools"] + [w["name"] for w in watchlists]
@@ -1616,13 +1616,17 @@ def main():
                         watchlist_id = next((w["id"] for w in watchlists if w["name"] == selected_watchlist), None)
                         
                         if watchlist_id:
-                            # Get the pool IDs in this watchlist using safe call
-                            watchlist_pool_ids = safe_db_call('get_pools_in_watchlist', watchlist_id)
+                            # Get the pool IDs in this watchlist using our improved function
+                            watchlist_pool_ids = get_pools_in_watchlist(watchlist_id)
                             
                             if watchlist_pool_ids:
                                 # Filter the dataframe
                                 filtered_df = filtered_df[filtered_df["id"].isin(watchlist_pool_ids)]
                                 st.success(f"Showing {len(filtered_df)} pools from watchlist: {selected_watchlist}")
+                else:
+                    # Show watchlist feature is not available, but only in the expanded section
+                    with st.expander("Watchlist Features", expanded=False):
+                        st.info("Watchlist features are not available - No watchlists found in database.")
             except Exception as e:
                 logger.error(f"Error loading watchlists: {str(e)}")
                 # Continue without watchlist filtering

@@ -104,3 +104,42 @@ def safe_db_call(method_name, *args, **kwargs):
     except Exception as e:
         logger.error(f"Error calling database method {method_name}: {str(e)}")
         return None
+
+
+# Add special handlers for common operations that might fail
+def get_watchlists():
+    """
+    Get watchlists with enhanced error handling for missing tables
+    
+    Returns:
+        List of watchlists or empty list if not available
+    """
+    try:
+        result = safe_db_call('get_watchlists')
+        if result:
+            return result
+    except Exception as e:
+        logger.error(f"Error retrieving watchlists: {str(e)}")
+    
+    # Return empty list as fallback
+    return []
+
+def get_pools_in_watchlist(watchlist_id):
+    """
+    Get pools in a watchlist with enhanced error handling
+    
+    Args:
+        watchlist_id: ID of the watchlist
+        
+    Returns:
+        List of pool IDs or empty list if not available
+    """
+    try:
+        result = safe_db_call('get_pools_in_watchlist', watchlist_id)
+        if result:
+            return result
+    except Exception as e:
+        logger.error(f"Error retrieving pools in watchlist: {str(e)}")
+    
+    # Return empty list as fallback
+    return []
