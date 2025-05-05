@@ -149,6 +149,14 @@ class HistoricalDataService:
             logger.error(f"Error getting metrics for pool {pool_id}: {str(e)}")
             return pd.DataFrame()
     
+    # Alias for get_pool_metrics to maintain compatibility with existing code
+    def get_pool_history(self, pool_id: str, days: int = 7) -> list:
+        """Alias for get_pool_metrics that returns a list of dictionaries"""
+        metrics_df = self.get_pool_metrics(pool_id, days)
+        if metrics_df.empty:
+            return []
+        return metrics_df.to_dict(orient='records')
+    
     def collect_pool_data(self, pool_data: List[Dict[str, Any]]):
         """Store the current state of multiple pools for historical tracking"""
         if not pool_data or len(pool_data) == 0:

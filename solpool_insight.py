@@ -132,6 +132,13 @@ def initialize_continuous_data_collection():
             data_service.start_scheduled_collection()
             logger.info("Started scheduled data collection service")
         
+        # Start historical data collection (new)
+        try:
+            start_historical_collection(data_service, interval_minutes=30)
+            logger.info("Started historical data collection service")
+        except Exception as e:
+            logger.error(f"Failed to start historical data collection: {str(e)}")
+        
         logger.info("Initialized data services with continuous collection for better predictions")
         return True
     except Exception as e:
