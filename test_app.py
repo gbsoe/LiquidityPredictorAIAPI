@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import os
@@ -22,22 +23,21 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Import db_handler module
+# Initialize database handler
 try:
-    import db_handler
-    from db_handler import get_db_handler
-    db_handler_instance = get_db_handler()
+    from database.db_operations import DBManager
+    db_handler = DBManager()
     DB_CONNECTED = True
 except Exception as e:
-    logger.error(f"Error importing db_handler: {str(e)}")
+    logger.error(f"Error initializing database handler: {str(e)}")
     DB_CONNECTED = False
-    db_handler_instance = None
+    db_handler = None
 
 def load_data(limit=50):
     """Load pool data from database or fallback to JSON"""
     try:
-        if DB_CONNECTED and db_handler_instance:
-            pools = db_handler_instance.get_pools(limit=limit)
+        if DB_CONNECTED and db_handler:
+            pools = db_handler.get_pools(limit=limit)
             return pools
         else:
             # Fallback to JSON
@@ -69,7 +69,7 @@ def main():
         """)
     
     # Database status
-    if DB_CONNECTED and db_handler_instance:
+    if DB_CONNECTED and db_handler:
         st.success("✓ Connected to PostgreSQL database")
     else:
         st.warning("⚠ Database connection not available - using file-based storage")
