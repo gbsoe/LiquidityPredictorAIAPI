@@ -53,7 +53,7 @@
   "price_sources": {
     "USDC": "coingecko",
     "SOL": "coingecko",
-    "USDT": "defi_api",
+    "USDT": "coingecko",
     "ETH": "coingecko",
     "ORCA": "coingecko",
     "RAY": "coingecko",
@@ -94,5 +94,5 @@
     "GENE": "coingecko",
     "WIF": "coingecko"
   },
-  "last_update": "2025-05-05T12:18:47.289178"
+  "last_update": "2025-05-05T12:19:52.469862"
 }
