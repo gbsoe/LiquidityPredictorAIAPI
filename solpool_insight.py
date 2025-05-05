@@ -42,6 +42,7 @@ try:
     # Import db_handler
     from db_handler import get_db_handler
     db_handler = get_db_handler()
+    DB_CONNECTED = True
     
     # Initialize other services
     from data_services.initialize import init_services
@@ -53,6 +54,7 @@ except Exception as e:
     print(traceback.format_exc())
     # Create a fallback db_handler in case the import fails
     db_handler = None
+    DB_CONNECTED = False
 
 # Import the historical data service
 from historical_data_service import get_historical_service, start_historical_collection

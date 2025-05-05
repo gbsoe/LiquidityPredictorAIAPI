@@ -324,6 +324,28 @@ class PerformanceMonitor:
             logger.error(f"Error saving interim report: {str(e)}")
             return None
     
+    def get_metrics(self):
+        """
+        Get current performance metrics.
+        
+        This method is used to provide metrics to the Streamlit UI.
+        
+        Returns:
+            Dictionary with current performance metrics
+        """
+        try:
+            # Calculate key metrics
+            metrics = {
+                "app_start_time": datetime.fromtimestamp(self.start_time),
+                "checkpoints": {key: datetime.now().timestamp() - value for key, value in self.checkpoints.items()},
+                "function_times": self.segments.copy()
+            }
+            
+            return metrics
+        except Exception as e:
+            logger.error(f"Error getting metrics: {str(e)}")
+            return {}
+    
     def save_final_report(self) -> str:
         """
         Save the final performance report to a file.
