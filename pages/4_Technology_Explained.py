@@ -369,15 +369,15 @@ with prediction_tab:
     st.markdown("""
     <div class="tech-card">
         <p>
-            The heart of SolPool Insight is our Self-Evolving Prediction Engine, which continuously improves 
-            over time through automatic learning and optimization. This system integrates:
+            SolPool Insight uses a pragmatic prediction engine that focuses on reliable, practical forecasting
+            methods to help guide investment decisions. Our current system implements:
         </p>
         <ul class="feature-list">
-            <li><strong>Ensemble Learning</strong>: Multiple model types working together for robust predictions</li>
-            <li><strong>Reinforcement Learning</strong>: Optimizing model weights based on prediction accuracy</li>
-            <li><strong>Bayesian Optimization</strong>: Advanced hyperparameter tuning for optimal performance</li>
-            <li><strong>Neural Architecture Search</strong>: Automatically discovering the best neural network structures</li>
-            <li><strong>Multi-Agent System</strong>: Specialized prediction agents focusing on different aspects</li>
+            <li><strong>Random Forest Regression</strong>: Core algorithm for APR prediction with good accuracy and explainability</li>
+            <li><strong>Feature Engineering</strong>: Creating meaningful derived metrics from raw data</li>
+            <li><strong>Ensemble Methods</strong>: Combining multiple prediction models for improved stability</li>
+            <li><strong>Statistical Time-Series Analysis</strong>: Using established techniques for trend identification</li>
+            <li><strong>Historical Pattern Recognition</strong>: Identifying repeating patterns in pool performance</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
@@ -392,8 +392,8 @@ with prediction_tab:
         st.markdown("""
         <div class="tech-card">
             <h4>APR Prediction Model</h4>
-            <p><strong>Primary Algorithms:</strong> Random Forest Regressor, XGBoost, LSTM Neural Network</p>
-            <p><strong>Purpose:</strong> Predict future APR changes over 7-30 day horizons</p>
+            <p><strong>Primary Algorithm:</strong> Random Forest Regressor</p>
+            <p><strong>Purpose:</strong> Predict future APR changes over 7-day horizon</p>
             <p><strong>Key Features:</strong></p>
             <ul>
                 <li>Historical APR patterns</li>
@@ -402,29 +402,24 @@ with prediction_tab:
                 <li>Time-based seasonality factors</li>
                 <li>DEX protocol characteristics</li>
             </ul>
-            <p><strong>Performance Metrics:</strong></p>
-            <ul>
-                <li>RMSE: 2.14% (out-of-sample testing)</li>
-                <li>MAE: 1.76%</li>
-                <li>R-squared: 0.83</li>
-            </ul>
+            <p><strong>Implementation Status:</strong> Core model implemented with ongoing refinements</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         <div class="tech-card">
             <h4>Risk Assessment Model</h4>
-            <p><strong>Primary Algorithms:</strong> Deep Neural Network, LSTM, Random Forest</p>
-            <p><strong>Purpose:</strong> Quantify risk levels through multi-factor analysis</p>
+            <p><strong>Primary Algorithm:</strong> Random Forest</p>
+            <p><strong>Purpose:</strong> Estimate risk levels based on historical data</p>
             <p><strong>Key Features:</strong></p>
             <ul>
                 <li>Volatility metrics</li>
-                <li>Impermanent loss simulation</li>
-                <li>Smart contract risk factors</li>
+                <li>Impermanent loss estimation</li>
                 <li>Liquidity concentration analysis</li>
                 <li>Price correlation stability</li>
+                <li>Historical stability factors</li>
             </ul>
-            <p><strong>Output:</strong> Risk score (0-100) with factor breakdown</p>
+            <p><strong>Implementation Status:</strong> Basic implementation with planned enhancements</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -432,38 +427,34 @@ with prediction_tab:
         st.markdown("""
         <div class="tech-card">
             <h4>TVL Prediction Model</h4>
-            <p><strong>Primary Algorithms:</strong> Gradient Boosting, ARIMA, Prophet</p>
-            <p><strong>Purpose:</strong> Forecast changes in pool liquidity</p>
+            <p><strong>Primary Algorithm:</strong> Simple trend analysis with moving averages</p>
+            <p><strong>Purpose:</strong> Track changes in pool liquidity</p>
             <p><strong>Key Features:</strong></p>
             <ul>
                 <li>Historical liquidity patterns</li>
-                <li>Market-wide liquidity flows</li>
-                <li>Token market cap correlations</li>
-                <li>APR competitive positioning</li>
-                <li>On-chain liquidity migration trends</li>
+                <li>Moving average calculations</li>
+                <li>Basic trend detection</li>
+                <li>Growth rate measurement</li>
+                <li>Relative change metrics</li>
             </ul>
-            <p><strong>Performance Metrics:</strong></p>
-            <ul>
-                <li>MAPE: 8.2% (7-day forecast)</li>
-                <li>Direction Accuracy: 84%</li>
-            </ul>
+            <p><strong>Implementation Status:</strong> Basic implementation tracking historical data</p>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("""
         <div class="tech-card">
             <h4>Pool Performance Classifier</h4>
-            <p><strong>Primary Algorithms:</strong> XGBoost Classifier, SVM, Random Forest</p>
-            <p><strong>Purpose:</strong> Categorize pools into performance classes</p>
+            <p><strong>Primary Algorithm:</strong> Rule-based classification</p>
+            <p><strong>Purpose:</strong> Categorize pools based on key metrics</p>
             <p><strong>Classification Schema:</strong></p>
             <ul>
-                <li><strong>Excellent (A)</strong>: High-APR, low-risk, stable performance</li>
-                <li><strong>Good (B)</strong>: Above-average returns with moderate risk</li>
-                <li><strong>Average (C)</strong>: Standard performance, balanced metrics</li>
-                <li><strong>Below Average (D)</strong>: Underperforming but not critical</li>
-                <li><strong>Poor (F)</strong>: High-risk, low-return, unstable metrics</li>
+                <li><strong>Excellent</strong>: High-APR, good liquidity, stable metrics</li>
+                <li><strong>Good</strong>: Above-average returns with reasonable stability</li>
+                <li><strong>Average</strong>: Standard performance, typical metrics</li>
+                <li><strong>Below Average</strong>: Underperforming on key metrics</li>
+                <li><strong>Poor</strong>: Low performance across multiple dimensions</li>
             </ul>
-            <p><strong>Classification Accuracy:</strong> 86%</p>
+            <p><strong>Implementation Status:</strong> Basic rule-based system with ongoing development</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -473,35 +464,30 @@ with prediction_tab:
     st.markdown("""
     <div class="tech-card">
         <p>
-            Our APR prediction process combines traditional time-series forecasting with advanced machine learning. 
-            Here's a detailed breakdown of the methodology:
+            Our APR prediction process uses practical machine learning approaches focused on reliable forecasting.
+            Here's a breakdown of the current methodology:
         </p>
         
         <ol>
             <li>
-                <strong>Historical Pattern Analysis:</strong> 
-                Identify recurring patterns in APR fluctuations using autocorrelation and seasonality decomposition.
+                <strong>Historical Data Collection:</strong> 
+                Gather time-series data on APR values and related metrics for each pool.
             </li>
             <li>
-                <strong>Feature Vector Creation:</strong>
-                For each pool, we construct a feature vector containing 40+ engineered features derived from raw metrics.
+                <strong>Feature Engineering:</strong>
+                Create relevant features like moving averages, trends, and volatility metrics.
             </li>
             <li>
-                <strong>Multi-Model Prediction:</strong>
-                Run predictions through multiple specialized models:
-                <ul>
-                    <li>Random Forest for capturing non-linear relationships</li>
-                    <li>LSTM for sequence and temporal pattern learning</li>
-                    <li>XGBoost for handling complex feature interactions</li>
-                </ul>
+                <strong>Model Training:</strong>
+                Train a Random Forest Regressor on historical data to identify patterns and relationships.
             </li>
             <li>
-                <strong>Ensemble Aggregation:</strong>
-                Combine model outputs using a weighted ensemble approach, with weights optimized via reinforcement learning.
+                <strong>Prediction Generation:</strong>
+                Apply the trained model to current data to predict future APR values.
             </li>
             <li>
-                <strong>Confidence Interval Generation:</strong>
-                Calculate prediction intervals using bootstrapping and historical error distribution analysis.
+                <strong>Performance Tracking:</strong>
+                Monitor prediction accuracy and adjust features as needed to improve results.
             </li>
         </ol>
     </div>
@@ -512,18 +498,16 @@ with prediction_tab:
     
     st.markdown("""
     <div class="formula-box">
-        <p>The formal mathematical representation of our APR prediction model:</p>
-        <p>APR̂<sub>t+h</sub> = f(APR<sub>t</sub>, APR<sub>t-1</sub>, ..., APR<sub>t-n</sub>, VLR<sub>t</sub>, PCorr<sub>t</sub>, TM<sub>t</sub>, MC<sub>t</sub>, ...)</p>
+        <p>The current mathematical approach for our APR prediction model:</p>
+        <p>APR̂<sub>t+h</sub> = RandomForest(APR<sub>t</sub>, APR<sub>t-1</sub>, ..., APR<sub>t-n</sub>, VLR<sub>t</sub>, other features)</p>
         <p>Where:</p>
         <ul>
             <li>APR̂<sub>t+h</sub>: Predicted APR h days into the future</li>
             <li>APR<sub>t</sub>, APR<sub>t-1</sub>, ...: Historical APR values</li>
             <li>VLR<sub>t</sub>: Volume-to-Liquidity Ratio</li>
-            <li>PCorr<sub>t</sub>: Price Correlation between tokens</li>
-            <li>TM<sub>t</sub>: Token Momentum indicators</li>
-            <li>MC<sub>t</sub>: Market Condition indicators</li>
+            <li>Other features include pool metrics and token characteristics</li>
         </ul>
-        <p>The function f is a complex non-linear mapping learned by our ensemble model.</p>
+        <p>Random Forest creates multiple decision trees and aggregates their predictions.</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -610,28 +594,28 @@ with prediction_tab:
     st.markdown("""
     <div class="tech-card">
         <p>
-            Our system continuously evolves and improves through several automated mechanisms:
+            We continuously work to improve our prediction capabilities through several processes:
         </p>
         <ul class="feature-list">
             <li>
-                <strong>Automated Backtracking:</strong> 
-                The system regularly compares predictions with actual outcomes to measure accuracy and adjust models.
+                <strong>Accuracy Monitoring:</strong> 
+                Track how well predictions match actual outcomes to identify areas for improvement.
             </li>
             <li>
-                <strong>Reinforcement Learning Optimization:</strong>
-                Model weights are continuously optimized based on prediction accuracy using a reward mechanism.
+                <strong>Data Collection Expansion:</strong>
+                Steadily increasing our historical data coverage for more robust training.
             </li>
             <li>
-                <strong>Periodic Retraining:</strong>
-                Models are retrained weekly with fresh data to adapt to changing market conditions.
+                <strong>Feature Refinement:</strong>
+                Identifying and adding new features that improve prediction accuracy.
             </li>
             <li>
-                <strong>Feature Importance Analysis:</strong>
-                Automatic evaluation of feature importance allows the system to focus on the most predictive signals.
+                <strong>Model Selection:</strong>
+                Testing different algorithms to determine which performs best for our use case.
             </li>
             <li>
-                <strong>Hyperparameter Optimization:</strong>
-                Bayesian optimization continuously fine-tunes model hyperparameters for optimal performance.
+                <strong>Hyperparameter Tuning:</strong>
+                Manual adjustment of model parameters to optimize prediction performance.
             </li>
         </ul>
     </div>
@@ -935,8 +919,8 @@ with architecture_tab:
     st.markdown("<h2 class='section-header'>System Architecture</h2>", unsafe_allow_html=True)
     
     st.markdown("""
-    SolPool Insight is built on a modern, scalable architecture designed for real-time data processing
-    and analysis. This section outlines the key components and their interactions.
+    SolPool Insight is built on a practical architecture focused on providing reliable Solana liquidity pool analysis.
+    This section outlines the key components and their interactions.
     """)
     
     # High-level Architecture
