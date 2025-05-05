@@ -68,7 +68,13 @@ try:
         )
         
         # Extract pool_id from selection
-        selected_pool_id = selected_pool_option.split("(")[-1].split(")")[0]
+        try:
+            selected_pool_id = selected_pool_option.split("(")[-1].split(")")[0]
+            st.session_state['selected_pool_id'] = selected_pool_id  # Cache the ID in session state
+        except:
+            # If we can't parse the ID, show an error
+            st.error("Could not extract pool ID from selection")
+            return
         
         # Time period selection
         time_period = st.sidebar.selectbox(
@@ -209,8 +215,12 @@ try:
         )
         
         if selected_pools:
-            # Extract pool IDs
-            pool_ids = [pool.split("(")[-1].split(")")[0] for pool in selected_pools]
+            # Extract pool IDs with error handling
+            try:
+                pool_ids = [pool.split("(")[-1].split(")")[0] for pool in selected_pools]
+            except Exception as e:
+                st.error(f"Could not extract pool IDs from selection: {str(e)}")
+                return
             
             # Metric to compare
             compare_metric = st.selectbox(
