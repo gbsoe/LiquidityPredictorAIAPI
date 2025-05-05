@@ -127,9 +127,17 @@ try:
                 # Display predictions table
                 st.subheader(f"Top {top_n} Pools by {prediction_category}")
                 
-                # Format dataframe for display - Ensure we include pool_id 
-                display_df = top_predictions[['pool_name', 'pool_id', 'predicted_apr', 'performance_class', 'risk_score']].copy()
-                display_df.columns = ['Pool Name', 'Pool ID', 'Predicted APR (%)', 'Performance Class', 'Risk Score']
+                # Format dataframe for display - Ensure we include pool_id and category/type
+                display_df = top_predictions[['pool_name', 'pool_id', 'predicted_apr', 'performance_class', 'risk_score', 'tvl', 'category']].copy()
+                
+                # Convert TVL to millions for display
+                display_df['tvl_millions'] = display_df['tvl'] / 1000000
+                
+                # Rename columns for display
+                display_df.columns = ['Pool Name', 'Pool ID', 'Predicted APR (%)', 'Performance Class', 'Risk Score', 'TVL', 'Type', 'TVL (M)']
+                
+                # Drop the original TVL column as we'll use the formatted version
+                display_df = display_df.drop(columns=['TVL'])
                 
                 # Apply styling to the dataframe
                 def highlight_performance(val):
@@ -155,7 +163,11 @@ try:
                 
                 # Apply styling
                 styled_df = display_df.style\
-                    .format({'Predicted APR (%)': '{:.2f}', 'Risk Score': '{:.2f}'})
+                    .format({
+                        'Predicted APR (%)': '{:.2f}', 
+                        'Risk Score': '{:.2f}',
+                        'TVL (M)': '${:.2f}M'
+                    })
                 
                 # Use .map instead of .applymap (which is deprecated)
                 try:
