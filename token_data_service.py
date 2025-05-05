@@ -823,10 +823,10 @@ class TokenDataService:
                 from data_services.data_service import DataService
                 data_service = DataService()
                 
-                # Get the latest pool data
-                all_pools = data_service.get_latest_pools()
+                # Get pools by token directly from the data service
+                all_pools = data_service.get_pools_by_token(symbol)
                 
-                # Filter pools containing this token
+                # Process each pool
                 for pool in all_pools:
                     token1 = pool.get('token1', {})
                     token2 = pool.get('token2', {})

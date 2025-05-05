@@ -25,9 +25,13 @@ logger = logging.getLogger("token_analysis_page")
 # Add root to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Import our token services
+# Import our services
 from token_data_service import get_token_service
 from token_price_service import get_token_price, get_multiple_prices
+from data_services.data_service import DataService
+
+# Initialize the data service for direct access to pool data
+data_service = DataService()
 
 # Page configuration
 st.set_page_config(
@@ -79,14 +83,71 @@ def load_token_data():
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_token_pools(token_symbol: str):
     try:
-        pools = token_service.get_pools_for_token(token_symbol)
-        if not pools:
-            return pd.DataFrame()
+        # First try directly from data service
+        pools = data_service.get_pools_by_token(token_symbol)
+        
+        if not pools or len(pools) == 0:
+            # Fall back to token service if needed
+            pools = token_service.get_pools_for_token(token_symbol)
             
-        pool_df = pd.DataFrame(pools)
-        return pool_df
+        if not pools or len(pools) == 0:
+            logger.warning(f"No pools found for token {token_symbol}")
+            return pd.DataFrame()
+        
+        # Process pools to ensure consistent format
+        processed_pools = []
+        for pool in pools:
+            # Convert token objects to symbols if needed
+            token1 = pool.get('token1', {})
+            token2 = pool.get('token2', {})
+            
+            token1_symbol = token1.get('symbol', '') if isinstance(token1, dict) else str(token1)
+            token2_symbol = token2.get('symbol', '') if isinstance(token2, dict) else str(token2)
+            
+            # Create clean pool object
+            clean_pool = {
+                'id': pool.get('pool_id', pool.get('id', '')),
+                'dex': pool.get('dex', 'Unknown'),
+                'token1_symbol': token1_symbol,
+                'token2_symbol': token2_symbol
+            }
+            
+            # Extract and normalize liquidity value
+            try:
+                liquidity = pool.get('liquidity', 0)
+                if isinstance(liquidity, dict):
+                    clean_pool['liquidity'] = float(liquidity.get('usd', 0))
+                else:
+                    clean_pool['liquidity'] = float(liquidity) if liquidity else 0
+            except (TypeError, ValueError):
+                clean_pool['liquidity'] = 0
+            
+            # Extract and normalize volume data
+            try:
+                volume = pool.get('volume', {})
+                if isinstance(volume, dict):
+                    clean_pool['volume_24h'] = float(volume.get('h24', volume.get('usd', 0)))
+                else:
+                    clean_pool['volume_24h'] = float(volume) if volume else 0
+            except (TypeError, ValueError):
+                clean_pool['volume_24h'] = 0
+            
+            # Add APR if available
+            try:
+                apr = pool.get('apr', {})
+                if isinstance(apr, dict):
+                    clean_pool['apr'] = float(apr.get('total', apr.get('day', 0))) * 100  # Convert to percentage
+                else:
+                    clean_pool['apr'] = float(apr) * 100 if apr else 0
+            except (TypeError, ValueError):
+                clean_pool['apr'] = 0
+            
+            processed_pools.append(clean_pool)
+        
+        logger.info(f"Loaded {len(processed_pools)} pools for token {token_symbol}")
+        return pd.DataFrame(processed_pools)
     except Exception as e:
-        st.error(f"Error loading pools for {token_symbol}: {e}")
+        logger.error(f"Error loading pools for {token_symbol}: {e}")
         return pd.DataFrame()
 
 # Function to generate token network visualization
@@ -188,10 +249,40 @@ def generate_token_network(token_symbol: str, pool_df: pd.DataFrame):
 
 # Function to create price history chart
 def create_price_chart(token_symbol: str):
-    # This is a placeholder for price history
-    # In a real implementation, this would fetch historical price data
+    # Try to get historical price data from data service first
+    try:
+        # Attempt to get token address for lookup
+        token_address = token_service.get_token_address(token_symbol)
+        historical_data = None
+        
+        if token_address:
+            # If we have a token address, try to get historical data from the data service
+            historical_service = None
+            try:
+                from historical_data_service import get_historical_service
+                historical_service = get_historical_service()
+                
+                # Get historical price data for the token
+                historical_data = historical_service.get_token_history(token_address, days=30)
+            except Exception as e:
+                logger.warning(f"Error getting historical price data for {token_symbol}: {e}")
+            
+        # Process historical data if we have it
+        if historical_data and isinstance(historical_data, dict) and 'prices' in historical_data:
+            price_history = historical_data['prices']
+            if price_history and len(price_history) > 0:
+                # Convert to DataFrame
+                df = pd.DataFrame(price_history)
+                if len(df.columns) >= 2:  # Ensure we have date and price columns
+                    df.columns = ['Date', 'Price']
+                    df['Date'] = pd.to_datetime(df['Date'], unit='ms')
+                    source = historical_data.get('source', 'Historical API')
+                    current_price = df['Price'].iloc[-1] if not df.empty else 0
+                    return create_chart_from_df(df, token_symbol, current_price, source)
+    except Exception as e:
+        logger.warning(f"Failed to get historical prices for {token_symbol}: {e}")
     
-    # Generate some sample data
+    # Fall back to current price with simulated history if real data not available
     dates = pd.date_range(start=datetime.now() - pd.Timedelta(days=30), end=datetime.now(), freq='D')
     
     # Get current price as a reference
@@ -223,6 +314,10 @@ def create_price_chart(token_symbol: str):
         'Price': prices
     })
     
+    return create_chart_from_df(df, token_symbol, current_price, source)
+
+# Helper function to create chart from dataframe
+def create_chart_from_df(df, token_symbol, current_price, source):
     fig = px.line(
         df, 
         x='Date', 
@@ -366,20 +461,31 @@ else:
                     if not pool_df.empty:
                         st.subheader("Liquidity Pools")
                         
-                        # Display pool data
-                        display_pools = pool_df[['dex', 'token1_symbol', 'token2_symbol', 'liquidity', 'volume_24h']].copy()
-                        display_pools = display_pools.rename(columns={
+                        # Display pool data with APR information
+                        if 'apr' in pool_df.columns:
+                            display_pools = pool_df[['dex', 'token1_symbol', 'token2_symbol', 'liquidity', 'volume_24h', 'apr']].copy()
+                        else:
+                            display_pools = pool_df[['dex', 'token1_symbol', 'token2_symbol', 'liquidity', 'volume_24h']].copy()
+                            
+                        # Rename columns for display
+                        column_map = {
                             'dex': 'DEX',
                             'token1_symbol': 'Token 1',
                             'token2_symbol': 'Token 2',
                             'liquidity': 'Liquidity (USD)',
-                            'volume_24h': '24h Volume (USD)'
-                        })
+                            'volume_24h': '24h Volume (USD)',
+                            'apr': 'APR (%)'
+                        }
+                        display_pools = display_pools.rename(columns=column_map)
                         
                         # Format numeric columns
                         for col in ['Liquidity (USD)', '24h Volume (USD)']:
                             if col in display_pools.columns:
                                 display_pools[col] = display_pools[col].apply(lambda x: f"${x:,.2f}" if pd.notnull(x) and x > 0 else "-")
+                                
+                        # Format APR column if it exists
+                        if 'APR (%)' in display_pools.columns:
+                            display_pools['APR (%)'] = display_pools['APR (%)'].apply(lambda x: f"{x:.2f}%" if pd.notnull(x) and x > 0 else "-")
                                 
                         st.dataframe(display_pools, use_container_width=True)
                         
@@ -400,14 +506,50 @@ else:
     with tab2:
         st.subheader("Tokens by DEX")
         
-        # Group tokens by DEX
-        dex_tokens = {}
-        for _, token_data in token_df.iterrows():
-            dexes = token_data.get('dexes', [])
-            for dex in dexes:
-                if dex not in dex_tokens:
-                    dex_tokens[dex] = []
-                dex_tokens[dex].append(token_data['symbol'])
+        # Get all pools to build DEX categorization
+        with st.spinner("Loading DEX data..."):
+            try:
+                all_pools = data_service.get_all_pools()
+                
+                # Group tokens by DEX
+                dex_tokens = {}
+                for pool in all_pools:
+                    dex = pool.get('dex', 'Unknown')
+                    
+                    # Extract token symbols
+                    token1 = pool.get('token1', {})
+                    token2 = pool.get('token2', {})
+                    
+                    token1_symbol = token1.get('symbol', '') if isinstance(token1, dict) else str(token1)
+                    token2_symbol = token2.get('symbol', '') if isinstance(token2, dict) else str(token2)
+                    
+                    # Add to dex tokens mapping
+                    if token1_symbol and len(token1_symbol) > 0:
+                        if dex not in dex_tokens:
+                            dex_tokens[dex] = set()
+                        dex_tokens[dex].add(token1_symbol)
+                        
+                    if token2_symbol and len(token2_symbol) > 0:
+                        if dex not in dex_tokens:
+                            dex_tokens[dex] = set()
+                        dex_tokens[dex].add(token2_symbol)
+                
+                # Convert sets to lists
+                dex_tokens = {dex: list(tokens) for dex, tokens in dex_tokens.items()}
+                
+                logger.info(f"Loaded token categorization for {len(dex_tokens)} DEXes")
+            except Exception as e:
+                logger.error(f"Error loading DEX data: {e}")
+                dex_tokens = {}
+                
+                # Fall back to token service data
+                for _, token_data in token_df.iterrows():
+                    dexes = token_data.get('dexes', [])
+                    if isinstance(dexes, list) and dexes:
+                        for dex in dexes:
+                            if dex not in dex_tokens:
+                                dex_tokens[dex] = []
+                            dex_tokens[dex].append(token_data['symbol'])
         
         # Display tokens by DEX
         if dex_tokens:

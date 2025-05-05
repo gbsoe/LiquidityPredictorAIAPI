@@ -17,7 +17,7 @@
     "JUPY": 0,
     "RAY": 2.65,
     "USDT": 1.0,
-    "POLI": 0,
+    "POLI": 0.00022913,
     "ATLA": 0,
     "7I5K": 0,
     "ORCA": 2.81,
@@ -32,7 +32,7 @@
     "USDH": 1.0,
     "MPLU": 0,
     "7KBN": 0,
-    "JSOL": 0,
+    "JSOL": 185.37,
     "SPEC": 2.22,
     "FARTCOIN": 1.091,
     "LAYER": 3.28,
@@ -64,7 +64,7 @@
     "HPSQ": "defi_api",
     "JUPY": "defi_api",
     "MSOL": "coingecko",
-    "POLI": "defi_api",
+    "POLI": "coingecko",
     "ATLA": "defi_api",
     "7I5K": "defi_api",
     "MANG": "defi_api",
@@ -74,7 +74,7 @@
     "MPLU": "defi_api",
     "7KBN": "defi_api",
     "6DAZ": "defi_api",
-    "JSOL": "defi_api",
+    "JSOL": "coingecko",
     "FWZ2": "defi_api",
     "ATLAS": "coingecko",
     "SPEC": "coingecko",
@@ -94,5 +94,5 @@
     "GENE": "coingecko",
     "WIF": "coingecko"
   },
-  "last_update": "2025-05-05T05:19:39.362323"
+  "last_update": "2025-05-05T05:44:16.055342"
 }
