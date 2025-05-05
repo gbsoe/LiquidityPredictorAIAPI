@@ -1,19 +1,11 @@
 import logging
 import os
+# Always import pandas first to ensure it's globally available
 import pandas as pd
 import psycopg2
 import json
 from datetime import datetime
 from database.mock_db import MockDBManager
-
-# Ensure pandas is available
-try:
-    import pandas as pd
-except ImportError:
-    # If pandas is not installed, install it
-    import subprocess
-    subprocess.check_call(["pip", "install", "pandas"])
-    import pandas as pd
 
 class DBManager:
     """
