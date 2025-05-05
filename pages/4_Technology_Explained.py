@@ -7,6 +7,8 @@ from plotly.subplots import make_subplots
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import math
+import os
+from PIL import Image
 
 # Custom styling
 st.set_page_config(
@@ -79,6 +81,35 @@ This page provides a detailed technical explanation of SolPool Insight's archite
 methodology, prediction models, and analytical calculations. Our goal is complete transparency in how 
 we generate our insights and predictions.
 """)
+
+# LA! Token Branding Banner
+st.markdown("""
+<div style="background-color: #F6F6F6; padding: 10px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #FFD700;">
+    <div style="display: flex; align-items: center;">
+""", unsafe_allow_html=True)
+
+# Load LA! Token logo
+la_token_logo_path = "attached_assets/IMG-20240624-WA0020-removebg-preview.png"
+
+if os.path.exists(la_token_logo_path):
+    la_token_logo = Image.open(la_token_logo_path)
+    la_token_col1, la_token_col2 = st.columns([1, 5])
+    
+    with la_token_col1:
+        st.image(la_token_logo, width=80)
+    
+    with la_token_col2:
+        st.markdown(
+            "<div style='margin-left: 20px;'>"
+            "<h3 style='margin: 0; padding: 0;'>FiLot is part of the "
+            "<a href='https://crazyrichla.replit.app/' target='_blank' style='text-decoration:none;'>"
+            "<span style='color:#FFD700;font-weight:bold;'>LA! Token</span></a> Ecosystem</h3>"
+            "<p style='margin-top: 5px;'>Providing advanced liquidity pool analytics for the LA! Token community</p>"
+            "</div>",
+            unsafe_allow_html=True
+        )
+
+st.markdown("""</div></div>""", unsafe_allow_html=True)
 
 # Create tabs for different sections
 data_tab, prediction_tab, risk_tab, architecture_tab = st.tabs([
@@ -1201,9 +1232,8 @@ with col2:
 with col3:
     st.markdown("""
     <div class="tech-card">
-        <h4>Community & Support</h4>
+        <h4>Support</h4>
         <ul>
-            <li>Discord Community</li>
             <li>GitHub Repository</li>
             <li>Technical Support</li>
         </ul>
