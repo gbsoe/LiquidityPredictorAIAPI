@@ -272,7 +272,7 @@ class TokenPriceService:
                 # Use our CoinGeckoAPI client
                 from coingecko_api import CoinGeckoAPI
                 coingecko_client = CoinGeckoAPI()
-                price = coingecko_client.get_token_price_by_symbol(symbol)
+                price = coingecko_client.get_price_by_symbol(symbol)
                 if price is not None and price > 0:
                     logger.info(f"Retrieved {symbol} price from CoinGecko by symbol: ${price}")
             except Exception as e:
@@ -701,7 +701,7 @@ class TokenPriceService:
                 # Try individual lookup for symbol
                 from coingecko_api import CoinGeckoAPI
                 coingecko_client = CoinGeckoAPI()
-                price = coingecko_client.get_token_price_by_symbol(symbol)
+                price = coingecko_client.get_price_by_symbol(symbol)
                 if price is not None and price > 0:
                     logger.info(f"Retrieved {symbol} price from CoinGecko by symbol lookup: ${price}")
                     result[symbol] = price
