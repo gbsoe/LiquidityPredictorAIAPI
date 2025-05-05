@@ -231,8 +231,10 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
             if pools and len(pools) > 0:
                 logger.info(f"Using {len(pools)} real Solana pools for predictions")
                 
-                # Use real pool data to generate predictions
+                # Import our standard pool display helpers for consistency
+                from utils.pool_display_helpers import format_tvl, derive_pool_category
                 import random
+                
                 predictions = []
                 
                 for pool in pools:
@@ -247,30 +249,31 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                         token1 = pool.get('token1_symbol', '')
                         token2 = pool.get('token2_symbol', '')
                         if token1 and token2:
-                            pool_name = f"{token1}-{token2}"
+                            pool_name = f"{token1}/{token2}"
                         else:
-                            # Use ID as last resort
+                            # Use ID as last resort - but truncate for display
                             pool_id = pool.get('id', '')
                             if pool_id:
                                 pool_name = f"Pool {pool_id[:8]}..."
                             else:
-                                pool_name = "Unknown Pool"
+                                continue  # Skip pools with no way to identify them
                     
                     # Use actual metrics from API where possible
                     apr = pool.get('apr', 0)
                     if apr is None or apr == 0:
-                        apr = pool.get('apr_24h', 0) or pool.get('apy', 0) or random.uniform(5, 50)
+                        apr = pool.get('apr_24h', 0) or pool.get('apy', 0) or 0
+                        if apr == 0:
+                            continue  # Skip pools with no APR data
                     
-                    # For display in the UI
-                    predicted_apr = apr * (1 + random.uniform(-0.1, 0.2))
+                    # For APR prediction, use actual APR with small variation
+                    predicted_apr = apr * (1 + random.uniform(-0.05, 0.1))
                     
                     # Risk score (lower is better, 0-1 range)
-                    # Base on volatility or APR changes if available
                     risk_factors = []
                     
                     # Higher volume/TVL ratio means higher risk (liquidity can drain faster)
                     volume = pool.get('volume_24h', 0) or 0
-                    liquidity = pool.get('liquidity', 0) or pool.get('tvl', 0) or 1  # Avoid division by zero
+                    liquidity = pool.get('liquidity', 0) or pool.get('tvl', 0) or 0
                     
                     if volume > 0 and liquidity > 0:
                         vol_liq_ratio = min(1.0, volume / (liquidity * 10))  # Cap at 1.0
@@ -282,7 +285,7 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                         risk_factors.append(min(1.0, apr_change / 100))
                     
                     # Average risk factors, default to mid-range if none
-                    risk_score = sum(risk_factors) / len(risk_factors) if risk_factors else random.uniform(0.3, 0.7)
+                    risk_score = sum(risk_factors) / len(risk_factors) if risk_factors else 0.5
                     
                     # Performance class (high, medium, low)
                     # Based on APR and risk score
@@ -293,43 +296,13 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                     else:
                         performance_class = 'low'
                     
-                    # Determine pool category/type if not specified
-                    pool_category = pool.get('category', '')
-                    if not pool_category:
-                        # Derive category based on tokens
-                        token1 = pool.get('token1_symbol', '').upper()
-                        token2 = pool.get('token2_symbol', '').upper()
-                        
-                        # Assign categories based on token combinations
-                        if 'USDC' in [token1, token2] or 'USDT' in [token1, token2] or 'DAI' in [token1, token2]:
-                            if 'SOL' in [token1, token2]:
-                                pool_category = 'Major Pair'
-                            else:
-                                pool_category = 'Stablecoin Pair'
-                        elif 'SOL' in [token1, token2]:
-                            pool_category = 'SOL Pair'
-                        elif 'BTC' in [token1, token2] or 'ETH' in [token1, token2]:
-                            pool_category = 'Major Crypto'
-                        elif 'BONK' in [token1, token2] or 'SAMO' in [token1, token2]:
-                            pool_category = 'Meme Coin'
-                        else:
-                            pool_category = 'DeFi Token'
+                    # Use the standard helper function for pool category - same as main page
+                    pool_category = derive_pool_category(pool)
                     
-                    # Ensure TVL is non-zero for display
+                    # Get TVL - ensure it's a real value
                     tvl = pool.get('liquidity', 0) or pool.get('tvl', 0)
-                    if tvl <= 0.001:  # If near zero or zero, assign realistic TVL based on other factors
-                        # More popular tokens tend to have higher TVL
-                        token1 = pool.get('token1_symbol', '').upper()
-                        token2 = pool.get('token2_symbol', '').upper()
-                        popular_tokens = ['SOL', 'USDC', 'USDT', 'ETH', 'BTC']
-                        
-                        # Higher APR often correlates with lower TVL
-                        # Use an inverse relationship with some randomization
-                        base_tvl = max(5000, 1000000 / (apr + 10)) * random.uniform(0.7, 1.3)
-                        
-                        # Popular tokens get a TVL boost
-                        popularity_factor = sum([2 if t in popular_tokens else 0.5 for t in [token1, token2]])
-                        tvl = base_tvl * popularity_factor
+                    if tvl <= 0:
+                        continue  # Skip pools with no TVL data
                     
                     predictions.append({
                         'pool_id': pool.get('id', ''),  # Use real Solana pool ID
@@ -342,7 +315,7 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                         'predicted_apr': predicted_apr,
                         'risk_score': risk_score,
                         'performance_class': performance_class,
-                        'category': pool_category,  # Add category/type field
+                        'category': pool_category,  # Add category/type field using consistent helper
                         'prediction_timestamp': pd.Timestamp.now()
                     })
                 
@@ -403,6 +376,9 @@ def get_pool_predictions(db, pool_id, days=30):
             logger.error(f"Invalid Solana pool ID format: {pool_id}")
             return pd.DataFrame()
         
+        # Import the pool display helpers for consistency
+        from utils.pool_display_helpers import format_tvl, derive_pool_category
+        
         # Try to get data directly from the data service first
         data_service = get_data_service()
         if data_service:
@@ -419,7 +395,20 @@ def get_pool_predictions(db, pool_id, days=30):
                 # Get pool metrics to use for prediction generation
                 apr = pool.get('apr', 0)
                 if apr is None or apr == 0:
-                    apr = pool.get('apr_24h', 0) or pool.get('apy', 0) or random.uniform(5, 50)
+                    apr = pool.get('apr_24h', 0) or pool.get('apy', 0) or 0
+                    if apr == 0:
+                        # Try to get metrics from historical data
+                        from historical_data_service import get_historical_service
+                        historical_service = get_historical_service()
+                        if historical_service:
+                            metrics = historical_service.get_pool_metrics(pool_id, 1)
+                            if not metrics.empty and 'apr' in metrics.columns:
+                                apr = metrics['apr'].mean()
+                    
+                    # If still no APR, we can't make predictions
+                    if apr == 0:
+                        logger.warning(f"No APR data available for pool {pool_id}, cannot generate predictions")
+                        return pd.DataFrame()
                 
                 # Generate prediction history
                 end_date = datetime.now()
@@ -463,17 +452,17 @@ def get_pool_predictions(db, pool_id, days=30):
                     else:
                         perf_class_series.append('low')
                 
-                # Get pool name
+                # Get pool name - using the same format as the main page
                 pool_name = pool.get('name', '')
                 if not pool_name:
                     token1 = pool.get('token1_symbol', '')
                     token2 = pool.get('token2_symbol', '')
                     if token1 and token2:
-                        pool_name = f"{token1}-{token2}"
+                        pool_name = f"{token1}/{token2}"
                     else:
                         pool_name = f"Pool {pool_id[:8]}..."
                 
-                # Create DataFrame
+                # Create DataFrame with the real pool ID and consistent naming
                 predictions_df = pd.DataFrame({
                     'prediction_timestamp': dates,
                     'predicted_apr': predicted_apr_series,
