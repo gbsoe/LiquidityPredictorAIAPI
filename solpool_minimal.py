@@ -294,12 +294,25 @@ def main():
         # Load data
         with st.spinner("Loading pool data..."):
             pools = load_pools_from_database()
+            
+            # Debug information about pools
+            st.write("Retrieved pool data:")
+            st.json(pools[0] if pools else {"message": "No pools found"})
+            
+            # Create DataFrame
             df = pd.DataFrame(pools)
         
         # Check if data was loaded
         if df.empty:
             st.warning("No pool data available. Please check the database connection.")
             return
+        
+        # Debug information
+        st.write("DataFrame columns:", list(df.columns))
+        st.write("DataFrame types:", df.dtypes.to_dict())
+        
+        # Basic data check
+        st.write("Sample row:", df.iloc[0].to_dict() if len(df) > 0 else "No data")
         
         st.success(f"Loaded {len(df)} pools from database.")
         
@@ -439,11 +452,34 @@ def main():
             # Simple analytics
             st.subheader("Pool Statistics")
             
-            # Calculate some stats
-            total_liquidity = df["liquidity"].sum()
-            avg_apr = df["apr"].mean()
-            total_volume = df["volume_24h"].sum()
-            pool_count = len(df)
+            # Calculate some stats safely
+            try:
+                # Convert data types to numeric for calculations
+                if "liquidity" in df.columns:
+                    df["liquidity"] = pd.to_numeric(df["liquidity"], errors="coerce")
+                    total_liquidity = df["liquidity"].sum()
+                else:
+                    total_liquidity = 0
+                    
+                if "apr" in df.columns:
+                    df["apr"] = pd.to_numeric(df["apr"], errors="coerce")
+                    avg_apr = df["apr"].mean()
+                else:
+                    avg_apr = 0
+                    
+                if "volume_24h" in df.columns:
+                    df["volume_24h"] = pd.to_numeric(df["volume_24h"], errors="coerce")
+                    total_volume = df["volume_24h"].sum()
+                else:
+                    total_volume = 0
+                    
+                pool_count = len(df)
+            except Exception as e:
+                st.error(f"Error calculating stats: {e}")
+                total_liquidity = 0
+                avg_apr = 0
+                total_volume = 0
+                pool_count = len(df)
             
             # Display metrics
             col1, col2, col3, col4 = st.columns(4)
@@ -462,41 +498,89 @@ def main():
             
             # DEX breakdown
             st.subheader("DEX Distribution")
-            dex_counts = df["dex"].value_counts().reset_index()
-            dex_counts.columns = ["DEX", "Count"]
-            st.bar_chart(dex_counts.set_index("DEX"))
+            try:
+                if "dex" in df.columns and not df.empty:
+                    # Get value counts
+                    dex_counts = df["dex"].value_counts().reset_index()
+                    dex_counts.columns = ["DEX", "Count"]
+                    
+                    # Display chart
+                    st.bar_chart(dex_counts.set_index("DEX"))
+                else:
+                    st.info("No DEX data available for distribution chart.")
+            except Exception as e:
+                st.error(f"Error creating DEX distribution: {e}")
+                st.info("DEX distribution could not be calculated.")
+                
+                # Display a simple message instead
+                st.write("DEX Distribution not available due to data format issues.")
             
             # APR distribution
             st.subheader("APR Distribution")
-            apr_ranges = [
-                "0-5%", "5-10%", "10-15%", "15-20%", "20-30%", "30%+"
-            ]
+            try:
+                if "apr" in df.columns and not df.empty:
+                    # Make sure APR is numeric
+                    df["apr"] = pd.to_numeric(df["apr"], errors="coerce")
+                    
+                    # Define APR range bins
+                    apr_ranges = [
+                        "0-5%", "5-10%", "10-15%", "15-20%", "20-30%", "30%+"
+                    ]
+                    
+                    # Calculate counts with safety checks
+                    apr_counts = [
+                        len(df[df["apr"] < 5]),
+                        len(df[(df["apr"] >= 5) & (df["apr"] < 10)]),
+                        len(df[(df["apr"] >= 10) & (df["apr"] < 15)]),
+                        len(df[(df["apr"] >= 15) & (df["apr"] < 20)]),
+                        len(df[(df["apr"] >= 20) & (df["apr"] < 30)]),
+                        len(df[df["apr"] >= 30])
+                    ]
+                    
+                    # Create a DataFrame for the chart
+                    apr_df = pd.DataFrame({
+                        "APR Range": apr_ranges,
+                        "Count": apr_counts
+                    })
+                    
+                    # Display chart
+                    st.bar_chart(apr_df.set_index("APR Range"))
+                else:
+                    st.info("No APR data available for distribution chart.")
+            except Exception as e:
+                st.error(f"Error creating APR distribution: {e}")
+                st.info("APR distribution could not be calculated.")
+                
+                # Display a simple message instead
+                st.write("APR Distribution not available due to data format issues.")
             
-            apr_counts = [
-                len(df[df["apr"] < 5]),
-                len(df[(df["apr"] >= 5) & (df["apr"] < 10)]),
-                len(df[(df["apr"] >= 10) & (df["apr"] < 15)]),
-                len(df[(df["apr"] >= 15) & (df["apr"] < 20)]),
-                len(df[(df["apr"] >= 20) & (df["apr"] < 30)]),
-                len(df[df["apr"] >= 30])
-            ]
-            
-            apr_df = pd.DataFrame({
-                "APR Range": apr_ranges,
-                "Count": apr_counts
-            })
-            
-            st.bar_chart(apr_df.set_index("APR Range"))
         
         # Tokens tab
         with tab3:
             st.header("Token Explorer")
             
-            # Extract unique tokens
-            all_tokens = sorted(list(set(
-                list(df["token1_symbol"].unique()) + 
-                list(df["token2_symbol"].unique())
-            )))
+            # Extract unique tokens safely
+            try:
+                all_tokens = []
+                
+                if "token1_symbol" in df.columns:
+                    all_tokens.extend(list(df["token1_symbol"].unique()))
+                    
+                if "token2_symbol" in df.columns:
+                    all_tokens.extend(list(df["token2_symbol"].unique()))
+                    
+                # Remove duplicates, None values, and sort
+                all_tokens = sorted([t for t in set(all_tokens) if t])
+                
+                if not all_tokens:
+                    # Provide a fallback if no tokens found
+                    all_tokens = ["SOL", "BTC", "ETH", "USDC", "USDT"]
+                    st.info("Using sample tokens as no token data was found.")
+            except Exception as e:
+                st.error(f"Error extracting tokens: {e}")
+                # Fallback to sample tokens
+                all_tokens = ["SOL", "BTC", "ETH", "USDC", "USDT"]
+                st.info("Using sample tokens due to data format issues.")
             
             # Token selection
             selected_token = st.selectbox(
