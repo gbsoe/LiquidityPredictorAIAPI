@@ -39,22 +39,23 @@ set_api_key(api_key)
 # Import db_handler and initialize data services before starting
 try:
     print("Initializing data services...")
-    # Import db_handler
-    from db_handler import get_db_handler
-    db_handler = get_db_handler()
-    DB_CONNECTED = True
+    # Import our improved database handler manager
+    from db_handler_manager import get_db_handler, is_db_connected, safe_db_call
+    # Initialize the database handler through the manager
+    db_handler_instance = get_db_handler()
+    DB_CONNECTED = is_db_connected()
     
     # Initialize other services
     from data_services.initialize import init_services
     init_services()
-    print("Data services initialized successfully")
+    print(f"Data services initialized successfully. Database connected: {DB_CONNECTED}")
 except Exception as e:
     print(f"Error initializing data services: {str(e)}")
     import traceback
     print(traceback.format_exc())
-    # Create a fallback db_handler in case the import fails
-    db_handler = None
+    # We'll get the db_handler through the manager as needed
     DB_CONNECTED = False
+    print("Failed to initialize database connection")
 
 # Import the historical data service
 from historical_data_service import get_historical_service, start_historical_collection
@@ -74,13 +75,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger('solpool_insight')
 
-# Import our database handler
+# Database handling is now managed through db_handler_manager
 try:
-    print("Attempting to import db_handler...")
-    import db_handler
-    print("Successfully imported db_handler")
+    # Perform a basic test of database connectivity
+    from db_handler_manager import is_db_connected
+    db_status = is_db_connected()
+    print(f"Database connection status: {db_status}")
 except Exception as e:
-    print(f"Error importing db_handler: {str(e)}")
+    print(f"Error checking database connection: {str(e)}")
     import traceback
     print(traceback.format_exc())
 
@@ -1377,15 +1379,17 @@ def main():
             """)
         
         # Database status with enhanced error handling
-        if db_handler is not None and hasattr(db_handler, 'engine') and db_handler.engine is not None:
+        from db_handler_manager import is_db_connected
+        db_connected = is_db_connected()
+        
+        if db_connected:
             st.success("✓ Connected to PostgreSQL database")
         else:
             st.warning("⚠ Database connection not available - using file-based storage")
             # Try to reconnect
             try:
-                from db_handler import get_db_handler
-                db_handler = get_db_handler()
-                if db_handler and hasattr(db_handler, 'engine') and db_handler.engine is not None:
+                # The manager will try to reconnect if needed
+                if is_db_connected():
                     st.success("✓ Reconnected to PostgreSQL database")
             except Exception as e:
                 st.error(f"Database connection error: {e}")
@@ -1593,38 +1597,35 @@ def main():
             
             # Get watchlists for filtering with enhanced error handling
             try:
-                if db_handler is not None and hasattr(db_handler, 'get_watchlists'):
-                    watchlists = db_handler.get_watchlists()
-                    if watchlists:
-                        # Allow filtering by watchlist
-                        watchlist_options = ["All Pools"] + [w["name"] for w in watchlists]
-                        selected_watchlist = st.selectbox(
-                            "Filter by Watchlist",
-                            options=watchlist_options,
-                            index=0
-                        )
+                # Use our safe database call function from the manager
+                from db_handler_manager import safe_db_call
+                
+                watchlists = safe_db_call('get_watchlists')
+                if watchlists:
+                    # Allow filtering by watchlist
+                    watchlist_options = ["All Pools"] + [w["name"] for w in watchlists]
+                    selected_watchlist = st.selectbox(
+                        "Filter by Watchlist",
+                        options=watchlist_options,
+                        index=0
+                    )
+                    
+                    # Apply watchlist filter if selected
+                    if selected_watchlist != "All Pools":
+                        # Find the watchlist ID
+                        watchlist_id = next((w["id"] for w in watchlists if w["name"] == selected_watchlist), None)
                         
-                        # Apply watchlist filter if selected
-                        if selected_watchlist != "All Pools":
-                            # Find the watchlist ID
-                            watchlist_id = next((w["id"] for w in watchlists if w["name"] == selected_watchlist), None)
+                        if watchlist_id:
+                            # Get the pool IDs in this watchlist using safe call
+                            watchlist_pool_ids = safe_db_call('get_pools_in_watchlist', watchlist_id)
                             
-                            if watchlist_id and hasattr(db_handler, 'get_pools_in_watchlist'):
-                                # Get the pool IDs in this watchlist
-                                watchlist_pool_ids = db_handler.get_pools_in_watchlist(watchlist_id)
-                                
-                                if watchlist_pool_ids:
-                                    # Filter the dataframe
-                                    filtered_df = filtered_df[filtered_df["id"].isin(watchlist_pool_ids)]
-                                    st.success(f"Showing {len(filtered_df)} pools from watchlist: {selected_watchlist}")
-                else:
-                    # Show watchlist feature is not available, but only in the expanded section
-                    with st.expander("Watchlist Features", expanded=False):
-                        st.info("Watchlist features are not available - database connection required.")
-                        
+                            if watchlist_pool_ids:
+                                # Filter the dataframe
+                                filtered_df = filtered_df[filtered_df["id"].isin(watchlist_pool_ids)]
+                                st.success(f"Showing {len(filtered_df)} pools from watchlist: {selected_watchlist}")
             except Exception as e:
-                logger.warning(f"Error loading watchlists: {e}")
-                # Show watchlist feature is not available, but only in the expanded section
+                logger.error(f"Error loading watchlists: {str(e)}")
+                # Continue without watchlist filtering
                 with st.expander("Watchlist Features", expanded=False):
                     st.info("Watchlist features are not available - database connection required.")
             
