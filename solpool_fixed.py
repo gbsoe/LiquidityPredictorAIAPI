@@ -41,12 +41,16 @@ api_key = os.getenv("DEFI_API_KEY") or "9feae0d0af47e4948e061f2d7820461e374e040c
 print(f"Using API key: {api_key[:8]}...")  
 set_api_key(api_key)  
 
-# CRITICAL FIX - Proper db_handler initialization
+# CRITICAL FIX - Proper database initialization with robust error handling
 try:
-    import db_handler
-    from db_handler import get_db_handler
+    import db_handler_manager
+    from db_handler_manager import get_db_handler, is_db_connected
     db_handler_instance = get_db_handler()
-    DB_CONNECTED = True
+    DB_CONNECTED = is_db_connected()
+    if DB_CONNECTED:
+        logger.info("Database connection established successfully")
+    else:
+        logger.warning("Database connection check failed - using fallback mechanisms")
 except Exception as e:
     logger.error(f"Error importing db_handler: {str(e)}")
     DB_CONNECTED = False

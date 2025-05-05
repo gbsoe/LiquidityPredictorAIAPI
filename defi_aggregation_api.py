@@ -1126,8 +1126,8 @@ class DefiAggregationAPI:
             True if successful, False otherwise
         """
         try:
-            # Import here to avoid circular imports
-            import db_handler
+            # Import db_handler_manager instead of direct db_handler import
+            from db_handler_manager import safe_db_call, store_pools
             
             # Get the current timestamp
             timestamp = datetime.now().isoformat()
@@ -1159,18 +1159,44 @@ class DefiAggregationAPI:
                 
                 historical_records.append(historical_record)
             
-            # Store the records in the database table for historical data
-            # This requires a db_handler function for storing historical data
+            # Store the records using the robust db_handler_manager which handles errors
             try:
                 # First store the pool data itself
-                db_handler.store_pools(pools)
+                store_pools(pools)
                 
-                # Then try to store historical records if the function exists
-                if hasattr(db_handler, 'store_historical_pool_data'):
-                    db_handler.store_historical_pool_data(historical_records)
+                # Then try to store historical records using safe_db_call that handles errors
+                result = safe_db_call('store_historical_pool_data', historical_records)
+                if result is not None:
                     logger.info(f"Stored {len(historical_records)} historical pool records")
                 else:
-                    logger.warning("store_historical_pool_data function not available in db_handler")
+                    logger.warning("Failed to store historical pool data - using fallback mechanism")
+                    
+                    # Try using the historical_data_service as an alternative
+                    try:
+                        from historical_data_service import get_historical_service
+                        historical_service = get_historical_service()
+                        for rec in historical_records:
+                            metrics = {
+                                'liquidity': rec['liquidity'],
+                                'volume': rec['volume_24h'],
+                                'apr': rec.get('apr_24h', 0),
+                                'price_ratio': rec['price_ratio']
+                            }
+                            # Use historical service properly
+                            if historical_service:
+                                historical_service.save_pool_metrics(rec['pool_id'], metrics)
+                        logger.info(f"Stored historical data using fallback service")
+                    except Exception as hist_err:
+                        logger.error(f"Historical data fallback also failed: {hist_err}")
+                        # Create an emergency backup file with the data
+                        emergency_file = f"data/emergency_historical_{int(time.time())}.json"
+                        try:
+                            with open(emergency_file, 'w') as f:
+                                json.dump(historical_records, f)
+                            logger.info(f"Created emergency backup at {emergency_file}")
+                        except:
+                            logger.error("Could not create emergency backup file")
+                    
                     
                 return True
                 
