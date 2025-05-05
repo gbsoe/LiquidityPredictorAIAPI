@@ -483,6 +483,16 @@ def get_token_data_service() -> TokenDataService:
     return _instance
 
 
+def get_token_service() -> TokenDataService:
+    """
+    Alias for get_token_data_service for backward compatibility
+    
+    Returns:
+        Token data service instance
+    """
+    return get_token_data_service()
+
+
 if __name__ == "__main__":
     # Example usage
     service = get_token_data_service()
