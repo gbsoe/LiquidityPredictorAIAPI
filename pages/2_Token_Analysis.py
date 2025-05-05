@@ -46,8 +46,13 @@ def load_token_data():
         # Get all available tokens
         tokens = token_service.get_all_tokens()
         
-        # Convert to DataFrame for easier filtering and display
-        token_df = pd.DataFrame(tokens.values())
+        # Check if tokens is a list or dictionary and convert accordingly
+        if isinstance(tokens, dict):
+            # It's a dictionary, use the values
+            token_df = pd.DataFrame(tokens.values())
+        else:
+            # It's already a list
+            token_df = pd.DataFrame(tokens)
         
         # Add price data
         token_symbols = token_df['symbol'].tolist()
@@ -183,7 +188,14 @@ def create_price_chart(token_symbol: str):
     dates = pd.date_range(start=datetime.now() - pd.Timedelta(days=30), end=datetime.now(), freq='D')
     
     # Get current price as a reference
-    current_price, source = get_token_price(token_symbol, return_source=True)
+    price_result = get_token_price(token_symbol, return_source=True)
+    
+    # Handle different return types
+    if isinstance(price_result, tuple):
+        current_price, source = price_result
+    else:
+        current_price = price_result
+        source = "Unknown"
     
     # If we have a price, create a reasonable price history
     if current_price and current_price > 0:
@@ -299,7 +311,14 @@ else:
                 token_data = token_service.get_token_data(selected_token)
                 if token_data:
                     # Get price with source
-                    price, price_source = get_token_price(selected_token, return_source=True)
+                    price_result = get_token_price(selected_token, return_source=True)
+                    
+                    # Handle different return types
+                    if isinstance(price_result, tuple):
+                        price, price_source = price_result
+                    else:
+                        price = price_result
+                        price_source = "Unknown"
                     
                     st.subheader(f"{token_data.get('name', selected_token)} ({selected_token})")
                     
