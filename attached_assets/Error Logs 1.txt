@@ -1,0 +1,29 @@
+05-05 15:39:56
+INFO:token_data_service:Added FARTCOIN to CoinGecko mappings with ID: fartcoin
+05-05 15:39:56
+ERROR:historical_data_service:Error getting metrics for pool x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH: Invalid comparison between dtype=datetime64[ns, UTC] and datetime
+05-05 15:39:56
+ERROR:historical_data_service:Error getting metrics for pool x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH: Invalid comparison between dtype=datetime64[ns, UTC] and datetime
+05-05 15:39:56
+INFO:data_services.data_service:Retrieved pool x4ND6LEXnrj3ufeCTY8RSuo3qbktirsz4tqPus5SjrH from cache
+05-05 15:40:22
+2025-05-05 08:40:22.462 Uncaught app execution
+05-05 15:40:22
+Traceback (most recent call last):
+05-05 15:40:22
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 121, in exec_func_with_error_handling
+05-05 15:40:22
+result = func()
+05-05 15:40:22
+^^^^^^
+05-05 15:40:22
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 640, in code_to_exec
+
+05-05 15:40:22
+exec(code, module.__dict__)
+05-05 15:40:22
+File "/home/runner/workspace/app.py", line 17, in
+05-05 15:40:22
+from utils.data_processor import get_top_pools, get_blockchain_stats, get_prediction_metrics
+05-05 15:40:22
+ImportError: cannot import name 'get_top_pools' from 'utils.data_processor' (/home/runner/workspace/utils/data_processor.py)
