@@ -30,6 +30,15 @@ from performance_monitor import get_performance_monitor
 perf_monitor = get_performance_monitor()
 perf_monitor.start_tracking("app_initialization")
 
+# Initialize API key with default value to avoid welcome screen
+from api_auth_helper import set_api_key
+api_key = os.getenv("DEFI_API_KEY") or "9feae0d0af47e4948e061f2d7820461e374e040c21cf65c087166d7ed18f5ed6"
+set_api_key(api_key)
+
+# Initialize data services before starting
+from data_services.initialize import init_services
+init_services()
+
 # Import the historical data service
 from historical_data_service import get_historical_service, start_historical_collection
 start_time = time.time()
