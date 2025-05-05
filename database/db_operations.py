@@ -889,3 +889,28 @@ class DBManager:
             if self.use_mock:
                 return self.mock_db.get_pool_predictions(pool_id)
             return pd.DataFrame()
+
+# Global DB Manager instance
+_db_manager = None
+
+def get_db_manager():
+    """
+    Get or create the global DB manager instance
+    """
+    global _db_manager
+    if _db_manager is None:
+        _db_manager = DBManager()
+    return _db_manager
+
+def store_pool_snapshot(pool_data):
+    """
+    Global function to store a pool snapshot in the database
+    
+    Args:
+        pool_data: Dictionary containing pool data
+        
+    Returns:
+        bool: True if successful
+    """
+    db = get_db_manager()
+    return db.store_pool_snapshot(pool_data)

@@ -1,121 +1,141 @@
-"""
-Simple API test that makes a single call and prints results
-"""
+# Simple API Test Script
+# This script tests the basic functionality of the SolPool Insight API
 
-from defi_aggregation_api import DefiAggregationAPI
-import time
+import requests
 import json
-from collections import Counter
+import logging
+from datetime import datetime
 
-def run_simple_test():
-    """Make a single API call and print detailed results"""
-    print("Simple DeFi API Test - Single Call")
-    print("=" * 50)
-    
-    # Init API
-    api = DefiAggregationAPI()
-    print(f"Using API base URL: {api.base_url}")
-    
-    # Single API call
-    start = time.time()
-    pools = api._make_request("pools", params={"limit": 20, "offset": 0})
-    duration = time.time() - start
-    
-    if not pools or not isinstance(pools, list):
-        print(f"Error: Invalid response: {pools}")
-        return
-    
-    # Basic stats
-    pool_count = len(pools)
-    
-    print(f"\nReceived {pool_count} pools in {duration:.2f} seconds")
-    print(f"Average time per pool: {duration/pool_count:.2f} seconds")
-    
-    # Analyze token distribution
-    token_pairs = []
-    dexes = []
-    
-    print("\nPool Details:")
-    print("-" * 50)
-    
-    for i, pool in enumerate(pools[:5], 1):  # Print details for first 5 pools
-        pool_id = pool.get('poolId', 'Unknown')
-        name = pool.get('name', 'Unknown')
-        dex = pool.get('source', 'Unknown')
-        
-        print(f"\n{i}. {name}")
-        print(f"   DEX: {dex}")
-        print(f"   ID: {pool_id}")
-        
-        # Track DEX
-        if dex != "Unknown":
-            dexes.append(dex)
-        
-        # Extract metrics
-        metrics = pool.get('metrics', {})
-        if metrics:
-            tvl = metrics.get('tvl', 0)
-            apy = metrics.get('apy', 0)
-            volume_24h = metrics.get('volume24h', 0)
-            
-            print(f"   TVL: ${tvl:,.2f}")
-            print(f"   APY: {apy:.2f}%")
-            print(f"   24h Volume: ${volume_24h:,.2f}")
-        
-        # Extract token info from name
-        tokens = []
-        if name and '-' in name:
-            parts = name.split('-')
-            if len(parts) >= 2:
-                token1 = parts[0].strip()
-                token2_parts = parts[1].split(' ')
-                token2 = token2_parts[0].strip()
-                
-                tokens = [token1, token2]
-                token_pair = f"{token1}-{token2}"
-                token_pairs.append(token_pair)
-                
-                print(f"   Tokens: {token1} and {token2}")
-    
-    # Count remaining pools
-    if pool_count > 5:
-        print(f"\n... and {pool_count - 5} more pools")
-    
-    # Token analysis
-    all_tokens = []
-    for pool in pools:
-        name = pool.get('name', '')
-        if name and '-' in name:
-            parts = name.split('-')
-            if len(parts) >= 2:
-                token1 = parts[0].strip()
-                token2_parts = parts[1].split(' ')
-                token2 = token2_parts[0].strip()
-                all_tokens.extend([token1, token2])
-    
-    token_counts = Counter(all_tokens)
-    
-    print("\nToken Distribution:")
-    print("-" * 50)
-    for token, count in token_counts.most_common(10):
-        print(f"{token}: {count} occurrences")
-    
-    # DEX distribution
-    dex_counts = Counter(dexes)
-    print("\nDEX Distribution:")
-    print("-" * 50)
-    for dex, count in dex_counts.most_common():
-        print(f"{dex}: {count} pools")
-    
-    # Save a copy of the raw data for reference
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger('api_test')
+
+# API configuration
+API_KEY = "dev_api_key_solpool_insight"  # Default development key
+BASE_URL = "http://localhost:5100/api"  # Local testing URL
+
+def test_health_check():
+    """
+    Test the health check endpoint (no auth required)
+    """
     try:
-        with open("api_response_sample.json", "w") as f:
-            json.dump(pools[:2], f, indent=2)  # Save just 2 pools to keep the file small
-        print("\nSample response data saved to api_response_sample.json")
+        response = requests.get(f"{BASE_URL}/health")
+        logger.info(f"Health check status: {response.status_code}")
+        if response.status_code == 200:
+            data = response.json()
+            logger.info(f"API Version: {data.get('version')}")
+            logger.info(f"API Status: {data.get('status')}")
+            return True
+        else:
+            logger.error(f"Health check failed: {response.text}")
+            return False
     except Exception as e:
-        print(f"Could not save sample: {str(e)}")
+        logger.error(f"Error testing health check: {str(e)}")
+        return False
+
+def test_api_docs():
+    """
+    Test the API documentation endpoint (no auth required)
+    """
+    try:
+        response = requests.get(f"{BASE_URL}/docs")
+        logger.info(f"API docs status: {response.status_code}")
+        if response.status_code == 200:
+            data = response.json()
+            endpoints = data.get('endpoints', [])
+            logger.info(f"API Version: {data.get('api_version')}")
+            logger.info(f"Available endpoints: {len(endpoints)}")
+            return True
+        else:
+            logger.error(f"API docs failed: {response.text}")
+            return False
+    except Exception as e:
+        logger.error(f"Error testing API docs: {str(e)}")
+        return False
+
+def test_get_pools():
+    """
+    Test the get pools endpoint (requires auth)
+    """
+    try:
+        headers = {
+            "X-API-Key": API_KEY
+        }
+        response = requests.get(f"{BASE_URL}/pools", headers=headers)
+        logger.info(f"Get pools status: {response.status_code}")
+        if response.status_code == 200:
+            data = response.json()
+            pools = data.get('pools', [])
+            logger.info(f"Retrieved {len(pools)} pools")
+            if pools:
+                # Print the first pool as a sample
+                logger.info(f"Sample pool: {json.dumps(pools[0], indent=2)}")
+            return True
+        else:
+            logger.error(f"Get pools failed: {response.text}")
+            return False
+    except Exception as e:
+        logger.error(f"Error testing get pools: {str(e)}")
+        return False
+
+def test_top_predictions():
+    """
+    Test the top predictions endpoint (requires auth)
+    """
+    try:
+        headers = {
+            "X-API-Key": API_KEY
+        }
+        params = {
+            "category": "apr",
+            "limit": 5
+        }
+        response = requests.get(f"{BASE_URL}/predictions/top", headers=headers, params=params)
+        logger.info(f"Top predictions status: {response.status_code}")
+        if response.status_code == 200:
+            data = response.json()
+            predictions = data.get('predictions', [])
+            logger.info(f"Retrieved {len(predictions)} predictions")
+            if predictions:
+                # Print the first prediction as a sample
+                logger.info(f"Sample prediction: {json.dumps(predictions[0], indent=2)}")
+            return True
+        else:
+            logger.error(f"Top predictions failed: {response.text}")
+            return False
+    except Exception as e:
+        logger.error(f"Error testing top predictions: {str(e)}")
+        return False
+
+def run_all_tests():
+    """
+    Run all API tests and report results
+    """
+    logger.info("=== Starting API Tests ===")
+    logger.info(f"Test time: {datetime.now().isoformat()}")
+    logger.info(f"Base URL: {BASE_URL}")
     
-    print("\nTest completed successfully.")
+    results = {
+        "health_check": test_health_check(),
+        "api_docs": test_api_docs(),
+        "get_pools": test_get_pools(),
+        "top_predictions": test_top_predictions()
+    }
+    
+    # Report overall results
+    success_count = sum(1 for result in results.values() if result)
+    total_count = len(results)
+    logger.info(f"=== Test Results: {success_count}/{total_count} tests passed ===")
+    
+    for test_name, result in results.items():
+        logger.info(f"{test_name}: {'✓ PASS' if result else '✗ FAIL'}")
+    
+    logger.info("=== Tests Completed ===")
+    
+    return results
 
 if __name__ == "__main__":
-    run_simple_test()
+    run_all_tests()

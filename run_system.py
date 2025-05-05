@@ -125,6 +125,27 @@ def start_ml_models():
         logger.error(f"Error starting ML models: {e}")
         return None
 
+# Start API server
+def start_api_server():
+    """Start the API server."""
+    try:
+        # Change to the base directory
+        os.chdir(BASE_DIR)
+        
+        # Start the API server
+        api_log = open(os.path.join(BASE_DIR, 'api_server.log'), 'a')
+        api_process = subprocess.Popen(
+            [sys.executable, 'api_endpoints.py'],
+            stdout=api_log,
+            stderr=api_log
+        )
+        
+        logger.info(f"Started API server (PID: {api_process.pid})")
+        return api_process
+    except Exception as e:
+        logger.error(f"Error starting API server: {e}")
+        return None
+
 # Start Streamlit dashboard
 def start_dashboard():
     """Start the Streamlit dashboard."""
@@ -135,7 +156,7 @@ def start_dashboard():
         # Start the Streamlit app
         dashboard_log = open(os.path.join(BASE_DIR, 'dashboard.log'), 'a')
         dashboard_process = subprocess.Popen(
-            [sys.executable, '-m', 'streamlit', 'run', 'app.py', '--server.port', '5000', '--server.address', '0.0.0.0'],
+            [sys.executable, '-m', 'streamlit', 'run', 'solpool_insight.py', '--server.port', '5000', '--server.address', '0.0.0.0'],
             stdout=dashboard_log,
             stderr=dashboard_log
         )
@@ -191,6 +212,11 @@ def main():
         ml_process = start_ml_models()
         if ml_process:
             processes.append(ml_process)
+        
+        # Start API server
+        api_process = start_api_server()
+        if api_process:
+            processes.append(api_process)
         
         # Start dashboard
         dashboard_process = start_dashboard()
