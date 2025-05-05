@@ -73,7 +73,12 @@ class DefiAggregationAPI:
         self.endpoints = {
             "health": "/health",
             "pools": "/api/pools",
-            "pool_details": "/api/pool/{}"  # Format string for pool ID
+            "pool_details": "/api/pool/{}"  # Format string for pool ID (primary)
+        }
+        
+        # Alternative endpoints to try if primary fails
+        self.alt_endpoints = {
+            "pool_details": "/api/pools/{}"  # Alternate format for pool ID
         }
         
         logger.info(f"DeFi Aggregation API client initialized with base URL: {self.base_url}")

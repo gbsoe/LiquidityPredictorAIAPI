@@ -145,9 +145,27 @@ class DefiApiClient:
             pool_id: Pool ID (base58-encoded address)
             
         Returns:
-            Dictionary with pool details
+            Dictionary with pool details or empty dict if not found
         """
-        return self._make_request(f"/api/pools/{pool_id}")
+        # Ensure we're using the correct API endpoint format
+        # First try the standard format: /api/pool/ID
+        try:
+            result = self._make_request(f"/api/pool/{pool_id}")
+            if result:
+                return result
+        except Exception as e:
+            # If that fails, try the alternate format: /api/pools/ID
+            try:
+                result = self._make_request(f"/api/pools/{pool_id}")
+                if result:
+                    return result
+            except Exception as inner_e:
+                # Log the error but don't re-raise to avoid breaking the application
+                logging.warning(f"Error retrieving pool by ID {pool_id}: {str(inner_e)}")
+        
+        # Return empty dict if all attempts fail
+        logging.warning(f"Could not find pool with ID: {pool_id}")
+        return {}
     
     def get_token_information(self, token_symbol: str) -> Dict[str, Any]:
         """
