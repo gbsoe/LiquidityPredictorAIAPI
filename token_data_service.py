@@ -71,13 +71,13 @@ class TokenDataService:
         # First try CoinGecko for accurate price
         price = self._get_price_from_coingecko(symbol)
         if price is not None:
-            self._update_token_data(symbol, {'price': price})
+            self._update_token_data(symbol, {'price': price, 'price_source': 'coingecko'})
             return price
         
         # If CoinGecko fails, try DeFi API
         price = self._get_price_from_defi_api(symbol)
         if price is not None:
-            self._update_token_data(symbol, {'price': price})
+            self._update_token_data(symbol, {'price': price, 'price_source': 'defi_api'})
             return price
         
         # No price found

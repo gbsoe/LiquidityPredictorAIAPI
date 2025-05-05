@@ -192,6 +192,11 @@ def main():
                     width="small",
                     help="Source of the token price data: CoinGecko, DeFi API, or None"
                 ),
+                "Address Source": st.column_config.TextColumn(
+                    "Address Source", 
+                    width="small",
+                    help="Source of the token address: CoinGecko, DeFi API, or None"
+                ),
                 "Active": st.column_config.TextColumn("Active", width="small")
             }
         )
@@ -261,6 +266,7 @@ def main():
                     "Decimals": token.get("decimals", 0),
                     "Price": format_price(float(token.get("price", 0))),
                     "Price Source": "CoinGecko" if token.get("price_source", "") == "coingecko" else ("DeFi API" if token.get("price", 0) > 0 else "None"),
+                    "Address Source": "CoinGecko" if token.get("address_source", "").startswith("coingecko") else ("DeFi API" if token.get("address", "") else "None"),
                     "Active": "✓" if token.get("active", False) else "✗"
                 }
                 for symbol, token in sorted_tokens
@@ -280,6 +286,11 @@ def main():
                         "Price Source", 
                         width="small",
                         help="Source of the token price data: CoinGecko, DeFi API, or None"
+                    ),
+                    "Address Source": st.column_config.TextColumn(
+                        "Address Source", 
+                        width="small",
+                        help="Source of the token address: CoinGecko, DeFi API, or None"
                     ),
                     "Active": st.column_config.TextColumn("Active", width="small")
                 }
@@ -532,9 +543,11 @@ def main():
         **Data Fields:**
         - **Symbol**: The token's symbol (e.g., SOL, RAY)
         - **Name**: The full name of the token
-        - **Address**: The Solana address of the token (from CoinGecko when available)
+        - **Address**: The Solana address of the token
         - **Decimals**: The number of decimal places for the token
         - **Price**: Current price in USD
+        - **Price Source**: Where the price data comes from (CoinGecko, DeFi API, or None)
+        - **Address Source**: Where the token address data comes from (CoinGecko, DeFi API, or None)
         - **Active**: Whether the token is active in the ecosystem
         
         **DEX Categorization:**
