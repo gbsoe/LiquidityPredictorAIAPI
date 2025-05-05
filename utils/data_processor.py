@@ -236,14 +236,24 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                 import random
                 
                 predictions = []
+                pool_ids_processed = set()  # Track processed pool IDs to avoid duplicates
                 
                 for pool in pools:
                     # Skip any pools without a valid ID
-                    if not pool.get('id') or len(pool.get('id', '')) < 32:
+                    pool_id = pool.get('id', '')
+                    if not pool_id or len(pool_id) < 32:
                         continue
-                        
+                    
+                    # Ensure each pool ID appears only once - skip duplicates
+                    if pool_id in pool_ids_processed:
+                        logger.debug(f"Skipping duplicate pool ID: {pool_id}")
+                        continue
+                    
+                    # Mark this pool ID as processed
+                    pool_ids_processed.add(pool_id)
+                    
                     # Log the pool structure for debugging
-                    logger.debug(f"Processing pool: {pool.get('name', 'Unknown')} with ID: {pool.get('id', 'Unknown')}")
+                    logger.debug(f"Processing pool: {pool.get('name', 'Unknown')} with ID: {pool_id}")
                     logger.debug(f"Pool data keys: {pool.keys()}")
                     logger.debug(f"Pool fields - apr24h: {pool.get('apr24h')}, metrics.apy24h: {pool.get('metrics', {}).get('apy24h')}, liquidityUsd: {pool.get('liquidityUsd')}")
                     
@@ -257,7 +267,6 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                             pool_name = f"{token1}/{token2}"
                         else:
                             # Use ID as last resort - but truncate for display
-                            pool_id = pool.get('id', '')
                             if pool_id:
                                 pool_name = f"Pool {pool_id[:8]}..."
                             else:
@@ -279,11 +288,20 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                             apr = 0
                             
                     if apr == 0:
-                        logger.debug(f"Skipping pool {pool.get('id', 'Unknown')} due to zero APR")
+                        logger.debug(f"Skipping pool {pool_id} due to zero APR")
                         continue  # Skip pools with no APR data
                     
                     # For APR prediction, use actual APR with small variation
-                    predicted_apr = apr * (1 + random.uniform(-0.05, 0.1))
+                    # Use a consistent seed based on the pool ID to ensure reproducibility
+                    # but avoid completely random variations that lead to duplicates in the table
+                    import hashlib
+                    # Create a hash of the pool ID to use as a seed
+                    hash_object = hashlib.md5(pool_id.encode())
+                    hash_int = int(hash_object.hexdigest(), 16) % 10000
+                    random.seed(hash_int)  # Set seed for reproducibility
+                    variation = random.uniform(-0.05, 0.1)  # Now this will be consistent for the same pool ID
+                    predicted_apr = apr * (1 + variation)
+                    random.seed()  # Reset seed
                     
                     # Risk score (lower is better, 0-1 range)
                     risk_factors = []
@@ -337,7 +355,7 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                     risk_score = sum(risk_factors) / len(risk_factors) if risk_factors else 0.5
                     
                     # Log the risk calculation for debugging
-                    logger.debug(f"Risk score for {pool.get('id', '')}: {risk_score} (factors: {risk_factors})")
+                    logger.debug(f"Risk score for {pool_id}: {risk_score} (factors: {risk_factors})")
                     
                     # Performance class (high, medium, low)
                     # Based on APR and risk score
@@ -366,7 +384,7 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                             tvl = 0
                             
                     if tvl <= 0:
-                        logger.debug(f"Skipping pool {pool.get('id', 'Unknown')} due to zero TVL")
+                        logger.debug(f"Skipping pool {pool_id} due to zero TVL")
                         continue  # Skip pools with no TVL data
                     
                     # Extract token symbols from different possible structures
@@ -397,7 +415,7 @@ def get_top_predictions(db, category="apr", limit=10, ascending=False):
                     dex = pool.get('dex', '') or pool.get('source', '') or ''
                     
                     predictions.append({
-                        'pool_id': pool.get('id', ''),  # Use real Solana pool ID
+                        'pool_id': pool_id,  # Use real Solana pool ID
                         'pool_name': pool_name,
                         'dex': dex,
                         'token1': token1,
