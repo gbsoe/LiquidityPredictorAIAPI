@@ -155,10 +155,8 @@ def main():
                 "Address": format_address(t.get("address", "")),
                 "Decimals": t.get("decimals", 0),
                 "Price": format_price(float(t.get("price", 0))),
-                "Price Source": t.get("price_source", "defi_api") if t.get("price", 0) > 0 else "none",
-                "Active": "✓" if t.get("active", False) else "✗",
-                "ID": t.get("id", 0),
-                "Full Address": t.get("address", "")  # Hidden column for reference
+                "Price Source": "CoinGecko" if t.get("price_source", "") == "coingecko" else ("DeFi API" if t.get("price", 0) > 0 else "None"),
+                "Active": "✓" if t.get("active", False) else "✗"
             }
             for t in enriched_tokens
         ])
@@ -191,16 +189,9 @@ def main():
                 "Price Source": st.column_config.TextColumn(
                     "Price Source", 
                     width="small",
-                    help="Source of the token price data: defi_api, coingecko, or none"
+                    help="Source of the token price data: CoinGecko, DeFi API, or None"
                 ),
-                "Active": st.column_config.TextColumn("Active", width="small"),
-                "ID": st.column_config.NumberColumn("ID", width="small"),
-                "Full Address": st.column_config.TextColumn(
-                    "Full Address", 
-                    width=None,
-                    disabled=True,
-                    required=False
-                )
+                "Active": st.column_config.TextColumn("Active", width="small")
             }
         )
     
@@ -268,9 +259,8 @@ def main():
                     "Address": format_address(token.get("address", "")),
                     "Decimals": token.get("decimals", 0),
                     "Price": format_price(float(token.get("price", 0))),
-                    "Price Source": token.get("price_source", "defi_api") if token.get("price", 0) > 0 else "none",
-                    "Active": "✓" if token.get("active", False) else "✗",
-                    "Full Address": token.get("address", "")  # Hidden column for reference
+                    "Price Source": "CoinGecko" if token.get("price_source", "") == "coingecko" else ("DeFi API" if token.get("price", 0) > 0 else "None"),
+                    "Active": "✓" if token.get("active", False) else "✗"
                 }
                 for symbol, token in sorted_tokens
             ])
@@ -288,15 +278,9 @@ def main():
                     "Price Source": st.column_config.TextColumn(
                         "Price Source", 
                         width="small",
-                        help="Source of the token price data: defi_api, coingecko, or none"
+                        help="Source of the token price data: CoinGecko, DeFi API, or None"
                     ),
-                    "Active": st.column_config.TextColumn("Active", width="small"),
-                    "Full Address": st.column_config.TextColumn(
-                        "Full Address", 
-                        width=None,
-                        disabled=True,
-                        required=False
-                    )
+                    "Active": st.column_config.TextColumn("Active", width="small")
                 }
             )
             
@@ -503,25 +487,36 @@ def main():
                 with col2:
                     st.write("### Token Economics")
                     price = token_metadata.get('price', 0)
-                    price_source = token_metadata.get('price_source', 'defi_api') if price > 0 else "none"
+                    price_source = token_metadata.get('price_source', '')
+                    
+                    # Format the price source display
+                    if price_source == 'coingecko':
+                        display_source = "CoinGecko"
+                    elif price > 0:
+                        display_source = "DeFi API"
+                    else:
+                        display_source = "None"
                     
                     # Display price with source indicator
                     st.write(f"**Current Price:** {format_price(price)}")
-                    st.write(f"**Price Source:** {price_source.capitalize()}")
+                    st.write(f"**Price Source:** {display_source}")
                     
                     # Active status
                     active = token_metadata.get('active', False)
                     st.write(f"**Active Status:** {'Active ✓' if active else 'Inactive ✗'}")
                     
-                    # Token ID
-                    token_id = token_metadata.get('id', 0)
-                    st.write(f"**Token ID:** {token_id}")
+                    # Address source if available
+                    address_source = token_metadata.get('address_source', '')
+                    if address_source:
+                        st.write(f"**Address Source:** {address_source}")
                     
                     # Note about data source
                     if price_source == 'coingecko':
-                        st.info(f"Price data provided by CoinGecko API when not available in the DeFi API.")
+                        st.info(f"Price data provided by CoinGecko API for higher accuracy and reliability.")
+                    elif price > 0:
+                        st.info(f"Data sourced from the DeFi API.")
                     else:
-                        st.info(f"Data sourced directly from the DeFi API `/tokens` endpoint.")
+                        st.info(f"No price data available for this token from our data sources.")
             else:
                 st.warning(f"No detailed metadata available for {selected_token}.")
     
@@ -531,12 +526,12 @@ def main():
         st.markdown("""
         ### Token Data Documentation
         
-        This page provides comprehensive token data based on the `/tokens` endpoint from the DeFi API.
+        This page provides comprehensive token data from multiple reliable sources with a focus on CoinGecko for data authenticity.
         
         **Data Fields:**
         - **Symbol**: The token's symbol (e.g., SOL, RAY)
         - **Name**: The full name of the token
-        - **Address**: The Solana address of the token
+        - **Address**: The Solana address of the token (from CoinGecko when available)
         - **Decimals**: The number of decimal places for the token
         - **Price**: Current price in USD
         - **Active**: Whether the token is active in the ecosystem
@@ -548,11 +543,11 @@ def main():
         - **Orca**: Tokens like SOL, ETH, USDC
         
         **Price Data:**
-        Token prices are obtained from multiple reliable sources:
-        - **DeFi API**: Primary source for token prices
-        - **CoinGecko**: Secondary source when prices are not available in the DeFi API
+        Token prices are obtained from multiple reliable sources with emphasis on authentic data:
+        - **CoinGecko**: Primary source for token prices and metadata
+        - **DeFi API**: Secondary source when CoinGecko data is unavailable
         
-        Each token's price source is clearly labeled to provide transparency about data origin.
+        Each token's price source is clearly labeled to provide transparency about data origin and ensure you have access to trustworthy financial information.
         """)
 
 if __name__ == "__main__":

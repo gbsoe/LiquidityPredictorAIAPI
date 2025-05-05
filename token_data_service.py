@@ -473,9 +473,20 @@ class TokenDataService:
                                 token_data['price'] = details['market_data']['current_price'].get('usd', 0)
                                 token_data['price_source'] = 'coingecko'
                             
-                            # Set address
-                            if 'platforms' in details and 'solana' in details['platforms']:
-                                token_data['address'] = details['platforms']['solana']
+                            # Set address - try to get from Solana platform
+                            if 'platforms' in details:
+                                # First try Solana platform
+                                if 'solana' in details['platforms'] and details['platforms']['solana']:
+                                    token_data['address'] = details['platforms']['solana']
+                                    token_data['address_source'] = 'coingecko'
+                                # If not in Solana platform, look at other platforms
+                                elif len(details['platforms']) > 0:
+                                    # Get first available address from any platform
+                                    for platform, address in details['platforms'].items():
+                                        if address and len(address) > 10:  # Basic check for valid address
+                                            token_data['address'] = address
+                                            token_data['address_source'] = f'coingecko:{platform}'
+                                            break
                 except Exception as e:
                     logger.warning(f"Error getting detailed token data from CoinGecko for {symbol}: {e}")
             

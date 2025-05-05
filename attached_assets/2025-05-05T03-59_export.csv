@@ -1,0 +1,18 @@
+,Symbol,Name,Address,Decimals,Price,Price Source,Active,ID,Full Address
+0,ATLAS,ATLAS,,9,$0.001206,coingecko,✓,0,
+1,BONK,BONK,,9,$0.000019,coingecko,✓,0,
+2,BTC,BTC,,9,"$95,668.00",coingecko,✓,0,
+3,ETH,ETH,,9,"$1,833.29",coingecko,✓,0,
+4,MNGO,MNGO,,9,$0.02,coingecko,✓,0,
+5,ORCA,ORCA,,9,$2.81,coingecko,✓,0,
+6,RAY,RAY,,9,$2.65,coingecko,✓,0,
+7,SAMO,SAMO,,9,$0.002918,coingecko,✓,0,
+8,SOL,Solana,,9,$145.00,defi_api,✓,0,
+9,SRM,SRM,,9,$0.01,coingecko,✓,0,
+10,USDC,USDC,EPjFWd...Dt1v,9,$1.00,coingecko,✓,0,EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+11,USDT,USDT,,9,$1.00,defi_api,✓,0,
+12,DUST,DUST,,9,$0.000000,none,✓,0,
+13,JTO,JTO,,9,$0.000000,none,✓,0,
+14,MSOL,MSOL,,9,$0.000000,none,✓,0,
+15,POLIS,POLIS,,9,$0.000000,none,✓,0,
+16,STSOL,STSOL,,9,$0.000000,none,✓,0,
