@@ -117,12 +117,15 @@ class HistoricalDataService:
                 
                 # Convert timestamp to datetime if needed, then to string
                 try:
-                    # Check if the timestamp column is already in datetime format
+                    # Ensure all timestamps are timezone-naive before string conversion
                     if pd.api.types.is_datetime64_dtype(metrics_data['timestamp']):
+                        # Convert to timezone-naive by using .dt.tz_localize(None)
+                        if hasattr(metrics_data['timestamp'].dt, 'tz_localize'):
+                            metrics_data['timestamp'] = metrics_data['timestamp'].dt.tz_localize(None)
                         metrics_data['timestamp'] = metrics_data['timestamp'].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
                     else:
-                        # Try to convert to datetime first
-                        metrics_data['timestamp'] = pd.to_datetime(metrics_data['timestamp'])
+                        # Convert string timestamps to datetime objects with consistent timezone handling
+                        metrics_data['timestamp'] = pd.to_datetime(metrics_data['timestamp'], utc=True).dt.tz_localize(None)
                         metrics_data['timestamp'] = metrics_data['timestamp'].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
                 except Exception as e:
                     # If conversion fails, use a simpler approach
@@ -152,9 +155,16 @@ class HistoricalDataService:
                 cutoff_date = datetime.now() - timedelta(days=days)
                 metrics_df = self.metrics_cache[pool_id]
                 
-                # Make sure timestamp is datetime format
+                # Make sure timestamp is datetime format with consistent timezone handling
                 if not pd.api.types.is_datetime64_dtype(metrics_df['timestamp']):
-                    metrics_df['timestamp'] = pd.to_datetime(metrics_df['timestamp'])
+                    metrics_df['timestamp'] = pd.to_datetime(metrics_df['timestamp'], utc=True)
+                
+                # Ensure all timestamps are timezone-naive for comparison
+                if hasattr(metrics_df['timestamp'].dt, 'tz_localize') and metrics_df['timestamp'].dt.tz is not None:
+                    metrics_df['timestamp'] = metrics_df['timestamp'].dt.tz_localize(None)
+                    
+                # Make cutoff_date timezone-naive for consistent comparison
+                cutoff_date = pd.Timestamp(cutoff_date).tz_localize(None)
                 
                 # Filter by date
                 recent_metrics = metrics_df[metrics_df['timestamp'] >= cutoff_date]
