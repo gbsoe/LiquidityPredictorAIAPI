@@ -435,24 +435,85 @@ class TokenDataService:
         
         # Check if we need to refresh the data
         if force_refresh or symbol not in self.token_data:
-            # Get price
-            price = self.get_token_price(symbol)
-            
-            # Get address
-            address = self.get_token_address(symbol)
-            
-            # Create token data object
+            # Create basic token data object
             token_data = {
                 'symbol': symbol,
-                'price': price,
-                'address': address,
-                'updated_at': time.time()
+                'name': symbol,  # Default to symbol as name
+                'decimals': 9,   # Default decimals for Solana tokens
+                'price': 0,
+                'address': '',
+                'active': True,   # Default to active
+                'id': 0,          # Default token ID
+                'updated_at': time.time(),
+                'price_source': 'none'
             }
+            
+            # First try to get detailed token info from CoinGecko
+            if self.coingecko:
+                try:
+                    # Try to get CoinGecko ID
+                    coin_id = self.coingecko.get_token_id(symbol)
+                    if coin_id:
+                        # Get token details
+                        details = self.coingecko.get_token_details(coin_id)
+                        if details:
+                            # Set name
+                            token_data['name'] = details.get('name', symbol)
+                            
+                            # Set ID
+                            token_data['id'] = details.get('id', 0)
+                            
+                            # Set decimals if available
+                            if 'detail_platforms' in details and 'solana' in details.get('detail_platforms', {}):
+                                solana_details = details['detail_platforms']['solana']
+                                token_data['decimals'] = solana_details.get('decimal_place', 9)
+                            
+                            # Set price
+                            if 'market_data' in details and 'current_price' in details['market_data']:
+                                token_data['price'] = details['market_data']['current_price'].get('usd', 0)
+                                token_data['price_source'] = 'coingecko'
+                            
+                            # Set address
+                            if 'platforms' in details and 'solana' in details['platforms']:
+                                token_data['address'] = details['platforms']['solana']
+                except Exception as e:
+                    logger.warning(f"Error getting detailed token data from CoinGecko for {symbol}: {e}")
+            
+            # Get price if not already set from CoinGecko details
+            if token_data['price'] == 0:
+                price = self.get_token_price(symbol)
+                if price:
+                    token_data['price'] = price
+                    if 'price_source' not in token_data or token_data['price_source'] == 'none':
+                        token_data['price_source'] = 'defi_api'
+            
+            # Get address if not already set from CoinGecko details
+            if not token_data['address']:
+                address = self.get_token_address(symbol)
+                if address:
+                    token_data['address'] = address
+            
+            # Get DEXes that use this token
+            token_data['dexes'] = []
+            try:
+                categories = self.get_token_categories()
+                for dex, tokens in categories.items():
+                    if symbol in tokens:
+                        token_data['dexes'].append(dex)
+            except Exception as e:
+                logger.warning(f"Error getting DEXes for token {symbol}: {e}")
             
             # Update cache
             self._update_token_data(symbol, token_data)
-            
-        return self.token_data.get(symbol, {})
+        
+        # Get the latest data from cache
+        result = self.token_data.get(symbol, {})
+        
+        # Ensure active status is set
+        if 'active' not in result:
+            result['active'] = result.get('price', 0) > 0
+        
+        return result
         
     def get_token_metadata(self, symbol: str) -> Dict[str, Any]:
         """

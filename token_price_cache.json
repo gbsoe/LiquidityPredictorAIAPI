@@ -40,7 +40,9 @@
     "BOOP": 1.738e-05,
     "LFG": 0.0001749,
     "PYTH": 0.136846,
-    "MNGO": 0.02075428
+    "MNGO": 0.02075428,
+    "SAMO": 0.00291803,
+    "SRM": 0.01235495
   },
   "price_sources": {
     "USDC": "defi_api",
@@ -76,7 +78,9 @@
     "BOOP": "coingecko",
     "LFG": "coingecko",
     "PYTH": "coingecko",
-    "MNGO": "coingecko"
+    "MNGO": "coingecko",
+    "SAMO": "coingecko",
+    "SRM": "coingecko"
   },
-  "last_update": "2025-05-05T03:37:06.359554"
+  "last_update": "2025-05-05T03:51:13.714125"
 }
