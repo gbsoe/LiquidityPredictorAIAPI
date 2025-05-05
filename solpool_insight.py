@@ -36,9 +36,14 @@ api_key = os.getenv("DEFI_API_KEY") or "9feae0d0af47e4948e061f2d7820461e374e040c
 print(f"Using API key: {api_key[:8]}...")
 set_api_key(api_key)
 
-# Initialize data services before starting
+# Import db_handler and initialize data services before starting
 try:
     print("Initializing data services...")
+    # Import db_handler
+    from db_handler import get_db_handler
+    db_handler = get_db_handler()
+    
+    # Initialize other services
     from data_services.initialize import init_services
     init_services()
     print("Data services initialized successfully")
@@ -46,6 +51,8 @@ except Exception as e:
     print(f"Error initializing data services: {str(e)}")
     import traceback
     print(traceback.format_exc())
+    # Create a fallback db_handler in case the import fails
+    db_handler = None
 
 # Import the historical data service
 from historical_data_service import get_historical_service, start_historical_collection
@@ -332,30 +339,59 @@ if 'initialized_data_collection' not in st.session_state:
 
 # Formatting helper functions
 def format_currency(value):
-    """Format a value as currency"""
-    if value >= 1_000_000:
-        return f"${value/1_000_000:.2f}M"
-    elif value >= 1_000:
-        return f"${value/1_000:.2f}K"
-    else:
-        return f"${value:.2f}"
+    """Format a value as currency with robust error handling"""
+    if value is None:
+        return "$0.00"
+    
+    try:
+        # Convert to float if it's a string
+        value = float(value)
+        
+        if value >= 1_000_000_000:
+            return f"${value/1_000_000_000:.2f}B"
+        elif value >= 1_000_000:
+            return f"${value/1_000_000:.2f}M"
+        elif value >= 1_000:
+            return f"${value/1_000:.2f}K"
+        else:
+            return f"${value:.2f}"
+    except (ValueError, TypeError):
+        # If conversion fails, return default
+        return "$0.00"
 
 def format_percentage(value):
-    """Format a value as percentage"""
-    return f"{value:.2f}%"
+    """Format a value as percentage with robust error handling"""
+    if value is None:
+        return "0.00%"
+    
+    try:
+        # Convert to float if it's a string
+        value = float(value)
+        return f"{value:.2f}%"
+    except (ValueError, TypeError):
+        # If conversion fails, return default
+        return "0.00%"
 
 def get_trend_icon(value):
-    """Return an arrow icon based on trend direction"""
-    if value > 1.0:
-        return "📈"  # Strong up
-    elif value > 0.2:
-        return "↗️"  # Up
-    elif value < -1.0:
-        return "📉"  # Strong down
-    elif value < -0.2:
-        return "↘️"  # Down
-    else:
-        return "➡️"  # Stable
+    """Return an arrow icon based on trend direction with null handling"""
+    if value is None:
+        return "➡️"  # Stable for None
+        
+    try:
+        value = float(value)
+        
+        if value > 1.0:
+            return "📈"  # Strong up
+        elif value > 0.2:
+            return "↗️"  # Up
+        elif value < -1.0:
+            return "📉"  # Strong down
+        elif value < -0.2:
+            return "↘️"  # Down
+        else:
+            return "➡️"  # Stable
+    except (ValueError, TypeError):
+        return "➡️"  # Default to stable for any errors
 
 def get_category_badge(category):
     """Return HTML for a category badge"""
@@ -1338,11 +1374,20 @@ def main():
             data, historical metrics, and machine learning-based predictions.
             """)
         
-        # Database status
-        if hasattr(db_handler, 'engine') and db_handler.engine is not None:
+        # Database status with enhanced error handling
+        if db_handler is not None and hasattr(db_handler, 'engine') and db_handler.engine is not None:
             st.success("✓ Connected to PostgreSQL database")
         else:
             st.warning("⚠ Database connection not available - using file-based storage")
+            # Try to reconnect
+            try:
+                from db_handler import get_db_handler
+                db_handler = get_db_handler()
+                if db_handler and hasattr(db_handler, 'engine') and db_handler.engine is not None:
+                    st.success("✓ Reconnected to PostgreSQL database")
+            except Exception as e:
+                st.error(f"Database connection error: {e}")
+                logger.error(f"Failed to connect to database: {e}")
         
         # Create tabs for different views
         tab_explore, tab_advanced, tab_predict, tab_risk, tab_nlp, tab_tokens = st.tabs([
@@ -1544,34 +1589,42 @@ def main():
             # Pool data table
             st.subheader("Pool Data")
             
-            # Get watchlists for filtering
+            # Get watchlists for filtering with enhanced error handling
             try:
-                watchlists = db_handler.get_watchlists()
-                if watchlists:
-                    # Allow filtering by watchlist
-                    watchlist_options = ["All Pools"] + [w["name"] for w in watchlists]
-                    selected_watchlist = st.selectbox(
-                        "Filter by Watchlist",
-                        options=watchlist_options,
-                        index=0
-                    )
-                    
-                    # Apply watchlist filter if selected
-                    if selected_watchlist != "All Pools":
-                        # Find the watchlist ID
-                        watchlist_id = next((w["id"] for w in watchlists if w["name"] == selected_watchlist), None)
+                if db_handler is not None and hasattr(db_handler, 'get_watchlists'):
+                    watchlists = db_handler.get_watchlists()
+                    if watchlists:
+                        # Allow filtering by watchlist
+                        watchlist_options = ["All Pools"] + [w["name"] for w in watchlists]
+                        selected_watchlist = st.selectbox(
+                            "Filter by Watchlist",
+                            options=watchlist_options,
+                            index=0
+                        )
                         
-                        if watchlist_id:
-                            # Get the pool IDs in this watchlist
-                            watchlist_pool_ids = db_handler.get_pools_in_watchlist(watchlist_id)
+                        # Apply watchlist filter if selected
+                        if selected_watchlist != "All Pools":
+                            # Find the watchlist ID
+                            watchlist_id = next((w["id"] for w in watchlists if w["name"] == selected_watchlist), None)
                             
-                            if watchlist_pool_ids:
-                                # Filter the dataframe
-                                filtered_df = filtered_df[filtered_df["id"].isin(watchlist_pool_ids)]
-                                st.success(f"Showing {len(filtered_df)} pools from watchlist: {selected_watchlist}")
+                            if watchlist_id and hasattr(db_handler, 'get_pools_in_watchlist'):
+                                # Get the pool IDs in this watchlist
+                                watchlist_pool_ids = db_handler.get_pools_in_watchlist(watchlist_id)
+                                
+                                if watchlist_pool_ids:
+                                    # Filter the dataframe
+                                    filtered_df = filtered_df[filtered_df["id"].isin(watchlist_pool_ids)]
+                                    st.success(f"Showing {len(filtered_df)} pools from watchlist: {selected_watchlist}")
+                else:
+                    # Show watchlist feature is not available, but only in the expanded section
+                    with st.expander("Watchlist Features", expanded=False):
+                        st.info("Watchlist features are not available - database connection required.")
+                        
             except Exception as e:
-                # Silently handle errors with watchlists as this is an optional feature
-                pass
+                logger.warning(f"Error loading watchlists: {e}")
+                # Show watchlist feature is not available, but only in the expanded section
+                with st.expander("Watchlist Features", expanded=False):
+                    st.info("Watchlist features are not available - database connection required.")
             
             # Create token information display option
             show_token_details = st.checkbox("Show Detailed Token Information", value=False)
