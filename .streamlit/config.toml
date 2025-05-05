@@ -9,10 +9,3 @@ backgroundColor = "#f8f9fa"
 secondaryBackgroundColor = "#e9ecef"
 textColor = "#212529"
 font = "sans-serif"
-
-[browser]
-gatherUsageStats = false
-
-# App title configuration
-[client]
-toolbarTitle = "SolPool Insight"
