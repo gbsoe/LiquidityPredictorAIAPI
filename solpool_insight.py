@@ -18,6 +18,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import threading
+from PIL import Image
 import time
 import requests
 import logging
@@ -1257,6 +1258,34 @@ def main():
                 st.sidebar.info(f"Legacy cache update: {mod_time_str}")
             except Exception:
                 pass
+                
+            # Add LA! Token branding at the bottom of sidebar
+            st.sidebar.divider()
+            
+            # LA! Token branding section
+            st.sidebar.markdown("### 🔗 Ecosystem")
+            
+            # Load the LA! Token logo
+            la_token_logo_path = "attached_assets/IMG-20240624-WA0020-removebg-preview.png"
+            
+            if os.path.exists(la_token_logo_path):
+                la_token_logo = Image.open(la_token_logo_path)
+                la_token_col1, la_token_col2 = st.sidebar.columns([1, 3])
+                
+                with la_token_col1:
+                    st.image(la_token_logo, width=50)
+                
+                with la_token_col2:
+                    st.markdown(
+                        "<a href='https://crazyrichla.replit.app/' target='_blank' style='text-decoration:none;'>"
+                        "<span style='color:#FFD700;font-weight:bold;'>LA! Token</span></a> Ecosystem",
+                        unsafe_allow_html=True
+                    )
+                
+                st.sidebar.markdown(
+                    "<div style='font-size:small;color:#888;'>FiLot is part of the LA! Token project family</div>",
+                    unsafe_allow_html=True
+                )
     
     # Display logo and title in the main area
     col_logo, col_title = st.columns([1, 3])
