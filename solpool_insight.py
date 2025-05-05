@@ -76,7 +76,7 @@ except Exception as e:
     print(traceback.format_exc())
 
 # Import token services
-from token_price_service import get_token_price, get_multiple_prices
+from token_price_service_minimal import get_token_price, get_multiple_prices
 # Already imported token_data_service above
 
 # Import API key manager
@@ -743,7 +743,7 @@ def ensure_all_fields(pool_data):
                     validated_pool["token2_symbol"] = token2_symbol
                 
                 # Now try to fill in token metadata
-                from token_price_service import update_pool_with_token_prices
+                from token_price_service_minimal import update_pool_with_token_prices
                 validated_pool = update_pool_with_token_prices(validated_pool)
         
         # Add any missing required fields with default values, but never overwrite tokens
@@ -779,7 +779,7 @@ def ensure_all_fields(pool_data):
         
         # Get token prices
         try:
-            from token_price_service import update_pool_with_token_prices
+            from token_price_service_minimal import update_pool_with_token_prices
             validated_pool = update_pool_with_token_prices(validated_pool)
         except Exception as e:
             logger.error(f"Could not get token prices: {e}")
@@ -2855,7 +2855,8 @@ def main():
                         )
                     else:
                         # Try using a direct API call with the token mapping
-                        from token_price_service import DEFAULT_TOKEN_MAPPING
+                        # No DEFAULT_TOKEN_MAPPING in minimal version
+                        DEFAULT_TOKEN_MAPPING = {"SOL": "solana", "BTC": "bitcoin", "ETH": "ethereum"}
                         if selected_token.upper() in DEFAULT_TOKEN_MAPPING:
                             # Get more detailed logging about why the fetch failed
                             coingecko_api_key = os.getenv("COINGECKO_API_KEY")
@@ -3090,7 +3091,8 @@ def main():
                     # Fallback to CoinGecko
                     try:
                         # Display information from the token_price_service
-                        from token_price_service import DEFAULT_TOKEN_MAPPING
+                        # No DEFAULT_TOKEN_MAPPING in minimal version
+                        DEFAULT_TOKEN_MAPPING = {"SOL": "solana", "BTC": "bitcoin", "ETH": "ethereum"}
                         
                         if selected_token.upper() in DEFAULT_TOKEN_MAPPING:
                             coingecko_id = DEFAULT_TOKEN_MAPPING[selected_token.upper()]
